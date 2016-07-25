@@ -1,0 +1,72 @@
+<table class="table table-striped ppit_index">
+	<tr>
+		<th>&nbsp;</th>
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/list'] as $propertyId => $rendering) : ?>
+		<th align="center">
+	<?php $label = $context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId]['labels'][$context->getLocale()] ?>
+	<?php if ($label) : ?>
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="<?php echo $propertyId ?>-anchor">
+				<span><?php echo $label ?></span>
+<?php if ($major == $propertyId) : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+	<?php endif;?>
+		</th>
+<?php endforeach;?>
+
+	<tr>
+		<td>
+			<button type="button" class="btn btn-default index-btn account-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="account-detail-anchor_0">
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+			</button>
+		</td>
+	</tr>
+	
+<?php foreach ($accounts as $account) : ?>
+	
+	<tr class="account">
+		<td >
+			<button type="button" class="btn btn-default index-btn account-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="account-detail-anchor_<?php echo $account->id ?>">
+				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $account->id ?>-glyphicon"></span>
+			</button>
+		</td>
+
+	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/list'] as $propertyId => $rendering) : ?>
+	
+		<?php if ($propertyId == 'customer_name') : ?>
+		<td><?php echo $account->customer_name ?></td>
+	
+		<?php elseif ($rendering == 'text') : ?>
+		<td><?php echo $account->properties[$propertyId] ?></td>
+	
+		<?php elseif ($rendering == 'photo') : ?>
+		<td>
+			<span class="info">
+				<img height="40" src="<?php echo $this->url('vcard/photo', array('id' => $account->properties[$propertyId])) ?>"/>
+				<span><img height="150" src="<?php echo $this->url('vcard/photo', array('id' => $account->properties[$propertyId])) ?>"/></span>
+			</span>
+		</td>
+
+		<?php elseif ($rendering == 'image') : ?>
+		<td style="text-align: center">
+			<img height="20" src="<?php echo $this->basePath('/img/'.$context->getInstance()->caption.'/'.$account->properties[$propertyId].'.png') ?>" title="<?php echo $account->properties[$propertyId] ?>" alt="<?php echo $account->properties[$propertyId] ?>" /><br>
+		</td>
+
+		<?php elseif ($rendering == 'phone') : ?>
+		<td>
+			<a href="tel:<?php echo $account->properties[$propertyId] ?>"><?php echo $account->properties[$propertyId] ?></a>
+		</td>
+	
+		<?php else : ?>
+		<td><?php echo $account->properties[$propertyId] ?></td>
+		
+		<?php endif;?>
+		
+	<?php endforeach;?>
+	</tr>
+	
+<?php endforeach; ?>
+
+</table>

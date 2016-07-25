@@ -1,0 +1,460 @@
+
+function connectRemoveIcon(id, target)
+{
+	$('#' + id).click(function () {
+		$('#' + target).hide();
+		filterAccountList();
+	});
+}
+
+function getParams() {
+
+	// Create a new FormData object.
+	var params = '?', todo = true;
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	
+	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
+	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
+	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	<?php else : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	
+	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
+	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
+	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	<?php elseif ($rendering == 'select') : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php else : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+	<?php
+	$todoTitle = (isset ($context->getInstance()->specifications['ppitCommitment']['account/search']['todoTitle']) ? $context->getInstance()->specifications['ppitCommitment']['account/search']['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$searchTitle = (isset ($context->getInstance()->specifications['ppitCommitment']['account/search']['searchTitle']) ? $context->getInstance()->specifications['ppitCommitment']['account/search']['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
+	?>
+	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
+
+	return params;
+}
+
+// Export the list
+function exportAccountList() {
+
+	var params = getParams();
+	document.location.href = '<?php echo $this->url('commitmentAccount/export') ?>' + params;
+}
+
+function eraseAccountSearch() {
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').val('');
+	$('#search_max_<?php echo $propertyId ?>').val('');
+
+	<?php else : ?>
+	$('#search_<?php echo $propertyId ?>').val('');
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').val('');
+	$('#search_max_<?php echo $propertyId ?>').val('');
+
+	<?php else : ?>
+	$('#search_<?php echo $propertyId ?>').val('');
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+	getAccountList(getParams(), 'customer_name', 'ASC');
+}
+
+function sortAccountList(criterion) {
+
+	var dir;
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
+	getAccountList(getParams(), criterion, dir);
+}
+
+function filterAccountList() {
+
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (ascCriterion) {
+		criterion = ascCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	else {
+		criterion = descCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	getAccountList(getParams(), criterion, dir);
+}
+
+function connectAccountSearchInputs() {
+
+	$('#export-button').click(function () { exportAccountList(); });
+	
+	$('#erase-button').unbind();
+	$('#erase-button').click(function () { eraseAccountSearch(); });
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+
+		<?php if ($context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_min_<?php echo $propertyId ?>").datepicker();
+	$("#search_max_<?php echo $propertyId ?>").datepicker();
+	$('#search_min_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+	$('#search_max_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+		<?php endif;?>
+	
+	<?php elseif ($rendering == 'select') : ?>
+		$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+	
+	<?php else : ?>
+		$('#search_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+
+		<?php if ($context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_<?php echo $propertyId ?>").datepicker();
+	$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+		<?php endif;?>
+
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+
+		<?php if ($context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_min_<?php echo $propertyId ?>").datepicker();
+	$("#search_max_<?php echo $propertyId ?>").datepicker();
+	$('#search_min_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+	$('#search_max_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+		<?php endif;?>
+	
+	<?php elseif ($rendering == 'select') : ?>
+		$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+
+	<?php else : ?>
+		$('#search_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
+
+		<?php if ($context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_<?php echo $propertyId ?>").datepicker();
+	$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
+		<?php endif;?>
+		
+	<?php endif;?>
+
+<?php endforeach;?>
+}
+
+// Load the list
+function getAccountList(params, major, dir) {		
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitmentAccount/list') ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('account-list-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: account-list-panel, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			// Connect the sort anchors
+			$('.ppit-sort-anchor').each(function () {
+				$(this).click(function () {
+					sortAccountList($(this).attr('id').split('-')[0]);
+				});
+			});
+			
+			// Connect the detail anchors
+			$('.account-detail-anchor').each(function () {
+				$(this).click(function () {
+					getAccountDetail($(this).attr('id').split('_')[1]);
+				});
+			});
+		}
+	}
+	xhttp.send();
+}
+
+function connectAuditPanel()
+{
+	$('#audit-panel').hide();
+	$('#audit-label').click(function () {
+		if ($('#audit-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#audit-panel').show();
+			$('#audit-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#audit-panel').hide();
+			$('#audit-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
+<?php 
+$properties = array();
+
+foreach ($context->getInstance()->specifications['ppitCommitment']['account/update'] as $propertyId => $options) {
+	$property = $context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId];
+	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Account', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectAccountUpdateForm(id, action)
+{
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account_properties'] as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkAccountUpdateProperties(id);
+
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'file') : ?>
+				var fileSelect = document.getElementById('order_form');
+				if (fileSelect) {
+					var files = fileSelect.files;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						formData.append('order_form', file, file.name);
+					}
+				}
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id;
+			if (action) route += '/' + action;
+			target = 'account-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+
+<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
+					console.log('post, route = ' + route);
+					console.log(xhttp.responseText);
+<?php endif;?>
+					document.getElementById(target).innerHTML = xhttp.responseText;
+					filterAccountList();
+					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getAccountUpdate(id, action) {
+	
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id;
+	if (action) route += '/' + action;
+
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('account-update-panel, route = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			connectAccountUpdateForm(id, action);
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.action-btn').removeClass("btn-primary").addClass("btn-default");
+	if (action == 'update') $('#account-update-anchor').removeClass("btn-default").addClass("btn-primary");
+	else if (action == 'delete') $('#account-delete-anchor').removeClass("btn-default").addClass("btn-primary");
+}
+
+// Load the list
+function getCommitmentAccountList(type, params, major, dir) {		
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitment/accountList') ?>/' + type + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: commitment-list-panel, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			// Connect the detail anchors
+			$('.commitment-detail-anchor').each(function () {
+				$(this).click(function () {
+					getCommitmentDetail(type, $(this).attr('id').split('_')[1]);
+				});
+			});
+
+			$('.account-list-anchor').each(function () {
+				$(this).click(function () {
+					document.location.href = $(this).attr('id');
+				});
+			});
+		}
+	}
+	xhttp.send();
+}
+
+// Load the detail panel
+function getAccountDetail(id) {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+
+	// Anchor to the new panel
+	$(location).attr('hash', 'form_action');
+
+	var route = '<?php echo $this->url('commitmentAccount/detail') ?>' + '/' + id;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: form_action, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			connectAuditPanel();
+			connectRemoveIcon('remove-anchor', 'form_action');
+
+			getAccountUpdate(id, '');
+
+			if (id) {
+				$('#account-update-anchor').click(function () { getAccountUpdate(id, 'update'); });
+				$('#account-delete-anchor').click(function () { getAccountUpdate(id, 'delete'); });
+			}
+			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
+
+			if (id != 0) getCommitmentAccountList('registration', '?account_id=' + id, 'identifier', 'DESC');
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#account-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
+}
+
+function activateAccount() {
+
+	// Load the search panel and highlight the menu entry
+	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search') ?>');
+	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
+	var accountAnchor;
+	accountAnchor = '#account-anchor';
+	$(accountAnchor).removeClass("btn-default").addClass("btn-primary");
+
+	<?php
+	$todoTitle = (isset ($context->getInstance()->specifications['ppitCommitment']['account/search']['todoTitle']) ? $context->getInstance()->specifications['ppitCommitment']['account/search']['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	?>
+	$('#mode-text').text('<?php echo $todoTitle ?>');
+		
+	// Connect the search inputs
+	connectAccountSearchInputs();
+	
+	getAccountList('?', 'customer_name', 'ASC');
+	
+	$('#add-criteria').click(function () {
+		mode = $('#add-criteria').text();
+		if (mode == '<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>') {
+			$('#add-criteria').text('<?php echo $this->translate('Less criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').show();
+		}
+		else {
+			$('#add-criteria').text('<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').hide();
+		}
+	});
+	$('#search-area').hide();
+}

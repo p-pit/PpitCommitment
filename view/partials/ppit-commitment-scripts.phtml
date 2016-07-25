@@ -1,0 +1,515 @@
+
+function connectRemoveIcon(type, id, target)
+{
+	$('#' + id).click(function () {
+		$('#' + target).hide();
+		filterCommitmentList(type);
+	});
+}
+
+function getParams(type) {
+
+	// Create a new FormData object.
+	var params = '?', todo = true;
+
+	var account_id = document.getElementById('search_account_id').value;
+	if (account_id.length >= 1) { params += 'account_id=' + account_id + '&'; todo = false; }
+	
+	var project_id = document.getElementById('search_project_id').value;
+	if (project_id.length >= 1) { params += 'project_id=' + project_id + '&'; todo = false; }
+	
+	var status = document.getElementById('search_status').value;
+	if (status.length >= 2) { params += 'status=' + status + '&'; todo = false; }
+
+	var min_amount = document.getElementById('search_min_amount').value;
+	if (min_amount.length >= 2) { params += 'min_amount=' + min_amount + '&'; todo = false; }
+
+	var max_amount = document.getElementById('search_max_amount').value;
+	if (max_amount.length >= 2) { params += 'max_amount=' + max_amount + '&'; todo = false; }
+	
+	var identifier = document.getElementById('search_identifier').value;
+	if (identifier.length >= 2) { params += 'identifier=' + identifier + '&'; todo = false; }
+
+	var quotation_identifier = document.getElementById('search_quotation_identifier').value;
+	if (quotation_identifier.length >= 2) { params += 'quotation_identifier=' + quotation_identifier + '&'; todo = false; }
+	
+	var invoice_identifier = document.getElementById('search_invoice_identifier').value;
+	if (invoice_identifier.length >= 2) { params += 'invoice_identifier=' + invoice_identifier + '&'; todo = false; }
+
+	var min_commitment_date = document.getElementById('search_min_commitment_date').value;
+	if (min_commitment_date) min_commitment_date = encodeDate(min_commitment_date);
+	if (min_commitment_date.length >= 2) { params += 'min_commitment_date=' + min_commitment_date + '&'; todo = false; }
+
+	var max_commitment_date = document.getElementById('search_max_commitment_date').value;
+	if (max_commitment_date) max_commitment_date = encodeDate(max_commitment_date);
+	if (max_commitment_date.length >= 2) { params += 'max_commitment_date=' + max_commitment_date + '&'; todo = false; }
+/*
+	var min_retraction_limit = document.getElementById('search_min_retraction_limit').value;
+	if (min_retraction_limit) min_retraction_date = encodeDate(min_retraction_limit);
+	if (min_retraction_limit.length >= 2) { params += 'min_retraction_limit=' + min_retraction_limit + '&'; todo = false; }
+
+	var max_retraction_limit = document.getElementById('search_max_retraction_limit').value;
+	if (max_retraction_limit) max_retraction_limit = encodeDate(max_retraction_limit);
+	if (max_retraction_limit.length >= 2) { params += 'max_retraction_limit=' + max_retraction_limit + '&'; todo = false; }
+	
+	var min_retraction_date = document.getElementById('search_min_retraction_date').value;
+	if (min_retraction_date) min_retraction_date = encodeDate(min_retraction_date);
+	if (min_retraction_date.length >= 2) { params += 'min_retraction_date=' + min_retraction_date + '&'; todo = false; }
+
+	var max_retraction_date = document.getElementById('search_max_retraction_date').value;
+	if (max_retraction_date) max_retraction_date = encodeDate(max_retraction_date);
+	if (max_retraction_date.length >= 2) { params += 'max_retraction_date=' + max_retraction_date + '&'; todo = false; }
+*/
+	var min_expected_delivery_date = document.getElementById('search_min_expected_delivery_date').value;
+	if (min_expected_delivery_date) min_expected_delivery_date = encodeDate(min_expected_delivery_date);
+	if (min_expected_delivery_date.length >= 2) { params += 'min_expected_delivery_date=' + min_expected_delivery_date + '&'; todo = false; }
+
+	var max_expected_delivery_date = document.getElementById('search_max_expected_delivery_date').value;
+	if (max_expected_delivery_date) max_expected_delivery_date = encodeDate(max_expected_delivery_date);
+	if (max_expected_delivery_date.length >= 2) { params += 'max_expected_delivery_date=' + max_expected_delivery_date + '&'; todo = false; }
+/*
+	var min_shipment_date = document.getElementById('search_min_shipment_date').value;
+	if (min_shipment_date) min_shipment_date = encodeDate(min_shipment_date);
+	if (min_shipment_date.length >= 2) { params += 'min_shipment_date=' + min_shipment_date + '&'; todo = false; }
+
+	var max_shipment_date = document.getElementById('search_max_shipment_date').value;
+	if (max_shipment_date) max_shipment_date = encodeDate(max_shipment_date);
+	if (max_shipment_date.length >= 2) { params += 'max_shipment_date=' + max_shipment_date + '&'; todo = false; }
+*/
+	var min_delivery_date = document.getElementById('search_min_delivery_date').value;
+	if (min_delivery_date) min_delivery_date = encodeDate(min_delivery_date);
+	if (min_delivery_date.length >= 2) { params += 'min_delivery_date=' + min_delivery_date + '&'; todo = false; }
+
+	var max_delivery_date = document.getElementById('search_max_delivery_date').value;
+	if (max_delivery_date) max_delivery_date = encodeDate(max_delivery_date);
+	if (max_delivery_date.length >= 2) { params += 'max_delivery_date=' + max_delivery_date + '&'; todo = false; }
+/*
+	var min_commissioning_date = document.getElementById('search_min_commissioning_date').value;
+	if (min_commissioning_date) min_commissioning_date = encodeDate(min_commissioning_date);
+	if (min_commissioning_date.length >= 2) { params += 'min_commissioning_date=' + min_commissioning_date + '&'; todo = false; }
+
+	var max_commissioning_date = document.getElementById('search_max_commissioning_date').value;
+	if (max_commissioning_date) max_commissioning_date = encodeDate(max_commissioning_date);
+	if (max_commissioning_date.length >= 2) { params += 'max_commissioning_date=' + max_commissioning_date + '&'; todo = false; }
+*/
+	var min_invoice_date = document.getElementById('search_min_invoice_date').value;
+	if (min_invoice_date) min_invoice_date = encodeDate(min_invoice_date);
+	if (min_invoice_date.length >= 2) { params += 'min_invoice_date=' + min_invoice_date + '&'; todo = false; }
+
+	var max_invoice_date = document.getElementById('search_max_invoice_date').value;
+	if (max_invoice_date) max_invoice_date = encodeDate(max_invoice_date);
+	if (max_invoice_date.length >= 2) { params += 'max_invoice_date=' + max_invoice_date + '&'; todo = false; }
+	
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) : ?>
+	
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+
+	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
+	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
+	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+
+<?php endforeach;?>
+
+	$('#mode-text').text((todo) ? '<?php echo $this->translate('Todo list', 'ppit-core', $context->getLocale())?>' : '<?php echo $this->translate('Search', 'ppit-core', $context->getLocale())?>');
+
+	return params;
+}
+
+// Export the list
+function exportCommitmentList(type) {
+
+	var params = getParams(type);
+	document.location.href = '<?php echo $this->url('commitment/export') ?>/' + type + params;
+}
+
+function eraseCommitmentSearch(type) {
+	$('#search_account_id').val('');
+	$('#search_project_id').val('');
+	$('#search_status').val('');
+	$('#search_min_amount').val('');
+	$('#search_max_amount').val('');
+	$('#search_identifier').val('');
+	$('#search_quotation_identifier').val('');
+	$('#search_invoice_identifier').val('');
+	$('#search_min_commitment_date').val('');
+	$('#search_max_commitment_date').val('');
+/*	$('#search_min_retraction_limit').val('');
+	$('#search_max_retraction_limit').val('');
+	$('#search_min_retraction_date').val('');
+	$('#search_max_retraction_date').val('');*/
+	$('#search_min_expected_delivery_date').val('');
+	$('#search_max_expected_delivery_date').val('');
+/*	$('#search_min_shipment_date').val('');
+	$('#search_max_shipment_date').val('');*/
+	$('#search_min_delivery_date').val('');
+	$('#search_max_delivery_date').val('');
+/*	$('#search_min_commissioning_date').val('');
+	$('#search_max_commissioning_date').val('');*/
+	$('#search_min_invoice_date').val('');
+	$('#search_max_invoice_date').val('');
+	
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) : ?>
+	$('#search_<?php echo $propertyId ?>').val('');
+	$('#search_min_<?php echo $propertyId ?>').val('');
+	$('#search_max_<?php echo $propertyId ?>').val('');
+<?php endforeach;?>
+
+	getCommitmentList(type, getParams(type), 'identifier', 'ASC');
+}
+
+function sortCommitmentList(type, criterion) {
+
+	var dir;
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
+	getCommitmentList(type, getParams(type), criterion, dir);
+}
+
+function filterCommitmentList(type) {
+
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (ascCriterion) {
+		criterion = ascCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	getCommitmentList(type, getParams(type), criterion, dir);
+}
+
+function connectCommitmentSearchInputs(type) {
+
+
+	$('#export-button').click(function () { exportCommitmentList(type); });
+	
+	$('#search_account_id').change(function () { filterCommitmentList(type); });
+	$('#search_project_id').change(function () { filterCommitmentList(type); });
+	$('#search_status').change(function () { filterCommitmentList(type); });
+	$('#search_min_amount').keyup(function () { filterCommitmentList(type); });
+	$('#search_max_amount').keyup(function () { filterCommitmentList(type); });
+	$('#search_identifier').keyup(function () { filterCommitmentList(type); });
+	$('#search_quotation_identifier').keyup(function () { filterCommitmentList(type); });
+	$('#search_invoice_identifier').keyup(function () { filterCommitmentList(type); });
+	$("#search_min_commitment_date").datepicker();
+	$('#search_min_commitment_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_commitment_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_commitment_date").datepicker();
+	$('#search_max_commitment_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_commitment_date').keyup(function () { filterCommitmentList(type); });
+/*	$("#search_min_retraction_limit").datepicker();
+	$('#search_min_retraction_limit').change(function () { filterCommitmentList(type); });
+	$('#search_min_retraction_limit').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_retraction_limit").datepicker();
+	$('#search_max_retraction_limit').change(function () { filterCommitmentList(type); });
+	$('#search_max_retraction_limit').keyup(function () { filterCommitmentList(type); });
+	$("#search_min_retraction_date").datepicker();
+	$('#search_min_retraction_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_retraction_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_retraction_date").datepicker();
+	$('#search_max_retraction_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_retraction_date').keyup(function () { filterCommitmentList(type); });*/
+	$("#search_min_expected_delivery_date").datepicker();
+	$('#search_min_expected_delivery_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_expected_delivery_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_expected_delivery_date").datepicker();
+	$('#search_max_expected_delivery_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_expected_delivery_date').keyup(function () { filterCommitmentList(type); });
+/*	$("#search_min_shipment_date").datepicker();
+	$('#search_min_shipment_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_shipment_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_shipment_date").datepicker();
+	$('#search_max_shipment_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_shipment_date').keyup(function () { filterCommitmentList(type); });*/
+	$("#search_min_delivery_date").datepicker();
+	$('#search_min_delivery_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_delivery_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_delivery_date").datepicker();
+	$('#search_max_delivery_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_delivery_date').keyup(function () { filterCommitmentList(type); });
+/*	$("#search_min_commissioning_date").datepicker();
+	$('#search_min_commissioning_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_commissioning_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_commissioning_date").datepicker();
+	$('#search_max_commissioning_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_commissioning_date').keyup(function () { filterCommitmentList(type); });*/
+	$("#search_min_invoice_date").datepicker();
+	$('#search_min_invoice_date').change(function () { filterCommitmentList(type); });
+	$('#search_min_invoice_date').keyup(function () { filterCommitmentList(type); });
+	$("#search_max_invoice_date").datepicker();
+	$('#search_max_invoice_date').change(function () { filterCommitmentList(type); });
+	$('#search_max_invoice_date').keyup(function () { filterCommitmentList(type); });
+	
+	$('#erase-button').unbind();
+	$('#erase-button').click(function () { eraseCommitmentSearch(type); });
+}
+
+// Load the list
+function getCommitmentList(type, params, major, dir) {		
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitment/list') ?>/' + type + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: commitment-list-panel, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			// Connect the sort anchors
+			$('.ppit-sort-anchor').each(function () {
+				$(this).click(function () {
+					sortCommitmentList(type, $(this).attr('id').split('-')[0]);
+				});
+			});
+			
+			// Connect the detail anchors
+			$('.commitment-detail-anchor').each(function () {
+				$(this).click(function () {
+					getCommitmentDetail(type, $(this).attr('id').split('_')[1]);
+				});
+			});
+		}
+	}
+	xhttp.send();
+}
+
+function connectAuditPanel()
+{
+	$('#audit-panel').hide();
+	$('#audit-label').click(function () {
+		if ($('#audit-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#audit-panel').show();
+			$('#audit-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#audit-panel').hide();
+			$('#audit-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
+function connectActionAnchors(type, id, action)
+{
+	// Show and anchor to the new panel
+	$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+	$('#' + action + '-anchor').removeClass('btn-default').addClass('btn-primary');
+	$('#commitment-update-panel').show();
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	var route;
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+	if (action == '<?php echo $actionId ?>') route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/<?php echo $actionId ?>';
+<?php endforeach;?>
+
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: commitment-update-panel' + ', url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+			if (action == '<?php echo $actionId ?>') connectCommitmentUpdateForm(type, id, '<?php echo $actionId ?>');
+<?php endforeach;?>
+		}
+	}
+	xhttp.send();
+}
+
+/////////////////////////////
+// Commitment update panel //
+/////////////////////////////
+
+<?php 
+$properties = array();
+
+$properties['settlement_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['expected_settlement_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['invoice_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['due_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['commissioning_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['expected_commissioning_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['delivery_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['expected_delivery_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['shipment_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['expected_shipment_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['retraction_date'] = array('type' => 'date', 'mandatory' => false);
+$properties['retraction_limit'] = array('type' => 'date', 'mandatory' => false);
+$properties['commitment_date'] = array('type' => 'date', 'mandatory' => true);
+$properties['invoice_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['quotation_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['comment'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
+$properties['amount'] = array('type' => 'number', 'mandatory' => false, 'minValue' => 0, 'maxValue' => 9999999999);
+$properties['description'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
+$properties['caption'] = array('type' => 'input', 'mandatory' => true, 'maxSize' => 255);
+$properties['project_id'] = array('type' => 'select', 'mandatory' => false);
+$properties['account_id'] = array('type' => 'select', 'mandatory' => true);
+$properties['update_time'] = array('type' => 'hidden');
+
+foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) {
+	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectCommitmentUpdateForm(type, id, action)
+{
+<?php foreach ($properties as $property_id => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $property_id ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkCommitmentUpdateProperties(id);
+	
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+<?php foreach ($properties as $property_id => $property) : ?>
+
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $property_id ?>', document.getElementById('<?php echo $property_id ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $property_id ?>', ((document.getElementById('<?php echo $property_id ?>').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'file') : ?>
+				var fileSelect = document.getElementById('order_form');
+				if (fileSelect) {
+					var files = fileSelect.files;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						formData.append('order_form', file, file.name);
+					}
+				}
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/' + action;
+			target = 'commitment-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+
+<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
+					console.log('post, route = ' + route);
+					console.log(xhttp.responseText);
+<?php endif;?>
+					document.getElementById(target).innerHTML = xhttp.responseText;
+					getCommitmentList(type, '?', 'identifier', 'ASC');
+					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getCommitmentUpdate(type, id) {
+	
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id;
+
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('commitment-update-panel, route = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			
+			connectCommitmentUpdateForm(type, id);
+		}
+	}
+	xhttp.send();
+}
+
+// Load the detail panel
+function getCommitmentDetail(type, id) {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+
+	// Anchor to the new panel
+	$(location).attr('hash', 'form_action');
+
+	var route = '<?php echo $this->url('commitment/detail') ?>/' + type + '/' + id;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: form_action, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+
+			connectAuditPanel();
+			connectRemoveIcon(type, 'remove-anchor', 'form_action');
+			getCommitmentUpdate(type, id);
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connectActionAnchors(type, id, '<?php echo $actionId ?>'); });
+<?php endforeach;?>
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#commitment-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
+}
+
+function activateCommitment(type) {
+
+	// Load the search panel and highlight the menu entry
+	loadPanel('index_action', '<?php echo $this->url('commitment/search') ?>/' + type);
+	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
+	var commitmentAnchor;
+	commitmentAnchor = '#' + type + '-anchor';
+	$(commitmentAnchor).removeClass("btn-default").addClass("btn-primary");
+	$('#mode-text').text('<?php echo $this->translate('Todo list', 'ppit-core', $context->getLocale())?>');
+	
+	// Connect the search inputs
+	connectCommitmentSearchInputs(type);
+	
+	getCommitmentList(type, '?', 'identifier', 'ASC');
+	
+	$('#add-criteria').click(function () {
+		$('#search-area').show();
+		$('#add-criteria').hide();
+	});
+	$('#search-area').hide();
+}

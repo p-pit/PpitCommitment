@@ -1,0 +1,50 @@
+<div class="panel panel-default">
+	<div class="panel-heading" style="background: #8DB6CB; color: #1A435D">
+		<strong><?php echo $this->translate('Detail', 'ppit-core', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
+
+<!-- Display the audit -->
+		<?php echo $this->translate('History', 'ppit-core', $context->getLocale()) ?> (<a id="audit-label" href="#"><?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?></a>)
+		<div id="audit-panel" class="panel panel-default">
+			<div class="panel-body">
+<?php foreach ($commitment->audit as $comment) : ?>
+				<div class="row">
+					<div class="col-md-12">
+						<strong><?php echo $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10) ?>:</strong>&nbsp;
+						<?php echo $context->getInstance()->specifications['ppitCommitment']['statuses'][$comment['status']]['labels'][$context->getLocale()] ?>&nbsp;
+						(<?php echo $comment['n_fn'] ?>)
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-2" align="right">&nbsp;</div>
+					<div class="col-md-10"><em><?php echo $comment['comment'] ?></em></div>
+				</div>
+<?php endforeach;?>
+			</div>
+		</div>
+		<div>&nbsp;</div>
+		<div>
+
+<?php if ($commitment->id) : ?>
+	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+			<?php if (array_key_exists($commitment->status, $action['currentStatuses'])) : ?>
+			<button type="button" class="btn btn-default action-btn" id="<?php echo $actionId ?>-anchor" title="<?php echo $action['label'][$context->getLocale()]?>">
+			<?php if (array_key_exists('glyphicon', $action)) : ?>
+				<span class="glyphicon <?php echo $action['glyphicon'] ?>"></span>
+			<?php else : ?>
+				<span><?php echo $action['label'][$context->getLocale()]?></span>
+			<?php endif;?>
+			</button>
+			<?php endif;?>
+	<?php endforeach;?>
+<?php endif;?>
+
+	</div>
+
+	<div id="commitment-update-panel"></div>

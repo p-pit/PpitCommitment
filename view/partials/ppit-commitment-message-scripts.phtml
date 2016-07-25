@@ -1,0 +1,134 @@
+
+function connectCommitmentMessageRemoveIcon(type, id, target)
+{
+	$('#' + id).click(function () {
+		$('#' + target).hide();
+		getCommitmentMessageList(type, 'id', 'DESC');
+	});
+}
+
+function sortCommitmentMessageList(type, criterion) {
+	var dir;
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
+	getCommitmentMessageList(type, criterion, dir);
+}
+
+// Load the list
+function getCommitmentMessageList(type, major, dir) {
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitmentMessage/index') ?>' + '?major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+ 	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('index_action').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: index_action, url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+			// Connect the sort anchors
+			$('.ppit-sort-anchor').each(function () {
+				$(this).click(function () {
+					sortCommitmentMessageList(type, $(this).attr('id').split('-')[0]);
+				});
+			});
+
+			// Connect the add anchor
+			$('#commitment-message-add-anchor').click(function () {
+				showCommitmentMessageDetail(type, '0', 'import');
+			});
+			
+			// Connect the detail anchors
+			$('.commitment-message-submit-anchor').each(function () {
+				$(this).click(function () {
+					showCommitmentMessageDetail(type, $(this).attr('id').split('_')[1], 'submit');
+				});
+			});
+			$('.commitment-message-import-anchor').each(function () {
+				$(this).click(function () {
+					showCommitmentMessageDetail(type, $(this).attr('id').split('_')[1], 'process');
+				});
+			});
+		}
+	}
+	xhttp.send();
+}
+
+// MESSAGES
+
+// Import panel
+<?php $properties = array(
+		'type' => array('type' => 'select', 'mandatory' => true),
+		'files' => array('type' => 'file'),
+) ?>
+<?php echo $this->partial('/partials/ppit-commitment-message-detail-scripts', array(
+		'context' => $context,
+		'action' => 'import',
+		'route' => 'commitmentMessage/import',
+		'properties' => $properties,
+)) ?>
+
+// Submit panel
+<?php $properties = array(
+		'update_time' => array('type' => 'hidden'),
+) ?>
+<?php echo $this->partial('/partials/ppit-commitment-message-detail-scripts', array(
+		'context' => $context,
+		'action' => 'submit',
+		'route' => 'commitmentMessage/submit',
+		'properties' => $properties,
+)) ?>
+
+// Process panel
+<?php $properties = array(
+) ?>
+<?php echo $this->partial('/partials/ppit-commitment-message-detail-scripts', array(
+		'context' => $context,
+		'action' => 'process',
+		'route' => 'commitmentMessage/process',
+		'properties' => $properties,
+)) ?>
+
+function showCommitmentMessageDetail(type, id, action)
+{
+	$('#form_action').show();
+	$(location).attr('hash', 'form_action');
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	var route;
+	if (action == 'import') route = '<?php echo $this->url('commitmentMessage/import') ?>';
+	else if (action == 'submit') route = '<?php echo $this->url('commitmentMessage/submit') ?>/' + id;
+	else if (action == 'process') route = '<?php echo $this->url('commitmentMessage/process') ?>/' + id;
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('showing panel: form_action' + ', url = ' + route);
+			console.log(xhttp.responseText);
+<?php endif;?>
+
+			connectCommitmentMessageRemoveIcon(type, 'remove-anchor', 'form_action');
+			connectCommitmentMessageRemoveIcon(type, 'return-anchor', 'form_action');
+			connectCommitmentMessageRemoveIcon(type, 'cancel-anchor', 'form_action');
+			if (action =='import') connectimportForm(0);
+			else if (action =='submit') connectsubmitForm(id);
+			else if (action =='process') connectprocessForm(id);
+		}
+	}
+	xhttp.send();
+}
+
+function activateCommitmentMessage(type) {
+	// Load the search panel and highlight the menu entry
+	loadPanel('index_action', '<?php echo $this->url('commitmentMessage/index') ?>');
+	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#commitmentMessage-anchor').removeClass("btn-default").addClass("btn-primary");
+
+	getCommitmentMessageList(type, 'id', 'DESC');
+}
+$('#commitmentMessage-anchor').click(function () { activateCommitmentMessage(''); });

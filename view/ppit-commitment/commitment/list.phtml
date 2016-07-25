@@ -1,0 +1,87 @@
+<table class="table table-striped ppit_index">
+	<tr>
+		<th>&nbsp;</th>
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="identifier-anchor">
+				<span><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></span>
+<?php if ($major == 'identifier') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="status-anchor">
+				<span><?php echo $this->translate('Next step', 'ppit-core', $context->getLocale()) ?></span>
+<?php if ($major == 'status') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="expected_delivery_date-anchor">
+				<span><?php echo $this->translate('Deadline', 'ppit-commitment', $context->getLocale()) ?></span>
+<?php if ($major == 'expected_delivery_date') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="expected_delivery_date-anchor">
+				<span><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></span>
+<?php if ($major == 'amount') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+		
+		<th>&nbsp;</th>
+	</tr>
+		
+	<tr>
+		<td>
+			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_0">
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+			</button>
+		</td>
+		<td colspan="4">
+			<img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>"> 45 pépites disponibles
+		</td>
+	</tr>
+	
+<?php foreach ($commitments as $commitment) : ?>
+	<?php if ($context->isAllowed('commitment/detail')) : ?>
+	
+	<tr>
+		<td colspan="6">
+			<strong><?php echo $commitment->customer_name ?></strong> -
+			<?php if ($commitment->project_id) echo $projects[$commitment->project_id]['caption'].' - ' ?>
+			<?php echo $commitment->caption ?>
+		</td>
+	</tr>
+	
+	<tr class="commitment">
+		<td >
+			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_<?php echo $commitment->id ?>">
+				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $commitment->id ?>-glyphicon"></span>
+			</button>
+		</td>
+		<td><?php echo $commitment->identifier ?></td>
+		<td><?php echo $context->getInstance()->specifications['ppitCommitment']['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
+		<td <?php if ($commitment->expected_delivery_date < date('Y-m-d')) echo 'style="color: red"' ?>><?php echo $context->decodeDate($commitment->expected_delivery_date) ?></td>
+		<td align="right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
+		<td>
+		<?php if ($commitment->order_form_id) : ?>
+			<a class="glyphicon glyphicon-cloud-download" title="<?php echo $this->translate('Download', 'ppit-core', $context->getLocale()) ?>" href="<?php echo $this->url('document/download', array('id' => $commitment->order_form_id)) ?>"></a>
+		<?php else : ?>
+			&nbsp;
+		<?php endif;?>
+		</td>
+	</tr>
+
+	<?php endif;?>
+<?php endforeach; ?>
+
+</table>

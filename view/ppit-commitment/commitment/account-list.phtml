@@ -1,0 +1,73 @@
+<h4 style="text-align: center"></h4>
+
+<?php $colspan = count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['properties'])
+	   		   + count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['glyphicons'])
+	   		   + count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['anchors']) ?>
+
+<table class="table table-striped ppit_index">
+	<tr>
+		<th colspan="<?php echo $colspan ?>" style="font-size: large; text-align: center">
+			<strong><?php echo $context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['title'][$context->getLocale()] ?></strong>
+		</th>
+	</tr>
+	<tr>
+<?php $route = $context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['addRoute']?>
+		<td colspan="<?php echo $colspan ?>">
+			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+			</button>
+			&nbsp;&nbsp;
+			( <img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>">
+			crédits disponibles : <strong <?php if ($context->formatFloat($context->getInstance()->credits, 0) <= 0) echo 'style="color: red"'?>><?php echo $context->formatFloat($context->getInstance()->credits, 0) ?></strong> )
+		</td>
+	</tr>
+
+<?php foreach ($commitments as $commitment) : ?>
+
+	<tr class="commitment">
+		
+	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['properties'] as $propertyId => $rendering) : ?>
+		<?php if ($propertyId == 'caption') : ?>
+		<td style="text-align: center"><strong><?php echo $commitment->caption ?></strong></td>
+
+		<?php else : ?>
+		<td style="text-align: center"><strong><?php echo $commitment->properties[$propertyId] ?></strong></td>
+
+		<?php endif;?>
+		
+	<?php endforeach;?>
+
+	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['glyphicons'] as $route => $params) : ?>
+		<td>
+			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="<?php echo $this->url($route, array('eid' => $commitment->identifier)) ?>">
+				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon"></span>
+			</button>
+		</td>
+	<?php endforeach;?>
+
+	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['anchors'] as $route => $params) : ?>
+		<td>
+		<?php if ($params['type'] == 'btn') : ?>
+			<button type="button" class="btn btn-default action-btn account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">
+				<?php echo $params['labels'][$context->getLocale()] ?>
+			</button>
+		<?php elseif ($params['type'] == 'nav') : ?>
+			<ul class="nav nav-tabs">
+		        <li class="dropdown">
+		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><?php echo $params['labels'][$context->getLocale()] ?> <span class="caret"></span></a>
+		          <ul class="dropdown-menu">
+			<?php foreach ($params['entries'] as $childRoute => $childParams) : ?>
+		          	<li class="dropdown-item"><a class="account-list-anchor" id="<?php echo $this->url($childRoute, array('eid' => $commitment->identifier)) ?>" href="#"><?php echo $childParams['labels'][$context->getLocale()] ?></a></li>
+		    <?php endforeach;?>
+		          </ul>
+		        </li>
+		    </ul>
+		<?php endif;?>
+		</td>
+	<?php endforeach;?>
+	
+	</tr>
+
+<?php endforeach; ?>
+
+</table>

@@ -1,0 +1,116 @@
+<h4 style="text-align: center"><strong><?php echo $context->getInstance()->specifications['ppitCommitment']['account/detail']['title'][$context->getLocale()] ?></strong></h4>
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'update_time' => $account->update_time,
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+			
+<!-- Global message -->
+<?php if ($message == 'confirm-update') : ?>
+			<div class="form-group" id="message">
+				<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to update the account?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
+			</div>
+<?php elseif ($message == 'confirm-delete') : ?>
+				<div class="form-group" id="message">
+						<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to delete the account?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
+					</div>
+<?php endif;?>
+
+<?php if (!$account->id) : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php elseif ($action == 'update') : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php elseif ($action == 'delete') : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+<?php endif;?>
+
+<?php 
+if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true; else $isDisabled = false;
+?>
+
+<?php foreach ($context->getInstance()->specifications['ppitCommitment']['account/update'] as $propertyId => $options) : ?>
+	<?php $property = $context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId] ?>
+		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
+			<div class="col-sm-7">
+
+	<?php if ($propertyId == 'n_first') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'n_last') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->n_last ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'email') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+				
+	<?php elseif ($propertyId == 'place_id') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
+		<?php foreach ($places as $place_id => $place) : ?>
+	    			<option value="<?php echo $place_id ?>" <?php if ($account->place_id == $place_id) echo 'selected="selected"' ?>><?php echo $place->name ?></option>
+		<?php endforeach;?>
+				</select>
+
+	<?php elseif ($propertyId == 'closing_date') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->closing_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+				
+	<?php elseif ($property['type'] == 'date') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'number') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($account->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'textarea') : ?>
+				<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?> <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+					<?php echo $account->properties[$propertyId] ?>
+				</textarea>>
+
+	<?php elseif ($property['type'] == 'select') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
+		<?php foreach ($property['modalities'] as $key => $labels) : ?>
+	    			<option value="<?php echo $key ?>" <?php if ($account->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
+		<?php endforeach;?>
+				</select>
+
+	<?php elseif ($property['type'] == 'photo') : ?>
+
+<!-- Photo -->
+				<img height="150" src="<?php echo $this->url('vcard/photo', array('id' => $account->properties[$propertyId])) ?>"/>
+	
+	<?php else : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php endif;?>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
+		</div>
+
+<?php endforeach;?>
+		
+		</form>

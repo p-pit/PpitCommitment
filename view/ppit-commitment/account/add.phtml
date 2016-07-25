@@ -1,0 +1,192 @@
+<?php
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+
+<!-- Display header on MPA mode -->
+<?php if (!$spa) : ?>
+	<?php 
+		$this->current = 'admin';
+		echo $this->partial('/partials/menu'); 
+	?>
+<?php endif;?>
+
+<h4><?php echo $this->translate('Add an account', 'ppit-contact', $context->getLocale()) ?></h4>
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+			'formId' => 'community-function-add-form',
+			'update_time' => $account->update_time,
+			'message' => $message,
+			'error' => $error,
+			'csrfForm' => $csrfForm,
+			'context' => $context,
+)) ?>
+
+<?php if ($message == 'OK' || !$context->isAllowed('commitmentAccount/add')) $isDisabled = true; else $isDisabled = false; ?>
+
+<!-- Customer -->
+<?php
+	echo $this->partial('/partials/input-widget.phtml', array(
+		'property' => 'customer_name',
+		'label' => '* '.$this->translate('Customer', 'ppit-contact', $context->getLocale()),
+		'value' => $account->customer_name,
+		'isMandatory' => true,
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+)); ?>
+<input type="hidden" id="customer_community_id" name="customer_community_id" />
+
+<!-- Supplier -->
+<?php
+	echo $this->partial('/partials/input-widget.phtml', array(
+		'property' => 'supplier_name',
+		'label' => '* '.$this->translate('Supplier', 'ppit-contact', $context->getLocale()),
+		'value' => $account->supplier_name,
+		'isMandatory' => true,
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+)); ?>
+<input type="hidden" id="supplier_community_id" name="supplier_community_id" />
+
+<!-- Opening date -->
+<?php echo $this->partial('/partials/date-widget.phtml', array(
+		'property' => 'opening_date',
+		'label' => $this->translate('Opening date', 'ppit-master-data', $context->getLocale()),
+		'value' => $account->opening_date,
+		'isMandatory' => false,
+		'minDate' => '0000-00-00',
+		'maxDate' => '9999-99-99',
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+)); ?>
+
+<!-- Closing date -->
+<?php echo $this->partial('/partials/date-widget.phtml', array(
+		'property' => 'closing_date',
+		'label' => $this->translate('Closing date', 'ppit-master-data', $context->getLocale()),
+		'value' => $account->closing_date,
+		'isMandatory' => false,
+		'minDate' => '0000-00-00',
+		'maxDate' => '9999-99-99',
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+)); ?>
+
+<!-- Form footer -->
+<?php echo $this->partial('/partials/form-footer', array(
+	'prefix' => 'community_function_',
+	'class' => 'btn-danger',
+	'message' => $message,
+	'context' => $context,
+)) ?>
+
+<!-- Load the common form javascript functions -->
+<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
+
+<script id='community_function_add_script'>
+
+$('#customer_name').autocomplete({
+	source : function(request, response){
+    $.ajax({
+    		url : '<?php echo $this->url('community/dataList') ?>', // Server request returning json data
+            dataType : 'json', // The data type is json
+            data : {
+                name : $('#customer_name').val(), // Giving the prefix (at least 3 chars input)
+                maxRows : 15
+            },
+            
+            success : function(donnee){
+	            	response($.map(donnee.data, function(object){
+        			document.getElementById("customer_community_id").value = object.id;
+	            	return object.name;
+                }));
+            }
+        });
+    }
+});
+
+$('#supplier_name').autocomplete({
+	source : function(request, response){
+    $.ajax({
+    		url : '<?php echo $this->url('community/dataList') ?>', // Server request returning json data
+            dataType : 'json', // The data type is json
+            data : {
+                name : $('#supplier_name').val(), // Giving the prefix (at least 3 chars input)
+                maxRows : 15
+            },
+            
+            success : function(donnee){
+	            	response($.map(donnee.data, function(object){
+        			document.getElementById("supplier_community_id").value = object.id;
+	            	return object.name;
+                }));
+            }
+        });
+    }
+});
+
+<?php if ($message == 'OK') : ?>
+
+$('#community_function_foot-return-anchor').click(function () {
+	reload(
+		'<?php echo $this->url('commitmentAccount/list') ?>',
+		'community_function_list_script',
+		'community_function_list'
+	);
+} );
+
+<?php else : ?>
+
+	$('#community_function_cancel-anchor').click(function () {
+		reload(
+			'<?php echo $this->url('commitmentAccount/list') ?>',
+			'community_function_list_script',
+			'community_function_contact_list'
+		);
+	} );
+
+	// Submit
+	<?php
+	$properties = array(
+			'customer_community_id' => 'hidden',
+			'customer_name' => 'input',
+			'supplier_community_id' => 'hidden',
+			'supplier_name' => 'input',
+			'function' => 'input',
+			'opening_date' => 'input',
+			'closing_date' => 'input',
+			'update_time' => 'hidden'
+	);
+	echo $this->partial('/partials/form-button-script', array(
+			'context' => $context,
+			'formId' => 'community-function-add-form',
+			'id' => 'submit-button',
+			'checkFunction' => 'checkForm',
+			'formRoute' => $this->url('commitmentAccount/add'),
+			'formScript' => 'community_function_add_script',
+			'target' => 'community_function_list',
+			'properties' => $properties,
+			'mainRoute' => null,
+			'hideForm' => false,
+	)) ?>
+	
+	function checkForm() {
+		validity = true;
+		if (!check_closing_date()) validity = false;
+		if (!check_opening_date()) validity = false;
+		if (!check_function()) validity = false;
+		if (document.getElementById('supplier_community_id').value == '') {
+			validity = false;
+			renderElement('supplier_name', '<?php echo $this->translate('Please select a supplier', 'ppit-contact', $context->getLocale()) ?>')
+		}
+		if (document.getElementById('customer_community_id').value == '') {
+			validity = false;
+			renderElement('customer_name', '<?php echo $this->translate('Please select a customer', 'ppit-contact', $context->getLocale()) ?>')
+		}
+		return validity;
+	}
+
+<?php endif;?>
+
+</script>

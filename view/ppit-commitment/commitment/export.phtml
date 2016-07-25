@@ -1,0 +1,55 @@
+<?php 
+header('Content-Type: text/csv; charset=utf-8');
+header("Content-disposition: filename=commitment-".date('Y-m-d').".csv");
+echo "\xEF\xBB\xBF";
+ 
+echo $this->translate('Type', 'ppit-core', $context->getLocale()).";";
+echo $this->translate('Site', 'ppit-master-data', $context->getLocale()).";";
+echo $this->translate('Area', 'ppit-equipment', $context->getLocale()).";";
+echo $this->translate('Status', 'ppit-core', $context->getLocale()).";";
+echo $this->translate('Caption', 'ppit-core', $context->getLocale()).";";
+echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Identifier', 'ppit-core', $context->getLocale()).";";
+echo $this->translate('Quotation identifier', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Invoice identifier', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Commitment date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Retraction limit', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Retraction date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Requested delivery date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Shipment date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Delivery date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Commissioning date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Invoice date', 'ppit-commitment', $context->getLocale()).";";
+echo $this->translate('Description', 'ppit-core', $context->getLocale()).";";
+
+foreach($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) {
+	echo $property['labels'][$context->getLocale()].";";
+}
+echo "\n";
+
+foreach ($commitments as $commitment) {
+	echo $context->getInstance()->specifications['ppitCommitment']['types'][$commitment->type]['labels']['fr_FR'].';';
+	echo $commitment->site_caption.';';
+	echo $commitment->area_caption.';';
+	echo $context->getInstance()->specifications['ppitCommitment']['statuses'][$commitment->status]['labels']['fr_FR'].';';
+	echo $commitment->caption.';';
+	echo $context->formatFloat($commitment->amount, 2).';';
+	echo (($commitment->identifier) ? "'".$commitment->identifier : '').";";
+	echo (($commitment->quotation_identifier) ? "'".$commitment->quotation_identifier : '').";";
+	echo (($commitment->invoice_identifier) ? "'".$commitment->invoice_identifier : '').";";
+	echo $context->decodeDate($commitment->commitment_date).';';
+	echo $context->decodeDate($commitment->retraction_limit).';';
+	echo $context->decodeDate($commitment->retraction_date).';';
+	echo $context->decodeDate($commitment->expected_delivery_date).';';
+	echo $context->decodeDate($commitment->shipment_date).';';
+	echo $context->decodeDate($commitment->delivery_date).';';
+	echo $context->decodeDate($commitment->commissioning_date).';';
+	echo $context->decodeDate($commitment->invoice_date).';';
+	echo $commitment->description.';';
+	
+	foreach($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) {
+		echo (($commitment->properties[$propertyId]) ? "'".$commitment->properties[$propertyId] : '').';';
+	}
+			
+	echo "\n";
+}
