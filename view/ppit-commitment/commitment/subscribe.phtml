@@ -1,0 +1,93 @@
+<div class="panel panel-default">
+	<div class="panel-heading" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+		<strong><?php echo $this->translate('Subscribe', 'ppit-commitment', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'update_time' => $commitment->update_time,
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+
+<?php 
+if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
+?>
+		<div class="form-group" id="product_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Product', 'ppit-master-data', $context->getLocale())?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="product" name="product" disabled="disabled" value="<?php echo $commitment->subscription->product_identifier ?>" />
+			</div>
+		</div>
+
+		<div class="form-group" id="description_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Description', 'ppit-core', $context->getLocale())?></label>
+			<div class="col-sm-7">
+				<textarea class="form-control" id="description" name="description" disabled="disabled"><?php echo $commitment->subscription->description ?></textarea>
+			</div>
+		</div>
+
+<?php foreach ($context->getConfig('commitment/subscribe') as $propertyId => $options) : ?>
+	<?php $property = $context->getConfig('commitment')['properties'][$propertyId] ?>
+		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
+			<div class="col-sm-7">
+
+	<?php if ($propertyId == 'quantity') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo 100 ?>" <?php if ($isDisabled || array_key_exists('disabled', $options)) echo 'disabled="disabled"'?> />
+				
+	<?php elseif ($property['type'] == 'date') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($commitment->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'number') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($commitment->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'textarea') : ?>
+				<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+					<?php echo $commitment->properties[$propertyId] ?>
+				</textarea>>
+
+	<?php elseif ($property['type'] == 'select') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
+		<?php foreach ($property['modalities'] as $key => $labels) : ?>
+	    			<option value="<?php echo $key ?>" <?php if ($commitment->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
+		<?php endforeach;?>
+				</select>
+
+	<?php elseif ($property['type'] == 'photo') : ?>
+
+<!-- Photo -->
+				<img height="150" src="<?php echo $this->url('vcard/photo', array('id' => $commitment->properties[$propertyId])) ?>"/>
+	
+	<?php else : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $commitment->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php endif;?>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
+		</div>
+
+<?php endforeach;?>
+
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Subscribe', 'ppit-commitment', $context->getLocale()) ?>">
+				</div>
+			</div>
+		
+		</form>
+	</div>
+</div>

@@ -1,24 +1,26 @@
 <h4 style="text-align: center"></h4>
 
-<?php $colspan = count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['properties'])
-	   		   + count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['glyphicons'])
-	   		   + count($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['anchors']) ?>
+<?php $colspan = count($context->getConfig('commitment/accountList')['properties'])
+	   		   + count($context->getConfig('commitment/accountList')['glyphicons'])
+	   		   + count($context->getConfig('commitment/accountList')['anchors']) ?>
 
 <table class="table table-striped ppit_index">
 	<tr>
 		<th colspan="<?php echo $colspan ?>" style="font-size: large; text-align: center">
-			<strong><?php echo $context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['title'][$context->getLocale()] ?></strong>
+			<strong><?php echo $context->getConfig('commitment/accountList')['title'][$context->getLocale()] ?></strong>
 		</th>
 	</tr>
 	<tr>
-<?php $route = $context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['addRoute']?>
+<?php $route = $context->getConfig('commitment/accountList')['addRoute']?>
 		<td colspan="<?php echo $colspan ?>">
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
+<?php if (!$context->getConfig('credit')['unlimitedCredits']) : ?>
 			&nbsp;&nbsp;
 			( <img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>">
-			crédits disponibles : <strong <?php if ($context->formatFloat($context->getInstance()->credits, 0) <= 0) echo 'style="color: red"'?>><?php echo $context->formatFloat($context->getInstance()->credits, 0) ?></strong> )
+			Crédits <em>P-PIT Engagements</em> mensuels disponibles : <strong <?php if ($context->formatFloat($context->getInstance()->credits, 0) <= 0) echo 'style="color: red"'?>><?php echo $credit->quantity ?></strong> )
+<?php endif;?>
 		</td>
 	</tr>
 
@@ -26,7 +28,7 @@
 
 	<tr class="commitment">
 		
-	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['properties'] as $propertyId => $rendering) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList')['properties'] as $propertyId => $rendering) : ?>
 		<?php if ($propertyId == 'caption') : ?>
 		<td style="text-align: center"><strong><?php echo $commitment->caption ?></strong></td>
 
@@ -37,7 +39,7 @@
 		
 	<?php endforeach;?>
 
-	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['glyphicons'] as $route => $params) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList')['glyphicons'] as $route => $params) : ?>
 		<td>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="<?php echo $this->url($route, array('eid' => $commitment->identifier)) ?>">
 				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -45,7 +47,7 @@
 		</td>
 	<?php endforeach;?>
 
-	<?php foreach ($context->getInstance()->specifications['ppitCommitment']['commitment/accountList']['anchors'] as $route => $params) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList')['anchors'] as $route => $params) : ?>
 		<td>
 		<?php if ($params['type'] == 'btn') : ?>
 			<button type="button" class="btn btn-default action-btn account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">

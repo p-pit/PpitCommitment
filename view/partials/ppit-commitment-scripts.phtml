@@ -15,8 +15,8 @@ function getParams(type) {
 	var account_id = document.getElementById('search_account_id').value;
 	if (account_id.length >= 1) { params += 'account_id=' + account_id + '&'; todo = false; }
 	
-	var project_id = document.getElementById('search_project_id').value;
-	if (project_id.length >= 1) { params += 'project_id=' + project_id + '&'; todo = false; }
+	var subscription_id = document.getElementById('search_subscription_id').value;
+	if (subscription_id.length >= 1) { params += 'subscription_id=' + subscription_id + '&'; todo = false; }
 	
 	var status = document.getElementById('search_status').value;
 	if (status.length >= 2) { params += 'status=' + status + '&'; todo = false; }
@@ -100,7 +100,7 @@ function getParams(type) {
 	if (max_invoice_date) max_invoice_date = encodeDate(max_invoice_date);
 	if (max_invoice_date.length >= 2) { params += 'max_invoice_date=' + max_invoice_date + '&'; todo = false; }
 	
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
 	
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
 	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
@@ -129,7 +129,7 @@ function exportCommitmentList(type) {
 
 function eraseCommitmentSearch(type) {
 	$('#search_account_id').val('');
-	$('#search_project_id').val('');
+	$('#search_subscription_id').val('');
 	$('#search_status').val('');
 	$('#search_min_amount').val('');
 	$('#search_max_amount').val('');
@@ -153,7 +153,7 @@ function eraseCommitmentSearch(type) {
 	$('#search_min_invoice_date').val('');
 	$('#search_max_invoice_date').val('');
 	
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
 	$('#search_<?php echo $propertyId ?>').val('');
 	$('#search_min_<?php echo $propertyId ?>').val('');
 	$('#search_max_<?php echo $propertyId ?>').val('');
@@ -188,7 +188,7 @@ function connectCommitmentSearchInputs(type) {
 	$('#export-button').click(function () { exportCommitmentList(type); });
 	
 	$('#search_account_id').change(function () { filterCommitmentList(type); });
-	$('#search_project_id').change(function () { filterCommitmentList(type); });
+	$('#search_subscription_id').change(function () { filterCommitmentList(type); });
 	$('#search_status').change(function () { filterCommitmentList(type); });
 	$('#search_min_amount').keyup(function () { filterCommitmentList(type); });
 	$('#search_max_amount').keyup(function () { filterCommitmentList(type); });
@@ -308,7 +308,7 @@ function connectActionAnchors(type, id, action)
 	xhttp = new XMLHttpRequest();
 	var route;
 
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
 	if (action == '<?php echo $actionId ?>') route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/<?php echo $actionId ?>';
 <?php endforeach;?>
 
@@ -321,7 +321,7 @@ function connectActionAnchors(type, id, action)
 			console.log(xhttp.responseText);
 <?php endif;?>
 			
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
 			if (action == '<?php echo $actionId ?>') connectCommitmentUpdateForm(type, id, '<?php echo $actionId ?>');
 <?php endforeach;?>
 		}
@@ -356,11 +356,11 @@ $properties['comment'] = array('type' => 'textarea', 'mandatory' => false, 'maxS
 $properties['amount'] = array('type' => 'number', 'mandatory' => false, 'minValue' => 0, 'maxValue' => 9999999999);
 $properties['description'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
 $properties['caption'] = array('type' => 'input', 'mandatory' => true, 'maxSize' => 255);
-$properties['project_id'] = array('type' => 'select', 'mandatory' => false);
+$properties['subscription_id'] = array('type' => 'select', 'mandatory' => false);
 $properties['account_id'] = array('type' => 'select', 'mandatory' => true);
 $properties['update_time'] = array('type' => 'hidden');
 
-foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) {
+foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) {
 	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
@@ -480,7 +480,7 @@ function getCommitmentDetail(type, id) {
 			connectAuditPanel();
 			connectRemoveIcon(type, 'remove-anchor', 'form_action');
 			getCommitmentUpdate(type, id);
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['actions'] as $actionId => $action) : ?>
+<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
 			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connectActionAnchors(type, id, '<?php echo $actionId ?>'); });
 <?php endforeach;?>
 		}

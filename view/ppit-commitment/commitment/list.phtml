@@ -57,7 +57,7 @@
 	<tr>
 		<td colspan="6">
 			<strong><?php echo $commitment->customer_name ?></strong> -
-			<?php if ($commitment->project_id) echo $projects[$commitment->project_id]['caption'].' - ' ?>
+			<?php if ($commitment->subscription_id) echo $commitment->product_identifier.' - ' ?>
 			<?php echo $commitment->caption ?>
 		</td>
 	</tr>
@@ -69,7 +69,7 @@
 			</button>
 		</td>
 		<td><?php echo $commitment->identifier ?></td>
-		<td><?php echo $context->getInstance()->specifications['ppitCommitment']['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
+		<td><?php echo $context->getConfig('commitment')['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
 		<td <?php if ($commitment->expected_delivery_date < date('Y-m-d')) echo 'style="color: red"' ?>><?php echo $context->decodeDate($commitment->expected_delivery_date) ?></td>
 		<td align="right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
 		<td>

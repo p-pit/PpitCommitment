@@ -5,6 +5,7 @@ use PpitCore\Model\GenericTable;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
+use PpitCommitment\Model\Subscription;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
@@ -72,6 +73,17 @@ class Module
                 	$resultSetPrototype = new ResultSet();
                 	$resultSetPrototype->setArrayObjectPrototype(new CommitmentMessage());
                 	return new TableGateway('commitment_message', $dbAdapter, null, $resultSetPrototype);
+                },
+ 	          	'PpitCommitment\Model\SubscriptionTable' =>  function($sm) {
+                    $tableGateway = $sm->get('SubscriptionTableGateway');
+                    $table = new GenericTable($tableGateway);
+                    return $table;
+                },
+                'SubscriptionTableGateway' => function ($sm) {
+                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultSetPrototype = new ResultSet();
+                    $resultSetPrototype->setArrayObjectPrototype(new Subscription());
+                    return new TableGateway('commitment_subscription', $dbAdapter, null, $resultSetPrototype);
                 },
             ),
         );

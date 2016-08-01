@@ -1,0 +1,85 @@
+<?php
+$title = $document->properties['title'];
+$this->headTitle($title);
+echo $context->getHeaderCode();
+?>
+<div>&nbsp;</div>
+
+<!-- Front product 1 -->
+<div class="row">
+
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading front-page">
+                <div id="front_product_1_title"><?php if (array_key_exists('date',$document->properties)) echo $context->decodeDate($document->properties['date']).': ' ?><?php echo $document->properties['title'] ?></div>
+            </div>
+            <div class="panel-body">
+<?php if (array_key_exists('action', $content)) : ?>
+				<button type="button" class="btn btn-primary" title="<?php echo $content['action']['text'] ?>" onClick="location_href('<?php echo $content['action']['href'] ?>')">
+					<?php if (isset($content['action']['glyphicon'])) : ?>
+					<span class="glyphicon glyphicon-<?php echo $content['action']['glyphicon'] ?>"></span>&nbsp;
+					<?php endif;?>
+					<?php if (isset($content['action']['text'])) : ?>
+					<?php echo $content['action']['text'] ?>
+					<?php endif;?>
+				</button>
+<?php endif ?>
+       			<div id="front_product_1">
+
+<!-- Display the document -->
+
+<?php for ($i = 0; $i < count($document->parts); $i++) : ?>
+	<?php $documentPart = $document->parts[$i]; ?>
+
+					<div id="document_part_panel_<?php echo $documentPart->id ?>">
+	
+	<?php if ($documentPart->image) : ?>
+						<div align="center">
+							<img 
+							<?php foreach ($documentPart->image as $attr => $value) : ?>
+								<?php if ($attr == 'src') : ?>
+								src="<?php echo $this->basePath($value) ?>"
+								<?php else : ?>
+								<?php echo $attr ?>="<?php echo $value ?>"
+								<?php endif;?>
+							<?php endforeach;?>
+							/>
+						</div>
+	<?php endif;?>
+			
+						<div><?php echo $documentPart->content ?></div>
+<?php endfor;?>
+					</div>
+				</div>
+				<div style="text-align: center">
+					<script>(function(d, s, id) {
+					  var js, fjs = d.getElementsByTagName(s)[0];
+					  if (d.getElementById(id)) return;
+					  js = d.createElement(s); js.id = id;
+					  js.src = "//connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v2.6";
+					  fjs.parentNode.insertBefore(js, fjs);
+					}(document, 'script', 'facebook-jssdk'));
+					</script>
+					<div class="fb-share-button" data-href="https://<?php echo $context->getInstance()->fqdn ?><?php echo $this->url('public/displayPage', array('directory' => $directory, 'name' => $name)) ?>" data-layout="box_count" data-mobile-iframe="true"></div>
+	
+					<script type="text/javascript" src="https://apis.google.com/js/plusone.js">
+					{lang: 'fr'}
+					</script>	
+					<span class="g-plusone" data-size="tall"></span>
+					
+					<script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: fr_FR</script>
+					<script type="IN/Share" data-url="https://<?php echo $context->getInstance()->fqdn ?><?php echo $this->url('public/displayPage', array('directory' => $directory, 'name' => $name)) ?>" data-counter="top"></script>
+	
+					<a class="twitter-share-button" href="https://twitter.com/share" data-via="ppitfr">Tweet</a><script>// <![CDATA[
+					!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+					// ]]></script>
+				</div>	
+             </div>
+        </div>
+	</div>
+</div>
+
+<script>
+function location_href(target) { document.location.href=target; }
+function location_hash(target) { document.location.hash=target; }
+</script>

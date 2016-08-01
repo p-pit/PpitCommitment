@@ -1,10 +1,13 @@
 <?php
 namespace PpitCommitment\Model;
 
+use PpitCommitment\Model\Subscription;
 use PpitContact\Model\Community;
 use PpitContact\Model\Vcard;
 use PpitContact\Model\ContactMessage;
 use PpitCore\Model\Context;
+use PpitCore\Model\Credit;
+use PpitCore\Model\Instance;
 use PpitDocument\Model\Document;
 use PpitEquipment\Model\Area;
 use PpitMasterData\Model\Place;
@@ -14,12 +17,16 @@ use Zend\InputFilter\InputFilter;
 use Zend\InputFilter\InputFilterAwareInterface;
 use Zend\InputFilter\InputFilterInterface;
 use Zend\db\sql\Where;
+use Zend\Log\Logger;
+use Zend\Log\Writer;
 
 class Commitment implements InputFilterAwareInterface
 {
     public $id;
-	public $type;
-	public $project_id;
+    public $instance_id;
+    public $last_credit_consumption_date;
+    public $type;
+	public $subscription_id;
 	public $account_id;
 	public $status;
 	public $caption;
@@ -79,11 +86,13 @@ class Commitment implements InputFilterAwareInterface
 
 	// Additional field from joined tables
 	public $customer_name;
+	public $product_identifier;
 	public $properties;
-    
+	
 	// Transient properties
 //	public $properties;
-	public $projects;
+	public $subscriptions;
+	public $subscription;
 	public $breadcrumb;
     public $vat_rate;
     public $files;
@@ -96,16 +105,10 @@ class Commitment implements InputFilterAwareInterface
     // Static fields
     private static $table;
 
-    public static function getProjects()
-    {
-    	$context = Context::getCurrent();
-    	return $context->getInstance()->specifications['ppitCommitment']['projects'];
-    }
-
     public static function getProperties()
     {
     	// Retrieve the properties
-    	return $context->getInstance()->specifications['ppitCommitment']['properties'];
+    	return $context->getConfig('commitment')['properties'];
     }
     
     public function getArrayCopy()
@@ -116,9 +119,11 @@ class Commitment implements InputFilterAwareInterface
     public function exchangeArray($data)
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
+        $this->instance_id = (isset($data['instance_id'])) ? $data['instance_id'] : null;
+        $this->last_credit_consumption_date = (isset($data['last_credit_consumption_date'])) ? $data['last_credit_consumption_date'] : null;
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->account_id = (isset($data['account_id'])) ? $data['account_id'] : null;
-        $this->project_id = (isset($data['project_id'])) ? $data['project_id'] : null;
+        $this->subscription_id = (isset($data['subscription_id'])) ? $data['subscription_id'] : null;
         $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->description = (isset($data['description'])) ? $data['description'] : null;
@@ -177,6 +182,7 @@ class Commitment implements InputFilterAwareInterface
 
         // Additional properties from joined tables
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
 
         // Denormalized properties
         $this->site_id = (isset($data['site_id'])) ? $data['site_id'] : null;
@@ -188,9 +194,10 @@ class Commitment implements InputFilterAwareInterface
     public function toArray() {
     	$data = array();
     	$data['id'] = (int) $this->id;
+    	$data['last_credit_consumption_date'] = ($this->last_credit_consumption_date) ? $this->last_credit_consumption_date : null;
     	$data['type'] = $this->type;
     	$data['account_id'] = $this->account_id;
-    	$data['project_id'] = $this->project_id;
+    	$data['subscription_id'] = $this->subscription_id;
     	$data['status'] = $this->status;
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
@@ -254,7 +261,8 @@ class Commitment implements InputFilterAwareInterface
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
     		->join('commitment_account', 'commitment.account_id = commitment_account.id', array(), 'left')
-    		->join('contact_community', 'commitment_account.customer_community_id = contact_community.id', array('customer_name' => 'name'), 'left');
+    		->join('contact_community', 'commitment_account.customer_community_id = contact_community.id', array('customer_name' => 'name'), 'left')
+    		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
     	
     	$where = new Where();
 
@@ -264,7 +272,7 @@ class Commitment implements InputFilterAwareInterface
 		// Todo list vs search modes
 		if ($mode == 'todo') {
 
-			$todo = $context->getInstance()->specifications['ppitCommitment']['todo'][$type];
+			$todo = $context->getConfig('commitment')['todo'][$type];
 			foreach($todo as $role => $properties) {
 				if ($context->hasRole($role)) {
 					foreach($properties as $property => $predicate) {
@@ -279,7 +287,7 @@ class Commitment implements InputFilterAwareInterface
 			
 			// Set the filters
 			if (isset($params['account_id'])) $where->equalTo('account_id', $params['account_id']);
-			if (isset($params['project_id'])) $where->equalTo('project_id', $params['project_id']);
+			if (isset($params['subscription_id'])) $where->equalTo('subscription_id', $params['subscription_id']);
 			if (isset($params['status'])) $where->like('status', '%'.$params['status'].'%');
 			if (isset($params['min_amount'])) $where->greaterThanOrEqualTo('amount', $params['min_amount']);
 			if (isset($params['max_amount'])) $where->lessThanOrEqualTo('amount', $params['max_amount']);
@@ -337,8 +345,10 @@ class Commitment implements InputFilterAwareInterface
     {
     	$commitment = Commitment::getTable()->get($id, $column);
     	if (!$commitment) return null;
+    	$subscription = Subscription::get($commitment->subscription_id);
+    	$commitment->product_identifier = $subscription->product_identifier;
     	$commitment->properties = $commitment->toArray();
-    	$commitment->projects = Commitment::getProjects();
+    	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 
 		return $commitment;
     }
@@ -346,7 +356,7 @@ class Commitment implements InputFilterAwareInterface
     public function computeDeadlines()
     {
     	$context = Context::getCurrent();
-		foreach ($context->getInstance()->specifications['ppitCommitment']['deadlines'][$this->type] as $step => $deadline) {
+		foreach ($context->getConfig('commitment')['deadlines'][$this->type] as $step => $deadline) {
 			if ($this->status == $deadline['status']) {
 				
 				// Retrieve the start date
@@ -369,13 +379,17 @@ class Commitment implements InputFilterAwareInterface
 		}
     }
 
-    public static function instanciate($type)
+    public static function instanciate($type, $subscription = null)
     {
     	$commitment = new Commitment;
     	$commitment->type = $type;
+    	if ($subscription) {
+    		$commitment->subscription_id = $subscription->id;
+    		$commitment->subscription = $subscription;
+    	}
     	$commitment->status = 'new';
     	$commitment->properties = $commitment->toArray();
-    	$commitment->projects = Commitment::getProjects();
+    	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
     	return $commitment;
     }
     
@@ -423,7 +437,7 @@ class Commitment implements InputFilterAwareInterface
 
 		if (array_key_exists('account_id', $data)) $this->account_id = (int) $data['account_id'];
 
-		if (array_key_exists('project_id', $data)) $this->project_id = (int) $data['project_id'];
+		if (array_key_exists('subscription_id', $data)) $this->subscription_id = (int) $data['subscription_id'];
 	    
 		if (array_key_exists('caption', $data)) {
 		    $this->caption = trim(strip_tags($data['caption']));
@@ -643,14 +657,14 @@ class Commitment implements InputFilterAwareInterface
     public function loadDataFromRequest($request, $action) {
 
     	$context = Context::getCurrent();
-    	$updatableProperties = $context->getInstance()->specifications['ppitCommitment']['actions'][$action]['properties'];
+    	$updatableProperties = $context->getConfig('commitment')['actions'][$action]['properties'];
 
     	// Retrieve the data from the request
     	$data = array();
 
     	// Specify the area only in creation
     	if (array_key_exists('account_id', $updatableProperties)) $data['account_id'] = $request->getPost('account_id');
-    	if (array_key_exists('project_id', $updatableProperties)) $data['project_id'] = $request->getPost('project_id');
+    	if (array_key_exists('subscription_id', $updatableProperties)) $data['subscription_id'] = $request->getPost('subscription_id');
     	if (array_key_exists('caption', $updatableProperties)) $data['caption'] = $request->getPost('caption');
     	if (array_key_exists('description', $updatableProperties)) $data['description'] = $request->getPost('description');
     	if (array_key_exists('amount', $updatableProperties)) $data['amount'] = $request->getPost('amount');
@@ -672,15 +686,15 @@ class Commitment implements InputFilterAwareInterface
     	if (array_key_exists('settlement_date', $updatableProperties)) $data['settlement_date'] = $request->getPost('settlement_date');
     	if (array_key_exists('comment', $updatableProperties)) $data['comment'] = $request->getPost('comment');
 
-    	foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) {
+    	foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) {
     		if ($property['type'] != 'file') $data[$propertyId] = $request->getPost($propertyId);
     	}
 
     	$data['update_time'] = $request->getPost('update_time');
     	 
     	// Change the status
-    	if ($action && array_key_exists($action, $context->getInstance()->specifications['ppitCommitment']['actions'])) {
-	    	$actionRules = $context->getInstance()->specifications['ppitCommitment']['actions'][$action];
+    	if ($action && array_key_exists($action, $context->getConfig('commitment')['actions'])) {
+	    	$actionRules = $context->getConfig('commitment')['actions'][$action];
 	    	if (array_key_exists('targetStatus', $actionRules)) $this->status = $actionRules['targetStatus'];
     	}
 
@@ -763,7 +777,7 @@ class Commitment implements InputFilterAwareInterface
     	$config = $context->getConfig();
     
     	// Submit the response message
-    	$credentials = $context->getInstance()->specifications['ppitCommitment']['invoiceMessage'];
+    	$credentials = $context->getConfig('commitment')['invoiceMessage'];
     
     	$client = new Client(
     			$credentials['url'],
@@ -852,7 +866,7 @@ class Commitment implements InputFilterAwareInterface
 		$rejectedCommitments = array();
 		$registeredCommitments = array();
 		
-		foreach ($context->getInstance()->getSpecs['ppitCommitment']['types'] as $type => $properties) {
+		foreach ($context->getConfig('commitment')['types'] as $type => $properties) {
 			$newCommitments[$type] = array();
 			$confirmedCommitments[$type] = array();
 			$rejectedCommitments[$type] = array();
@@ -867,7 +881,7 @@ class Commitment implements InputFilterAwareInterface
 			Commitment::getTable()->save($commitment);
 		}
 		
-		foreach ($context->getInstance()->getSpecs['ppitCommitment']['types'] as $type => $properties) {
+		foreach ($context->getConfig('commitment')['types'] as $type => $properties) {
 			if (count($newCommitments[$type]) > 0) {
 	    		$select = Vcard::getTable()->getSelect();
 	    		$where = new Where;
@@ -875,8 +889,8 @@ class Commitment implements InputFilterAwareInterface
 	    		$select->where($where);
 	    		$cursor = Vcard::getTable()->selectWith($select);
 	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['addTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['addText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $newCommitments[$type]));
+	    		$title = sprintf($context->getConfig('commitment')['messages']['addTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
+	    		$text = sprintf($context->getConfig('commitment')['messages']['addText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $newCommitments[$type]));
 	    		foreach ($cursor as $contact) {
 	    			ContactMessage::sendMail($contact->email, $text, $title, null);
 	    		}
@@ -889,8 +903,8 @@ class Commitment implements InputFilterAwareInterface
 	    		$select->where($where);
 	    		$cursor = Vcard::getTable()->selectWith($select);
 	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['confirmTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['confirmText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $confirmedCommitments[$type]));
+	    		$title = sprintf($context->getConfig('commitment')['messages']['confirmTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
+	    		$text = sprintf($context->getConfig('commitment')['messages']['confirmText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $confirmedCommitments[$type]));
 	    		foreach ($cursor as $contact) {
 	    			ContactMessage::sendMail($contact->email, $text, $title, null);
 	    		}
@@ -903,8 +917,8 @@ class Commitment implements InputFilterAwareInterface
 	    		$select->where($where);
 	    		$cursor = Vcard::getTable()->selectWith($select);
 	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['rejectTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['rejectText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $rejectedCommitments[$type]));
+	    		$title = sprintf($context->getConfig('commitment')['messages']['rejectTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
+	    		$text = sprintf($context->getConfig('commitment')['messages']['rejectText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $rejectedCommitments[$type]));
 	    		foreach ($cursor as $contact) {
 	    			ContactMessage::sendMail($contact->email, $text, $title, null);
 	    		}
@@ -917,8 +931,8 @@ class Commitment implements InputFilterAwareInterface
 	    		$select->where($where);
 	    		$cursor = Vcard::getTable()->selectWith($select);
 	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['registerTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getInstance()->specifications['ppitCommitment']['messages']['registerText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $registeredCommitments[$type]));
+	    		$title = sprintf($context->getConfig('commitment')['messages']['registerTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
+	    		$text = sprintf($context->getConfig('commitment')['messages']['registerText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $registeredCommitments[$type]));
 	    		foreach ($cursor as $contact) {
 	    			ContactMessage::sendMail($contact->email, $text, $title, null);
 	    		}
@@ -926,6 +940,147 @@ class Commitment implements InputFilterAwareInterface
 		}
     }
 
+    public static function consumeCredits()
+    {
+    	$context = Context::getCurrent();
+    	$config = $context->getConfig();
+    	$writer = new Writer\Stream('data/log/console.txt');
+    	$logger = new Logger();
+    	$logger->addWriter($writer);
+ 
+    	// Retrieve instances
+    	$select = Instance::getTable()->getSelect();
+    	$cursor = Instance::getTable()->selectWith($select);
+    	$instances = array();
+    	$instanceIds = array();
+    	foreach ($cursor as $instance) {
+    		$unlimitedCredits = (array_key_exists('unlimitedCredits', $instance->specifications)) ? $instance->specifications['unlimitedCredits'] : false;
+    		$logger->info('Instance : id='.$instance->id.', caption='.$instance->caption.', unlimitedCredits='.(($unlimitedCredits) ? 'true' : 'false'));
+    		if (!$unlimitedCredits) {
+    			$instance->administrators = array();
+    			$instances[$instance->id] = $instance;
+    			$instanceIds[] = $instance->id;
+    		}
+    	}
+
+    	// Retrieve credits
+    	$select = Credit::getTable()->getSelect();
+    	$where = new Where();
+    	$where->in('instance_id', $instanceIds);
+    	$where->equalTo('type', 'p-pit-engagements');
+    	$select->where($where);
+    	$cursor = Credit::getTable()->transSelectWith($select);
+    	$credits = array();
+    	foreach ($cursor as $credit) {
+    		$credit->consumers = array();
+    		$credits[$credit->instance_id] = $credit;
+    	}
+    	 
+    	// Retrieve commitments and count
+    	$select = Commitment::getTable()->getSelect()
+    		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left');
+    	$where = new Where();
+    	$where->in('instance_id', $instanceIds);
+		$where->notEqualTo('status', 'closed');
+		$where->notEqualTo('status', 'suspended');
+		$select->where($where);
+		$cursor = Commitment::getTable()->transSelectWith($select);
+		foreach ($cursor as $commitment) {
+			$credits[$commitment->instance_id]->consumers[] = $commitment;
+			$logger->info('Commitment : instance_id='.$commitment->instance_id.', id='.$commitment->id.', caption='.$commitment->caption.', status='.$commitment->status);
+		}
+		
+		// Retrieve administrators to be notified
+		$select = Vcard::getTable()->getSelect();
+		$where = new Where;
+		$where->like('roles', '%admin%');
+		$select->where($where);
+		$cursor = Vcard::getTable()->transSelectWith($select);
+		foreach ($cursor as $contact) {
+			if ($contact->is_notified) $instances[$contact->instance_id]->administrators[] = $contact;
+		}
+
+		// Check enough credits are available
+		foreach ($credits as $credit) {
+			$counter = count($credit->consumers);
+			if ($credit->quantity < $counter) {
+				$logger->info('ALERT : Not enough credits for P-PIT Engagements available on instance '.$credit->instance_id.'. Available='.$credit->quantity.', required='.$counter);
+			
+				// Notify
+	    		$url = $config['ppitCoreSettings']['domainName'];
+	    		$instance = $instances[$credit->instance_id];
+	    		foreach ($instance->administrators as $contact) {
+		    		$title = sprintf($config['commitment/consumeCredit']['messages']['availabilityAlertTitle'][$contact->locale], 'P-PIT Engagements');
+		    		$text = sprintf(
+    						$config['commitment/consumeCredit']['messages']['availabilityAlertText'][$contact->locale],
+    						$contact->n_first,
+    						'P-PIT Engagements',
+    						$instance->caption,
+    						'p-pit-engagements',
+    						'P-PIT Engagements',
+    						$credit->quantity,
+    						count($credit->consumers)
+		    		);
+	    			ContactMessage::sendMail($contact->email, $text, $title);
+	    		}
+			}
+			if (	date('m') != substr($credit->activation_date, 5, 2) // The first month is free
+				&&	!array_key_exists(date('Y-m'), $credit->audit) // The current month has not already been consumed
+				&&	date('Y-m-d') >= date('Y-m-').substr($credit->activation_date, 8, 2) // The monthly date is reached
+			)
+			{
+    			$connection = Credit::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+					$logger->info('Consuming '.$counter.' credits for instance: '.$credit->instance_id);
+					$credit->quantity -= $counter;
+					$credit->audit[date('Y-m')] = array(
+							'status' => 'used',
+							'quantity' => $counter,
+							'time' => Date('Y-m-d G:i:s'),
+			    			'n_fn' => 'P-PIT',
+			    			'comment' => 'Monthly consuming',
+					);
+					Credit::getTable()->transSave($credit);
+	
+					// Audit the credit consumption in the commitment records
+					foreach ($credit->consumers as $commitment) {
+						$commitment->last_credit_consumption_date = date('Y-m-d');
+						$commitment->audit[] = array(
+							'time' => Date('Y-m-d G:i:s'),
+			    			'n_fn' => 'P-PIT',
+			    			'comment' => 'Monthly consuming',
+						);
+						Commitment::getTable()->transSave($commitment);
+					}
+	
+					// Notify
+		    		$url = $config['ppitCoreSettings']['domainName'];
+		    		$instance = $instances[$credit->instance_id];
+		    		foreach ($instance->administrators as $contact) {
+			    		$title = sprintf($config['commitment/consumeCredit']['messages']['consumeCreditTitle'][$contact->locale], 'P-PIT Engagements');
+			    		$text = sprintf(
+	    						$config['commitment/consumeCredit']['messages']['consumeCreditText'][$contact->locale],
+	    						$contact->n_first,
+	    						'P-PIT Engagements',
+			    				Context::sDecodeDate(date('Y-m-d'), $contact->locale),
+	    						$instance->caption,
+	    						count($credit->consumers),
+	    						'P-PIT Engagements',
+	    						$credit->quantity
+	    				);
+		    			ContactMessage::sendMail($contact->email, $text, $title);
+		    		}
+    				$connection->commit();
+    			}
+           	    catch (\Exception $e) {
+	    			$connection->rollback();
+	    			throw $e;
+	    		}
+    		}
+		}
+    }
+    
     public function isUsed($object)
     {
     	return false;

@@ -31,14 +31,14 @@
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn <?php echo ($action == 'delete') ? 'btn-danger' : 'btn-warning' ?>" value="<?php echo $context->getInstance()->specifications['ppitCommitment']['actions'][$action]['label'][$context->getLocale()] ?>">
+					<input name="submit" type="submit" id="submit-button" class="btn <?php echo ($action == 'delete') ? 'btn-danger' : 'btn-warning' ?>" value="<?php echo $context->getConfig('commitment')['actions'][$action]['label'][$context->getLocale()] ?>">
 				</div>
 			</div>
 <?php endif;?>
 
 <?php 
 if (!$action && $commitment->id || $message == 'OK') $isDisabled = true; else $isDisabled = false;
-$updatableProperties = $context->getInstance()->specifications['ppitCommitment']['actions'][$action]['properties'];
+$updatableProperties = $context->getConfig('commitment')['actions'][$action]['properties'];
 ?>
 
 <?php if (array_key_exists('account_id', $updatableProperties)) : ?>
@@ -58,28 +58,28 @@ $updatableProperties = $context->getInstance()->specifications['ppitCommitment']
 		<input type="hidden" id="account_id" name="account_id" />
 <?php endif;?>
 
-<?php if (array_key_exists('project_id', $updatableProperties)) : ?>
-		<div class="form-group" id="project_id_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Project', 'ppit-commitment', $context->getLocale()) ?></label>
+<?php if (array_key_exists('subscription_id', $updatableProperties)) : ?>
+		<div class="form-group" id="subscription_id_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Subscription', 'ppit-commitment', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-	    		<select class="form-control" id="project_id"  <?php if ($updatableProperties['project_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
+	    		<select class="form-control" id="subscription_id"  <?php if ($updatableProperties['subscription_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
 	    			<option value=""></option>
-<?php foreach ($commitment->projects as $projectId => $project) : ?>	
-	    			<option value="<?php echo $projectId ?>" <?php if ($commitment->project_id == $projectId) echo 'selected="selected"' ?>><?php echo $project['domain'].' - '.$project['caption'] ?></option>
+<?php foreach ($commitment->subscriptions as $projectId => $project) : ?>	
+	    			<option value="<?php echo $projectId ?>" <?php if ($commitment->subscription_id == $projectId) echo 'selected="selected"' ?>><?php echo $project['domain'].' - '.$project['caption'] ?></option>
 <?php endforeach;?>
 	    		</select>
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="project_id_error"></p></div>
+			<div class="col-sm-12"><p class="help-block" id="subscription_id_error"></p></div>
 		</div>
 <?php else : ?>
-		<input type="hidden" id="project_id" name="project_id" />
+		<input type="hidden" id="subscription_id" name="subscription_id" />
 <?php endif;?>
 		
 <?php if (array_key_exists('status', $updatableProperties)) : ?>
 		<div class="form-group" id="status_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-	    		<input class="form-control" id="status" name="status" disabled="disabled" value="<?php echo $context->getInstance()->specifications['ppitCommitment']['statuses'][$commitment->status]['labels'][$context->getLocale()] ?>" />
+	    		<input class="form-control" id="status" name="status" disabled="disabled" value="<?php echo $context->getConfig('commitment')['statuses'][$commitment->status]['labels'][$context->getLocale()] ?>" />
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="area_id_error"></p></div>
 		</div>
@@ -362,7 +362,7 @@ $updatableProperties = $context->getInstance()->specifications['ppitCommitment']
 			</div>
 		</div>
 		
-<?php foreach ($context->getInstance()->specifications['ppitCommitment']['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
 
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php echo $property['labels'][$context->getLocale()] ?></label>

@@ -14,6 +14,22 @@ class CommitmentMessageController extends AbstractActionController
 {
 	public function indexAction()
     {
+    	$context = Context::getCurrent();
+//		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+
+		$type = $this->params()->fromRoute('type', null);
+		$menu = $context->getConfig('menu');
+
+    	return new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getConfig(),
+    			'menu' => $menu,
+    			'type' => $type,
+    	));
+    }
+	
+	public function searchAction()
+    {
     	// Retrieve the context
     	$context = Context::getCurrent();
     	 
@@ -132,7 +148,7 @@ class CommitmentMessageController extends AbstractActionController
     
     		if ($csrfForm->isValid()) { // CSRF check
     
-    			if ($context->getInstance()->specifications['ppitCommitment']['importTypes'][$xmlMessage->type] == 'invoice') {
+    			if ($context->getConfig('commitment')['importTypes'][$xmlMessage->type] == 'invoice') {
     				$rc = $xmlMessage->processInvoice($request);
     				if ($rc != 'OK') $error = $rc;
     			}

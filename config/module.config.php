@@ -26,8 +26,7 @@ return array(
 			)
 		)
 	),
-		
-				
+
     'router' => array(
         'routes' => array(
             'index' => array(
@@ -107,19 +106,31 @@ return array(
         										),
         								),
         						),
-        				'update' => array(
-        						'type' => 'segment',
-        						'options' => array(
-        								'route' => '/update[/:id][/:act]',
-        								'constraints' => array(
-        										'id'     => '[0-9]*',
-        								),
-        								'defaults' => array(
-        										'action' => 'update',
-        								),
-        						),
-        				),
-	                ),
+		        				'update' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/update[/:id][/:act]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'update',
+		        								),
+		        						),
+		        				),
+		        				'register' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/register',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'register',
+		        								),
+		        						),
+		        				),
+	       		),
 	       			'dataList' => array(
 	                    'type' => 'segment',
 	                    'options' => array(
@@ -246,6 +257,15 @@ return array(
         								),
         						),
         				),
+        				'subscribe' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/subscribe[/:product]',
+        								'defaults' => array(
+        										'action' => 'subscribe',
+        								),
+        						),
+        				),
         				'delete' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -286,6 +306,15 @@ return array(
             								'route' => '/index',
             								'defaults' => array(
             										'action' => 'index',
+            								),
+            						),
+            				),
+            				'search' => array(
+            						'type' => 'segment',
+            						'options' => array(
+            								'route' => '/search',
+            								'defaults' => array(
+            										'action' => 'search',
             								),
             						),
             				),
@@ -381,20 +410,24 @@ return array(
 				array('route' => 'commitmentAccount/export', 'roles' => array('user')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('user')),
 				array('route' => 'commitmentAccount/update', 'roles' => array('admin')),
+				array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
             	array('route' => 'commitment', 'roles' => array('admin')),
             	array('route' => 'commitment/accountlist', 'roles' => array('user')),
             	array('route' => 'commitment/index', 'roles' => array('user')),
             	array('route' => 'commitment/search', 'roles' => array('user')),
             	array('route' => 'commitment/list', 'roles' => array('user')),
+            	array('route' => 'commitment/accountList', 'roles' => array('user')),
             	array('route' => 'commitment/export', 'roles' => array('user')),
             	array('route' => 'commitment/detail', 'roles' => array('user')),
             	array('route' => 'commitment/message', 'roles' => array('guest')),
             	array('route' => 'commitment/post', 'roles' => array('admin')),
+            	array('route' => 'commitment/subscribe', 'roles' => array('guest')),
             	array('route' => 'commitment/update', 'roles' => array('user')),
             	array('route' => 'commitment/delete', 'roles' => array(/*'admin'*/)),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/download', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/index', 'roles' => array('admin')),
+            	array('route' => 'commitmentMessage/search', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
@@ -465,5 +498,431 @@ return array(
 			),
 	),
 	'ppitCommitmentDependencies' => array(
+	),
+	'commitmentAccount' => array(
+			'statuses' => array(),
+			'properties' => array(
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Company',
+									'fr_FR' => 'Entreprise',
+							),
+					),
+					'n_first' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - First name',
+									'fr_FR' => 'Contact - Prénom',
+							),
+					),
+					'n_last' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Last name',
+									'fr_FR' => 'Contact - Nom',
+							),
+					),
+					'email' => array(
+							'type' => 'email',
+							'labels' => array(
+									'en_US' => 'Contact - Email',
+									'fr_FR' => 'Contact - Email',
+							),
+					),
+					'tel_work' => array(
+							'type' => 'phone',
+							'labels' => array(
+									'en_US' => 'Contact - Phone',
+									'fr_FR' => 'Contact - Téléphone',
+							),
+					),
+					'tel_cell' => array(
+							'type' => 'phone',
+							'labels' => array(
+									'en_US' => 'Contact - Cellular',
+									'fr_FR' => 'Contact - Mobile',
+							),
+					),
+					'place_id' => array(
+							'type' => 'select',
+							'labels' => array(
+									'en_US' => 'Center',
+									'fr_FR' => 'Centre',
+							),
+					),
+					'opening_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Opening date',
+									'fr_FR' => 'Date d\'ouverture',
+							),
+					),
+					'closing_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Closing date',
+									'fr_FR' => 'Date de fermeture',
+							),
+					),
+			),
+	),
+	'commitmentAccount/index' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	'commitmentAccount/search' => array(
+			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+				'customer_name' => 'contains',
+			),
+			'more' => array(
+			),
+	),
+	'commitmentAccount/list' => array(
+			'customer_name' => 'text',
+	),
+	'commitmentAccount/detail' => array(
+			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
+			'displayAudit' => true,
+	),
+	'commitmentAccount/update' => array(
+			'n_first' => array('mandatory' => true),
+			'n_last' => array('mandatory' => true),
+			'email' => array('mandatory' => true),
+			'place_id' => array('mandatory' => true),
+			'opening_date' => array('mandatory' => true),
+			'closing_date' => array('mandatory' => false),
+	),
+	'commitmentAccount/register' => array(
+			'customer_name' => array('mandatory' => true),
+			'n_first' => array('mandatory' => true),
+			'n_last' => array('mandatory' => true),
+			'email' => array('mandatory' => true),
+			'tel_work' => array('mandatory' => false),
+			'tel_cell' => array('mandatory' => false),
+	),
+	'commitment' => array(
+			'types' => array(
+					'rental' => array(
+							'labels' => array(
+									'en_US' => 'Rental',
+									'fr_FR' => 'Location',
+							)
+					),
+					'service' => array(
+							'labels' => array(
+									'en_US' => 'Service offer',
+									'fr_FR' => 'Prestation de service',
+							)
+					),
+			),
+			'properties' => array(
+					'type' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Product',
+									'fr_FR' => 'Produit',
+							),
+					),
+					'due_date' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Due date',
+									'fr_FR' => 'Echéance',
+							),
+					),
+			),
+			'statuses' => array(
+					'new' => array(
+							'labels' => array(
+									'en_US' => 'To be confirmed',
+									'fr_FR' => 'A confirmer',
+							)
+					),
+					'confirmed' => array(
+							'labels' => array(
+									'en_US' => 'Confirmed',
+									'fr_FR' => 'Confirmé',
+							)
+					),
+					'rejected' => array(
+							'labels' => array(
+									'en_US' => 'Rejected',
+									'fr_FR' => 'Rejeté',
+							)
+					),
+					'delivered' => array(
+							'labels' => array(
+									'en_US' => 'Delivered',
+									'fr_FR' => 'Livré',
+							)
+					),
+					'commissioned' => array(
+							'labels' => array(
+									'en_US' => 'To invoice',
+									'fr_FR' => 'A facturer',
+							)
+					),
+					'invoiced' => array(
+							'labels' => array(
+									'en_US' => 'Invoiced',
+									'fr_FR' => 'Facturé',
+							)
+					),
+					'settled' => array(
+							'labels' => array(
+									'en_US' => 'Settled',
+									'fr_FR' => 'Réglé',
+							)
+					),
+			),
+			'deadlines' => array(
+					'rental' => array(
+						'invoice' => array('status' => 'new', 'period' => 0),
+						'settlement' => array('status' => 'new', 'period' => 0),
+						'renewal' => array('status' => 'new', 'period' => 1, 'unit' => 'month'),
+					),
+					'service' => array(
+						'retraction' => array('status' => 'new', 'period' => 5, 'unit' => 'day'),
+						'shipment' => array('status' => 'new', 'period' => 10, 'unit' => 'day'),
+						'delivery' => array('status' => 'new', 'period' => 13, 'unit' => 'day'),
+						'commissioning' => array('status' => 'new', 'period' => 15, 'unit' => 'day'),
+						'invoice' => array('status' => 'commissioned', 'period' => 0),
+						'settlement' => array('status' => 'commissioned', 'period' => 0),
+					),
+			),
+			'todo' => array(
+					'rental' => array(
+							'sales_manager' => array(
+									'status' => array('selector' => 'equalTo', 'value' => 'new'),
+							),
+							'business_owner' => array(
+									'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
+							),
+					),
+					'service' => array(
+							'sales_manager' => array(
+									'status' => array('selector' => 'equalTo', 'value' => 'new'),
+							),
+							'business_owner' => array(
+									'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
+							),
+					),
+			),
+			'actions' => array(
+					'' => array(
+						'currentStatuses' => array(),
+						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
+						'properties' => array(
+								'status' => 'display',
+								'account_id' => 'update',
+								'subscription_id' => 'update',
+								'caption' => 'update',
+								'description' => 'update',
+								'amount' => 'update',
+								'identifier' => 'update',
+								'quotation_identifier' => 'update',
+								'commitment_date' => 'update',
+								'expected_delivery_date' => 'update',
+								'due_date' => 'update',
+								'expected_settlement_date' => 'update',
+								'comment' => 'update',
+						),
+					),
+					'update' => array(
+						'currentStatuses' => array('new' => null),
+						'glyphicon' => 'glyphicon-edit',
+						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
+						'properties' => array(
+								'status' => 'display',
+								'account_id' => 'update',
+								'subscription_id' => 'update',
+								'caption' => 'update',
+								'description' => 'update',
+								'amount' => 'update',
+								'identifier' => 'update',
+								'quotation_identifier' => 'update',
+								'commitment_date' => 'update',
+								'requested_delivery_date' => 'update',
+								'comment' => 'update',
+						),
+					),
+					'delete' => array(
+						'currentStatuses' => array('new' => null),
+						'glyphicon' => 'glyphicon-trash',
+						'label' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
+						'properties' => array(
+						),
+					),
+					'confirm' => array(
+						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'confirmed',
+						'label' => array('en_US' => 'Confirm', 'fr_FR' => 'Confirmer'),
+						'properties' => array(
+						),
+					),
+					'reject' => array(
+						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'rejected',
+						'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
+						'properties' => array(
+						),
+					),
+					'deliver' => array(
+						'currentStatuses' => array('confirmed' => null),
+						'targetStatus' => 'delivered',
+						'label' => array('en_US' => 'Deliver', 'fr_FR' => 'Livrer'),
+						'properties' => array(
+						),
+					),
+					'settle' => array(
+						'currentStatuses' => array('delivered' => null),
+						'targetStatus' => 'settled',
+						'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
+						'properties' => array(
+						),
+					),
+					'invoice' => array(
+						'currentStatuses' => array('settled' => null),
+						'targetStatus' => 'invoiced',
+						'label' => array('en_US' => 'Invoice', 'fr_FR' => 'Facturer'),
+						'properties' => array(
+						),
+					),
+					'renew' => array(
+						'currentStatuses' => array('invoiced' => null),
+						'targetStatus' => 'renewed',
+						'label' => array('en_US' => 'Renew', 'fr_FR' => 'Renouveller'),
+						'properties' => array(
+						),
+					),
+			),
+			'inputMessages' => array(
+					'order' => array(
+							'action' => '',
+							'format' => 'Web-service - json',
+							'description' => array(
+									
+									// Generic
+									'message_identifier',
+									'issue_date',
+									
+									// Specific
+									'order_number',
+									'buyer_party',
+									'seller_party',
+									'product_identifier',
+									'quantity',
+							)
+					),
+			),
+			'outputMessages' => array(),
+			'importTypes' => array(),
+			'messageTemplates' => array(),
+	),
+	'commitment/accountList' => array(
+			'title' => array('en_US' => 'Subscriptions', 'fr_FR' => 'Souscriptions'),
+			'addRoute' => 'commitment/update',
+			'glyphicons' => array(
+				'commitment/update' => array(
+						'labels' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
+						'glyphicon' => 'glyphicon-edit',
+				),
+				'commitment/delete' => array(
+						'labels' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
+						'glyphicon' => 'glyphicon-trash',
+				),
+			),
+			'properties' => array(
+				'caption' => 'text',
+				'property_1' => 'text',
+			),
+			'anchors' => array(
+				'document' => array(
+						'type' => 'nav',
+						'labels' => array('en_US' => 'Documents', 'fr_FR' => 'Documents'),
+						'entries' => array(
+						),
+				),
+				'bill' => array(
+						'type' => 'btn',
+						'labels' => array('en_US' => 'Bill', 'fr_FR' => 'Facture'),
+				),
+			),
+	),
+	'commitment/consumeCredit' => array(
+			'messages' => array(
+					'availabilityAlertTitle' => array(
+							'en_US' => '%s credits available',
+							'fr_FR' => 'Crédits %s disponibles',
+					),
+					'availabilityAlertText' => array(
+							'en_US' => 'Hello %s,
+Your available %s credits reserve for %s is almost out of stock (*). 
+In order to avoid the risk of suffering use restrictions, you can right now renew your subscription, for the desired period of time.
+Our tip : Have peace of mind by renewing for a 1-year period of time.
+							
+Link to P-PIT order site : https://www.p-pit.fr/public/product/%s
+					
+(*) Your current %s reserve rises %s units. Your next monthly consumption is estimated up to now to %s units, estimation based on your current data analysis.
+							
+We hope that our services are giving you full satisfaction. Plesase send your requests or questions to the P-PIT support: support@p-pit.fr or 06 29 87 90 02.
+					
+Best regards,
+
+The P-PIT staff
+',
+							'fr_FR' => 'Bonjour %s,
+Votre réserve de crédits %s disponibles pour %s est bientôt épuisée (*). 
+Pour ne pas risquer de subir des restrictions à l\'utilisation, vous pouvez dès à présent renouveller en ligne votre souscription pour la durée que vous souhaitez.
+Notre conseil : Ayez l\'esprit tranquille en renouvelant pour un an.
+
+Lien vers le site de commande P-PIT : https://www.p-pit.fr/public/product/%s
+					
+(*) Votre réserve actuelle %s est de %s unités. Votre prochain décompte mensuel est estimé à ce jour à %s unités, estimation basée sur l\'analyse de vos données courantes. 
+
+Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
+					
+Bien cordialement,
+
+L\'équipe P-PIT
+',
+					),
+					'consumeCreditTitle' => array(
+							'en_US' => 'Monthly %s credits consumption report',
+							'fr_FR' => 'Rapport mensuel de consommation de crédits %s',
+					),
+					'consumeCreditText' => array(
+							'en_US' => 'Hello %s,
+Please note that the monthly count of %s credits has occurred on %s. Given the current %s event, %s units have been consumed. Your new %s reserve rises %s units.
+							
+We hope that our services are giving you full satisfaction. Plesase send your requests or questions to the P-PIT support: support@p-pit.fr or 06 29 87 90 02.
+					
+Best regards,
+
+The P-PIT staff
+',
+							'fr_FR' => 'Bonjour %s,
+Veuillez noter que le décompte mensuel de crédits %s a été effectué en date du %s. Compte tenu de l\'activité courante %s, %s unités ont été décomptées. Votre nouvelle réserve %s est de %s unités.
+
+Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
+					
+Bien cordialement,
+
+L\'équipe P-PIT
+',
+					),
+			),
+	),
+	'commitment/index' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	'commitment/subscribe' => array(
+			'property_1' => array('mandatory' => true),
+			'due_date' => array('mandatory' => false, 'disabled' => true),
+	),
+	'commitmentMessage/index' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 );

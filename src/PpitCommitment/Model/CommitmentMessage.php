@@ -167,7 +167,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		$context = Context::getCurrent();
 		$config = $context->getConfig();
 		$maxRows = $config['ppitOrderSettings']['orderImportMaxRows'];
-		$properties = $context->getInstance()->specifications['ppitCommitment']['importTypes'][$this->type]['description'];
+		$properties = $context->getConfig('commitment')['importTypes'][$this->type]['description'];
 		$filePath = 'data/documents/'.$document_id;
 	
 		ini_set('auto_detect_line_endings', true);
@@ -343,7 +343,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 			// Retrieve the order
 			$select = Order::getTable()->getSelect();
 			$where = new Where;
-			$importType = $context->getInstance()->specifications['ppitCommitment']['importTypes'][$this->type];
+			$importType = $context->getConfig('commitment')['importTypes'][$this->type];
 			$i = 0;
 			$properties = array();
 			foreach ($importType['description'] as $property) {

@@ -46,6 +46,8 @@ class Account implements InputFilterAwareInterface
     public $n_first;
     public $n_last;
     public $email;
+    public $tel_work;
+    public $tel_cell;
     
     // Transient properties
     public $place;
@@ -170,6 +172,8 @@ class Account implements InputFilterAwareInterface
     	$account->n_first = $account->main_contact->n_first;
     	$account->n_last = $account->main_contact->n_last;
     	$account->email = $account->main_contact->email;
+    	$account->tel_work = $account->main_contact->tel_work;
+    	$account->tel_cell = $account->main_contact->tel_cell;
     	$account->properties = $account->toArray();
 
     	return $account;
@@ -187,81 +191,91 @@ class Account implements InputFilterAwareInterface
     public function loadData($data) {
     
     	$context = Context::getCurrent();
-    	
-		foreach ($context->getInstance()->specifications['ppitCommitment']['account/update'] as $propertyId => $unused) {
-			$property = $context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId];
 
-			if ($propertyId == 'place_id') $this->place_id = (int) $data['place_id'];
-			elseif ($propertyId == 'n_first') {
+			if (array_key_exists('place_id', $data)) $this->place_id = (int) $data['place_id'];
+    		if (array_key_exists('customer_name', $data)) {
+		    	$this->customer_name = trim(strip_tags($data['customer_name']));
+		    	if (!$this->customer_name || strlen($this->customer_name) > 255) return 'Integrity';
+			}
+			if (array_key_exists('n_first', $data)) {
 		    	$this->n_first = trim(strip_tags($data['n_first']));
 		    	if (!$this->n_first || strlen($this->n_first) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'n_last') {
+			if (array_key_exists('n_last', $data)) {
 				$this->n_last = trim(strip_tags($data['n_last']));
 				if (!$this->n_last || strlen($this->n_last) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'email') {
+			if (array_key_exists('email', $data)) {
 				$this->email = trim(strip_tags($data['email']));
 				if (!$this->email || strlen($this->email) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'customer_bill_contact_id') $this->customer_bill_contact_id = (int) $data['customer_bill_contact_id'];
-			elseif ($propertyId == 'opening_date') {
+			if (array_key_exists('tel_work', $data)) {
+		    	$this->tel_work = trim(strip_tags($data['tel_work']));
+		    	if (strlen($this->tel_work) > 255) return 'Integrity';
+			}
+			if (array_key_exists('tel_cell', $data)) {
+		    	$this->tel_cell = trim(strip_tags($data['tel_cell']));
+		    	if (strlen($this->tel_cell) > 255) return 'Integrity';
+			}
+			if (array_key_exists('customer_bill_contact_id', $data)) $this->customer_bill_contact_id = (int) $data['customer_bill_contact_id'];
+			if (array_key_exists('opening_date', $data)) {
 		    	$this->opening_date = trim(strip_tags($data['opening_date']));
 		    	if (!$this->opening_date || !checkdate(substr($this->opening_date, 5, 2), substr($this->opening_date, 8, 2), substr($this->opening_date, 0, 4))) return 'Integrity';
 			}
-			elseif ($propertyId == 'closing_date') {
+			if (array_key_exists('closing_date', $data)) {
 		    	$this->closing_date = trim(strip_tags($data['closing_date']));
 		    	if ($this->closing_date && !checkdate(substr($this->closing_date, 5, 2), substr($this->closing_date, 8, 2), substr($this->closing_date, 0, 4))) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_1') {
+			if (array_key_exists('property_1', $data)) {
 				$this->property_1 = trim(strip_tags($data['property_1']));
 				if (strlen($this->property_1) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_2') {
+			if (array_key_exists('property_2', $data)) {
 				$this->property_2 = trim(strip_tags($data['property_2']));
 				if (strlen($this->property_2) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_3') {
+			if (array_key_exists('property_3', $data)) {
 				$this->property_3 = trim(strip_tags($data['property_3']));
 				if (strlen($this->property_3) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_4') {
+			if (array_key_exists('property_4', $data)) {
 				$this->property_4 = trim(strip_tags($data['property_4']));
 				if (strlen($this->property_4) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_5') {
+			if (array_key_exists('property_5', $data)) {
 				$this->property_5 = trim(strip_tags($data['property_5']));
 				if (strlen($this->property_5) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_6') {
+			if (array_key_exists('property_6', $data)) {
 				$this->property_6 = trim(strip_tags($data['property_6']));
 				if (strlen($this->property_6) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_7') {
+			if (array_key_exists('property_7', $data)) {
 				$this->property_7 = trim(strip_tags($data['property_7']));
 				if (strlen($this->property_7) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_8') {
+			if (array_key_exists('property_8', $data)) {
 				$this->property_8 = trim(strip_tags($data['property_8']));
 				if (strlen($this->property_8) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_9') {
+			if (array_key_exists('property_9', $data)) {
 				$this->property_9 = trim(strip_tags($data['property_9']));
 				if (strlen($this->property_9) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'property_10') {
+			if (array_key_exists('property_10', $data)) {
 				$this->property_10 = trim(strip_tags($data['property_10']));
 				if (strlen($this->property_10) > 255) return 'Integrity';
 			}
-			elseif ($propertyId == 'update_time') $this->update_time = $data['update_time'];
+			if (array_key_exists('update_time', $data)) $this->update_time = $data['update_time'];
 				
-			$this->customer_community->name = $this->n_last.', '.$this->n_first;
+			$this->customer_community->name = ($this->customer_name) ? $this->customer_name : $this->n_last.', '.$this->n_first;
 			$this->main_contact->n_first = $this->n_first;
 			$this->main_contact->n_last = $this->n_last;
 			$this->main_contact->email = $this->email;
+			$this->main_contact->tel_work = $this->tel_work;
+			$this->main_contact->tel_cell = $this->tel_cell;
 			$this->main_contact->n_fn = $this->n_last.', '.$this->n_first;
     		$this->properties = $this->toArray();
-		}
     	
     	// Update the audit
     	$this->audit[] = array(
@@ -278,14 +292,14 @@ class Account implements InputFilterAwareInterface
     	$context = Context::getCurrent();
     	$data = array();
 
-		foreach ($context->getInstance()->specifications['ppitCommitment']['account/update'] as $propertyId => $unused) {
-			$property = $context->getInstance()->specifications['ppitCommitment']['account_properties'][$propertyId];
+		foreach ($context->getConfig('commitmentAccount/update') as $propertyId => $unused) {
+			$property = $context->getConfig('commitmentAccount')['properties'][$propertyId];
 	    	$data[$propertyId] =  $request->getPost($propertyId);
 		}
     	if ($this->loadData($data) != 'OK') throw new \Exception('View error');
     }
 
-    public function add()
+    public function add($createUser = true)
     {
     	$context = Context::getCurrent();
 
@@ -305,12 +319,14 @@ class Account implements InputFilterAwareInterface
     	$this->main_contact->add();
     	$this->customer_community->main_contact_id = $this->main_contact->id;
     	Community::getTable()->save($this->customer_community);
-    	
-    	$user = User::getNew();
-    	$user->username = $this->main_contact->email;
-    	$user->contact_id = $this->main_contact->id;
-    	$rc = $user->add();
-    	if ($rc != 'OK') return $rc;
+
+    	if ($createUser) {
+    		$user = User::getNew();
+    		$user->username = $this->main_contact->email;
+    		$user->contact_id = $this->main_contact->id;
+    		$rc = $user->add();
+    		if ($rc != 'OK') return $rc;
+    	}
 
     	$this->id = null;
     	Account::getTable()->save($this);

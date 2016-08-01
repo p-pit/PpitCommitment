@@ -7,8 +7,10 @@ use Zend\View\Model\ViewModel;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Message;
 use PpitCommitment\Model\Commitment;
+use PpitCommitment\Model\Subscription;
 use PpitContact\Model\Vcard;
 use PpitCore\Form\CsrfForm;
+use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use DOMPDFModule\View\Model\PdfModel;
@@ -25,7 +27,7 @@ class CommitmentController extends AbstractActionController
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$type = $this->params()->fromRoute('type', null);
-		$menu = $context->getInstance()->specifications['menu'];
+		$menu = $context->getConfig('menu');
 
     	return new ViewModel(array(
     			'context' => $context,
@@ -43,8 +45,8 @@ class CommitmentController extends AbstractActionController
 		$account_id = ($params()->fromQuery('account_id', null));
 		if ($account_id) $filters['account_id'] = $account_id;
 		
-		$project_id = ($params()->fromQuery('project_id', null));
-		if ($project_id) $filters['project_id'] = $project_id;
+		$subscription_id = ($params()->fromQuery('subscription_id', null));
+		if ($subscription_id) $filters['subscription_id'] = $subscription_id;
 		
 		$status = ($params()->fromQuery('status', null));
 		if ($status) $filters['status'] = $status;
@@ -140,8 +142,8 @@ class CommitmentController extends AbstractActionController
    				'context' => $context,
 				'config' => $context->getconfig(),
    				'accounts' => Account::getList($params, 'customer_name', 'ASC'),
-   				'projects' => Commitment::getProjects(),
-   				'statuses' => $context->getInstance()->specifications['ppitCommitment']['statuses'],
+   				'subscriptions' => Subscription::getList(array(), 'product_identifier', 'ASC'),
+   				'statuses' => $context->getConfig('commitment')['statuses'],
    				'type' => $type,
    		));
 		$view->setTerminal(true);
@@ -166,19 +168,22 @@ class CommitmentController extends AbstractActionController
 		// Retrieve the list
 		$commitments = Commitment::getList($type, $params, $major, $dir, $mode);
 
+		// Retrieve the credits
+		$credit = Credit::getTable()->get('p-pit-engagements', 'type'); 
+		
    		// Return the link list
    		$view = new ViewModel(array(
    				'context' => $context,
 				'config' => $context->getconfig(),
    				'type' => $type,
-   				'projects' => $context->getInstance()->specifications['ppitCommitment']['projects'],
-   				'properties' => $context->getInstance()->specifications['ppitCommitment']['properties'],
-   				'statuses' => $context->getInstance()->specifications['ppitCommitment']['statuses'],
+   				'properties' => $context->getConfig('commitment')['properties'],
+   				'statuses' => $context->getConfig('commitment')['statuses'],
    				'commitments' => $commitments,
    				'mode' => $mode,
    				'params' => $params,
    				'major' => $major,
    				'dir' => $dir,
+   				'credit' => $credit,
    		));
 		$view->setTerminal(true);
        	return $view;
@@ -214,7 +219,7 @@ class CommitmentController extends AbstractActionController
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
-   			'statuses' => $context->getInstance()->specifications['ppitCommitment']['statuses'],
+   			'statuses' => $context->getConfig('commitment')['statuses'],
     		'id' => $commitment->id,
     		'commitment' => $commitment,
     	));
@@ -222,13 +227,74 @@ class CommitmentController extends AbstractActionController
 		return $view;
     }
 
+    public function subscribeAction()
+    {
+    	$context = Context::getCurrent();
+    	$product = $this->params()->fromRoute('product', null);
+		if (!$context->isAuthenticated()) return $this->redirect()->toRoute('commitmentAccount/register', array('product' => $product));
+
+		$subscription = Subscription::getCurrent($product);
+    	$commitment = Commitment::instanciate($subscription->type, $subscription);
+
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+
+    			// Load the input data
+    			$commitment->loadDataFromRequest($request, $action);
+
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				if (!$commitment->id) $return = $commitment->add();
+    				else $return = $commitment->update($request->getPost('update_time'));
+
+    				if ($return != 'OK') {
+    					$connection->rollback();
+    					$error = $return;
+    				}
+    				else {
+    					$connection->commit();
+	    				$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+	    		$action = null;
+    		}
+    	}
+
+    	$view = new ViewModel(array(
+				'context' => $context,
+				'config' => $context->getconfig(),
+   				'properties' => $context->getConfig('commitment')['properties'],
+    			'commitment' => $commitment,
+    			'csrfForm' => $csrfForm,
+    			'error' => $error,
+    			'message' => $message
+    	));
+		$view->setTerminal(true);
+       	return $view;
+    }
+    
     public function updateAction()
     {
 		// Retrieve the context
 		$context = Context::getCurrent();
 
 		// Retrieve the type
-		$type = $this->params()->fromRoute('type', 0);
+		$type = $this->params()->fromRoute('type', null);
 		
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
@@ -282,8 +348,8 @@ class CommitmentController extends AbstractActionController
 				'config' => $context->getconfig(),
     			'id' => $id,
     			'action' => $action,
-    			'accounts' => Account::getList('customer_name', 'ASC'),
-   				'properties' => $context->getInstance()->specifications['ppitCommitment']['properties'],
+    			'accounts' => Account::getList(array(), 'customer_name', 'ASC'),
+   				'properties' => $context->getConfig('commitment')['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
     			'error' => $error,

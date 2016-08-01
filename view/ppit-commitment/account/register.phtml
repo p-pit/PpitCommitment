@@ -1,4 +1,13 @@
-<h4 style="text-align: center"><strong><?php echo $context->getConfig('commitmentAccount/detail')['title'][$context->getLocale()] ?></strong></h4>
+<div class="panel panel-default">
+	<div class="panel-heading" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+		<strong><?php echo $this->translate('Register', 'ppit-commitment', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
 
 <!-- Form header -->
 <?php echo $this->partial('/partials/form-header', array(
@@ -9,54 +18,27 @@
 		'context' => $context,
 ));
 ?>
-			
-<!-- Global message -->
-<?php if ($message == 'confirm-update') : ?>
-			<div class="form-group" id="message">
-				<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to update the account?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
-			</div>
-<?php elseif ($message == 'confirm-delete') : ?>
-				<div class="form-group" id="message">
-						<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to delete the account?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
-					</div>
-<?php endif;?>
-
-<?php if (!$account->id) : ?>
-		    <div class="form-group">
-				<div class="col-sm-5">&nbsp;</div>
-				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
-				</div>
-			</div>
-
-<?php elseif ($action == 'update') : ?>
-		    <div class="form-group">
-				<div class="col-sm-5">&nbsp;</div>
-				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
-				</div>
-			</div>
-
-<?php elseif ($action == 'delete') : ?>
-		    <div class="form-group">
-				<div class="col-sm-5">&nbsp;</div>
-				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
-				</div>
-			</div>
+	
+<?php if ($message == 'OK') : ?>
+		<p><?php echo $this->translate('An email including a validation link has be sent to you. Please, click on this link.', 'ppit-commitment', $context->getLocale()) ?>
+<?php else : ?>
+		<h4><?php echo $this->translate('Before starting the trial, we have to know you', 'ppit-commitment', $context->getLocale()) ?></h4>
 <?php endif;?>
 
 <?php 
-if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true; else $isDisabled = false;
+if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
 
-<?php foreach ($context->getConfig('commitmentAccount/update') as $propertyId => $options) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/register') as $propertyId => $options) : ?>
 	<?php $property = $context->getConfig('commitmentAccount')['properties'][$propertyId] ?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
-	<?php if ($propertyId == 'n_first') : ?>
+	<?php if ($propertyId == 'customer_name') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->customer_name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($propertyId == 'n_first') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
 	<?php elseif ($propertyId == 'n_last') : ?>
@@ -64,18 +46,12 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			
 	<?php elseif ($propertyId == 'email') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
-				
-	<?php elseif ($propertyId == 'place_id') : ?>
-				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
-	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
-		<?php foreach ($places as $place_id => $place) : ?>
-	    			<option value="<?php echo $place_id ?>" <?php if ($account->place_id == $place_id) echo 'selected="selected"' ?>><?php echo $place->name ?></option>
-		<?php endforeach;?>
-				</select>
-
-	<?php elseif ($propertyId == 'closing_date') : ?>
-				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
-				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->closing_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'tel_work') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->tel_work ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'tel_cell') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->tel_cell ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 				
 	<?php elseif ($property['type'] == 'date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
@@ -112,5 +88,14 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 		</div>
 
 <?php endforeach;?>
+
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-success" value="<?php echo $this->translate('Register', 'ppit-commitment', $context->getLocale()) ?>">
+				</div>
+			</div>
 		
 		</form>
+	</div>
+</div>

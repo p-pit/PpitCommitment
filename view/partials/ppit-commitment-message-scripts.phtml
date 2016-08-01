@@ -19,7 +19,7 @@ function sortCommitmentMessageList(type, criterion) {
 function getCommitmentMessageList(type, major, dir) {
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitmentMessage/index') ?>' + '?major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	route = '<?php echo $this->url('commitmentMessage/search') ?>' + '?major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
  	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
@@ -125,7 +125,7 @@ function showCommitmentMessageDetail(type, id, action)
 
 function activateCommitmentMessage(type) {
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitmentMessage/index') ?>');
+	loadPanel('index_action', '<?php echo $this->url('commitmentMessage/search') ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
 	$('#commitmentMessage-anchor').removeClass("btn-default").addClass("btn-primary");
 

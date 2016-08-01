@@ -18,12 +18,11 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-
 		$instance_id = $context->getInstanceId();
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($instance_id, $community_id);
 
-		$menu = $context->getInstance()->specifications['menu'];
+		$menu = $context->getConfig('menu');
 		$currentEntry = $this->params()->fromQuery('entry', 'account');
 
     	return new ViewModel(array(
@@ -46,7 +45,7 @@ class AccountController extends AbstractActionController
     	$customer_name = ($params()->fromQuery('customer_name', null));
     	if ($customer_name) $filters['customer_name'] = $customer_name;
 
-    	foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['main'] as $propertyId => $rendering) {
+    	foreach ($context->getConfig('commitmentAccount/search')['main'] as $propertyId => $rendering) {
     
     		$property = ($params()->fromQuery($propertyId, null));
     		if ($property) $filters[$propertyId] = $property;
@@ -56,7 +55,7 @@ class AccountController extends AbstractActionController
     		if ($max_property) $filters['max_'.$propertyId] = $max_property;
     	}
 
-    	foreach ($context->getInstance()->specifications['ppitCommitment']['account/search']['more'] as $propertyId => $rendering) {
+    	foreach ($context->getConfig('commitmentAccount/search')['more'] as $propertyId => $rendering) {
     	
     		$property = ($params()->fromQuery($propertyId, null));
     		if ($property) $filters[$propertyId] = $property;
@@ -224,7 +223,68 @@ class AccountController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
+    
+    public function registerAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+		
+    	$account = Account::instanciate();
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+		$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
 
+    			// Load the input data
+    			$data = array();
+				foreach ($context->getConfig('commitmentAccount/register') as $propertyId => $unused) {
+			    	$data[$propertyId] =  $request->getPost($propertyId);
+				}
+		    	if ($account->loadData($data) != 'OK') throw new \Exception('View error');
+
+    			// Atomically save
+    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$return = $account->add(false /* Without creating the user */);
+    
+    				if ($return != 'OK') {
+    					$connection->rollback();
+    					$error = $return;
+    				}
+    				else {
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'account' => $account,
+    			'csrfForm' => $csrfForm,
+    			'error' => $error,
+    			'message' => $message
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+    
 	public function deleteAction()
     {
     	$id = (int) $this->params()->fromRoute('id', 0);

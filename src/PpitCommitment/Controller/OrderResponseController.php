@@ -135,7 +135,7 @@ class OrderResponseController extends AbstractActionController
 				'config' => $context->getconfig(),
 				'id' => $id,
 				'act' => $act,
-				'orderProperties' => $context->getInstance()->specifications['ppitCommitment']['properties'],
+				'orderProperties' => $context->getConfig('commitment')['properties'],
 				'order' => $order,
 				'csrfForm' => $csrfForm,
 				'error' => $error,

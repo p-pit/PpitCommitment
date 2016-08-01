@@ -1,64 +1,53 @@
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<strong><?php echo $this->translate('Messages', 'ppit-commitment', $context->getLocale()); ?></strong>
-    </div>
-    <div class="panel-body">
-		<table class="table table-striped ppit_index">
-			<tr>
-				<th>&nbsp;</th>
-				<th>&nbsp;</th>
-				<th>
-					<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="id-anchor">
-						<span><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></span>
-<?php if ($major == 'id') : ?>
-						<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
-<?php endif;?>
-					</button>
-				</th>
-				<th>
-					<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="type-anchor">
-						<span><?php echo $this->translate('Type', 'ppit-core', $context->getLocale()) ?></span>
-<?php if ($major == 'type') : ?>
-						<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
-<?php endif;?>
-					</button>
-				</th>
-				<th><?php echo $this->translate('Transmission time', 'ppit-commitment', $context->getLocale())?>
-				<th><?php echo $this->translate('Return code', 'ppit-commitment', $context->getLocale())?>
-			</tr>
-			<tr>
-				<td colspan="6">
-					<button type="button" class="btn btn-default" title="<?php echo $this->translate('Submit', 'ppit-core', $context->getLocale()) ?>" id="<?php echo 'commitment-message-add-anchor' ?>">
-						<span class="glyphicon glyphicon-plus"></span>
-					</button>
-				</td>
-			</tr>
-<?php foreach ($messages as $xmlMessage) : ?>
-			<tr>
-				<td>
-					<a class="glyphicon glyphicon-cloud-download" title="<?php echo $this->translate('Download', 'ppit-core', $context->getLocale()) ?>" target="_blank" href="<?php echo $this->url('commitmentMessage/download', array('id' => $xmlMessage->id)) ?>"></a>
-				</td>
-	<?php if ($xmlMessage->direction == 'O') : ?>
-				<td>
-					<button type="button" class="btn btn-default commitment-message-submit-anchor" title="<?php echo $this->translate('Resend', 'ppit-commitment', $context->getLocale()) ?>" id="<?php echo 'commitment-message-submit-anchor_'.$xmlMessage->id ?>">
-						<span class="glyphicon glyphicon-send"></span>
-					</button>
-				</td>
-	<?php elseif (array_key_exists($xmlMessage->type, $context->getInstance()->specifications['ppitCommitment']['importTypes'])) : ?>
-				<td>
-					<button type="button" class="btn btn-default commitment-message-import-anchor" title="<?php echo $this->translate('Process', 'ppit-core', $context->getLocale()) ?>" id="<?php echo 'commitment-message-process-anchor_'.$xmlMessage->id ?>">
-						<span class="glyphicon glyphicon-cog"></span>
-					</button>
-				</td>
-	<?php else :?>
-				<td>&nbsp;</td>
-	<?php endif;?>
-				<td><?php echo $xmlMessage->id ?></td>
-				<td><?php echo $xmlMessage->type ?></td>
-				<td><?php echo $xmlMessage->update_time ?></td>
-				<td><?php echo $this->translate(substr($xmlMessage->http_status, 0, 30), 'ppit-commitment', $context->getLocale()) ?></td>
-			</tr>
-<?php endforeach; ?>
-		</table>
+<!-- Load the common form javascript functions -->
+<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
+
+<?php
+$title = $context->getConfig('commitmentMessage/index')['title'][$context->getLocale()];
+$this->headTitle($title);
+echo $context->getHeaderCode();
+?>
+
+<div class="container">
+	
+	<div>&nbsp;</div>
+	
+	<div id="main_menu" >
+	    <div class="col-md-10 col-md-offset-1">
+			<div align="center">
+
+<?php foreach ($menu as $entryId => $entry) : ?>
+	<?php if ($context->isAllowed($entry['route'])) : ?>
+				<button type="button" class="btn btn-default menu-btn" id="<?php echo $entryId ?>-anchor">
+					<?php echo $entry['label'][$context->getLocale()] ?>
+				</button>
+	<?php endif ?>
+<?php endforeach ?>
+
+			</div>
+			<div>&nbsp;</div>
+		</div>
+	</div>
+
+	<!-- Main panel -->
+	<div class="row">
+	    <div class="col-md-6 ppit-panel" id="index_action"></div>
+		<div class="col-md-6 ppit-panel" id="form_action"></div>
+	</div>
+	
+	<!-- Login -->
+	<div class="row">
+	    <div class="col-md-6 col-md-offset-3 ppit-panel" id="login-panel">
+		</div>
 	</div>
 </div>
+
+<script>
+
+<?php
+echo $this->partial('/partials/ppit-commitment-message-scripts');
+echo $this->partial('/partials/ppit-controller') 
+?>
+
+activateCommitmentMessage('<?php echo $type ?>');
+
+</script>

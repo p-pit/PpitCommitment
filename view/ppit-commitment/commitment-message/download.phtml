@@ -1,9 +1,9 @@
 <?php 
-if (array_key_exists($xmlMessage->type, $context->getInstance()->specifications['ppitCommitment']['importTypes'])) {
+if (array_key_exists($xmlMessage->type, $context->getConfig('commitment')['importTypes'])) {
 	header('Content-Type: text/csv; charset=utf-8');
 	header("Content-disposition: filename=osi-".$xmlMessage->id.".csv");
 	echo "\xEF\xBB\xBF";
-	foreach ($context->getInstance()->specifications['ppitCommitment']['importTypes'][$xmlMessage->type]['description'] as $property) {
+	foreach ($context->getConfig('commitment')['importTypes'][$xmlMessage->type]['description'] as $property) {
 		echo $property['name'].';';
 	}
 	echo "\n";
