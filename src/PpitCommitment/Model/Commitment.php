@@ -1000,13 +1000,6 @@ class Commitment implements InputFilterAwareInterface
 		$cursor = Commitment::getTable()->transSelectWith($select);
 		foreach ($cursor as $commitment) {
 			$credits[$commitment->instance_id]->consumers[] = $commitment;
-    		
-    		// Log
-    		if ($config['isTraceActive']) {
-				$logText = 'Commitment : instance_id='.$commitment->instance_id.', id='.$commitment->id.', caption='.$commitment->caption.', status='.$commitment->status;
-				if ($live) $logger->info($logText);
-	    		else print_r($logText."\n");
-    		}
 		}
 
 		// Retrieve administrators to be notified
@@ -1080,6 +1073,13 @@ class Commitment implements InputFilterAwareInterface
 				    			'comment' => 'Monthly consuming',
 							);
 							Commitment::getTable()->transSave($commitment);
+
+				    		// Log
+				    		if ($config['isTraceActive']) {
+								$logText = 'Commitment : instance_id='.$commitment->instance_id.', id='.$commitment->id.', caption='.$commitment->caption.', status='.$commitment->status;
+								if ($live) $logger->info($logText);
+					    		else print_r($logText."\n");
+				    		}
 						}
 		
 						// Notify
