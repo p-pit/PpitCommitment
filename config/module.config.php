@@ -854,19 +854,20 @@ return array(
 	'commitment/consumeCredit' => array(
 			'messages' => array(
 					'availabilityAlertTitle' => array(
-							'en_US' => '%s credits available',
-							'fr_FR' => 'Crédits %s disponibles',
+							'en_US' => 'P-PIT Commitments credits available',
+							'fr_FR' => 'Crédits P-PIT Engagements disponibles',
 					),
 					'availabilityAlertText' => array(
 							'en_US' => 'Hello %s,
-Your available %s credits reserve for %s is almost out of stock (*). 
+							
+Your available P-PIT Commitments credits reserve for %s is almost out of stock (*). 
 In order to avoid the risk of suffering use restrictions, you can right now renew your subscription, for the desired period of time.
 Our tip : Have peace of mind by renewing for a 1-year period of time.
 							
 Link to P-PIT order site : https://www.p-pit.fr/public/product/%s
 					
-(*) Your current %s reserve rises %s units. Your next monthly consumption is estimated up to now to %s units, estimation based on your current data analysis.
-							
+(*) Your current P-PIT Commitments reserve rises %s units. Your next monthly consumption is estimated up to now to %s units, estimation based on the current active subscriptions.
+
 We hope that our services are giving you full satisfaction. Plesase send your requests or questions to the P-PIT support: support@p-pit.fr or 06 29 87 90 02.
 					
 Best regards,
@@ -874,13 +875,14 @@ Best regards,
 The P-PIT staff
 ',
 							'fr_FR' => 'Bonjour %s,
-Votre réserve de crédits %s disponibles pour %s est bientôt épuisée (*). 
+							
+Votre réserve de crédits P-PIT Engagements disponibles pour %s est bientôt épuisée (*). 
 Pour ne pas risquer de subir des restrictions à l\'utilisation, vous pouvez dès à présent renouveller en ligne votre souscription pour la durée que vous souhaitez.
 Notre conseil : Ayez l\'esprit tranquille en renouvelant pour un an.
 
 Lien vers le site de commande P-PIT : https://www.p-pit.fr/public/product/%s
-					
-(*) Votre réserve actuelle %s est de %s unités. Votre prochain décompte mensuel est estimé à ce jour à %s unités, estimation basée sur l\'analyse de vos données courantes. 
+
+(*) Votre réserve actuelle P-PIT Engagements est de %s unités. Votre prochain décompte mensuel est estimé à ce jour à %s unités, estimation basée sur le nombre de dossiers actifs à ce jour.
 
 Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
 					
@@ -890,13 +892,14 @@ L\'équipe P-PIT
 ',
 					),
 					'consumeCreditTitle' => array(
-							'en_US' => 'Monthly %s credits consumption report',
-							'fr_FR' => 'Rapport mensuel de consommation de crédits %s',
+							'en_US' => 'Monthly P-PIT Commitments credits consumption report',
+							'fr_FR' => 'Rapport mensuel de consommation de crédits P-PIT Engagements',
 					),
 					'consumeCreditText' => array(
 							'en_US' => 'Hello %s,
-Please note that the monthly count of %s credits has occurred on %s. Given the current %s event, %s units have been consumed. Your new %s reserve rises %s units.
 							
+Please note that the monthly count of P-PIT Commitments credits has occurred on %s. Given the current %s active subscriptions, %s units have been consumed. Your new P-PIT Commitments reserve rises %s units.
+
 We hope that our services are giving you full satisfaction. Plesase send your requests or questions to the P-PIT support: support@p-pit.fr or 06 29 87 90 02.
 					
 Best regards,
@@ -904,7 +907,8 @@ Best regards,
 The P-PIT staff
 ',
 							'fr_FR' => 'Bonjour %s,
-Veuillez noter que le décompte mensuel de crédits %s a été effectué en date du %s. Compte tenu de l\'activité courante %s, %s unités ont été décomptées. Votre nouvelle réserve %s est de %s unités.
+							
+Veuillez noter que le décompte mensuel de crédits P-PIT Engagements a été effectué en date du %s. Compte tenu du nombre de dossiers %s actifs à ce jour, %s unités ont été décomptées. Votre nouvelle réserve P-PIT Engagements est de %s unités.
 
 Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
 					

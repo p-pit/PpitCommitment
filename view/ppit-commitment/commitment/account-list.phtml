@@ -19,7 +19,7 @@
 <?php if (!$context->getConfig('credit')['unlimitedCredits']) : ?>
 			&nbsp;&nbsp;
 			( <img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>">
-			Crédits <em>P-PIT Engagements</em> mensuels disponibles : <strong <?php if ($context->formatFloat($context->getInstance()->credits, 0) <= 0) echo 'style="color: red"'?>><?php echo $credit->quantity ?></strong> )
+			Crédits <em>P-PIT Engagements</em> mensuels disponibles : <strong <?php if ($context->formatFloat($credit->quantity, 0) <= 0) echo 'style="color: red"'?>><?php echo $credit->quantity ?></strong> )
 <?php endif;?>
 		</td>
 	</tr>
