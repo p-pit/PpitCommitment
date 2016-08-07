@@ -505,8 +505,8 @@ return array(
 					'customer_name' => array(
 							'type' => 'input',
 							'labels' => array(
-									'en_US' => 'Company',
-									'fr_FR' => 'Entreprise',
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
 							),
 					),
 					'n_first' => array(
@@ -565,22 +565,99 @@ return array(
 									'fr_FR' => 'Date de fermeture',
 							),
 					),
+					'property_1' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'Basketball' => array('fr_FR' => 'Basketball'),
+									'Equitation' => array('fr_FR' => 'Equitation'),
+									'Football' => array('fr_FR' => 'Football'),
+									'Golf' => array('fr_FR' => 'Golf'),
+									'Tennis' => array('fr_FR' => 'Tennis'),
+							),
+							'labels' => array(
+									'en_US' => 'Sport',
+									'fr_FR' => 'Sport',
+							),
+					),
+					'property_2' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Emergency phone',
+									'fr_FR' => 'Tél. urgence',
+							),
+					),
+					'property_3' => array(
+							'type' => 'photo',
+							'labels' => array(
+									'en_US' => '',
+									'fr_FR' => '',
+							),
+					),
+					'property_4' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'6e' => array('fr_FR' => '6e'),
+									'5e' => array('fr_FR' => '5e'),
+									'4e' => array('fr_FR' => '4e'),
+									'3e' => array('fr_FR' => '3e'),
+									'2nde' => array('fr_FR' => '2nde'),
+									'1ère' => array('fr_FR' => '1ère'),
+									'Term.' => array('fr_FR' => 'Term.'),
+							),
+							'labels' => array(
+									'en_US' => 'Class',
+									'fr_FR' => 'Classe',
+							),
+					),
+					'property_5' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'S' => array('fr_FR' => 'S'),
+									'ES' => array('fr_FR' => 'ES'),
+									'STMG' => array('fr_FR' => 'STMG'),
+							),
+							'labels' => array(
+									'en_US' => 'Specialty',
+									'fr_FR' => 'Spécialité',
+							),
+					),
+					'property_6' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'Interne' => array('fr_FR' => 'Interne'),
+									'Externe' => array('fr_FR' => 'Externe'),
+									'Weekend' => array('fr_FR' => 'Weekend'),
+									'Dimanche' => array('fr_FR' => 'Dimanche'),
+							),
+							'labels' => array(
+									'en_US' => 'Boarding-school',
+									'fr_FR' => 'Internat',
+							),
+					),
 			),
 	),
 	'commitmentAccount/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 	'commitmentAccount/search' => array(
-			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
-			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'title' => array('en_US' => 'Students', 'fr_FR' => 'Eleves'),
+			'todoTitle' => array('en_US' => 'registered', 'fr_FR' => 'inscrits'),
 			'main' => array(
+				'property_1' => 'select',
 				'customer_name' => 'contains',
+				'property_4' => 'select',
 			),
 			'more' => array(
+				'place_id' => 'select',
+				'opening_date' => 'range',
+				'closing_date' => 'range',
 			),
 	),
 	'commitmentAccount/list' => array(
+			'property_1' => 'image',
+			'property_3' => 'photo',
 			'customer_name' => 'text',
+			'property_2' => 'phone',
 	),
 	'commitmentAccount/detail' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
