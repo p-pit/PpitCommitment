@@ -18,8 +18,8 @@ class CommitmentMessageController extends AbstractActionController
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$type = $this->params()->fromRoute('type', null);
-		$menu = $context->getConfig('menu');
-
+		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
+		
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),

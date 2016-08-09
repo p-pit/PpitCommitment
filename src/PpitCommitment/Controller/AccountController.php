@@ -22,12 +22,15 @@ class AccountController extends AbstractActionController
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($instance_id, $community_id);
 
-		$menu = $context->getConfig('menu');
+		$applicationName = 'P-PIT Engagements';
+		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
 		$currentEntry = $this->params()->fromQuery('entry', 'account');
 
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'active' => 'application',
+    			'applicationName' => $applicationName,
     			'community_id' => $community_id,
     			'menu' => $menu,
     			'contact' => $contact,

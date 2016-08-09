@@ -499,6 +499,62 @@ return array(
 	),
 	'ppitCommitmentDependencies' => array(
 	),
+
+	'menus' => array(
+			'p-pit-engagements' => array(
+					'rental' => array(
+							'action' => 'Commitment',
+							'route' => 'commitment/index',
+							'params' => array('type' => 'rental'),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Rental',
+									'fr_FR' => 'Location',
+							),
+					),
+					'service' => array(
+							'action' => 'Commitment',
+							'route' => 'commitment/index',
+							'params' => array('type' => 'service'),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Service offer',
+									'fr_FR' => 'Prestation de service',
+							),
+					),
+					'product' => array(
+							'action' => 'Product',
+							'route' => 'product/index',
+							'params' => array('type' => 'rental'),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Catalogue',
+									'fr_FR' => 'Catalogue',
+							),
+					),
+					'account' => array(
+							'action' => 'Account',
+							'route' => 'commitmentAccount/index',
+							'params' => array(),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Accounts',
+									'fr_FR' => 'Comptes',
+							),
+					),
+					'commitmentMessage' => array(
+							'action' => 'CommitmentMessage',
+							'route' => 'commitmentMessage/index',
+							'params' => array('type' => ''),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Messages',
+									'fr_FR' => 'Messages',
+							),
+					),
+			),
+	),
+		
 	'commitmentAccount' => array(
 			'statuses' => array(),
 			'properties' => array(
