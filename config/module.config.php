@@ -409,7 +409,7 @@ return array(
 				array('route' => 'commitmentAccount/delete', 'roles' => array('admin')),
 				array('route' => 'commitmentAccount/export', 'roles' => array('user')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('user')),
-				array('route' => 'commitmentAccount/update', 'roles' => array('admin')),
+				array('route' => 'commitmentAccount/update', 'roles' => array('user')),
 				array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
             	array('route' => 'commitment', 'roles' => array('admin')),
             	array('route' => 'commitment/accountlist', 'roles' => array('user')),
@@ -520,16 +520,6 @@ return array(
 							'label' => array(
 									'en_US' => 'Service offer',
 									'fr_FR' => 'Prestation de service',
-							),
-					),
-					'product' => array(
-							'action' => 'Product',
-							'route' => 'product/index',
-							'params' => array('type' => 'rental'),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Catalogue',
-									'fr_FR' => 'Catalogue',
 							),
 					),
 					'account' => array(

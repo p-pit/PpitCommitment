@@ -141,7 +141,7 @@ class AccountController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    	 
+
     	$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $account= Account::get($id);
     	else $account = Account::instanciate();
@@ -160,7 +160,7 @@ class AccountController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    
+    	
     	// Retrieve the type
     	$type = $this->params()->fromRoute(0);
     

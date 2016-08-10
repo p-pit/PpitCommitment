@@ -50,4 +50,8 @@ echo $this->partial('/partials/ppit-controller')
 
 activateCommitmentMessage('<?php echo $type ?>');
 
+<?php foreach ($context->getConfig('menus')['p-pit-engagements'] as $entryId => $entry) : ?>
+	$('#<?php echo $entryId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url($entry['route'], $entry['params']) ?>'); });
+<?php endforeach;?>
+
 </script>
