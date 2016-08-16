@@ -135,6 +135,10 @@ class AccountController extends AbstractActionController
 		header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header('Content-Disposition:inline;filename=Fichier.xlsx ');
 		$writer->save('php://output');
+
+    	$view = new ViewModel(array());
+    	$view->setTerminal(true);
+    	return $view;
     }
 
     public function detailAction()

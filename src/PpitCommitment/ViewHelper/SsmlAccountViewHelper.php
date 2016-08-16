@@ -11,7 +11,7 @@ class SsmlAccountViewHelper
 		$context = Context::getCurrent();
 		$translator = $context->getServiceManager()->get('translator');
 
-		$title = (isset ($context->getConfig('commitmentAccount/search')['title']) ? $context->getConfig('commitment')['account/search']['title'][$context->getLocale()] : $this->translate('Accounts', 'ppit-commitment', $context->getLocale()));
+		$title = (isset ($context->getConfig('commitmentAccount/search')['title']) ? $context->getConfig('commitmentAccount/search')['title'][$context->getLocale()] : $this->translate('Accounts', 'ppit-commitment', $context->getLocale()));
 		
 		// Set document properties
 		$workbook->getProperties()->setCreator('P-PIT')
@@ -27,7 +27,7 @@ class SsmlAccountViewHelper
 		$i = 0;
 		$colNames = array(1 => 'A', 2 => 'B', 3 => 'C', 4 => 'D', 5 => 'E', 6 => 'F', 7 => 'G', 8 => 'H', 9 => 'I', 10 => 'J', 11 => 'K', 12 => 'L', 13 => 'M');
 		
-		foreach($context->getConfig('commitmentAccount')['properties']['account_properties'] as $propertyId => $property) {
+		foreach($context->getConfig('commitmentAccount')['properties'] as $propertyId => $property) {
 			$i++;
 			$sheet->setCellValue($colNames[$i].'1', $property['labels'][$context->getLocale()]);
 		}
@@ -40,13 +40,16 @@ class SsmlAccountViewHelper
 				$i++;
 				if ($propertyId == 'customer_name') $sheet->setCellValue($colNames[$i].$j, $account->customer_name);
 				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $view->places[$account->place_id]->name);
+				elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->n_first, 2));
+				elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->n_last, 2));
+				elseif ($propertyId == 'email') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->email, 2));
 				elseif ($property['type'] == 'date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($account->properties[$propertyId]));
 				elseif ($property['type'] == 'number') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->properties[$propertyId], 2));
 				else $sheet->setCellValue($colNames[$i].$j, $account->properties[$propertyId]);
 			}
 		}
 		$i = 0;
-		foreach($context->getConfig('commitmentAccount')['properties']['account_properties'] as $propertyId => $property) {
+		foreach($context->getConfig('commitmentAccount')['properties'] as $propertyId => $property) {
 			$i++;
 			$sheet->getColumnDimension($colNames[$i])->setAutoSize(true);
 		}

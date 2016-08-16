@@ -940,9 +940,81 @@ return array(
 							)
 					),
 			),
-			'outputMessages' => array(),
+			'outputMessages' => array(
+					'commissioning' => array(
+							'action' => 'commission',
+							'format' => 'Web-service - json',
+							'description' => array(
+									'message_identifier' => array('source' => 'this', 'property' => 'id'),
+									'order_number' => array('source' => 'commitment_message', 'property' => 'order_number'),
+									'issue_date' => array('source' => 'system', 'property' => 'now'),
+									'commissioning_date' => array('source' => 'commitment', 'property' => 'commissioning_date'),
+									'buyer_party' => array('source' => 'commitment_message', 'property' => 'buyer_party'),
+									'seller_party' => array('source' => 'commitment_message', 'property' => 'seller_party'),
+									'product_identifier' => array('source' => 'commitment_message', 'property' => 'product_identifier'),
+									'quantity' => array('source' => 'commitment_message', 'property' => 'quantity'),
+							)
+					),
+			),
 			'importTypes' => array(),
-			'messageTemplates' => array(),
+			'messageTemplates' => array(
+					'addTitle' => array(
+							'en_US' => 'New order(s) %s',
+							'fr_FR' => 'Nouvelle(s) commande(s) %s',
+					),
+					'addText' => array(
+							'en_US' => 'Hello,
+We inform you that orders listed below have been submitted and requires your confirmation. To proceed, please follow this links: %s.
+New orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été émises et doivent recevoir votre confirmation. Pour ce faire, veuillez suivre ce lien: %s.
+Nouvelles commandes %s : %s
+',
+					),
+					'confirmTitle' => array(
+							'en_US' => 'Order(s) accepted %s',
+							'fr_FR' => 'Commande(s) acceptée(s) %s',
+					),
+					'confirmText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been accepted. For more details, please follow this links: %s.
+Accepted orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été acceptées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes acceptées %s : %s
+',
+					),
+					'rejectTitle' => array(
+							'en_US' => 'Order(s) rejected %s',
+							'fr_FR' => 'Commande(s) rejetée(s) %s',
+					),
+					'rejectText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been rejected. For more details, please follow this links: %s.
+Rejected orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été rejetées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes rejetées %s : %s
+',
+					),
+					'registerTitle' => array(
+							'en_US' => 'Order(s) registered %s',
+							'fr_FR' => 'Commande(s) enregistrée(s) %s',
+					),
+					'registerText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been registered. For more details, please follow this links: %s.
+Registered orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été enregistrées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes enregistrées %s : %s
+',
+					),
+			),
 	),
 	'commitment/accountList' => array(
 			'title' => array('en_US' => 'Subscriptions', 'fr_FR' => 'Souscriptions'),
