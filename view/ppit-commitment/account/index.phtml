@@ -2,7 +2,7 @@
 <?php echo $this->partial('/partials/common-form-js.phtml'); ?>
 
 <?php
-$title = $context->getConfig('commitmentAccount/index')['title'][$context->getLocale()];
+$title = $context->getConfig('commitmentAccount/index'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()];
 $this->headTitle($title);
 echo $this->partial('/partials/header');
 ?>
