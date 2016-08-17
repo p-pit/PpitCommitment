@@ -11,7 +11,7 @@ function getParams() {
 
 	var params = '?', todo = true;
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	
@@ -32,7 +32,7 @@ function getParams() {
 
 <?php endforeach;?>
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['more'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['more'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	
@@ -59,8 +59,8 @@ function getParams() {
 <?php endforeach;?>
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentAccount/search')['todoTitle']) ? $context->getConfig('commitmentAccount/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
-	$searchTitle = (isset ($context->getConfig('commitmentAccount/search')['searchTitle']) ? $context->getConfig('commitmentAccount/search')['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$searchTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['searchTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
 
@@ -71,12 +71,12 @@ function getParams() {
 function exportAccountList() {
 
 	var params = getParams();
-	document.location.href = '<?php echo $this->url('commitmentAccount/export') ?>' + params;
+	document.location.href = '<?php echo $this->url('commitmentAccount/export', array('type' => $type)) ?>' + params;
 }
 
 function eraseAccountSearch() {
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').val('');
@@ -89,7 +89,7 @@ function eraseAccountSearch() {
 
 <?php endforeach;?>
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['more'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['more'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').val('');
@@ -136,13 +136,13 @@ function connectAccountSearchInputs() {
 	$('#erase-button').unbind();
 	$('#erase-button').click(function () { eraseAccountSearch(); });
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 
-		<?php if ($context->getConfig('commitmentAccount')['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
 	$('#search_min_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
@@ -155,7 +155,7 @@ function connectAccountSearchInputs() {
 	<?php else : ?>
 		$('#search_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 
-		<?php if ($context->getConfig('commitmentAccount')['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_<?php echo $propertyId ?>").datepicker();
 	$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
 		<?php endif;?>
@@ -164,13 +164,13 @@ function connectAccountSearchInputs() {
 
 <?php endforeach;?>
 
-<?php foreach ($context->getConfig('commitmentAccount/search')['more'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['more'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 
-		<?php if ($context->getConfig('commitmentAccount')['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
 	$('#search_min_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
@@ -183,7 +183,7 @@ function connectAccountSearchInputs() {
 	<?php else : ?>
 		$('#search_<?php echo $propertyId ?>').keyup(function () { filterAccountList(); });
 
-		<?php if ($context->getConfig('commitmentAccount')['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_<?php echo $propertyId ?>").datepicker();
 	$('#search_<?php echo $propertyId ?>').change(function () { filterAccountList(); });
 		<?php endif;?>
@@ -197,7 +197,7 @@ function connectAccountSearchInputs() {
 function getAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitmentAccount/list') ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	route = '<?php echo $this->url('commitmentAccount/list', array('type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
@@ -252,8 +252,8 @@ function connectAuditPanel()
 <?php 
 $properties = array();
 
-foreach ($context->getConfig('commitmentAccount/update') as $propertyId => $options) {
-	$property = $context->getConfig('commitmentAccount')['properties'][$propertyId];
+foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
@@ -307,7 +307,7 @@ function connectAccountUpdateForm(id, action)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id;
+			route = '<?php echo $this->url('commitmentAccount/update', array('type' => $type)) ?>/' + id;
 			if (action) route += '/' + action;
 			target = 'account-update-panel';
 			xhttp.open('POST', route, true);
@@ -333,7 +333,7 @@ function connectAccountUpdateForm(id, action)
 function getAccountUpdate(id, action) {
 	
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id;
+	var route = '<?php echo $this->url('commitmentAccount/update', array('type' => $type)) ?>/' + id;
 	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
@@ -363,8 +363,8 @@ function getAccountUpdate(id, action) {
 <?php 
 $properties = array();
 
-foreach ($context->getConfig('commitmentAccount/register') as $propertyId => $options) {
-	$property = $context->getConfig('commitmentAccount')['properties'][$propertyId];
+foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
@@ -418,7 +418,7 @@ function connectAccountRegisterForm()
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitmentAccount/register') ?>';
+			route = '<?php echo $this->url('commitmentAccount/register', array('type' => $type)) ?>';
 			target = 'form_action';
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
@@ -480,7 +480,7 @@ function getAccountDetail(id) {
 	// Anchor to the new panel
 	$(location).attr('hash', 'form_action');
 
-	var route = '<?php echo $this->url('commitmentAccount/detail') ?>' + '/' + id;
+	var route = '<?php echo $this->url('commitmentAccount/detail', array('type' => $type)) ?>' + '/' + id;
 
 	// Execute the ajax request
 	xhttp = new XMLHttpRequest();
@@ -517,14 +517,14 @@ function getAccountDetail(id) {
 function activateAccount() {
 
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search') ?>');
+	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search', array('type' => $type)) ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
 	var accountAnchor;
 	accountAnchor = '#account-anchor';
 	$(accountAnchor).removeClass("btn-default").addClass("btn-primary");
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentAccount/search')['todoTitle']) ? $context->getConfig('commitmentAccount/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text('<?php echo $todoTitle ?>');
 		

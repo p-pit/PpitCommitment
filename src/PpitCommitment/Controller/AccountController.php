@@ -18,6 +18,9 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+
+		$type = $this->params()->fromRoute('type', null);
+		
 		$instance_id = $context->getInstanceId();
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($instance_id, $community_id);
@@ -35,6 +38,7 @@ class AccountController extends AbstractActionController
     			'menu' => $menu,
     			'contact' => $contact,
     			'currentEntry' => $currentEntry,
+    			'type' => $type,
     	));
     }
 
@@ -75,12 +79,15 @@ class AccountController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    
+
+    	$type = $this->params()->fromRoute('type', null);
+
     	// Return the link list
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
 				'places' => Place::getList(),
+    			'type' => $type,
     	));
     	$view->setTerminal(true);
     	return $view;
@@ -90,7 +97,9 @@ class AccountController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    
+
+    	$type = $this->params()->fromRoute('type', null);
+    	 
     	$params = $this->getFilters($this->params());
     
     	$major = ($this->params()->fromQuery('major', 'customer_name'));
@@ -99,7 +108,7 @@ class AccountController extends AbstractActionController
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
     
     	// Retrieve the list
-    	$accounts = Account::getList($params, $major, $dir, $mode);
+    	$accounts = Account::getList($type, $params, $major, $dir, $mode);
 
     	// Return the link list
     	$view = new ViewModel(array(
@@ -107,6 +116,7 @@ class AccountController extends AbstractActionController
     			'config' => $context->getconfig(),
     			'accounts' => $accounts,
 				'places' => Place::getList(),
+    			'type' => $type,
     			'mode' => $mode,
     			'params' => $params,
     			'major' => $major,
@@ -153,6 +163,7 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
+    			'type' => $account->type,
     			'id' => $account->id,
     			'account' => $account,
     	));
@@ -189,7 +200,12 @@ class AccountController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
     
     			// Load the input data
-    			$account->loadDataFromRequest($request, $action);
+		    	$data = array();
+				foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
+					$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+			    	$data[$propertyId] =  $request->getPost($propertyId);
+				}
+		    	if ($account->loadData($data) != 'OK') throw new \Exception('View error');
     
     			// Atomically save
     			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
@@ -219,6 +235,7 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
+    			'type' => $account->type,
     			'id' => $id,
     			'action' => $action,
     			'account' => $account,
@@ -235,7 +252,9 @@ class AccountController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-		
+
+    	$type = $this->params()->fromRoute('type', null);
+
     	$account = Account::instanciate();
     
     	// Instanciate the csrf form
@@ -252,7 +271,7 @@ class AccountController extends AbstractActionController
 
     			// Load the input data
     			$data = array();
-				foreach ($context->getConfig('commitmentAccount/register') as $propertyId => $unused) {
+				foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 			    	$data[$propertyId] =  $request->getPost($propertyId);
 				}
 		    	if ($account->loadData($data) != 'OK') throw new \Exception('View error');
@@ -283,6 +302,7 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
+    			'type' => $type,
     			'account' => $account,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
@@ -339,6 +359,7 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
+    		'type' => $account->type,
     		'account' => $account,
     		'id' => $id,
     		'csrfForm' => $csrfForm,

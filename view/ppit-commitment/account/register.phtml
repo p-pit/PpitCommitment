@@ -29,8 +29,8 @@
 if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
 
-<?php foreach ($context->getConfig('commitmentAccount/register') as $propertyId => $options) : ?>
-	<?php $property = $context->getConfig('commitmentAccount')['properties'][$propertyId] ?>
+<?php foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $options) : ?>
+	<?php $property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId] ?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">

@@ -19,6 +19,7 @@ class Account implements InputFilterAwareInterface
 {
     public $id;
     public $instance_id;
+    public $type;
     public $place_id;
     public $customer_community_id;
 	public $customer_bill_contact_id;
@@ -71,6 +72,7 @@ class Account implements InputFilterAwareInterface
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
         $this->instance_id = (isset($data['instance_id'])) ? $data['instance_id'] : null;
+        $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
         $this->customer_bill_contact_id = (isset($data['customer_bill_contact_id'])) ? $data['customer_bill_contact_id'] : null;
@@ -101,6 +103,7 @@ class Account implements InputFilterAwareInterface
     {
     	$data = array();
     	$data['id'] = (int) $this->id;
+    	$data['type'] =  ($this->type) ? $this->type : null;
     	$data['place_id'] = (int) $this->place_id;
     	$data['customer_community_id'] =  (int) $this->customer_community_id;
     	$data['customer_bill_contact_id'] =  (int) $this->customer_bill_contact_id;
@@ -122,7 +125,7 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($params, $major, $dir, $mode = 'todo')
+    public static function getList($type, $params, $major, $dir, $mode = 'todo')
     {
     	$select = Account::getTable()->getSelect()
 			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
@@ -130,6 +133,7 @@ class Account implements InputFilterAwareInterface
 			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
+		if ($type) $where->equalTo('type', $type);
         
     	// Todo list vs search modes
     	if ($mode == 'todo') {
@@ -192,7 +196,11 @@ class Account implements InputFilterAwareInterface
     
     	$context = Context::getCurrent();
 
-			if (array_key_exists('place_id', $data)) $this->place_id = (int) $data['place_id'];
+    		if (array_key_exists('type', $data)) {
+		    	$this->type = trim(strip_tags($data['type']));
+		    	if (strlen($this->type) > 255) return 'Integrity';
+			}
+    		if (array_key_exists('place_id', $data)) $this->place_id = (int) $data['place_id'];
     		if (array_key_exists('customer_name', $data)) {
 		    	$this->customer_name = trim(strip_tags($data['customer_name']));
 		    	if (!$this->customer_name || strlen($this->customer_name) > 255) return 'Integrity';
@@ -285,18 +293,6 @@ class Account implements InputFilterAwareInterface
     	);
 
     	return 'OK';
-    }
-    
-    public function loadDataFromRequest($request) {
-
-    	$context = Context::getCurrent();
-    	$data = array();
-
-		foreach ($context->getConfig('commitmentAccount/update') as $propertyId => $unused) {
-			$property = $context->getConfig('commitmentAccount')['properties'][$propertyId];
-	    	$data[$propertyId] =  $request->getPost($propertyId);
-		}
-    	if ($this->loadData($data) != 'OK') throw new \Exception('View error');
     }
 
     public function add($createUser = true)
