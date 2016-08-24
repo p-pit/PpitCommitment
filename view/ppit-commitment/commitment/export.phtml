@@ -22,7 +22,7 @@ echo $this->translate('Commissioning date', 'ppit-commitment', $context->getLoca
 echo $this->translate('Invoice date', 'ppit-commitment', $context->getLocale()).";";
 echo $this->translate('Description', 'ppit-core', $context->getLocale()).";";
 
-foreach($context->getConfig('commitment')['properties'] as $propertyId => $property) {
+foreach($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
 	echo $property['labels'][$context->getLocale()].";";
 }
 echo "\n";
@@ -31,7 +31,7 @@ foreach ($commitments as $commitment) {
 	echo $context->getConfig('commitment')['types'][$commitment->type]['labels']['fr_FR'].';';
 	echo $commitment->site_caption.';';
 	echo $commitment->area_caption.';';
-	echo $context->getConfig('commitment')['statuses'][$commitment->status]['labels']['fr_FR'].';';
+	echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'][$commitment->status]['labels']['fr_FR'].';';
 	echo $commitment->caption.';';
 	echo $context->formatFloat($commitment->amount, 2).';';
 	echo (($commitment->identifier) ? "'".$commitment->identifier : '').";";
@@ -47,7 +47,7 @@ foreach ($commitments as $commitment) {
 	echo $context->decodeDate($commitment->invoice_date).';';
 	echo $commitment->description.';';
 	
-	foreach($context->getConfig('commitment')['properties'] as $propertyId => $property) {
+	foreach($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
 		echo (($commitment->properties[$propertyId]) ? "'".$commitment->properties[$propertyId] : '').';';
 	}
 			

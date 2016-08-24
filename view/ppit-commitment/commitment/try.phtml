@@ -1,0 +1,116 @@
+<div class="panel panel-default">
+	<div class="panel-heading" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+		<strong><?php echo $this->translate('Free trial', 'ppit-commitment', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+	
+<?php if ($message == 'OK') : ?>
+		<h4><?php echo $this->translate('Welcome on your fresh-installed version of P-Pit application. To start, please click on this link.', 'ppit-commitment', $context->getLocale()) ?></h4>
+<?php else : ?>
+		<h4><?php echo $this->translate('By entering this few informations, you will get a fresh-installed, immediately available version of P-Pit application.', 'ppit-commitment', $context->getLocale()) ?></h4>
+<?php endif;?>
+
+<?php 
+if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
+?>
+
+<?php foreach ($context->getConfig('commitment/try') as $propertyId => $options) : ?>
+
+	<?php if ($propertyId == 'caption') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Enterprise', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $instance->caption ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+
+	<?php elseif ($propertyId == 'n_title') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Title', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<select class="form-control" id="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+					<option><-- <?php echo $this->translate('Please choose', 'ppit-core', $context->getLocale()) ?> --></option>
+					<option value="<?php echo $this->translate('Mr', 'ppit-contact', $context->getLocale()) ?>" <?php if ($contact->n_title == $this->translate('Mr', 'ppit-contact', $context->getLocale())) echo 'selected="selected"' ?>><?php echo $this->translate('Mr', 'ppit-contact', $context->getLocale()) ?></option>
+					<option value="<?php echo $this->translate('Ms', 'ppit-contact', $context->getLocale()) ?>" <?php if ($contact->n_title == $this->translate('Mme', 'ppit-contact', $context->getLocale())) echo 'selected="selected"' ?>><?php echo $this->translate('Mme', 'ppit-contact', $context->getLocale()) ?></option>
+				</select>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+
+	<?php elseif ($propertyId == 'n_first') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('First name', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $contact->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+			
+	<?php elseif ($propertyId == 'n_last') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Last name', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $contact->n_last ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+			
+	<?php elseif ($propertyId == 'email') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Email', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $contact->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+			
+	<?php elseif ($propertyId == 'tel_work') : ?>
+		<div class="form-group" id="<?php echo $propertyId ?>_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Phone', 'ppit-contact', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $contact->tel_work ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+		</div>
+
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php if ($error == 'Duplicate identifier') $error = true; else $error = false; ?>
+		<div class="form-group <?php if ($error) echo 'has-error' ?>" id="username_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Identifier', 'ppit-user', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="username" value="<?php echo $user->username ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error) echo $this->translate('This identifier has already been chosen, please select another one') ?></div>
+		</div>
+
+		<input type="hidden" id="requires_notifications" value="1" />
+		<input type="hidden" id="locale" value="fr_FR" />
+
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-success" value="<?php echo $this->translate('Free trial', 'ppit-commitment', $context->getLocale()) ?>">
+				</div>
+			</div>
+		
+		</form>
+	</div>
+</div>

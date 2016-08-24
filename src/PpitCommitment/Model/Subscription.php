@@ -22,8 +22,6 @@ class Subscription implements InputFilterAwareInterface
     public $type;
     public $product_identifier;
     public $description;
-	public $delivered_quantity;
-    public $invoiced_quantity;
     public $unit_price;
     public $opening_date;
     public $closing_date;
@@ -51,8 +49,6 @@ class Subscription implements InputFilterAwareInterface
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
         $this->description = (isset($data['description'])) ? $data['description'] : null;
-        $this->delivered_quantity = (isset($data['delivered_quantity'])) ? $data['delivered_quantity'] : null;
-        $this->invoiced_quantity = (isset($data['invoiced_quantity'])) ? $data['invoiced_quantity'] : null;
         $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
         $this->opening_date = (isset($data['opening_date'])) ? $data['opening_date'] : null;
         $this->closing_date = (isset($data['closing_date']) && $data['closing_date'] != '9999-12-31') ? $data['closing_date'] : null;
@@ -68,8 +64,6 @@ class Subscription implements InputFilterAwareInterface
     	$data['type'] = $this->type;
     	$data['product_identifier'] =  $this->product_identifier;
     	$data['description'] =  $this->description;
-    	$data['delivered_quantity'] =  (float) $this->delivered_quantity;
-    	$data['invoiced_quantity'] =  (float) $this->invoiced_quantity;
     	$data['opening_date'] =  ($this->opening_date) ? $this->opening_date : null;
     	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : '9999-12-31';
     	$data['audit'] =  ($this->audit) ? json_encode($this->audit) : null;
@@ -101,7 +95,7 @@ class Subscription implements InputFilterAwareInterface
 		$subscriptions = array();
 		foreach ($cursor as $subscription) {
 			$subscription->properties = $subscription->toArray();
-			$subscriptions[] = $subscription;
+			$subscriptions[$subscription->id] = $subscription;
 		}
 		return $subscriptions;
     }
@@ -119,6 +113,7 @@ class Subscription implements InputFilterAwareInterface
 		$where = new Where;
     	$where->equalTo('product_identifier', $product);
 		$where->greaterThanOrEqualTo('closing_date', date('Y-m-d'));
+		$select->where($where);
 		$cursor = Subscription::getTable()->selectWith($select);
 		foreach ($cursor as $subscription) return $subscription;
     	return null;
@@ -146,12 +141,6 @@ class Subscription implements InputFilterAwareInterface
 		if (array_key_exists('description', $data)) {
 	    	$this->description = trim(strip_tags($data['description']));
 	    	if (strlen($this->description) > 2047) return 'Integrity';
-		}
-		if (array_key_exists('delivered_quantity', $data)) {
-			$this->delivered_quantity = (float) $data['delivered_quantity'];
-		}
-    	if (array_key_exists('delivered_quantity', $data)) {
-			$this->invoiced_quantity = (float) $data['invoiced_quantity'];
 		}
     	if (array_key_exists('unit_price', $data)) {
 	    	$this->unit_price = trim(strip_tags($data['unit_price']));

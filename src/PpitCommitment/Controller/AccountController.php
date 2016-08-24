@@ -20,7 +20,7 @@ class AccountController extends AbstractActionController
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$type = $this->params()->fromRoute('type', null);
-		
+
 		$instance_id = $context->getInstanceId();
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($instance_id, $community_id);
@@ -177,8 +177,8 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
     	
     	// Retrieve the type
-    	$type = $this->params()->fromRoute(0);
-    
+    	$type = $this->params()->fromRoute('type');
+
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
     	if ($id) $account = Account::get($id);
@@ -203,9 +203,12 @@ class AccountController extends AbstractActionController
 		    	$data = array();
 				foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 					$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-			    	$data[$propertyId] =  $request->getPost($propertyId);
+					if ($property['type'] != 'photo') $data[$propertyId] =  $request->getPost($propertyId);
 				}
-		    	if ($account->loadData($data) != 'OK') throw new \Exception('View error');
+				$files = $request->getFiles()->toArray();
+				if (!$files) $files = array();
+
+				if ($account->loadData($data, $files) != 'OK') throw new \Exception('View error');
     
     			// Atomically save
     			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
@@ -214,7 +217,7 @@ class AccountController extends AbstractActionController
     				if (!$account->id) $return = $account->add();
     				elseif ($action == 'delete') $return = $account->delete($request->getPost('update_time'));
     				else $return = $account->update($request->getPost('update_time'));
-    
+
     				if ($return != 'OK') {
     					$connection->rollback();
     					$error = $return;
@@ -235,7 +238,7 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
-    			'type' => $account->type,
+    			'type' => $type,
     			'id' => $id,
     			'action' => $action,
     			'account' => $account,

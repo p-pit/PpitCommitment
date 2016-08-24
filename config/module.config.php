@@ -109,7 +109,7 @@ return array(
 		        				'update' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
-		        								'route' => '/update[/:id][/:act]',
+		        								'route' => '/update[/:type][/:id][/:act]',
 		        								'constraints' => array(
 		        										'id'     => '[0-9]*',
 		        								),
@@ -257,12 +257,12 @@ return array(
         								),
         						),
         				),
-        				'subscribe' => array(
+        				'try' => array(
         						'type' => 'segment',
         						'options' => array(
-        								'route' => '/subscribe[/:product]',
+        								'route' => '/try[/:product]',
         								'defaults' => array(
-        										'action' => 'subscribe',
+        										'action' => 'try',
         								),
         						),
         				),
@@ -421,7 +421,7 @@ return array(
             	array('route' => 'commitment/detail', 'roles' => array('user')),
             	array('route' => 'commitment/message', 'roles' => array('guest')),
             	array('route' => 'commitment/post', 'roles' => array('admin')),
-            	array('route' => 'commitment/subscribe', 'roles' => array('guest')),
+            	array('route' => 'commitment/try', 'roles' => array('guest')),
             	array('route' => 'commitment/update', 'roles' => array('user')),
             	array('route' => 'commitment/delete', 'roles' => array(/*'admin'*/)),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
@@ -643,12 +643,12 @@ return array(
 			'n_first' => array('mandatory' => true),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => true),
-			'place_id' => array('mandatory' => true),
 			'opening_date' => array('mandatory' => true),
 			'closing_date' => array('mandatory' => false),
 	),
-	'commitmentAccount/register' => array(
-			'customer_name' => array('mandatory' => true),
+	'commitment/try' => array(
+			'caption' => array('mandatory' => true),
+			'n_title' => array('mandatory' => true),
 			'n_first' => array('mandatory' => true),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => true),
@@ -670,6 +670,172 @@ return array(
 							)
 					),
 			),
+			'messageTemplates' => array(
+					'addTitle' => array(
+							'en_US' => 'New order(s) %s',
+							'fr_FR' => 'Nouvelle(s) commande(s) %s',
+					),
+					'addText' => array(
+							'en_US' => 'Hello,
+We inform you that orders listed below have been submitted and requires your confirmation. To proceed, please follow this links: %s.
+New orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été émises et doivent recevoir votre confirmation. Pour ce faire, veuillez suivre ce lien: %s.
+Nouvelles commandes %s : %s
+',
+					),
+					'confirmTitle' => array(
+							'en_US' => 'Order(s) accepted %s',
+							'fr_FR' => 'Commande(s) acceptée(s) %s',
+					),
+					'confirmText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been accepted. For more details, please follow this links: %s.
+Accepted orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été acceptées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes acceptées %s : %s
+',
+					),
+					'rejectTitle' => array(
+							'en_US' => 'Order(s) rejected %s',
+							'fr_FR' => 'Commande(s) rejetée(s) %s',
+					),
+					'rejectText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been rejected. For more details, please follow this links: %s.
+Rejected orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été rejetées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes rejetées %s : %s
+',
+					),
+					'registerTitle' => array(
+							'en_US' => 'Order(s) registered %s',
+							'fr_FR' => 'Commande(s) enregistrée(s) %s',
+					),
+					'registerText' => array(
+							'en_US' => 'Hello,
+We inform you that the orders listed below have been registered. For more details, please follow this links: %s.
+Registered orders %s: %s
+',
+							'fr_FR' => 'Bonjour,
+Nous vous informons que les commandes dont la liste suit ont été enregistrées. Pour plus de détails, veuillez suivre ce lien: %s.
+Commandes enregistrées %s : %s
+',
+					),
+			),
+	),
+	'commitment/rental' => array(
+			'properties' => array(
+			),
+			'statuses' => array(
+					'new' => array(
+							'labels' => array(
+									'en_US' => 'To be approved',
+									'fr_FR' => 'A valider',
+							)
+					),
+					'approved' => array(
+							'labels' => array(
+									'en_US' => 'Approved',
+									'fr_FR' => 'Validé',
+							)
+					),
+					'settled' => array(
+							'labels' => array(
+									'en_US' => 'Settled',
+									'fr_FR' => 'Réglé',
+							)
+					),
+					'commissioned' => array(
+							'labels' => array(
+									'en_US' => 'Commissioned',
+									'fr_FR' => 'En service',
+							)
+					),
+			),
+			'deadlines' => array(),
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'equalTo', 'value' => array('new')),
+					),
+			),
+			'actions' => array(
+					'' => array(
+						'currentStatuses' => array(),
+						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
+						'properties' => array(
+								'account_id' => 'update',
+								'subscription_id' => 'update',
+								'caption' => 'update',
+								'description' => 'update',
+								'quantity' => 'update',
+								'unit_price' => 'update',
+								'amount' => 'update',
+								'identifier' => 'update',
+								'comment' => 'update',
+						),
+					),
+					'update' => array(
+						'currentStatuses' => array('new' => null),
+						'glyphicon' => 'glyphicon-edit',
+						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
+						'properties' => array(
+								'status' => 'display',
+								'account_id' => 'update',
+								'subscription_id' => 'update',
+								'caption' => 'update',
+								'description' => 'update',
+								'quantity' => 'update',
+								'unit_price' => 'update',
+								'amount' => 'update',
+								'identifier' => 'update',
+								'comment' => 'update',
+						),
+					),
+					'delete' => array(
+						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'deleted',
+						'glyphicon' => 'glyphicon-trash',
+						'label' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
+						'properties' => array(
+						),
+					),
+					'approve' => array(
+						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'approved',
+						'label' => array('en_US' => 'Approve', 'fr_FR' => 'Valider'),
+						'properties' => array(
+						),
+					),
+					'reject' => array(
+						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'rejected',
+						'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
+						'properties' => array(
+						),
+					),
+					'settle' => array(
+						'currentStatuses' => array('approved' => null),
+						'targetStatus' => 'settled',
+						'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
+						'properties' => array(
+						),
+					),
+					'commission' => array(
+						'currentStatuses' => array('settled' => null),
+						'targetStatus' => 'commissioned',
+						'label' => array('en_US' => 'Commission', 'fr_FR' => 'Mettre en service'),
+						'properties' => array(
+						),
+					),
+			),
+	),
+	'commitment/service' => array(
 			'properties' => array(
 					'type' => array(
 							'type' => 'input',
@@ -731,36 +897,19 @@ return array(
 					),
 			),
 			'deadlines' => array(
-					'rental' => array(
-						'invoice' => array('status' => 'new', 'period' => 0),
-						'settlement' => array('status' => 'new', 'period' => 0),
-						'renewal' => array('status' => 'new', 'period' => 1, 'unit' => 'month'),
-					),
-					'service' => array(
-						'retraction' => array('status' => 'new', 'period' => 5, 'unit' => 'day'),
-						'shipment' => array('status' => 'new', 'period' => 10, 'unit' => 'day'),
-						'delivery' => array('status' => 'new', 'period' => 13, 'unit' => 'day'),
-						'commissioning' => array('status' => 'new', 'period' => 15, 'unit' => 'day'),
-						'invoice' => array('status' => 'commissioned', 'period' => 0),
-						'settlement' => array('status' => 'commissioned', 'period' => 0),
-					),
+					'retraction' => array('status' => 'new', 'period' => 5, 'unit' => 'day'),
+					'shipment' => array('status' => 'new', 'period' => 10, 'unit' => 'day'),
+					'delivery' => array('status' => 'new', 'period' => 13, 'unit' => 'day'),
+					'commissioning' => array('status' => 'new', 'period' => 15, 'unit' => 'day'),
+					'invoice' => array('status' => 'commissioned', 'period' => 0),
+					'settlement' => array('status' => 'commissioned', 'period' => 0),
 			),
 			'todo' => array(
-					'rental' => array(
-							'sales_manager' => array(
-									'status' => array('selector' => 'equalTo', 'value' => 'new'),
-							),
-							'business_owner' => array(
-									'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
-							),
+					'sales_manager' => array(
+							'status' => array('selector' => 'equalTo', 'value' => array('new')),
 					),
-					'service' => array(
-							'sales_manager' => array(
-									'status' => array('selector' => 'equalTo', 'value' => 'new'),
-							),
-							'business_owner' => array(
-									'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
-							),
+					'business_owner' => array(
+							'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
 					),
 			),
 			'actions' => array(
@@ -803,6 +952,7 @@ return array(
 					),
 					'delete' => array(
 						'currentStatuses' => array('new' => null),
+						'targetStatus' => 'deleted',
 						'glyphicon' => 'glyphicon-trash',
 						'label' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
 						'properties' => array(
@@ -851,6 +1001,8 @@ return array(
 						),
 					),
 			),
+	),
+	'commitmentMessage' => array(
 			'inputMessages' => array(
 					'order' => array(
 							'action' => '',
@@ -887,64 +1039,6 @@ return array(
 					),
 			),
 			'importTypes' => array(),
-			'messageTemplates' => array(
-					'addTitle' => array(
-							'en_US' => 'New order(s) %s',
-							'fr_FR' => 'Nouvelle(s) commande(s) %s',
-					),
-					'addText' => array(
-							'en_US' => 'Hello,
-We inform you that orders listed below have been submitted and requires your confirmation. To proceed, please follow this links: %s.
-New orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été émises et doivent recevoir votre confirmation. Pour ce faire, veuillez suivre ce lien: %s.
-Nouvelles commandes %s : %s
-',
-					),
-					'confirmTitle' => array(
-							'en_US' => 'Order(s) accepted %s',
-							'fr_FR' => 'Commande(s) acceptée(s) %s',
-					),
-					'confirmText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been accepted. For more details, please follow this links: %s.
-Accepted orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été acceptées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes acceptées %s : %s
-',
-					),
-					'rejectTitle' => array(
-							'en_US' => 'Order(s) rejected %s',
-							'fr_FR' => 'Commande(s) rejetée(s) %s',
-					),
-					'rejectText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been rejected. For more details, please follow this links: %s.
-Rejected orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été rejetées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes rejetées %s : %s
-',
-					),
-					'registerTitle' => array(
-							'en_US' => 'Order(s) registered %s',
-							'fr_FR' => 'Commande(s) enregistrée(s) %s',
-					),
-					'registerText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been registered. For more details, please follow this links: %s.
-Registered orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été enregistrées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes enregistrées %s : %s
-',
-					),
-			),
 	),
 	'commitment/accountList' => array(
 			'title' => array('en_US' => 'Subscriptions', 'fr_FR' => 'Souscriptions'),
@@ -1044,14 +1138,13 @@ L\'équipe P-PIT
 					),
 			),
 	),
-	'commitment/index' => array(
+	'commitment/index/rental' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
-	'commitment/subscribe' => array(
-			'property_1' => array('mandatory' => true),
-			'due_date' => array('mandatory' => false, 'disabled' => true),
+	'commitment/subscribe/rental' => array(
+//			'due_date' => array('mandatory' => false, 'disabled' => true),
 	),
-	'commitmentMessage/index' => array(
+	'commitmentMessage/index/rental' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 );

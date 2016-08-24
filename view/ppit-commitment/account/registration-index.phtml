@@ -2,7 +2,7 @@
 <?php echo $this->partial('/partials/common-form-js.phtml'); ?>
 
 <?php
-$title = $context->getConfig('commitment/index'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()];
+$title = $context->getConfig('commitmentAccount/index'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()];
 $this->headTitle($title);
 echo $this->partial('/partials/header');
 ?>
@@ -44,7 +44,7 @@ echo $this->partial('/partials/header');
 <script>
 
 <?php
-echo $this->partial('/partials/ppit-commitment-scripts');
+echo $this->partial('/partials/ppit-account-scripts');
 echo $this->partial('/partials/ppit-controller') 
 ?>
 
@@ -52,6 +52,6 @@ echo $this->partial('/partials/ppit-controller')
 	$('#<?php echo $entryId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url($entry['route'], $entry['params']) ?>'); });
 <?php endforeach;?>
 
-activateCommitment('<?php echo $type ?>');
+activateAccount();
 
 </script>

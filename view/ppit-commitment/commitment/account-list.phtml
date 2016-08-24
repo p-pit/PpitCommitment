@@ -1,13 +1,13 @@
 <h4 style="text-align: center"></h4>
 
-<?php $colspan = count($context->getConfig('commitment/accountList')['properties'])
-	   		   + count($context->getConfig('commitment/accountList')['glyphicons'])
-	   		   + count($context->getConfig('commitment/accountList')['anchors']) ?>
+<?php $colspan = count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['properties'])
+	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'])
+	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors']) ?>
 
 <table class="table table-striped ppit_index">
 	<tr>
 		<th colspan="<?php echo $colspan ?>" style="font-size: large; text-align: center">
-			<strong><?php echo $context->getConfig('commitment/accountList')['title'][$context->getLocale()] ?></strong>
+			<strong><?php echo $context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] ?></strong>
 		</th>
 	</tr>
 	<tr>
@@ -28,7 +28,7 @@
 
 	<tr class="commitment">
 		
-	<?php foreach ($context->getConfig('commitment/accountList')['properties'] as $propertyId => $rendering) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $rendering) : ?>
 		<?php if ($propertyId == 'caption') : ?>
 		<td style="text-align: center"><strong><?php echo $commitment->caption ?></strong></td>
 
@@ -39,7 +39,7 @@
 		
 	<?php endforeach;?>
 
-	<?php foreach ($context->getConfig('commitment/accountList')['glyphicons'] as $route => $params) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'] as $route => $params) : ?>
 		<td>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="<?php echo $this->url($route, array('eid' => $commitment->identifier)) ?>">
 				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -47,7 +47,7 @@
 		</td>
 	<?php endforeach;?>
 
-	<?php foreach ($context->getConfig('commitment/accountList')['anchors'] as $route => $params) : ?>
+	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors'] as $route => $params) : ?>
 		<td>
 		<?php if ($params['type'] == 'btn') : ?>
 			<button type="button" class="btn btn-default action-btn account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">

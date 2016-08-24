@@ -5,6 +5,8 @@ use PpitCore\Model\GenericTable;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
+use PpitCommitment\Model\Event;
+use PpitCommitment\Model\Notification;
 use PpitCommitment\Model\Subscription;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
@@ -74,7 +76,29 @@ class Module
                 	$resultSetPrototype->setArrayObjectPrototype(new CommitmentMessage());
                 	return new TableGateway('commitment_message', $dbAdapter, null, $resultSetPrototype);
                 },
- 	          	'PpitCommitment\Model\SubscriptionTable' =>  function($sm) {
+            	'PpitCommitment\Model\EventTable' =>  function($sm) {
+                	$tableGateway = $sm->get('EventTableGateway');
+                	$table = new GenericTable($tableGateway);
+                	return $table;
+                },
+                'EventTableGateway' => function ($sm) {
+                	$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                	$resultSetPrototype = new ResultSet();
+                	$resultSetPrototype->setArrayObjectPrototype(new Event());
+                	return new TableGateway('commitment_event', $dbAdapter, null, $resultSetPrototype);
+                },
+                'PpitCommitment\Model\NotificationTable' =>  function($sm) {
+                	$tableGateway = $sm->get('NotificationTableGateway');
+                	$table = new GenericTable($tableGateway);
+                	return $table;
+                },
+                'NotificationTableGateway' => function ($sm) {
+                	$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                	$resultSetPrototype = new ResultSet();
+                	$resultSetPrototype->setArrayObjectPrototype(new Notification());
+                	return new TableGateway('commitment_notification', $dbAdapter, null, $resultSetPrototype);
+                },
+                'PpitCommitment\Model\SubscriptionTable' =>  function($sm) {
                     $tableGateway = $sm->get('SubscriptionTableGateway');
                     $table = new GenericTable($tableGateway);
                     return $table;

@@ -25,7 +25,7 @@
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+					<input name="submit" type="submit" id="up-submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
 				</div>
 			</div>
 
@@ -33,7 +33,7 @@
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
+					<input name="submit" type="submit" id="up-submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 				</div>
 			</div>
 
@@ -41,7 +41,7 @@
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
+					<input name="submit" type="submit" id="up-submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
 				</div>
 			</div>
 <?php endif;?>
@@ -64,14 +64,6 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			
 	<?php elseif ($propertyId == 'email') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
-				
-	<?php elseif ($propertyId == 'place_id') : ?>
-				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
-	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
-		<?php foreach ($places as $place_id => $place) : ?>
-	    			<option value="<?php echo $place_id ?>" <?php if ($account->place_id == $place_id) echo 'selected="selected"' ?>><?php echo $place->name ?></option>
-		<?php endforeach;?>
-				</select>
 
 	<?php elseif ($propertyId == 'closing_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
@@ -101,7 +93,7 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 	<?php elseif ($property['type'] == 'photo') : ?>
 
 <!-- Photo -->
-				<img height="150" src="<?php echo $this->url('vcard/photo', array('id' => $account->properties[$propertyId])) ?>"/>
+				<img height="150" src="<?php echo $this->url('vcard/photo', array('id' => ($account->properties[$propertyId]) ? $account->properties[$propertyId] :  $account->main_contact->id)) ?>"/>
 	
 	<?php else : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
@@ -111,6 +103,41 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
 		</div>
 
+	<?php if ($property['type'] == 'photo' && !$isDisabled) : ?>
+	    <div class="photo-group">
+			<label class="col-sm-5 control-label"></label>
+			<div class="col-sm-7">
+				<input type="file" id="<?php echo $propertyId ?>" class="form-control" />
+			</div>
+		</div>
+		<div>&nbsp;</div>
+	<?php endif; ?>
+
 <?php endforeach;?>
+
+<?php if (!$account->id) : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php elseif ($action == 'update') : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php elseif ($action == 'delete') : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+<?php endif;?>
 		
 		</form>

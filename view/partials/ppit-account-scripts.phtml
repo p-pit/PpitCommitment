@@ -291,8 +291,8 @@ function connectAccountUpdateForm(id, action)
 	<?php elseif ($property['type'] == 'checkbox') : ?>
 				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
 
-	<?php elseif ($property['type'] == 'file') : ?>
-				var fileSelect = document.getElementById('order_form');
+	<?php elseif ($property['type'] == 'photo') : ?>
+				var fileSelect = document.getElementById('<?php echo $propertyId ?>');
 				if (fileSelect) {
 					var files = fileSelect.files;
 					for (var i = 0; i < files.length; i++) {
@@ -314,11 +314,6 @@ function connectAccountUpdateForm(id, action)
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
 				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-
-<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
-					console.log('post, route = ' + route);
-					console.log(xhttp.responseText);
-<?php endif;?>
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					filterAccountList();
 					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
@@ -356,93 +351,13 @@ function getAccountUpdate(id, action) {
 	else if (action == 'delete') $('#account-delete-anchor').removeClass("btn-default").addClass("btn-primary");
 }
 
-///////////////////
-// Register form //
-///////////////////
-
-<?php 
-$properties = array();
-
-foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
-	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
-}
-
-$properties['update_time'] = array('type' => 'hidden');
-
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Account', 'context' => $context, 'properties' => $properties)) 
-?>
-
-function connectAccountRegisterForm()
-{
-<?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'date') : ?>
-		$('#input_<?php echo $propertyId ?>').datepicker();
-	<?php endif;?>
-<?php endforeach ?>
-
-	var form = document.getElementById('ppit-form');
-	form.onsubmit = function(event) {
-		
-		event.preventDefault();
-	
-		// Check validity
-		var validity = checkAccountUpdateProperties();
-
-		if (validity) {
-		
-			// Create a new FormData object.
-			var formData = new FormData();
-			
-			// Get the properties values
-<?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
-				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
-
-	<?php elseif ($property['type'] == 'checkbox') : ?>
-				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
-
-	<?php elseif ($property['type'] == 'file') : ?>
-				var fileSelect = document.getElementById('order_form');
-				if (fileSelect) {
-					var files = fileSelect.files;
-					for (var i = 0; i < files.length; i++) {
-						var file = files[i];
-						formData.append('order_form', file, file.name);
-					}
-				}
-
-	<?php endif ?>
-
-<?php endforeach ?>
-
-			var xhttp = new XMLHttpRequest();
-			var route, target;
-			route = '<?php echo $this->url('commitmentAccount/register', array('type' => $type)) ?>';
-			target = 'form_action';
-			xhttp.open('POST', route, true);
-			// Set up a handler for when the request finishes.
-			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-
-<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
-					console.log('post, route = ' + route);
-					console.log(xhttp.responseText);
-<?php endif;?>
-					document.getElementById(target).innerHTML = xhttp.responseText;
-				}
-			};
-			xhttp.send(formData);
-		}
-		else return false;
-	}
-}
-
 // Load the list
 function getCommitmentAccountList(type, params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitment/accountList') ?>/' + type + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	route = '<?php echo $this->url('commitment/accountList') ?>'
+	if (type != '') route += '/' + type;
+	route += params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
@@ -504,7 +419,9 @@ function getAccountDetail(id) {
 			}
 			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
 
-			if (id != 0) getCommitmentAccountList('registration', '?account_id=' + id, 'identifier', 'DESC');
+<?php if (array_key_exists('p-pit-engagements', $context->getApplications())) : ?>
+			if (id != 0) getCommitmentAccountList('<?php echo $type ?>', '?account_id=' + id, 'identifier', 'DESC');
+<?php endif;?>
 		}
 	}
 	xhttp.send();

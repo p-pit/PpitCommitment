@@ -19,6 +19,7 @@ class Account implements InputFilterAwareInterface
 {
     public $id;
     public $instance_id;
+    public $status;
     public $type;
     public $place_id;
     public $customer_community_id;
@@ -43,6 +44,7 @@ class Account implements InputFilterAwareInterface
     // Joined properties
     public $place_name;
     public $customer_name;
+    public $main_contact_id;
     public $supplier_name;
     public $n_first;
     public $n_last;
@@ -56,6 +58,7 @@ class Account implements InputFilterAwareInterface
 	public $supplier_community;
 	public $main_contact;
 	public $properties;
+    public $files;
 	public $comment;
 
     protected $inputFilter;
@@ -72,6 +75,7 @@ class Account implements InputFilterAwareInterface
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
         $this->instance_id = (isset($data['instance_id'])) ? $data['instance_id'] : null;
+        $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
@@ -96,6 +100,7 @@ class Account implements InputFilterAwareInterface
         // Joined properties
         $this->place_name = (isset($data['place_name'])) ? $data['place_name'] : null;
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->main_contact_id = (isset($data['main_contact_id'])) ? $data['main_contact_id'] : null;
         $this->supplier_name = (isset($data['supplier_name'])) ? $data['supplier_name'] : null;
     }
     
@@ -103,6 +108,7 @@ class Account implements InputFilterAwareInterface
     {
     	$data = array();
     	$data['id'] = (int) $this->id;
+    	$data['status'] = $this->status;
     	$data['type'] =  ($this->type) ? $this->type : null;
     	$data['place_id'] = (int) $this->place_id;
     	$data['customer_community_id'] =  (int) $this->customer_community_id;
@@ -130,11 +136,12 @@ class Account implements InputFilterAwareInterface
     	$select = Account::getTable()->getSelect()
 			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
 			->join(array('supplier' => 'contact_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name'), 'left')
+			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'main_contact_id'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
-        
+		$where->notEqualTo('status', 'deleted');
+
     	// Todo list vs search modes
     	if ($mode == 'todo') {
     		$where->greaterThanOrEqualTo('commitment_account.closing_date', date('Y-m-d'));
@@ -172,6 +179,7 @@ class Account implements InputFilterAwareInterface
     	if ($account->supplier_community) $account->supplier_name = $account->supplier_community->name;
     	$account->customer_community = Community::getTable()->get($account->customer_community_id);
     	$account->customer_name = $account->customer_community->name;
+    	$account->main_contact_id = $account->customer_community->main_contact_id;
     	$account->main_contact = Vcard::get($account->customer_community->main_contact_id);
     	$account->n_first = $account->main_contact->n_first;
     	$account->n_last = $account->main_contact->n_last;
@@ -183,16 +191,18 @@ class Account implements InputFilterAwareInterface
     	return $account;
     }
 
-    public static function instanciate()
+    public static function instanciate($type)
     {
 		$account = new Account;
+		$account->status = 'new';
+		$account->type = $type;
 		$account->audit = array();
 		$account->customer_community = Community::instanciate();
 		$account->main_contact = Vcard::instanciate();
 		return $account;
     }
 
-    public function loadData($data) {
+    public function loadData($data, $files = array()) {
     
     	$context = Context::getCurrent();
 
@@ -284,7 +294,8 @@ class Account implements InputFilterAwareInterface
 			$this->main_contact->tel_cell = $this->tel_cell;
 			$this->main_contact->n_fn = $this->n_last.', '.$this->n_first;
     		$this->properties = $this->toArray();
-    	
+    		$this->files = $files;
+
     	// Update the audit
     	$this->audit[] = array(
     			'time' => Date('Y-m-d G:i:s'),
@@ -313,6 +324,7 @@ class Account implements InputFilterAwareInterface
     	$this->main_contact->community_id = $this->customer_community->id;
     	$this->main_contact = Vcard::optimize($this->main_contact);
     	$this->main_contact->add();
+    	foreach ($this->files as $file) $this->main_contact->saveFile($file);
     	$this->customer_community->main_contact_id = $this->main_contact->id;
     	Community::getTable()->save($this->customer_community);
 
@@ -341,7 +353,8 @@ class Account implements InputFilterAwareInterface
     	$this->customer_community->update($this->customer_community->update_time);
     	
     	$this->main_contact->update($this->main_contact->update_time);
-    	 
+    	foreach ($this->files as $file) $this->main_contact->saveFile($file);
+
     	Account::getTable()->save($this);
     
     	return 'OK';
@@ -364,7 +377,7 @@ class Account implements InputFilterAwareInterface
     
     public function delete($update_time)
     {
-    	$context = Context::getCurrent();
+		$context = Context::getCurrent();
     	$account = Account::get($this->id);
     
     	// Isolation check
@@ -372,12 +385,12 @@ class Account implements InputFilterAwareInterface
     	$user = User::get($this->main_contact->id, 'contact_id');
     	$user->delete($user->update_time);
 
-    	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->user_community->update_time);
-    	
     	$this->main_contact->delete($this->main_contact->update_time);
+    	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->user_community->update_time);
     	 
-    	Account::getTable()->delete($this->id);
-    
+    	$this->status = 'deleted';
+    	Account::getTable()->save($this);
+    	 
     	return 'OK';
     }
 

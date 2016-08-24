@@ -5,14 +5,16 @@ use DateInterval;
 use Date;
 use Zend\View\Model\ViewModel;
 use PpitCommitment\Model\Account;
-use PpitCommitment\Model\Message;
 use PpitCommitment\Model\Commitment;
+use PpitCommitment\Model\Message;
 use PpitCommitment\Model\Subscription;
 use PpitContact\Model\Vcard;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
+use PpitCore\Model\Instance;
+use PpitUser\Model\User;
 use DOMPDFModule\View\Model\PdfModel;
 use Zend\Session\Container;
 use Zend\Http\Client;
@@ -144,9 +146,9 @@ class CommitmentController extends AbstractActionController
    		$view = new ViewModel(array(
    				'context' => $context,
 				'config' => $context->getconfig(),
-   				'accounts' => Account::getList($params, 'customer_name', 'ASC'),
+   				'accounts' => Account::getList(null, $params, 'customer_name', 'ASC'),
    				'subscriptions' => Subscription::getList(array(), 'product_identifier', 'ASC'),
-   				'statuses' => $context->getConfig('commitment')['statuses'],
+   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'type' => $type,
    		));
 		$view->setTerminal(true);
@@ -162,7 +164,7 @@ class CommitmentController extends AbstractActionController
 
 		// Retrieve the order type
 		$type = $this->params()->fromRoute('type', null);
-		
+
 		$major = ($this->params()->fromQuery('major', 'identifier'));
 		$dir = ($this->params()->fromQuery('dir', 'ASC'));
 
@@ -179,8 +181,8 @@ class CommitmentController extends AbstractActionController
    				'context' => $context,
 				'config' => $context->getconfig(),
    				'type' => $type,
-   				'properties' => $context->getConfig('commitment')['properties'],
-   				'statuses' => $context->getConfig('commitment')['statuses'],
+//   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
+//   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'commitments' => $commitments,
    				'mode' => $mode,
    				'params' => $params,
@@ -222,7 +224,8 @@ class CommitmentController extends AbstractActionController
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
-   			'statuses' => $context->getConfig('commitment')['statuses'],
+   			'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
+    		'type' => $type,
     		'id' => $commitment->id,
     		'commitment' => $commitment,
     	));
@@ -230,15 +233,15 @@ class CommitmentController extends AbstractActionController
 		return $view;
     }
 
-    public function subscribeAction()
+    public function tryAction()
     {
     	$context = Context::getCurrent();
     	$product = $this->params()->fromRoute('product', null);
-		if (!$context->isAuthenticated()) return $this->redirect()->toRoute('commitmentAccount/register', array('product' => $product));
 
-		$subscription = Subscription::getCurrent($product);
-    	$commitment = Commitment::instanciate($subscription->type, $subscription);
-
+    	$instance = Instance::instanciate();
+    	$contact = Vcard::instanciate();
+    	$user = User::getNew();
+    	 
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -246,43 +249,75 @@ class CommitmentController extends AbstractActionController
     	$message = null;
     	$request = $this->getRequest();
     	if ($request->isPost()) {
-    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+			$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		 
     		if ($csrfForm->isValid()) { // CSRF check
 
-    			// Load the input data
-    			$commitment->loadDataFromRequest($request, $action);
+       			// Retrieve the data from the request
+    			$data = array();
+    			$data['caption'] = $request->getPost('caption');
+    			$data['is_active'] = 1;
+    			$rc = $instance->loadData($data);
+    			if ($rc != 'OK') throw new \Exception('View error');
 
+    			$data = array();
+    			$data['attributed_credits'] = array($product);
+    			$data['n_title'] = $request->getPost('n_title');
+    			$data['n_first'] = $request->getPost('n_first');
+    			$data['n_last'] = $request->getPost('n_last');
+    			$data['email'] = $request->getPost('email');
+    			$data['tel_work'] = $request->getPost('tel_work');
+    			$data['tel_cell'] = null;
+    			$data['roles'] = array('admin');
+    			$data['is_notified'] = 1;
+    			$rc = $contact->loadData($data);
+    			if ($rc != 'OK') throw new \Exception('View error');
+
+    			$user->contact_id = $contact->id;
+    			$rc = $user->loadData($request, $contact, $instance->id);
+    			 
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				if (!$commitment->id) $return = $commitment->add();
-    				else $return = $commitment->update($request->getPost('update_time'));
+    				$rc = $instance->add();
+    				mkdir('./public/img/'.$context->getInstance()->caption);
 
-    				if ($return != 'OK') {
+    				if ($rc != 'OK') {
+    					$error = $rc;
     					$connection->rollback();
-    					$error = $return;
     				}
     				else {
-    					$connection->commit();
-	    				$message = 'OK';
+    					$contact->instance_id = $instance->id;
+    					Vcard::getTable()->transSave($contact);
+	    				$rc = $user->add($contact->email, true);
+    					
+    					if ($rc != 'OK') {
+    						if ($rc == 'Duplicate') $error = 'Duplicate identifier';
+    						else $error = $rc;
+    						$connection->rollback();
+    					}
+    					else {
+    						$connection->commit();
+		    				$message = 'OK';
+	    				}
     				}
     			}
     			catch (\Exception $e) {
     				$connection->rollback();
     				throw $e;
     			}
-	    		$action = null;
     		}
     	}
 
     	$view = new ViewModel(array(
 				'context' => $context,
 				'config' => $context->getconfig(),
-   				'properties' => $context->getConfig('commitment')['properties'],
-    			'commitment' => $commitment,
+    			'product' => $product,
+    			'instance' => $instance,
+    			'contact' => $contact,
+    			'user' => $user,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
     			'message' => $message
@@ -319,19 +354,56 @@ class CommitmentController extends AbstractActionController
     		 
     		if ($csrfForm->isValid()) { // CSRF check
 
-    			// Load the input data
-    			$commitment->loadDataFromRequest($request, $action);
+    			// Retrieve the data from the request
+    			$data = array();
+    			foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['properties'] as $propertyId => $unused) {
+    				$data[$propertyId] =  $request->getPost($propertyId);
+    			}
+    			foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
+    				if ($property['type'] != 'file') $data[$propertyId] = $request->getPost($propertyId);
+    			}
+    			 
+    			$data['update_time'] = $request->getPost('update_time');
+    			 
+    			// Change the status
+    			if ($action && array_key_exists($action, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'])) {
+    				$actionRules = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action];
+    				if (array_key_exists('targetStatus', $actionRules)) $commitment->status = $actionRules['targetStatus'];
+    			}
+    			
+    			// Retrieve the order form
+    			$files = $request->getFiles()->toArray();
+    			 
+    			$rc = $commitment->loadData($data, $files);
+    			if ($rc != 'OK') throw new \Exception('View error');
 
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				if (!$commitment->id) $return = $commitment->add();
-    				else $return = $commitment->update($request->getPost('update_time'));
+    				if (!$commitment->id) {
+    					if ($commitment->subscription_id) {
+    						$subscription = $commitment->subscriptions[$commitment->subscription_id];
+    						$commitment->description = $subscription->description;
+    						$commitment->product_identifier = $subscription->product_identifier;
+    						$commitment->unit_price = $subscription->unit_price;
+    					}
+    					$rc = $commitment->add();
+    				}
+    				else {
+						if ($action == 'update') {
+	    					// Retrieve the CGV
+	    					$document = Document::getWithPath('home/public/resources/cgv');
+	    					$document->retrieveContent();
+	    					reset($document->parts);
+	    					$commitment->cgv = current($document->parts)->content;
+						}
+	    				$rc = $commitment->update($request->getPost('update_time'));
+    				}
 
-    				if ($return != 'OK') {
+    				if ($rc != 'OK') {
     					$connection->rollback();
-    					$error = $return;
+    					$error = $rc;
     				}
     				else {
     					$connection->commit();
@@ -349,10 +421,11 @@ class CommitmentController extends AbstractActionController
     	$view = new ViewModel(array(
 				'context' => $context,
 				'config' => $context->getconfig(),
+    			'type' => $type,
     			'id' => $id,
     			'action' => $action,
-    			'accounts' => Account::getList(array(), 'customer_name', 'ASC'),
-   				'properties' => $context->getConfig('commitment')['properties'],
+    			'accounts' => Account::getList(null, array(), 'customer_name', 'ASC'),
+   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
     			'error' => $error,

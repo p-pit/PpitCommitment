@@ -100,7 +100,7 @@ function getParams(type) {
 	if (max_invoice_date) max_invoice_date = encodeDate(max_invoice_date);
 	if (max_invoice_date.length >= 2) { params += 'max_invoice_date=' + max_invoice_date + '&'; todo = false; }
 	
-<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) : ?>
 	
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
 	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
@@ -153,7 +153,7 @@ function eraseCommitmentSearch(type) {
 	$('#search_min_invoice_date').val('');
 	$('#search_max_invoice_date').val('');
 	
-<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) : ?>
 	$('#search_<?php echo $propertyId ?>').val('');
 	$('#search_min_<?php echo $propertyId ?>').val('');
 	$('#search_max_<?php echo $propertyId ?>').val('');
@@ -297,37 +297,37 @@ function connectAuditPanel()
 	});
 }
 
-function connectActionAnchors(type, id, action)
+function connectCgvPanel()
 {
-	// Show and anchor to the new panel
-	$('.action-btn').removeClass('btn-primary').addClass('btn-default');
-	$('#' + action + '-anchor').removeClass('btn-default').addClass('btn-primary');
-	$('#commitment-update-panel').show();
-
-	// Execute the ajax request
-	xhttp = new XMLHttpRequest();
-	var route;
-
-<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
-	if (action == '<?php echo $actionId ?>') route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/<?php echo $actionId ?>';
-<?php endforeach;?>
-
-	xhttp.open("GET", route, true);
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: commitment-update-panel' + ', url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
-			
-<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
-			if (action == '<?php echo $actionId ?>') connectCommitmentUpdateForm(type, id, '<?php echo $actionId ?>');
-<?php endforeach;?>
+	$('#cgv-panel').hide();
+	$('#cgv-label').click(function () {
+		if ($('#cgv-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#cgv-panel').show();
+			$('#cgv-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
 		}
-	}
-	xhttp.send();
+		else {
+			$('#cgv-panel').hide();
+			$('#cgv-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
 }
+
+function connectDescriptionPanel()
+{
+	$('#description-panel').hide();
+	$('#description-label').click(function () {
+		if ($('#description-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#description-panel').show();
+			$('#description-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#description-panel').hide();
+			$('#description-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
 
 /////////////////////////////
 // Commitment update panel //
@@ -336,38 +336,40 @@ function connectActionAnchors(type, id, action)
 <?php 
 $properties = array();
 
-$properties['settlement_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['expected_settlement_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['invoice_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['due_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['commissioning_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['expected_commissioning_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['delivery_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['expected_delivery_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['shipment_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['expected_shipment_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['retraction_date'] = array('type' => 'date', 'mandatory' => false);
-$properties['retraction_limit'] = array('type' => 'date', 'mandatory' => false);
-$properties['commitment_date'] = array('type' => 'date', 'mandatory' => true);
-$properties['invoice_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-$properties['quotation_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-$properties['identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-$properties['comment'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
-$properties['amount'] = array('type' => 'number', 'mandatory' => false, 'minValue' => 0, 'maxValue' => 9999999999);
-$properties['description'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
-$properties['caption'] = array('type' => 'input', 'mandatory' => true, 'maxSize' => 255);
-$properties['subscription_id'] = array('type' => 'select', 'mandatory' => false);
-$properties['account_id'] = array('type' => 'select', 'mandatory' => true);
+if (array_key_exists('settlement_date', $action['properties'])) $properties['settlement_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('expected_settlement_date', $action['properties'])) $properties['expected_settlement_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('invoice_date', $action['properties'])) $properties['invoice_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('due_date', $action['properties'])) $properties['due_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('commissioning_date', $action['properties'])) $properties['commissioning_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('expected_commissioning_date', $action['properties'])) $properties['expected_commissioning_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('delivery_date', $action['properties'])) $properties['delivery_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('expected_delivery_date', $action['properties'])) $properties['expected_delivery_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('shipment_date', $action['properties'])) $properties['shipment_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('expected_shipment_date', $action['properties'])) $properties['expected_shipment_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('retraction_date', $action['properties'])) $properties['retraction_date'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('retraction_limit', $action['properties'])) $properties['retraction_limit'] = array('type' => 'date', 'mandatory' => false);
+if (array_key_exists('commitment_date', $action['properties'])) $properties['commitment_date'] = array('type' => 'date', 'mandatory' => true);
+if (array_key_exists('invoice_identifier', $action['properties'])) $properties['invoice_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+if (array_key_exists('quotation_identifier', $action['properties'])) $properties['quotation_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+if (array_key_exists('identifier', $action['properties'])) $properties['identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+if (array_key_exists('comment', $action['properties'])) $properties['comment'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
+if (array_key_exists('amount', $action['properties'])) $properties['amount'] = array('type' => 'number', 'mandatory' => false, 'minValue' => 0, 'maxValue' => 9999999999);
+if (array_key_exists('unit_price', $action['properties'])) $properties['unit_price'] = array('type' => 'number', 'mandatory' => true, 'minValue' => 0, 'maxValue' => 9999999999);
+if (array_key_exists('quantity', $action['properties'])) $properties['quantity'] = array('type' => 'number', 'mandatory' => true, 'minValue' => 0, 'maxValue' => 9999999999);
+if (array_key_exists('description', $action['properties'])) $properties['description'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
+if (array_key_exists('caption', $action['properties'])) $properties['caption'] = array('type' => 'input', 'mandatory' => true, 'maxSize' => 255);
+if (array_key_exists('subscription_id', $action['properties'])) $properties['subscription_id'] = array('type' => 'select', 'mandatory' => false);
+if (array_key_exists('account_id', $action['properties'])) $properties['account_id'] = array('type' => 'select', 'mandatory' => true);
 $properties['update_time'] = array('type' => 'hidden');
 
-foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) {
-	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
+	if (array_key_exists($propertyId, $action)) $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment'.$actionId, 'context' => $context, 'properties' => $properties)) 
 ?>
 
-function connectCommitmentUpdateForm(type, id, action)
+function connectCommitment<?php echo $actionId ?>UpdateForm(type, id)
 {
 <?php foreach ($properties as $property_id => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
@@ -381,7 +383,7 @@ function connectCommitmentUpdateForm(type, id, action)
 		event.preventDefault();
 	
 		// Check validity
-		var validity = checkCommitmentUpdateProperties(id);
+		var validity = checkCommitment<?php echo $actionId ?>UpdateProperties(id);
 	
 		if (validity) {
 		
@@ -413,7 +415,7 @@ function connectCommitmentUpdateForm(type, id, action)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/' + action;
+			route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '<?php echo ($actionId) ? '/'.$actionId : '' ?>';
 			target = 'commitment-update-panel';
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
@@ -435,7 +437,30 @@ function connectCommitmentUpdateForm(type, id, action)
 	}
 }
 
-function getCommitmentUpdate(type, id) {
+function connect<?php echo $actionId ?>Anchors(type, id)
+{
+	// Show and anchor to the new panel
+	$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+	$('#<?php echo $actionId ?>-anchor').removeClass('btn-default').addClass('btn-primary');
+	$('#commitment-update-panel').show();
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	var route;
+
+	route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/<?php echo $actionId ?>';
+
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+			connectCommitment<?php echo $actionId ?>UpdateForm(type, id);
+		}
+	}
+	xhttp.send();
+}
+
+function getCommitment<?php echo $actionId ?>Update(type, id) {
 	
 	var xhttp = new XMLHttpRequest();
 	var route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id;
@@ -449,11 +474,14 @@ function getCommitmentUpdate(type, id) {
 			console.log(xhttp.responseText);
 <?php endif;?>
 			
-			connectCommitmentUpdateForm(type, id);
+			connectDescriptionPanel();
+			connectCommitment<?php echo $actionId ?>UpdateForm(type, id);
 		}
 	}
 	xhttp.send();
 }
+
+<?php endforeach;?>
 
 // Load the detail panel
 function getCommitmentDetail(type, id) {
@@ -478,10 +506,11 @@ function getCommitmentDetail(type, id) {
 <?php endif;?>
 
 			connectAuditPanel();
+			connectCgvPanel();
 			connectRemoveIcon(type, 'remove-anchor', 'form_action');
 			getCommitmentUpdate(type, id);
-<?php foreach ($context->getConfig('commitment')['actions'] as $actionId => $action) : ?>
-			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connectActionAnchors(type, id, '<?php echo $actionId ?>'); });
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
+			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connect<?php echo $actionId ?>Anchors(type, id, '<?php echo $actionId ?>'); });
 <?php endforeach;?>
 		}
 	}
@@ -508,8 +537,15 @@ function activateCommitment(type) {
 	getCommitmentList(type, '?', 'identifier', 'ASC');
 	
 	$('#add-criteria').click(function () {
-		$('#search-area').show();
-		$('#add-criteria').hide();
+		mode = $('#add-criteria').text();
+		if (mode == '<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>') {
+			$('#add-criteria').text('<?php echo $this->translate('Less criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').show();
+		}
+		else {
+			$('#add-criteria').text('<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').hide();
+		}
 	});
 	$('#search-area').hide();
 }

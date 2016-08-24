@@ -289,7 +289,6 @@ class CommitmentMessage implements InputFilterAwareInterface
 		$commitment = Commitment::instanciateFromJson('rental', $content, true);
 		$commitment->caption = 'P-PIT ('.$content['quantity'].' x 0,5 €)';
 		$commitment->amount = $content['quantity'] * 0.5;
-		$commitment->renewable = 1;
 
 		// Bad request
 		if (!$commitment) {

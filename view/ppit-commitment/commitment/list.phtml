@@ -69,7 +69,7 @@
 			</button>
 		</td>
 		<td><?php echo $commitment->identifier ?></td>
-		<td><?php echo $context->getConfig('commitment')['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
+		<td><?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
 		<td <?php if ($commitment->expected_delivery_date < date('Y-m-d')) echo 'style="color: red"' ?>><?php echo $context->decodeDate($commitment->expected_delivery_date) ?></td>
 		<td align="right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
 		<td>

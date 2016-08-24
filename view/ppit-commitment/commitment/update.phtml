@@ -31,14 +31,14 @@
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn <?php echo ($action == 'delete') ? 'btn-danger' : 'btn-warning' ?>" value="<?php echo $context->getConfig('commitment')['actions'][$action]['label'][$context->getLocale()] ?>">
+					<input name="submit" type="submit" id="submit-button" class="btn <?php echo ($action == 'delete') ? 'btn-danger' : 'btn-warning' ?>" value="<?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['label'][$context->getLocale()] ?>">
 				</div>
 			</div>
 <?php endif;?>
 
 <?php 
 if (!$action && $commitment->id || $message == 'OK') $isDisabled = true; else $isDisabled = false;
-$updatableProperties = $context->getConfig('commitment')['actions'][$action]['properties'];
+$updatableProperties = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['properties'];
 ?>
 
 <?php if (array_key_exists('account_id', $updatableProperties)) : ?>
@@ -54,37 +54,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="account_id_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="account_id" name="account_id" />
-<?php endif;?>
-
-<?php if (array_key_exists('subscription_id', $updatableProperties)) : ?>
-		<div class="form-group" id="subscription_id_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Subscription', 'ppit-commitment', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-	    		<select class="form-control" id="subscription_id"  <?php if ($updatableProperties['subscription_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
-	    			<option value=""></option>
-<?php foreach ($commitment->subscriptions as $projectId => $project) : ?>	
-	    			<option value="<?php echo $projectId ?>" <?php if ($commitment->subscription_id == $projectId) echo 'selected="selected"' ?>><?php echo $project['domain'].' - '.$project['caption'] ?></option>
-<?php endforeach;?>
-	    		</select>
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="subscription_id_error"></p></div>
-		</div>
-<?php else : ?>
-		<input type="hidden" id="subscription_id" name="subscription_id" />
-<?php endif;?>
-		
-<?php if (array_key_exists('status', $updatableProperties)) : ?>
-		<div class="form-group" id="status_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-	    		<input class="form-control" id="status" name="status" disabled="disabled" value="<?php echo $context->getConfig('commitment')['statuses'][$commitment->status]['labels'][$context->getLocale()] ?>" />
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="area_id_error"></p></div>
-		</div>
-<?php else : ?>
-		<input type="hidden" id="status" name="status" />
 <?php endif;?>
 
 <?php if (array_key_exists('caption', $updatableProperties)) : ?>
@@ -95,33 +64,84 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="caption_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="caption" name="caption" />
+<?php endif;?>
+
+<?php if (array_key_exists('subscription_id', $updatableProperties)) : ?>
+		<div class="form-group" id="subscription_id_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Subscription', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<select class="form-control" id="subscription_id"  <?php if ($updatableProperties['subscription_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""></option>
+<?php foreach ($commitment->subscriptions as $subscriptionId => $subscription) : ?>	
+	    			<option value="<?php echo $subscriptionId ?>" <?php if ($commitment->subscription_id == $subscriptionId) echo 'selected="selected"' ?>><?php echo $subscription->product_identifier ?></option>
+<?php endforeach;?>
+	    		</select>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="subscription_id_error"></p></div>
+		</div>
+<?php endif;?>
+		
+<?php if (array_key_exists('status', $updatableProperties)) : ?>
+		<div class="form-group" id="status_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="status" name="status" disabled="disabled" value="<?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'][$commitment->status]['labels'][$context->getLocale()] ?>" />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="area_id_error"></p></div>
+		</div>
 <?php endif;?>
 
 <?php if (array_key_exists('description', $updatableProperties)) : ?>
+	<?php $mode = $updatableProperties['description'] ?>
 		<div class="form-group" id="description_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Description', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
+	<?php if ($mode == 'display') : ?>
+				<a id="description-label" href="#description-panel"><?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?></a>
+	<?php else : ?>
 	    		<textarea class="form-control" id="description" name="description" <?php if ($updatableProperties['description'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>><?php echo $commitment->description ?></textarea>
+	<?php endif;?>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="description_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="description" name="description" />
+		<div id="description-panel" class="panel panel-default">
+			<div class="panel-body">
+				<?php echo $commitment->description ?>
+			</div>
+		</div>			
+<?php endif;?>
+
+		<input type="hidden" id="quantity" />
+<?php if (array_key_exists('quantity', $updatableProperties)) : ?>
+		<div class="form-group" id="input_quantity_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Quantity', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_quantity" name="input_quantity" value="<?php echo $context->formatFloat($commitment->quantity, 0) ?>" <?php if ($updatableProperties['quantity'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_quantity_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="unit_price" />
+<?php if (array_key_exists('unit_price', $updatableProperties)) : ?>
+		<div class="form-group" id="input_unit_price_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Unit price', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_unit_price" value="<?php echo $context->formatFloat($commitment->unit_price, 2) ?>" <?php if ($updatableProperties['unit_price'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_unit_price_error"></p></div>
+		</div>
 <?php endif;?>
 
 		<input type="hidden" id="amount" name="amount" />
 <?php if (array_key_exists('amount', $updatableProperties)) : ?>
 		<div class="form-group" id="input_amount_group">
-			<label class="col-sm-5 control-label">* <?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></label>
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
 				<input class="form-control" id="input_amount" name="input_amount" value="<?php echo $context->formatFloat($commitment->amount, 2) ?>" <?php if ($updatableProperties['amount'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_amount_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_amount" name="input_amount" />
 <?php endif;?>
 
 <?php if (array_key_exists('comment', $updatableProperties)) : ?>
@@ -132,8 +152,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="comment_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="comment" name="comment" />
 <?php endif;?>
 		
 		<div class="form-group">
@@ -151,8 +169,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="identifier_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="identifier" name="identifier" />
 <?php endif;?>
 
 <?php if (array_key_exists('quotation_identifier', $updatableProperties)) : ?>
@@ -163,8 +179,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="quotation_identifier_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="quotation_identifier" name="quotation_identifier" />
 <?php endif;?>
 
 <?php if (array_key_exists('invoice_identifier', $updatableProperties)) : ?>
@@ -175,8 +189,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="invoice_identifier_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="invoice_identifier" name="invoice_identifier" />
 <?php endif;?>
 
 		<div class="form-group">
@@ -195,8 +207,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_commitment_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_commitment_date" name="input_commitment_date" />
 <?php endif;?>
 
 		<input type="hidden" id="retraction_limit" name="retraction_limit" />
@@ -208,8 +218,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_retraction_limit_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_retraction_limit" name="input_retraction_limit" />
 <?php endif;?>
 
 		<input type="hidden" id="retraction_date" name="retraction_date" />
@@ -221,8 +229,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_retraction_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_retraction_date" name="input_retraction_date" />
 <?php endif;?>
 
 		<input type="hidden" id="expected_shipment_date" name="expected_shipment_date" />
@@ -234,8 +240,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_expected_shipment_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_expected_shipment_date" name="input_expected_shipment_date" />
 <?php endif;?>
 
 		<input type="hidden" id="shipment_date" name="shipment_date" />
@@ -247,8 +251,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_shipment_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_shipment_date" name="input_shipment_date" />
 <?php endif;?>
 
 		<input type="hidden" id="expected_delivery_date" name="expected_delivery_date" />
@@ -260,8 +262,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_expected_delivery_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_expected_delivery_date" name="input_expected_delivery_date" />
 <?php endif;?>
 
 		<input type="hidden" id="delivery_date" name="delivery_date" />
@@ -273,8 +273,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_delivery_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_delivery_date" name="input_delivery_date" />
 <?php endif;?>
 
 		<input type="hidden" id="expected_commissioning_date" name="expected_commissioning_date" />
@@ -286,8 +284,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_expected_commissioning_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_expected_commissioning_date" name="input_expected_commissioning_date" />
 <?php endif;?>
 
 		<input type="hidden" id="commissioning_date" name="commissioning_date" />
@@ -299,8 +295,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_commissioning_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_commissioning_date" name="input_commissioning_date" />
 <?php endif;?>
 
 		<input type="hidden" id="due_date" name="due_date" />
@@ -312,8 +306,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_due_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_due_date" name="input_due_date" />
 <?php endif;?>
 
 		<input type="hidden" id="invoice_date" name="invoice_date" />
@@ -325,8 +317,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_invoice_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_invoice_date" name="input_invoice_date" />
 <?php endif;?>
 
 		<input type="hidden" id="expected_settlement_date" name="expected_settlement_date" />
@@ -338,8 +328,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_expected_settlement_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_expected_settlement_date" name="input_expected_settlement_date" />
 <?php endif;?>
 
 		<input type="hidden" id="settlement_date" name="settlement_date" />
@@ -351,8 +339,6 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="input_settlement_date_error"></p></div>
 		</div>
-<?php else : ?>
-		<input type="hidden" id="input_settlement_date" name="input_settlement_date" />
 <?php endif;?>
 
 		<div class="form-group">
@@ -362,7 +348,7 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 			</div>
 		</div>
 		
-<?php foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) : ?>
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) : ?>
 
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php echo $property['labels'][$context->getLocale()] ?></label>
@@ -399,5 +385,3 @@ $updatableProperties = $context->getConfig('commitment')['actions'][$action]['pr
 <?php endforeach;?>
 		
 		</form>
-	</div>
-</div>

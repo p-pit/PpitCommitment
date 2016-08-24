@@ -1,6 +1,7 @@
 <?php
 namespace PpitCommitment\Model;
 
+use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Subscription;
 use PpitContact\Model\Community;
 use PpitContact\Model\Vcard;
@@ -31,8 +32,13 @@ class Commitment implements InputFilterAwareInterface
 	public $status;
 	public $caption;
 	public $description;
+	public $product_identifier;
+	public $quantity;
+	public $unit_price;
 	public $amount;
-	public $renewable;
+	public $options;
+	public $including_options_amount;
+	public $cgv;
 	public $identifier;
 	public $quotation_identifier;
 	public $invoice_identifier;
@@ -86,7 +92,6 @@ class Commitment implements InputFilterAwareInterface
 
 	// Additional field from joined tables
 	public $customer_name;
-	public $product_identifier;
 	public $properties;
 	
 	// Transient properties
@@ -104,12 +109,6 @@ class Commitment implements InputFilterAwareInterface
 
     // Static fields
     private static $table;
-
-    public static function getProperties()
-    {
-    	// Retrieve the properties
-    	return $context->getConfig('commitment')['properties'];
-    }
     
     public function getArrayCopy()
     {
@@ -127,8 +126,13 @@ class Commitment implements InputFilterAwareInterface
         $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->description = (isset($data['description'])) ? $data['description'] : null;
+        $this->quantity = (isset($data['quantity'])) ? $data['quantity'] : null;
+        $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
+        $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
-        $this->renewable = (isset($data['renewable'])) ? $data['renewable'] : null;
+        $this->options = (isset($data['options'])) ? json_decode($data['options'], true) : null;
+        $this->including_options_amount = (isset($data['including_options_amount'])) ? $data['including_options_amount'] : null;
+        $this->cgv = (isset($data['cgv'])) ? $data['cgv'] : null;
         $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
         $this->quotation_identifier = (isset($data['quotation_identifier'])) ? $data['quotation_identifier'] : null;
         $this->invoice_identifier = (isset($data['invoice_identifier'])) ? $data['invoice_identifier'] : null;
@@ -182,7 +186,6 @@ class Commitment implements InputFilterAwareInterface
 
         // Additional properties from joined tables
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
-        $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
 
         // Denormalized properties
         $this->site_id = (isset($data['site_id'])) ? $data['site_id'] : null;
@@ -201,8 +204,13 @@ class Commitment implements InputFilterAwareInterface
     	$data['status'] = $this->status;
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
+    	$data['product_identifier'] = $this->product_identifier;
+    	$data['quantity'] = $this->quantity;
+    	$data['unit_price'] = $this->unit_price;
     	$data['amount'] = $this->amount;
-    	$data['renewable'] = (int) $this->renewable;
+    	$data['options'] = json_encode($this->options);
+    	$data['including_options_amount'] = $this->including_options_amount;
+    	$data['cgv'] = $this->cgv;
     	$data['identifier'] = $this->identifier;
     	$data['quotation_identifier'] = $this->quotation_identifier;
     	$data['invoice_identifier'] = $this->invoice_identifier;
@@ -265,6 +273,7 @@ class Commitment implements InputFilterAwareInterface
     		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
     	
     	$where = new Where();
+    	$where->notEqualTo('commitment.status', 'deleted');
 
     	// Filter on type
 		if ($type) $where->equalTo('commitment.type', $type);
@@ -272,7 +281,7 @@ class Commitment implements InputFilterAwareInterface
 		// Todo list vs search modes
 		if ($mode == 'todo') {
 
-			$todo = $context->getConfig('commitment')['todo'][$type];
+			$todo = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['todo'];
 			foreach($todo as $role => $properties) {
 				if ($context->hasRole($role)) {
 					foreach($properties as $property => $predicate) {
@@ -284,47 +293,16 @@ class Commitment implements InputFilterAwareInterface
 			}
 		}
 		else {
-			
+
 			// Set the filters
-			if (isset($params['account_id'])) $where->equalTo('account_id', $params['account_id']);
-			if (isset($params['subscription_id'])) $where->equalTo('subscription_id', $params['subscription_id']);
-			if (isset($params['status'])) $where->like('status', '%'.$params['status'].'%');
-			if (isset($params['min_amount'])) $where->greaterThanOrEqualTo('amount', $params['min_amount']);
-			if (isset($params['max_amount'])) $where->lessThanOrEqualTo('amount', $params['max_amount']);
-			if (isset($params['identifier'])) $where->like('order.identifier', '%'.$params['identifier'].'%');
-			if (isset($params['quotation_identifier'])) $where->like('quotation_identifier', '%'.$params['quotation_identifier'].'%');
-			if (isset($params['invoice_identifier'])) $where->like('invoice_identifier', '%'.$params['invoice_identifier'].'%');
-			if (isset($params['min_commitment_date'])) $where->greaterThanOrEqualTo('commitment_date', $params['min_commitment_date']);
-			if (isset($params['max_commitment_date'])) $where->lessThanOrEqualTo('commitment_date', $params['max_commitment_date']);
-			if (isset($params['min_retraction_limit'])) $where->greaterThanOrEqualTo('retraction_limit', $params['min_retraction_limit']);
-			if (isset($params['max_retraction_limit'])) $where->lessThanOrEqualTo('retraction_limit', $params['max_retraction_limit']);
-			if (isset($params['min_retraction_date'])) $where->greaterThanOrEqualTo('retraction_date', $params['min_retraction_date']);
-			if (isset($params['max_retraction_date'])) $where->lessThanOrEqualTo('retraction_date', $params['max_retraction_date']);
-			if (isset($params['min_expected_shipment_date'])) $where->greaterThanOrEqualTo('expected_shipment_date', $params['min_expected_shipment_date']);
-			if (isset($params['max_expected_shipment_date'])) $where->lessThanOrEqualTo('expected_shipment_date', $params['max_expected_shipment_date']);
-			if (isset($params['min_shipment_date'])) $where->greaterThanOrEqualTo('shipment_date', $params['min_shipment_date']);
-			if (isset($params['max_shipment_date'])) $where->lessThanOrEqualTo('shipment_date', $params['max_shipment_date']);
-			if (isset($params['min_expected_delivery_date'])) $where->greaterThanOrEqualTo('expected_delivery_date', $params['min_expected_delivery_date']);
-			if (isset($params['max_expected_delivery_date'])) $where->lessThanOrEqualTo('expected_delivery_date', $params['max_expected_delivery_date']);
-			if (isset($params['min_delivery_date'])) $where->greaterThanOrEqualTo('delivery_date', $params['min_delivery_date']);
-			if (isset($params['max_delivery_date'])) $where->lessThanOrEqualTo('delivery_date', $params['max_delivery_date']);
-			if (isset($params['min_expected_commissioning_date'])) $where->greaterThanOrEqualTo('expected_commissioning_date', $params['min_expected_commissioning_date']);
-			if (isset($params['max_expected_commissioning_date'])) $where->lessThanOrEqualTo('expected_commissioning_date', $params['max_expected_commissioning_date']);
-			if (isset($params['min_commissioning_date'])) $where->greaterThanOrEqualTo('commissioning_date', $params['min_commissioning_date']);
-			if (isset($params['max_commissioning_date'])) $where->lessThanOrEqualTo('commissioning_date', $params['max_commissioning_date']);
-			if (isset($params['min_due_date'])) $where->greaterThanOrEqualTo('due_date', $params['min_due_date']);
-			if (isset($params['max_due_date'])) $where->lessThanOrEqualTo('due_date', $params['max_due_date']);
-			if (isset($params['min_invoice_date'])) $where->greaterThanOrEqualTo('invoice_date', $params['min_invoice_date']);
-			if (isset($params['max_invoice_date'])) $where->lessThanOrEqualTo('invoice_date', $params['max_invoice_date']);
-			if (isset($params['min_expected_settlement_date'])) $where->greaterThanOrEqualTo('expected_settlement_date', $params['min_expected_settlement_date']);
-			if (isset($params['max_expected_settlement_date'])) $where->lessThanOrEqualTo('expected_settlement_date', $params['max_expected_settlement_date']);
-			if (isset($params['min_settlement_date'])) $where->greaterThanOrEqualTo('settlement_date', $params['min_settlement_date']);
-			if (isset($params['max_settlement_date'])) $where->lessThanOrEqualTo('settlement_date', $params['max_settlement_date']);
-				
-			for ($i = 1; $i < 20; $i++) {
-				if (isset($params['property_'.$i])) $where->like('property_'.$i, '%'.$params['property_'.$i].'%');
-				if (isset($params['min_property_'.$i])) $where->greaterThanOrEqualTo('property_'.$i, $params['min_property_'.$i]);
-				if (isset($params['max_property_'.$i])) $where->lessThanOrEqualTo('property_'.$i, $params['max_property_'.$i]);
+			foreach ($params as $propertyId => $property) {
+				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
+				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
+				elseif ($propertyId == 'customer_name') $where->like('customer_name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
+				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
+				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
+				else $where->like('commitment.'.$propertyId, '%'.$params[$propertyId].'%');
 			}
 		}
 
@@ -345,6 +323,11 @@ class Commitment implements InputFilterAwareInterface
     {
     	$commitment = Commitment::getTable()->get($id, $column);
     	if (!$commitment) return null;
+        if ($commitment->account_id) {
+	    	$account = Account::get($commitment->account_id);
+	    	$community = Community::get($account->customer_community_id);
+	    	$commitment->customer_name = $community->name;
+    	}
     	if ($commitment->subscription_id) {
 	    	$subscription = Subscription::get($commitment->subscription_id);
     		$commitment->product_identifier = $subscription->product_identifier;
@@ -358,7 +341,7 @@ class Commitment implements InputFilterAwareInterface
     public function computeDeadlines()
     {
     	$context = Context::getCurrent();
-		foreach ($context->getConfig('commitment')['deadlines'][$this->type] as $step => $deadline) {
+		foreach ($context->getConfig('commitment'.(($this->type) ? '/'.$this->type : ''))['deadlines'] as $step => $deadline) {
 			if ($this->status == $deadline['status']) {
 				
 				// Retrieve the start date
@@ -388,10 +371,11 @@ class Commitment implements InputFilterAwareInterface
     	if ($subscription) {
     		$commitment->subscription_id = $subscription->id;
     		$commitment->subscription = $subscription;
+    		$commitment->description = $subscription->description;
     	}
     	$commitment->status = 'new';
     	$commitment->properties = $commitment->toArray();
-    	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
+    	$commitment->subscriptions = Subscription::getList(array('type' => $type), 'product_identifier', 'ASC');
     	return $commitment;
     }
     
@@ -451,9 +435,33 @@ class Commitment implements InputFilterAwareInterface
 		    if (strlen($this->description) > 2047) return 'Integrity';
 		}
 
+		if (array_key_exists('product_identifier', $data)) {
+			$this->product_identifier = trim(strip_tags($data['product_identifier']));
+			if (strlen($this->product_identifier) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('quantity', $data)) {
+			$this->quantity = trim(strip_tags($data['quantity']));
+			if (strlen($this->quantity) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('unit_price', $data)) {
+			$this->unit_price = trim(strip_tags($data['unit_price']));
+			if (strlen($this->unit_price) > 255) return 'Integrity';
+		}
+		
 		if (array_key_exists('amount', $data)) {
 			$this->amount = trim(strip_tags($data['amount']));
 			if (strlen($this->amount) > 255) return 'Integrity';
+		}
+		
+    	if (array_key_exists('options', $data)) {
+    		$this->options = array();
+    		foreach($data['options'] as $option) {
+				$option = trim(strip_tags($option));
+				if (strlen($option) > 255) return 'Integrity';
+				$options[] = $option;
+    		}
 		}
 		
 		if (array_key_exists('identifier', $data)) {
@@ -654,57 +662,6 @@ class Commitment implements InputFilterAwareInterface
 		$this->properties = $this->toArray();
 		$this->update_time = $data['update_time'];
 		return 'OK';
-    }
-
-    public function loadDataFromRequest($request, $action) {
-
-    	$context = Context::getCurrent();
-    	$updatableProperties = $context->getConfig('commitment')['actions'][$action]['properties'];
-
-    	// Retrieve the data from the request
-    	$data = array();
-
-    	// Specify the area only in creation
-    	if (array_key_exists('account_id', $updatableProperties)) $data['account_id'] = $request->getPost('account_id');
-    	if (array_key_exists('subscription_id', $updatableProperties)) $data['subscription_id'] = $request->getPost('subscription_id');
-    	if (array_key_exists('caption', $updatableProperties)) $data['caption'] = $request->getPost('caption');
-    	if (array_key_exists('description', $updatableProperties)) $data['description'] = $request->getPost('description');
-    	if (array_key_exists('amount', $updatableProperties)) $data['amount'] = $request->getPost('amount');
-    	if (array_key_exists('identifier', $updatableProperties)) $data['identifier'] = $request->getPost('identifier');
-    	if (array_key_exists('quotation_identifier', $updatableProperties)) $data['quotation_identifier'] = $request->getPost('quotation_identifier');
-    	if (array_key_exists('invoice_identifier', $updatableProperties)) $data['invoice_identifier'] = $request->getPost('invoice_identifier');
-    	if (array_key_exists('commitment_date', $updatableProperties)) $data['commitment_date'] = $request->getPost('commitment_date');
-    	if (array_key_exists('retraction_limit', $updatableProperties)) $data['retraction_limit'] = $request->getPost('retraction_limit');
-    	if (array_key_exists('retraction_date', $updatableProperties)) $data['retraction_date'] = $request->getPost('retraction_date');
-    	if (array_key_exists('expected_shipment_date', $updatableProperties)) $data['expected_shipment_date'] = $request->getPost('expected_shipment_date');
-    	if (array_key_exists('shipment_date', $updatableProperties)) $data['shipment_date'] = $request->getPost('shipment_date');
-    	if (array_key_exists('expected_delivery_date', $updatableProperties)) $data['expected_delivery_date'] = $request->getPost('expected_delivery_date');
-    	if (array_key_exists('delivery_date', $updatableProperties)) $data['delivery_date'] = $request->getPost('delivery_date');
-    	if (array_key_exists('expected_commissioning_date', $updatableProperties)) $data['expected_commissioning_date'] = $request->getPost('expected_commissioning_date');
-    	if (array_key_exists('commissioning_date', $updatableProperties)) $data['commissioning_date'] = $request->getPost('commissioning_date');
-    	if (array_key_exists('due_date', $updatableProperties)) $data['due_date'] = $request->getPost('due_date');
-    	if (array_key_exists('invoice_date', $updatableProperties)) $data['invoice_date'] = $request->getPost('invoice_date');
-    	if (array_key_exists('expected_settlement_date', $updatableProperties)) $data['expected_settlement_date'] = $request->getPost('expected_settlement_date');
-    	if (array_key_exists('settlement_date', $updatableProperties)) $data['settlement_date'] = $request->getPost('settlement_date');
-    	if (array_key_exists('comment', $updatableProperties)) $data['comment'] = $request->getPost('comment');
-
-    	foreach ($context->getConfig('commitment')['properties'] as $propertyId => $property) {
-    		if ($property['type'] != 'file') $data[$propertyId] = $request->getPost($propertyId);
-    	}
-
-    	$data['update_time'] = $request->getPost('update_time');
-    	 
-    	// Change the status
-    	if ($action && array_key_exists($action, $context->getConfig('commitment')['actions'])) {
-	    	$actionRules = $context->getConfig('commitment')['actions'][$action];
-	    	if (array_key_exists('targetStatus', $actionRules)) $this->status = $actionRules['targetStatus'];
-    	}
-
-    	// Retrieve the order form
-    	$files = $request->getFiles()->toArray();
-    	 
-    	$return = $this->loadData($data, $files);
-    	if ($return != 'OK') throw new \Exception('View error');
     }
 
     public function add($xcblOrder = null)
