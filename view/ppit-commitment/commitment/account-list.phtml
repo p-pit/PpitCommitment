@@ -11,7 +11,7 @@
 		</th>
 	</tr>
 	<tr>
-<?php $route = $context->getConfig('commitment/accountList')['addRoute']?>
+<?php $route = $context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['addRoute']?>
 		<td colspan="<?php echo $colspan ?>">
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>

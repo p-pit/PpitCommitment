@@ -97,7 +97,7 @@ return array(
 	       						'detail' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/detail[/:id]',
+        										'route' => '/detail[/:type][/:id]',
         										'constraints' => array(
         												'id' => '[0-9]*',
         										),
@@ -615,6 +615,7 @@ return array(
 							),
 					),
 			),
+			'order' => 'customer_name',
 	),
 	'commitmentAccount/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),

@@ -282,10 +282,9 @@ class CommitmentController extends AbstractActionController
     			$connection->beginTransaction();
     			try {
     				$rc = $instance->add();
-    				mkdir('./public/img/'.$context->getInstance()->caption);
-
+    				
     				if ($rc != 'OK') {
-    					$error = $rc;
+	    				if ($rc == 'Duplicate') $error = 'Duplicate instance';
     					$connection->rollback();
     				}
     				else {
@@ -299,6 +298,7 @@ class CommitmentController extends AbstractActionController
     						$connection->rollback();
     					}
     					else {
+		    				mkdir('./public/img/'.$instance->caption);
     						$connection->commit();
 		    				$message = 'OK';
 	    				}
@@ -310,7 +310,7 @@ class CommitmentController extends AbstractActionController
     			}
     		}
     	}
-
+    	
     	$view = new ViewModel(array(
 				'context' => $context,
 				'config' => $context->getconfig(),

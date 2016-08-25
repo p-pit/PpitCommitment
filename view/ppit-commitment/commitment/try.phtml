@@ -19,7 +19,7 @@
 ?>
 	
 <?php if ($message == 'OK') : ?>
-		<h4><?php echo $this->translate('Welcome on your fresh-installed version of P-Pit application. To start, please click on this link.', 'ppit-commitment', $context->getLocale()) ?></h4>
+		<h4><?php echo $this->translate('Welcome on your fresh-installed version of P-Pit application. You have received a registering email. To start, please click on the link inside.', 'ppit-commitment', $context->getLocale()) ?></h4>
 <?php else : ?>
 		<h4><?php echo $this->translate('By entering this few informations, you will get a fresh-installed, immediately available version of P-Pit application.', 'ppit-commitment', $context->getLocale()) ?></h4>
 <?php endif;?>
@@ -30,13 +30,14 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 
 <?php foreach ($context->getConfig('commitment/try') as $propertyId => $options) : ?>
 
+<?php if ($error == 'Duplicate instance') $error = true; else $error = false; ?>
 	<?php if ($propertyId == 'caption') : ?>
 		<div class="form-group" id="<?php echo $propertyId ?>_group">
 			<label class="col-sm-5 control-label">* <?php echo $this->translate('Enterprise', 'ppit-contact', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $instance->caption ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"></p></div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"><?php if ($error) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></p></div>
 		</div>
 
 	<?php elseif ($propertyId == 'n_title') : ?>
@@ -98,7 +99,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-7">
 				<input class="form-control" id="username" value="<?php echo $user->username ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error) echo $this->translate('This identifier has already been chosen, please select another one') ?></div>
+			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></div>
 		</div>
 
 		<input type="hidden" id="requires_notifications" value="1" />

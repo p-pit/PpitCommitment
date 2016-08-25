@@ -17,6 +17,7 @@
 			'Before starting the trial, we have to know you' => 'Avant de démarrer l\'essai, nous avons besoin de vous connaitre',
 			'Begin of display' => 'Début d\'affichage',
 			'Begin' => 'Début',
+			'By entering this few informations, you will get a fresh-installed, immediately available version of P-Pit application.' => 'Veuillez saisir ces quelques informations, nécessaires à l\'installation de votre version de P-Pit, disponible immédiatement, et gratuite pendant un mois.',
 			'Comming events' => 'Evènements à venir',
 			'Commitment' => 'Engagement',
 			'Commitments' => 'Engagements',
@@ -75,5 +76,6 @@
 			'Unit price' => 'Prix unitaire',
 			'Update a commitment' => 'Modifier un engagement',
 			'VAT' => 'TVA',
+			'Welcome on your fresh-installed version of P-Pit application. You have received a registering email. To start, please click on the link inside.' => "Bienvenue sur votre nouvelle application P-Pit. Vous avez reçu un email d'enregistrement. Pour démarrer, veuillez cliquer sur le lien inclus dans cet email.",
 			'Width in pixels' => 'Largeur en pixels',
 	);

@@ -102,7 +102,7 @@ function eraseAccountSearch() {
 
 <?php endforeach;?>
 
-	getAccountList(getParams(), 'customer_name', 'ASC');
+	getAccountList(getParams(), '<?php echo $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['order'] ?>', 'ASC');
 }
 
 function sortAccountList(criterion) {
@@ -448,7 +448,7 @@ function activateAccount() {
 	// Connect the search inputs
 	connectAccountSearchInputs();
 	
-	getAccountList('?', 'customer_name', 'ASC');
+	getAccountList('?', '<?php echo $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['order'] ?>', 'ASC');
 	
 	$('#add-criteria').click(function () {
 		mode = $('#add-criteria').text();
