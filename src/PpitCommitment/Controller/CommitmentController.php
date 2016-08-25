@@ -274,7 +274,6 @@ class CommitmentController extends AbstractActionController
     			$rc = $contact->loadData($data);
     			if ($rc != 'OK') throw new \Exception('View error');
 
-    			$user->contact_id = $contact->id;
     			$rc = $user->loadData($request, $contact, $instance->id);
     			 
     			// Atomically save
@@ -289,8 +288,10 @@ class CommitmentController extends AbstractActionController
     				}
     				else {
     					$contact->instance_id = $instance->id;
+    					$contact->attributedCredits[] = $product;
     					Vcard::getTable()->transSave($contact);
-	    				$rc = $user->add($contact->email, true);
+		    			$user->contact_id = $contact->id;
+    					$rc = $user->add($contact->email, true);
     					
     					if ($rc != 'OK') {
     						if ($rc == 'Duplicate') $error = 'Duplicate identifier';
@@ -310,7 +311,7 @@ class CommitmentController extends AbstractActionController
     			}
     		}
     	}
-    	
+
     	$view = new ViewModel(array(
 				'context' => $context,
 				'config' => $context->getconfig(),
