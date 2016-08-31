@@ -256,13 +256,12 @@ function getCommitmentList(type, params, major, dir) {
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: commitment-list-panel, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 			
 			// Connect the sort anchors
 			$('.ppit-sort-anchor').each(function () {
@@ -277,6 +276,9 @@ function getCommitmentList(type, params, major, dir) {
 					getCommitmentDetail(type, $(this).attr('id').split('_')[1]);
 				});
 			});
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+	<?php endif;?>
 		}
 	}
 	xhttp.send();
@@ -498,12 +500,12 @@ function getCommitmentDetail(type, id) {
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: form_action, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 
 			connectAuditPanel();
 			connectCgvPanel();
@@ -512,6 +514,9 @@ function getCommitmentDetail(type, id) {
 <?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
 			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connect<?php echo $actionId ?>Anchors(type, id, '<?php echo $actionId ?>'); });
 <?php endforeach;?>
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+	<?php endif;?>
 		}
 	}
 	xhttp.send();

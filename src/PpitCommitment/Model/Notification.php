@@ -111,7 +111,7 @@ class Notification implements InputFilterAwareInterface
 		foreach ($cursor as $notification) {
 			$keep = true;
 			foreach ($params as $propertyId => $property) {
-				if (!array_key_exists($propertyId, $notification->criteria)) $keep = false;
+				if (array_key_exists($propertyId, $criteria) && !array_key_exists($propertyId, $notification->criteria)) $keep = false;
 				else {
 					if (substr($propertyId, 0, 4) == 'min_' && $notification->criteria[$propertyId] < $params[$propertyId]) $keep = false;
 	    			elseif (substr($propertyId, 0, 4) == 'max_' && $notification->criteria[$propertyId] > $params[$propertyId]) $keep = false;

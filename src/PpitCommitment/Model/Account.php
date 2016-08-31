@@ -8,6 +8,7 @@ use PpitCore\Model\Generic;
 use PpitDocument\Model\Document;
 use PpitMasterData\Model\Place;
 use PpitUser\Model\User;
+use PpitUser\Model\UserContact;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;
@@ -38,13 +39,14 @@ class Account implements InputFilterAwareInterface
     public $property_8;
     public $property_9;
     public $property_10;
+    public $json_property_1;
     public $audit;
     public $update_time;
         
     // Joined properties
     public $place_name;
     public $customer_name;
-    public $main_contact_id;
+    public $contact_1_id;
     public $supplier_name;
     public $n_title;
     public $n_first;
@@ -58,11 +60,21 @@ class Account implements InputFilterAwareInterface
     public $place;
 	public $customer_community;
 	public $supplier_community;
-	public $main_contact;
+	public $contact_1;
+	public $contact_2;
+	public $contact_3;
+	public $contact_4;
+	public $contact_5;
 	public $properties;
     public $files;
 	public $comment;
-
+	public $is_notified;
+	public $locale;
+	public $username;
+	public $new_password;
+	public $user;
+	public $userContact;
+	
     protected $inputFilter;
 
     // Static fields
@@ -96,13 +108,14 @@ class Account implements InputFilterAwareInterface
         $this->property_8 = (isset($data['property_8'])) ? $data['property_8'] : null;
         $this->property_9 = (isset($data['property_9'])) ? $data['property_9'] : null;
         $this->property_10 = (isset($data['property_10'])) ? $data['property_10'] : null;
+        $this->json_property_1 = (isset($data['json_property_1'])) ? json_decode($data['json_property_1'], true) : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
         // Joined properties
         $this->place_name = (isset($data['place_name'])) ? $data['place_name'] : null;
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
-        $this->main_contact_id = (isset($data['main_contact_id'])) ? $data['main_contact_id'] : null;
+        $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
         $this->supplier_name = (isset($data['supplier_name'])) ? $data['supplier_name'] : null;
         $this->n_title = (isset($data['n_title'])) ? $data['n_title'] : null;
         $this->n_first = (isset($data['n_first'])) ? $data['n_first'] : null;
@@ -136,28 +149,30 @@ class Account implements InputFilterAwareInterface
     	$data['property_8'] =  ($this->property_8) ? $this->property_8 : null;
     	$data['property_9'] =  ($this->property_9) ? $this->property_9 : null;
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
+    	$data['json_property_1'] =  ($this->json_property_1) ? json_encode($this->json_property_1) : null;
     	$data['audit'] =  ($this->audit) ? json_encode($this->audit) : null;
     	return $data;
     }
     
     public static function getList($type, $params, $major, $dir, $mode = 'todo')
     {
+    	$context = Context::getCurrent();
+
     	$select = Account::getTable()->getSelect()
 			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
 			->join(array('supplier' => 'contact_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'main_contact_id'), 'left')
-			->join('contact_vcard', 'customer.main_contact_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'tel_work', 'tel_cell'), 'left')
+			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'contact_1_id'), 'left')
+			->join('contact_vcard', 'customer.contact_1_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'tel_work', 'tel_cell'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
-		$where->notEqualTo('status', 'deleted');
+		$where->notEqualTo('commitment_account.status', 'deleted');
 
     	// Todo list vs search modes
     	if ($mode == 'todo') {
     		$where->greaterThanOrEqualTo('commitment_account.closing_date', date('Y-m-d'));
     	}
     	else {
-
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
     			if ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
@@ -166,13 +181,25 @@ class Account implements InputFilterAwareInterface
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
     	}
-		
     	$select->where($where);
 		$cursor = Account::getTable()->selectWith($select);
 		$accounts = array();
 		foreach ($cursor as $account) {
 			$account->properties = $account->toArray();
-			$accounts[] = $account;
+			
+			// Filter on authorized perimeter
+			if (array_key_exists($type, $context->getPerimeters())) {
+				$keep = true;
+				foreach ($context->getPerimeters()[$type] as $key => $values) {
+					$keep2 = false;
+					foreach ($values as $value) {
+						if ($account->properties[$key] == $value) $keep2 = true;
+					}
+					if (!$keep2) $keep = false;
+				}
+				if ($keep) $accounts[] = $account;
+			}
+			else $accounts[] = $account;
 		}
 		return $accounts;
     }
@@ -185,18 +212,39 @@ class Account implements InputFilterAwareInterface
     	// Retrieve the place, the customer and the supplier
     	$account->place = Place::getTable()->get($account->place_id);
     	if ($account->place) $account->place_name = $account->place->name;
-    	$account->supplier_community = Community::getTable()->get($account->supplier_community_id);
-    	if ($account->supplier_community) $account->supplier_name = $account->supplier_community->name;
-    	$account->customer_community = Community::getTable()->get($account->customer_community_id);
-    	$account->customer_name = $account->customer_community->name;
-    	$account->main_contact_id = $account->customer_community->main_contact_id;
-    	$account->main_contact = Vcard::get($account->customer_community->main_contact_id);
-    	$account->n_first = $account->main_contact->n_first;
-    	$account->n_last = $account->main_contact->n_last;
-    	$account->email = $account->main_contact->email;
-    	$account->tel_work = $account->main_contact->tel_work;
-    	$account->tel_cell = $account->main_contact->tel_cell;
-    	$account->properties = $account->toArray();
+    	if ($account->supplier_community_id) {
+    		$account->supplier_community = Community::getTable()->get($account->supplier_community_id);
+	    	$account->supplier_name = $account->supplier_community->name;
+    	}
+    	if ($account->customer_community_id) {
+    		$account->customer_community = Community::getTable()->get($account->customer_community_id);
+    		$account->customer_name = $account->customer_community->name;
+	    	if ($account->customer_community->contact_1_id) {
+	    		$account->contact_1_id = $account->customer_community->contact_1_id;
+		    	$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
+		    	$account->n_first = $account->contact_1->n_first;
+		    	$account->n_last = $account->contact_1->n_last;
+		    	$account->email = $account->contact_1->email;
+		    	$account->tel_work = $account->contact_1->tel_work;
+		    	$account->tel_cell = $account->contact_1->tel_cell;
+		    	$account->is_notified = $account->contact_1->is_notified;
+		    	$account->locale = $account->contact_1->locale;
+		    	
+		    	$userContact = UserContact::get($account->contact_1_id, 'contact_id');
+		    	if ($userContact) {
+		    		$this->userContact = $userContact;
+
+		    		$user = User::transGet($userContact->user_id);
+		    		$account->user = $user;
+		    		$account->username = $user->username;
+		    	}
+	    	}
+	        if ($account->customer_community->contact_2_id) $account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
+	        if ($account->customer_community->contact_3_id) $account->contact_3 = Vcard::get($account->customer_community->contact_3_id);
+	        if ($account->customer_community->contact_4_id) $account->contact_4 = Vcard::get($account->customer_community->contact_4_id);
+	        if ($account->customer_community->contact_5_id) $account->contact_5 = Vcard::get($account->customer_community->contact_5_id);
+    	}
+        $account->properties = $account->toArray();
 
     	return $account;
     }
@@ -208,7 +256,10 @@ class Account implements InputFilterAwareInterface
 		$account->type = $type;
 		$account->audit = array();
 		$account->customer_community = Community::instanciate();
-		$account->main_contact = Vcard::instanciate();
+		$account->contact_1 = Vcard::instanciate();
+		$account->json_property_1 = array();
+		$account->is_notified = 1;
+		$account->locale = 'fr_FR';
 		return $account;
     }
 
@@ -235,7 +286,7 @@ class Account implements InputFilterAwareInterface
 			}
 			if (array_key_exists('email', $data)) {
 				$this->email = trim(strip_tags($data['email']));
-				if (!$this->email || strlen($this->email) > 255) return 'Integrity';
+				if (strlen($this->email) > 255) return 'Integrity';
 			}
 			if (array_key_exists('tel_work', $data)) {
 		    	$this->tel_work = trim(strip_tags($data['tel_work']));
@@ -294,15 +345,30 @@ class Account implements InputFilterAwareInterface
 				$this->property_10 = trim(strip_tags($data['property_10']));
 				if (strlen($this->property_10) > 255) return 'Integrity';
 			}
+    		if (array_key_exists('json_property_1', $data)) {
+				$this->json_property_1 = $data['json_property_1'];
+			}
+        	if (array_key_exists('username', $data)) {
+				$this->username = $data['username'];
+			}
+            if (array_key_exists('is_notified', $data)) {
+				$this->is_notified = $data['is_notified'];
+			}
+            if (array_key_exists('new_password', $data)) {
+				$this->new_password = $data['new_password'];
+			}
+            if (array_key_exists('locale', $data)) {
+				$this->locale = $data['locale'];
+			}
 			if (array_key_exists('update_time', $data)) $this->update_time = $data['update_time'];
 				
 			$this->customer_community->name = ($this->customer_name) ? $this->customer_name : $this->n_last.', '.$this->n_first;
-			$this->main_contact->n_first = $this->n_first;
-			$this->main_contact->n_last = $this->n_last;
-			$this->main_contact->email = $this->email;
-			$this->main_contact->tel_work = $this->tel_work;
-			$this->main_contact->tel_cell = $this->tel_cell;
-			$this->main_contact->n_fn = $this->n_last.', '.$this->n_first;
+			$this->contact_1->n_first = $this->n_first;
+			$this->contact_1->n_last = $this->n_last;
+			$this->contact_1->email = $this->email;
+			$this->contact_1->tel_work = $this->tel_work;
+			$this->contact_1->tel_cell = $this->tel_cell;
+			$this->contact_1->n_fn = $this->n_last.', '.$this->n_first;
     		$this->properties = $this->toArray();
     		$this->files = $files;
 
@@ -316,10 +382,10 @@ class Account implements InputFilterAwareInterface
     	return 'OK';
     }
 
-    public function add($createUser = true)
+    public function add()
     {
     	$context = Context::getCurrent();
-
+/*
     	$document = new Document;
     	$document->parent_id = 0;
     	$document->type = 'directory';
@@ -331,20 +397,31 @@ class Account implements InputFilterAwareInterface
     	$this->customer_community->add();
     	$this->customer_community_id = $this->customer_community->id;
 
-    	$this->main_contact->community_id = $this->customer_community->id;
-    	$this->main_contact = Vcard::optimize($this->main_contact);
-    	$this->main_contact->add();
-    	foreach ($this->files as $file) $this->main_contact->saveFile($file);
-    	$this->customer_community->main_contact_id = $this->main_contact->id;
+    	$this->contact_1->community_id = $this->customer_community->id;
+    	$this->contact_1 = Vcard::optimize($this->contact_1);
+    	$this->contact_1->add();
+    	foreach ($this->files as $file) $this->contact_1->saveFile($file);
+    	$this->customer_community->contact_1_id = $this->contact_1->id;
     	Community::getTable()->save($this->customer_community);
 
-    	if ($createUser) {
+    	if ($this->username) {
     		$user = User::getNew();
-    		$user->username = $this->main_contact->email;
-    		$user->contact_id = $this->main_contact->id;
-    		$rc = $user->add();
-    		if ($rc != 'OK') return $rc;
-    	}
+    		$user->username = $this->username;
+    		if ($this->is_notified) {
+    			$rc = $user->add(false, true);
+    			if ($rc != 'OK') return $rc;
+    		}
+    		else {
+    			$user->new_password = $this->new_password;
+    			$rc = $user->add();
+    			if ($rc != 'OK') return 'duplicate-user';
+    			$user->changePassword();
+    		}
+    		$userContact = UserContact::getNew();
+    		$userContact->user_id = $user->user_id;
+    		$userContact->contact_id = $this->contact_1_id;
+			$userContact->add();
+    	}*/
 
     	$this->id = null;
     	Account::getTable()->save($this);
@@ -359,12 +436,37 @@ class Account implements InputFilterAwareInterface
 
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
-
+/*
     	$this->customer_community->update($this->customer_community->update_time);
     	
-    	$this->main_contact->update($this->main_contact->update_time);
-    	foreach ($this->files as $file) $this->main_contact->saveFile($file);
+    	$this->contact_1->update($this->contact_1->update_time);
+    	if ($this->files) foreach ($this->files as $file) $this->contact_1->saveFile($file);
 
+    	if ($this->user && $this->username != $this->user->username) {
+    		
+    		// Lock the current user
+    		$this->user->state = 0;
+    		$this->user->update($this->user->update_time);
+    		
+    		// And create a new one
+    		$user = User::getNew();
+    		$user->username = $this->username;
+    		if ($this->is_notified) {
+    			$rc = $user->add(false, true);
+    			if ($rc != 'OK') return $rc;
+    		}
+    		else {
+    			$user->new_password = $this->new_password;
+    			$rc = $user->add();
+    			if ($rc != 'OK') return $rc;
+    			$user->changePassword();
+    		}
+    		$userContact = UserContact::getNew();
+    		$userContact->user_id = $user->user_id;
+    		$userContact->contact_id = $this->contact_1_id;
+    		$userContact->add();
+    	}*/
+    	 
     	Account::getTable()->save($this);
     
     	return 'OK';
@@ -392,10 +494,10 @@ class Account implements InputFilterAwareInterface
     
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
-    	$user = User::get($this->main_contact->id, 'contact_id');
+    	$user = User::get($this->contact_1->id, 'contact_id');
     	$user->delete($user->update_time);
 
-    	$this->main_contact->delete($this->main_contact->update_time);
+    	$this->contact_1->delete($this->contact_1->update_time);
     	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->customer_community->update_time);
     	 
     	$this->status = 'deleted';

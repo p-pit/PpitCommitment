@@ -118,7 +118,31 @@ return array(
 		        								),
 		        						),
 		        				),
-		        				'register' => array(
+		        				'updateUser' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/update-user[/:type][/:id][/:act]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'update-user',
+		        								),
+		        						),
+		        				),
+	       						'updateContact' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/update-contact[/:type][/:contactNumber][/:id][/:act]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'updateContact',
+		        								),
+		        						),
+		        				),
+	       				'register' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/register[/:type]',
@@ -410,7 +434,9 @@ return array(
 				array('route' => 'commitmentAccount/export', 'roles' => array('user')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('user')),
 				array('route' => 'commitmentAccount/update', 'roles' => array('user')),
-				array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
+				array('route' => 'commitmentAccount/updateUser', 'roles' => array('user')),
+            	array('route' => 'commitmentAccount/updateContact', 'roles' => array('user')),
+            	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
             	array('route' => 'commitment', 'roles' => array('admin')),
             	array('route' => 'commitment/accountlist', 'roles' => array('user')),
             	array('route' => 'commitment/index', 'roles' => array('user')),
@@ -475,25 +501,27 @@ return array(
 	),
 
 	'ppitRoles' => array(
-			'accountant' => array(
-					'show' => true,
-					'labels' => array(
-							'en_US' => 'Accountant',
-							'fr_FR' => 'Comptable',
+			'ppitCommitment' => array(
+					'accountant' => array(
+							'show' => true,
+							'labels' => array(
+									'en_US' => 'Accountant',
+									'fr_FR' => 'Comptable',
+							),
 					),
-			),
-			'sales_manager' => array(
-					'show' => true,
-					'labels' => array(
-							'en_US' => 'Sales manager',
-							'fr_FR' => 'Vendeur',
+					'sales_manager' => array(
+							'show' => true,
+							'labels' => array(
+									'en_US' => 'Sales manager',
+									'fr_FR' => 'Vendeur',
+							),
 					),
-			),
-			'business_owner' => array(
-					'show' => true,
-					'labels' => array(
-							'en_US' => 'Business owner',
-							'fr_FR' => 'Gestion',
+					'business_owner' => array(
+							'show' => true,
+							'labels' => array(
+									'en_US' => 'Business owner',
+									'fr_FR' => 'Gestion',
+							),
 					),
 			),
 	),
@@ -639,6 +667,7 @@ return array(
 	'commitmentAccount/detail' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
+			'tabs' => array(),
 	),
 	'commitmentAccount/update' => array(
 			'n_first' => array('mandatory' => true),
@@ -646,6 +675,22 @@ return array(
 			'email' => array('mandatory' => true),
 			'opening_date' => array('mandatory' => true),
 			'closing_date' => array('mandatory' => false),
+	),
+	'commitmentAccount/updateContact' => array(
+			'n_title' => array('mandatory' => false),
+			'n_first' => array('mandatory' => true),
+			'n_last' => array('mandatory' => true),
+			'tel_work' => array('mandatory' => false),
+			'tel_cell' => array('mandatory' => false),
+			'email' => array('mandatory' => false),
+			'adr_street' => array('mandatory' => false),
+			'adr_extended' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => false),
+			'adr_post_office_box' => array('mandatory' => false),
+			'adr_city' => array('mandatory' => false),
+			'adr_state' => array('mandatory' => false),
+			'adr_country' => array('mandatory' => false),
+			'locale' => array('mandatory' => true),
 	),
 	'commitment/try' => array(
 			'caption' => array('mandatory' => true),

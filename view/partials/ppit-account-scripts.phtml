@@ -201,13 +201,20 @@ function getAccountList(params, major, dir) {
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('account-list-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: account-list-panel, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
 			
 			// Connect the sort anchors
 			$('.ppit-sort-anchor').each(function () {
@@ -229,6 +236,9 @@ function getAccountList(params, major, dir) {
 					getAccountDetail($(this).attr('id').split('_')[1]);
 				});
 			});
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
 		}
 	}
 	xhttp.send();
@@ -257,6 +267,10 @@ foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '
 	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
+$properties['username'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['is_notified'] = array('type' => 'checkbox');
+$properties['new_password'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['locale'] = array('type' => 'select', 'mandatory' => false);
 $properties['update_time'] = array('type' => 'hidden');
 
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Account', 'context' => $context, 'properties' => $properties)) 
@@ -264,6 +278,7 @@ echo $this->partial('/partials/check-update-properties', array('entity' => 'Acco
 
 function connectAccountUpdateForm(id, action)
 {
+
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
@@ -277,6 +292,10 @@ function connectAccountUpdateForm(id, action)
 	
 		// Check validity
 		var validity = checkAccountUpdateProperties(id);
+		if ($('#new_password').val() != $('#new_password2').val()) {
+			renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
+			validity = false;
+		}
 
 		if (validity) {
 		
@@ -285,7 +304,7 @@ function connectAccountUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -297,7 +316,7 @@ function connectAccountUpdateForm(id, action)
 					var files = fileSelect.files;
 					for (var i = 0; i < files.length; i++) {
 						var file = files[i];
-						formData.append('order_form', file, file.name);
+						formData.append('<?php echo $propertyId ?>', file, file.name);
 					}
 				}
 
@@ -316,6 +335,7 @@ function connectAccountUpdateForm(id, action)
 				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					filterAccountList();
+					connectAccountUpdateForm(id, action);
 					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
 				}
 			};
@@ -326,21 +346,31 @@ function connectAccountUpdateForm(id, action)
 }
 
 function getAccountUpdate(id, action) {
-	
+
 	var xhttp = new XMLHttpRequest();
 	var route = '<?php echo $this->url('commitmentAccount/update', array('type' => $type)) ?>/' + id;
 	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('account-update-panel, route = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
+
+			if (id) {
+				$('#account-update-anchor').click(function () { getAccountUpdate(id, 'update'); });
+				$('#account-delete-anchor').click(function () { getAccountUpdate(id, 'delete'); });
+			}
+			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
 			
 			connectAccountUpdateForm(id, action);
+			
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
 		}
 	}
 	xhttp.send();
@@ -350,6 +380,224 @@ function getAccountUpdate(id, action) {
 	if (action == 'update') $('#account-update-anchor').removeClass("btn-default").addClass("btn-primary");
 	else if (action == 'delete') $('#account-delete-anchor').removeClass("btn-default").addClass("btn-primary");
 }
+
+<?php 
+$properties = array();
+$properties['username'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['is_notified'] = array('type' => 'checkbox');
+$properties['new_password'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['locale'] = array('type' => 'select', 'mandatory' => false);
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'User', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectUserUpdateForm(id, action)
+{
+
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkUserUpdateProperties(id);
+		if ($('#new_password').val() != $('#new_password2').val()) {
+			renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
+			validity = false;
+		}
+
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentAccount/updateUser', array('type' => $type)) ?>/' + id;
+			if (action) route += '/' + action;
+			target = 'account-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					document.getElementById(target).innerHTML = xhttp.responseText;
+					connectUserUpdateForm(id, action);
+					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getUserUpdate(id, action) {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/updateUser', array('type' => $type)) ?>/' + id;
+	if (action) route += '/' + action;
+
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
+
+			if (id) {
+				$('#account-update-anchor').click(function () { getAccountUpdate(id, 'update'); });
+				$('#account-delete-anchor').click(function () { getAccountUpdate(id, 'delete'); });
+			}
+			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
+			
+			connectAccountUpdateForm(id, action);
+			
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.action-btn').removeClass("btn-primary").addClass("btn-default");
+	if (action == 'update') $('#account-update-anchor').removeClass("btn-default").addClass("btn-primary");
+	else if (action == 'delete') $('#account-delete-anchor').removeClass("btn-default").addClass("btn-primary");
+}
+
+<?php 
+$properties = array();
+
+foreach ($context->getConfig('commitmentAccount/updateContact'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('vcard/properties')[$propertyId];
+	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Contact', 'context' => $context, 'properties' => $properties)) 
+?>
+
+<?php foreach ($context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['tabs'] as $contactNumber => $tab) : ?>
+
+function connect<?php echo $contactNumber ?>UpdateForm(id, action)
+{
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkContactUpdateProperties(id);
+
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+	<?php foreach ($properties as $propertyId => $property) : ?>
+		<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+		<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+		<?php elseif ($property['type'] == 'photo') : ?>
+				var fileSelect = document.getElementById('<?php echo $propertyId ?>');
+				if (fileSelect) {
+					var files = fileSelect.files;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						formData.append('order_form', file, file.name);
+					}
+				}
+
+		<?php endif ?>
+
+	<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentAccount/updateContact', array('type' => $type, 'contactNumber' => $contactNumber)) ?>/' + id;
+			if (action) route += '/' + action;
+			target = 'account-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					document.getElementById(target).innerHTML = xhttp.responseText;
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function get<?php echo $contactNumber ?>Update(id, action) {
+	
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/updateContact', array('type' => $type, 'contactNumber' => $contactNumber)) ?>/' + id;
+	if (action) route += '/' + action;
+
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
+
+			if (id) {
+				$('#account-update-anchor').click(function () { get<?php echo $contactNumber ?>Update(id, 'update'); });
+				$('#account-delete-anchor').click(function () { get<?php echo $contactNumber ?>Update(id, 'delete'); });
+			}
+			else $('#account-add-anchor').click(function () { get<?php echo $contactNumber ?>Update(id, 'add'); });
+
+			connect<?php echo $contactNumber ?>UpdateForm(id, action);
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+/*	$('.action-btn').removeClass("btn-primary").addClass("btn-default");
+	if (action == 'update') $('#account-update-anchor').removeClass("btn-default").addClass("btn-primary");
+	else if (action == 'delete') $('#account-delete-anchor').removeClass("btn-default").addClass("btn-primary");*/
+}
+
+<?php endforeach;?>
 
 // Load the list
 function getCommitmentAccountList(type, params, major, dir) {		
@@ -361,13 +609,12 @@ function getCommitmentAccountList(type, params, major, dir) {
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: commitment-list-panel, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 			
 			// Connect the detail anchors
 			$('.commitment-detail-anchor').each(function () {
@@ -381,6 +628,9 @@ function getCommitmentAccountList(type, params, major, dir) {
 					document.location.href = $(this).attr('id');
 				});
 			});
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
 		}
 	}
 	xhttp.send();
@@ -401,26 +651,38 @@ function getAccountDetail(id) {
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: form_action, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 			
 			connectAuditPanel();
 			connectRemoveIcon('remove-anchor', 'form_action');
 
 			getAccountUpdate(id, '');
+			$('#contact_1-tab').addClass('active');
 
-			if (id) {
-				$('#account-update-anchor').click(function () { getAccountUpdate(id, 'update'); });
-				$('#account-delete-anchor').click(function () { getAccountUpdate(id, 'delete'); });
-			}
-			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
+<?php foreach ($context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['tabs'] as $tabId => $tab) : ?>
+			$('#<?php echo $tabId ?>-tab').click(function () {
+				$('.account-tab').removeClass('active');
+				$('#<?php echo $tabId ?>-tab').addClass('active');
+	<?php if ($tabId == 'contact_1') : ?>
+				getAccountUpdate(id, '');
+	<?php elseif ($tabId == 'user') : ?>
+				getUserUpdate(id, '');
+	<?php else : ?>
+				get<?php echo $contactNumber ?>Update(id, '');
+	<?php endif;?>
+			});
+<?php endforeach;?>
 
 <?php if (array_key_exists('p-pit-engagements', $context->getApplications())) : ?>
 			if (id != 0) getCommitmentAccountList('<?php echo $type ?>', '?account_id=' + id, 'identifier', 'DESC');
+<?php endif;?>
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
 <?php endif;?>
 		}
 	}

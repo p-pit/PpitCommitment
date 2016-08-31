@@ -50,8 +50,8 @@
 		<?php elseif ($rendering == 'photo') : ?>
 		<td>
 			<span class="info">
-				<img height="40" src="<?php echo $this->url('vcard/photo', array('id' => ($account->properties[$propertyId]) ? $account->properties[$propertyId] :  $account->main_contact_id)) ?>"/>
-				<span><img height="150" src="<?php echo $this->url('vcard/photo', array('id' => ($account->properties[$propertyId]) ? $account->properties[$propertyId] :  $account->main_contact_id)) ?>"/></span>
+				<img height="40" src="<?php echo $this->url('vcard/photo', array('id' => ($account->properties[$propertyId]) ? $account->properties[$propertyId] :  $account->contact_1_id)) ?>"/>
+				<span><img height="150" src="<?php echo $this->url('vcard/photo', array('id' => ($account->properties[$propertyId]) ? $account->properties[$propertyId] :  $account->contact_1_id)) ?>"/></span>
 			</span>
 		</td>
 

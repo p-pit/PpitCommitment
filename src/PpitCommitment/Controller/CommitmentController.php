@@ -19,6 +19,8 @@ use DOMPDFModule\View\Model\PdfModel;
 use Zend\Session\Container;
 use Zend\Http\Client;
 use Zend\Http\Request;
+use Zend\Log\Logger;
+use Zend\Log\Writer;
 use Zend\Mvc\Controller\AbstractActionController;
 
 class CommitmentController extends AbstractActionController
@@ -236,6 +238,18 @@ class CommitmentController extends AbstractActionController
     public function tryAction()
     {
     	$context = Context::getCurrent();
+    	$request = $this->getRequest();
+    	// Log
+    	$logText = "\t";
+    	foreach ($request->getHeaders()->toArray() as $headerId => $headerValue) $logText .= $headerValue."\t";
+    	$logText .= (($request->isPost() ? 'POST' : 'GET'))."\t";
+    	foreach ($request->getPost()->toArray() as $postId => $postValue) $logText .= $postValue."\t";
+		$logText .= "\n";
+    	$writer = new Writer\Stream('data/log/commitment_try.txt');
+    	$logger = new Logger();
+    	$logger->addWriter($writer);
+    	$logger->info($logText);
+    	
     	$product = $this->params()->fromRoute('product', null);
 
     	$instance = Instance::instanciate();
@@ -247,8 +261,7 @@ class CommitmentController extends AbstractActionController
     	$csrfForm->addCsrfElement('csrf');
     	$error = null;
     	$message = null;
-    	$request = $this->getRequest();
-    	if ($request->isPost()) {
+		if ($request->isPost()) {
 			$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		 
@@ -262,7 +275,7 @@ class CommitmentController extends AbstractActionController
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['attributed_credits'] = array($product);
+    			$data['attributed_credits'] = array('p-pit-studies' => null);  //$product; à rectifier
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
@@ -288,7 +301,6 @@ class CommitmentController extends AbstractActionController
     				}
     				else {
     					$contact->instance_id = $instance->id;
-    					$contact->attributedCredits[] = $product;
     					Vcard::getTable()->transSave($contact);
 		    			$user->contact_id = $contact->id;
     					$rc = $user->add($contact->email, true);

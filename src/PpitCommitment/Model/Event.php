@@ -106,7 +106,7 @@ class Event implements InputFilterAwareInterface
     			}
     		}
     	}
-		
+
     	$select->where($where);
 		$cursor = Event::getTable()->selectWith($select);
 		$criteria = $context->getConfig('commitmentEvent/update'.(($type) ? '/'.$type : ''))['criteria'];
@@ -114,11 +114,11 @@ class Event implements InputFilterAwareInterface
 		foreach ($cursor as $event) {
 			$keep = true;
 			foreach ($params as $propertyId => $property) {
-				if (!array_key_exists($propertyId, $event->criteria)) $keep = false;
+				if (array_key_exists($propertyId, $criteria) && !array_key_exists($propertyId, $event->criteria)) $keep = false;
 				else {
 					if (substr($propertyId, 0, 4) == 'min_' && $event->criteria[$propertyId] < $params[$propertyId]) $keep = false;
 	    			elseif (substr($propertyId, 0, 4) == 'max_' && $event->criteria[$propertyId] > $params[$propertyId]) $keep = false;
-	    			elseif ($params[$propertyId] != $event->criteria[$propertyId]) $keep = false;
+	    			elseif (array_key_exists($propertyId, $criteria) && $params[$propertyId] != $event->criteria[$propertyId]) $keep = false;
 				}
 			}
 			if ($keep) {
@@ -214,7 +214,7 @@ class Event implements InputFilterAwareInterface
 				$this->image[$attributeId] = $value;
 			}
         }
-    		if (array_key_exists('criteria', $data)) {
+    	if (array_key_exists('criteria', $data)) {
 			$this->criteria = array();
 			foreach ($data['criteria'] as $criterionId => $criterion) {
 				$criterion = trim(strip_tags($criterion));
@@ -236,6 +236,11 @@ class Event implements InputFilterAwareInterface
 		}
 		if (array_key_exists('update_time', $data)) $this->update_time = $data['update_time'];
     	$this->properties = $this->toArray();
+
+    	if (!$this->end_time) {
+    		if (substr($this->begin_time, 11, 2) == '23') $this->end_time = substr($this->begin_time, 0, 8).(substr($this->begin_time, 5, 2)+1).'T00'.substr($this->begin_time, 13, 5);
+    		else $this->end_time = substr($this->begin_time, 0, 11).'T'.(substr($this->begin_time, 11, 2)+1).substr($this->begin_time, 13, 5);
+    	}
     	
     	// Update the audit
     	$this->audit[] = array(

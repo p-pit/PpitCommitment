@@ -23,12 +23,12 @@ function getCommitmentMessageList(type, major, dir) {
  	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('index_action').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: index_action, url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 			// Connect the sort anchors
 			$('.ppit-sort-anchor').each(function () {
 				$(this).click(function () {
@@ -52,6 +52,9 @@ function getCommitmentMessageList(type, major, dir) {
 					showCommitmentMessageDetail(type, $(this).attr('id').split('_')[1], 'process');
 				});
 			});
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+	<?php endif;?>
 		}
 	}
 	xhttp.send();
@@ -105,12 +108,12 @@ function showCommitmentMessageDetail(type, id, action)
 	else if (action == 'process') route = '<?php echo $this->url('commitmentMessage/process') ?>/' + id;
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('showing panel: form_action' + ', url = ' + route);
-			console.log(xhttp.responseText);
-<?php endif;?>
 
 			connectCommitmentMessageRemoveIcon(type, 'remove-anchor', 'form_action');
 			connectCommitmentMessageRemoveIcon(type, 'return-anchor', 'form_action');
@@ -118,6 +121,9 @@ function showCommitmentMessageDetail(type, id, action)
 			if (action =='import') connectimportForm(0);
 			else if (action =='submit') connectsubmitForm(id);
 			else if (action =='process') connectprocessForm(id);
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+	<?php endif;?>
 		}
 	}
 	xhttp.send();
