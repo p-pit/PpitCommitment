@@ -956,7 +956,7 @@ class Commitment implements InputFilterAwareInterface
 		$select->where($where);
 		$cursor = Commitment::getTable()->transSelectWith($select);
 		foreach ($cursor as $commitment) {
-			$credits[$commitment->instance_id]->consumers[] = $commitment;
+			if (array_key_exists($commitment->instance_id, $credits)) $credits[$commitment->instance_id]->consumers[] = $commitment;
 		}
 
 		// Retrieve administrators to be notified
@@ -968,7 +968,8 @@ class Commitment implements InputFilterAwareInterface
 		foreach ($cursor as $contact) {
 			if ($contact->is_notified) $instances[$contact->instance_id]->administrators[] = $contact;
 		}
-
+var_dump(count($credits));
+		
 		// Check enough credits are available
 		foreach ($credits as $credit) {
 			$counter = count($credit->consumers);

@@ -282,7 +282,7 @@ class CommitmentController extends AbstractActionController
     			$data['email'] = $request->getPost('email');
     			$data['tel_work'] = $request->getPost('tel_work');
     			$data['tel_cell'] = null;
-    			$data['roles'] = array('admin');
+    			$data['roles'] = array('admin' => true, 'manager' => true);
     			$data['is_notified'] = 1;
     			$rc = $contact->loadData($data);
     			if ($rc != 'OK') throw new \Exception('View error');
@@ -303,6 +303,7 @@ class CommitmentController extends AbstractActionController
     					$contact->instance_id = $instance->id;
     					Vcard::getTable()->transSave($contact);
 		    			$user->contact_id = $contact->id;
+		    			$user->email = $contact->email;
     					$rc = $user->add($contact->email, true);
     					
     					if ($rc != 'OK') {
