@@ -951,8 +951,8 @@ class Commitment implements InputFilterAwareInterface
     		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left');
     	$where = new Where();
     	$where->in('instance_id', $instanceIds);
-		$where->notEqualTo('status', 'closed');
-		$where->notEqualTo('status', 'suspended');
+		$where->notEqualTo('commitment.status', 'closed');
+		$where->notEqualTo('commitment.status', 'suspended');
 		$select->where($where);
 		$cursor = Commitment::getTable()->transSelectWith($select);
 		foreach ($cursor as $commitment) {
@@ -968,7 +968,6 @@ class Commitment implements InputFilterAwareInterface
 		foreach ($cursor as $contact) {
 			if ($contact->is_notified) $instances[$contact->instance_id]->administrators[] = $contact;
 		}
-var_dump(count($credits));
 		
 		// Check enough credits are available
 		foreach ($credits as $credit) {

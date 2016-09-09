@@ -525,6 +525,14 @@ return array(
 					),
 			),
 	),
+
+	'contact/perimeters' => array(
+			'ppitCommitment' => array(
+			),
+	),
+	
+	'currentApplication' => 'ppitCommitment',
+		
 	'ppitCommitmentDependencies' => array(
 	),
 
