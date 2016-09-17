@@ -21,6 +21,9 @@ class Notification implements InputFilterAwareInterface
     public $title;
     public $content;
     public $image;
+    public $attachment_type;
+    public $attachment_label;
+    public $attachment_path;
     public $target;
     public $begin_date;
     public $end_date;
@@ -31,6 +34,7 @@ class Notification implements InputFilterAwareInterface
     public $comment;
     public $properties;
     public $matchingAccounts;
+    public $link;
     
     protected $inputFilter;
 
@@ -53,6 +57,9 @@ class Notification implements InputFilterAwareInterface
         $this->title = (isset($data['title'])) ? $data['title'] : null;
         $this->content = (isset($data['content'])) ? $data['content'] : null;
         $this->image = (isset($data['image'])) ? json_decode($data['image'], true) : null;
+        $this->attachment_type = (isset($data['attachment_type'])) ? $data['attachment_type'] : null;
+        $this->attachment_label = (isset($data['attachment_label'])) ? $data['attachment_label'] : null;
+        $this->attachment_path = (isset($data['attachment_path'])) ? $data['attachment_path'] : null;
         $this->target = (isset($data['target'])) ? json_decode($data['target'], true) : null;
         $this->begin_date = (isset($data['begin_date'])) ? $data['begin_date'] : null;
         $this->end_date = (isset($data['end_date']) && $data['end_date'] != '9999-12-31') ? $data['end_date'] : null;
@@ -72,6 +79,9 @@ class Notification implements InputFilterAwareInterface
     	$data['title'] = $this->title;
     	$data['content'] = $this->content;
     	$data['image'] = json_encode($this->image);
+    	$data['attachment_type'] = $this->attachment_type;
+    	$data['attachment_label'] = $this->attachment_label;
+    	$data['attachment_path'] = $this->attachment_path;
     	$data['target'] = json_encode($this->target);
     	$data['begin_date'] =  ($this->begin_date) ? $this->begin_date : null;
     	$data['end_date'] =  ($this->end_date) ? $this->end_date : '9999-12-31';
@@ -141,6 +151,9 @@ class Notification implements InputFilterAwareInterface
 
     public static function retrieveCurrents($type, $category, $account_id)
     {
+    	$context = Context::getCurrent();
+    	$dropboxClient = null;
+
     	$select = Notification::getTable()->getSelect()
     		->order(array('end_date DESC'));
 		$where = new Where;
@@ -153,10 +166,19 @@ class Notification implements InputFilterAwareInterface
 		$select->where($where);
     	$cursor = Notification::getTable()->selectWith($select);
     	$notifications = array();
-    	foreach ($cursor as $notification) $notifications[] = $notification;
+    	foreach ($cursor as $notification) {
+    		if ($notification->attachment_type == 'dropbox') {
+    			if (!$dropboxClient) {
+    				require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
+    				$dropboxClient = new \Dropbox\Client($context->getConfig('ppitDocument')['dropboxCredential'], "P-PIT");
+    			}
+    			$notification->link = $dropboxClient->createShareableLink($notification->attachment_path);
+    		}
+    		$notifications[] = $notification;
+    	}
     	return $notifications;
     }
-    
+
     public static function instanciate($type = null)
     {
 		$notification = new Notification;
@@ -208,6 +230,18 @@ class Notification implements InputFilterAwareInterface
 				if ($value) $this->image[$attributeId] = $value;
 			}
         }
+    	if (array_key_exists('attachment_type', $data)) {
+		    $this->attachment_type = $data['attachment_type'];
+		    if (strlen($this->attachment_type) > 255) return 'Integrity';
+		}
+        if (array_key_exists('attachment_label', $data)) {
+		    $this->attachment_label = $data['attachment_label'];
+		    if (strlen($this->attachment_label) > 255) return 'Integrity';
+		}
+		if (array_key_exists('attachment_path', $data)) {
+		    $this->attachment_path = $data['attachment_path'];
+		    if (strlen($this->attachment_path) > 255) return 'Integrity';
+		}
 		if (array_key_exists('target', $data)) {
 			$this->target = array();
 			foreach ($data['target'] as $account_id => $unused) {

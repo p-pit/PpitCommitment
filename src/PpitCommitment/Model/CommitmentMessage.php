@@ -229,7 +229,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 			}
 		}
 	}
-
+	
 	public static function sendPpitSubscriptionMessage($request)
 	{
 		// Retrieve the context

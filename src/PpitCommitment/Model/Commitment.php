@@ -170,7 +170,7 @@ class Commitment implements InputFilterAwareInterface
         $this->property_18 = (isset($data['property_18'])) ? $data['property_18'] : null;
         $this->property_19 = (isset($data['property_19'])) ? $data['property_19'] : null;
         $this->property_20 = (isset($data['property_20'])) ? $data['property_20'] : null;
-        $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : array();
+        $this->audit = (isset($data['audit'])) ? ((is_array($data['audit'])) ? $data['audit'] : json_decode($data['audit'], true)) : array();
         $this->tax_regime = (isset($data['tax_regime'])) ? $data['tax_regime'] : null;
         $this->tax_amount = (isset($data['tax_amount'])) ? $data['tax_amount'] : null;
         $this->tax_inclusive = (isset($data['tax_inclusive'])) ? $data['tax_inclusive'] : null;
@@ -424,7 +424,12 @@ class Commitment implements InputFilterAwareInterface
 		if (array_key_exists('account_id', $data)) $this->account_id = (int) $data['account_id'];
 
 		if (array_key_exists('subscription_id', $data)) $this->subscription_id = (int) $data['subscription_id'];
-	    
+
+		if (array_key_exists('status', $data)) {
+			$this->status = trim(strip_tags($data['status']));
+			if (strlen($this->status) > 255) return 'Integrity';
+		}
+
 		if (array_key_exists('caption', $data)) {
 		    $this->caption = trim(strip_tags($data['caption']));
 		   	if (strlen($this->caption) > 255) return 'Integrity';
@@ -452,6 +457,7 @@ class Commitment implements InputFilterAwareInterface
 		
 		if (array_key_exists('amount', $data)) {
 			$this->amount = trim(strip_tags($data['amount']));
+			$this->including_options_amount = trim(strip_tags($data['amount']));
 			if (strlen($this->amount) > 255) return 'Integrity';
 		}
 		
@@ -460,8 +466,14 @@ class Commitment implements InputFilterAwareInterface
     		foreach($data['options'] as $option) {
 				$option = trim(strip_tags($option));
 				if (strlen($option) > 255) return 'Integrity';
-				$options[] = $option;
+				$this->options[] = $option;
+				$this->including_options_amount += $option;
     		}
+		}
+
+		if (array_key_exists('cgv', $data)) {
+			$this->cgv = trim(strip_tags($data['cgv']));
+			if (strlen($this->cgv) > 16777215) return 'Integrity';
 		}
 		
 		if (array_key_exists('identifier', $data)) {

@@ -1,10 +1,14 @@
 <?php
 namespace PpitCommitment\Controller;
 
+use PpitCommitment\Model\Account;
+use PpitCommitment\Model\Commitment;
+use PpitCommitment\Model\CommitmentMessage;
+use PpitContact\Model\Community;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
-use PpitCommitment\Model\CommitmentMessage;
+use PpitDocument\Model\DocumentPart;
 use Zend\Http\Client;
 use Zend\View\Model\ViewModel;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -50,6 +54,312 @@ class CommitmentMessageController extends AbstractActionController
 		return $view;
     }
 
+    public function ppitGetListAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$username = null;
+    	$password = null;
+    	 
+    	$this->getResponse()->getHeaders()->addHeaderLine('Content-Type', 'application/json');
+
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username,$password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
+    		 
+    		// Write to the log
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    			$logger = new \Zend\Log\Logger();
+    			$logger->addWriter($writer);
+    			$logger->info('ppit-get-list;401;'.$username.';'.$password);
+    		}
+    		$this->getResponse()->setStatusCode('401');
+    	}
+    	else {
+    		$community = Community::get($username, 'name');
+    		if (!$community) $this->getResponse()->setStatusCode('400');
+    		else {
+    			$account = Account::get($community->id, 'customer_community_id');
+    			if (!$account) $this->getResponse()->setStatusCode('400');
+    			else echo json_encode(Commitment::getList(null, array('account_id' => $account->id), 'caption', 'ASC', 'search'), true);
+    		}
+    	}
+    	return $this->getResponse();
+    }
+    
+    public function ppitGetAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$username = null;
+    	$password = null;
+
+    	$this->getResponse()->getHeaders()->addHeaderLine('Content-Type', 'application/json');
+
+    	$id = $this->params()->fromRoute('id', null);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username,$password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
+    	
+    		// Write to the log
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    			$logger = new \Zend\Log\Logger();
+    			$logger->addWriter($writer);
+    			$logger->info('ppit-get;401;'.$username.';'.$password);
+    		}
+    		$this->getResponse()->setStatusCode('401');
+    	}
+    	else {
+	    	$community = Community::get($username, 'name');
+	    	if (!$community) $this->getResponse()->setStatusCode('400');
+	    	else {
+		    	$account = Account::get($community->id, 'customer_community_id');
+	    		if (!$account) $this->getResponse()->setStatusCode('400');
+	    		else $this->getResponse()->setContent(json_encode(Commitment::get($id)));
+	    	}
+    	}
+    	return $this->getResponse();
+    }
+
+    public function ppitPostAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$username = null;
+    	$password = null;
+    
+    	$id = $this->params()->fromRoute('id', null);
+    	if (!$id) return $this->redirect()->toRoute('home');
+
+    	$content = DocumentPart::getTable()->transGet($context->getConfig('documentPart/currentTerms'))->content;
+
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username,$password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
+    		 
+    		// Write to the log
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    			$logger = new \Zend\Log\Logger();
+    			$logger->addWriter($writer);
+    			$logger->info('ppit-post;401;'.$username.';'.$password);
+    		}
+    		$this->getResponse()->setStatusCode('401');
+	    	return $this->getResponse();
+    	}
+    	else {
+			$message = CommitmentMessage::instanciate('P-PIT', json_encode(array()));
+			$message->direction = 'I';
+			$message->format = 'JSON';
+			$message->identifier = $id;
+			$commitment = Commitment::get($id);
+	
+			// Bad request
+			if (!$commitment) {
+	
+				// Write to the log
+				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+					$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+					$logger = new \Zend\Log\Logger();
+					$logger->addWriter($writer);
+					$logger->info('ppit-post;400');
+				}
+		    	$this->getResponse()->setStatusCode('400');
+		    	return $this->getResponse();
+			}
+			$message->content = json_decode($this->getRequest()->getContent(), true)['cgv'];
+			$data = json_decode($this->getRequest()->getContent(), true);
+			if (array_key_exists('status', $data)) $commitment->status = $data['status'];
+			if (array_key_exists('cgv', $data)) $commitment->cgv = $data['cgv'];
+			$message->add();
+			$commitment->confirmation_message_id = $message->id;
+			$rc = $commitment->update($commitment->update_time);
+			$message->http_status = $rc;
+			$message->update(null);
+			
+			if ($rc != 'OK') {
+	
+				// Write to the log
+				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+					$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+					$logger = new \Zend\Log\Logger();
+					$logger->addWriter($writer);
+					$logger->info('ppit-post;422;'.$commitment->identifier);
+				}
+		    	$this->getResponse()->setStatusCode('422');
+		    	return $this->getResponse();
+			}
+		
+			// Write to the log
+			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+				$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+				$logger = new \Zend\Log\Logger();
+				$logger->addWriter($writer);
+				$logger->info('ppit-post;200');
+			}
+	    	$this->getResponse()->setStatusCode('200');
+	    	return $this->getResponse();
+    	}
+    }
+
+    public function paymentAutoresponseAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    		$logger = new \Zend\Log\Logger();
+    		$logger->addWriter($writer);
+    	}
+    	 
+    	// Retrieve the commitment
+    	$id = $this->params()->fromRoute('id', null);
+    	$commitment = Commitment::get($id);
+    	if (!$commitment) {
+    		// Write to the log
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$logger->info('payment-autoresponse;422');
+    		}
+    		$this->getResponse()->setStatusCode('422');
+    		return $this->getResponse();
+    	}
+
+    	// Récupération de la variable cryptée DATA
+    	$message="message=$_POST[DATA]";
+
+    	// Initialisation du chemin du fichier pathfile
+    	$pathfile='pathfile='.$context->getConfig('ppit-payment')['pathfile'];
+    	 
+    	// Initialisation du chemin de l'exécutable response
+    	$path_bin = $context->getConfig('ppit-payment')['path_bin'].'response';
+    	
+    	// Appel du binaire response
+    	$message = escapeshellcmd($message);
+    	$result=exec("$path_bin $pathfile $message");
+
+    	//	Sortie de la fonction : !code!error!v1!v2!v3!...!v29
+    	//		- code=0	: la fonction retourne les données de la transaction dans les variables v1, v2, ...
+    	//					: Ces variables sont décrites dans le GUIDE DU PROGRAMMEUR
+    	//		- code=-1 	: La fonction retourne un message d'erreur dans la variable error
+    	
+    	//	on sépare les différents champs et on les met dans une variable tableau    	
+    	$tableau = explode ("!", $result);
+    	
+    	//	Récupération des données de la réponse
+    	$code = $tableau[1];
+    	$error = $tableau[2];
+      	
+    	//  analyse du code retour
+    	if (( $code == "" ) && ( $error == "" ) )
+    	{
+	    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$logger->info("payment-autoresponse;;executable response non trouve $path_bin");
+	    	}
+    	}
+
+    	//	Erreur, affiche le message d'erreur
+    	else if ( $code != 0 ) {
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$logger->info("payment-autoresponse;$code;$error");
+	    	}
+    	}
+    	
+    	// OK
+    	else {
+			$content = array(
+	    		'merchant_id' => $tableau[3],
+    			'merchant_country' => $tableau[4],
+    			'amount' => $tableau[5],
+    			'transaction_id' => $tableau[6],
+    			'payment_means' => $tableau[7],
+    			'transmission_date' => $tableau[8],
+    			'payment_time' => $tableau[9],
+    			'payment_date' => $tableau[10],
+    			'response_code' => $tableau[11],
+    			'payment_certificate' => $tableau[12],
+    			'authorisation_id' => $tableau[13],
+    			'currency_code' => $tableau[14],
+    			'card_number' => $tableau[15],
+    			'cvv_flag' => $tableau[16],
+    			'cvv_response_code' => $tableau[17],
+    			'bank_response_code' => $tableau[18],
+    			'complementary_code' => $tableau[19],
+    			'complementary_info' => $tableau[20],
+    			'return_context' => $tableau[21],
+    			'caddie' => $tableau[22],
+    			'receipt_complement' => $tableau[23],
+    			'merchant_language' => $tableau[24],
+    			'language' => $tableau[25],
+    			'customer_id' => $tableau[26],
+    			'order_id' => $tableau[27],
+    			'customer_email' => $tableau[28],
+	    		'customer_ip_address' => $tableau[29],
+    			'capture_day' => $tableau[30],
+    			'capture_mode' => $tableau[31],
+    			'data' => $tableau[32],
+    			'order_validity' => $tableau[33],
+    			'transaction_condition' => $tableau[34],
+    			'statement_reference' => $tableau[35],
+    			'card_validity' => $tableau[36],
+    			'score_value' => $tableau[37],
+    			'score_color' => $tableau[38],
+    			'score_info' => $tableau[39],
+    			'score_threshold' => $tableau[40],
+    			'score_profile' => $tableau[41],
+    			'threed_ls_code' => $tableau[43],
+	    		'threed_relegation_code' => $tableau[44],
+			);
+
+	    	$message = CommitmentMessage::instanciate('payment-autoresponse', json_encode($content));
+	    	$message->direction = 'I';
+	    	$message->format = 'JSON';
+	    	$message->identifier = $id;
+	    	$message->http_status = 'HTTP/1.1 200 OK';
+	    	$message->add();
+
+	    	$commitment->status = 'commissioned';
+	    	$commitment->commissioning_date = date('Y-m-d');
+	    	$commitment->invoice_date = date('Y-m-d');
+	    	$commitment->settlement_date = date('Y-m-d');
+	    	$commitment->settlement_message_id = $message->id;
+	    	$commitment->notification_time = null;
+	    	$commitment->update($commitment->update_time);
+
+	    	// Write to the log
+	    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    		$logger->info('payment-autoresponse;200;'.$id);
+	    	}
+	    	$this->getResponse()->setStatusCode('200');
+	    	return $this->getResponse();
+    	}
+	}
+    
     public function ppitSubscribeAction()
     {
     	// Retrieve the context

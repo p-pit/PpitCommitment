@@ -14,6 +14,7 @@ use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
+use PpitDocument\Model\DocumentPart;
 use PpitUser\Model\User;
 use DOMPDFModule\View\Model\PdfModel;
 use Zend\Session\Container;
@@ -449,6 +450,231 @@ class CommitmentController extends AbstractActionController
        	return $view;
     }
 
+    public function acceptAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the commitment id
+    	$id = $this->params()->fromRoute('id', null);
+
+    	// Submit the P-Pit get message
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$url = $context->getConfig()['ppitCommitment']['getMessage']['url'].'/'.$id;
+    	$client = new Client(
+    			$url,
+    			array(
+    					'adapter' => 'Zend\Http\Client\Adapter\Curl',
+    					'maxredirects' => 0,
+    					'timeout'      => 30,
+    			)
+    	);
+    	 
+    	$username = $context->getConfig()['ppitCommitment']['getMessage']['user'];
+    	$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
+    	$client->setEncType('text/xml');
+    	$client->setMethod('GET');
+    	$response = $client->send();
+    	 
+    	$commitmentData = json_decode($response->getContent(), true);
+    	$commitment = new Commitment();
+    	$commitment->exchangeArray($commitmentData);
+    	if ($commitment->status == 'deleted' || $commitment->status == 'canceled') {
+    		return $this->redirect()->toRoute('home');
+    	}
+    	 
+    	$content = DocumentPart::getTable()->transGet($context->getConfig('documentPart/currentTerms'))->content;
+    	 
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$message = null;
+    	$error = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    
+    		if ($csrfForm->isValid()) { // CSRF check
+
+    			// Submit the P-Pit get-list message
+    			$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    			$url = $context->getConfig()['ppitCommitment']['postMessage']['url'].'/'.$id;
+    			$client = new Client(
+    					$url,
+    					array(
+    							'adapter' => 'Zend\Http\Client\Adapter\Curl',
+    							'maxredirects' => 0,
+    							'timeout'      => 30,
+    					)
+    			);
+    			
+    			$username = $context->getConfig()['ppitCommitment']['getListMessage']['user'];
+    			$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
+    			$client->setEncType('application/json');
+    			$client->setMethod('POST');
+				$client->setRawBody(json_encode(array('status' => 'approved', 'cgv' => $content)));
+    			$response = $client->send();
+
+				// Write to the log
+		   		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+		   			$writer = new \Zend\Log\Writer\Stream('data/log/commitment.txt');
+		   			$logger = new \Zend\Log\Logger();
+		   			$logger->addWriter($writer);
+		   			$logger->info('commitment/accept;'.$commitment->id.';'.$url.';'.$response->renderStatusLine());
+		   		}
+		   		if ($response->renderStatusLine() == 'HTTP/1.1 200 OK') $message = 'OK';
+		   		else $error = $response->renderStatusLine();
+    		}
+    	}
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'commitment' => $commitment,
+    			'content' => $content,
+    			'csrfForm' => $csrfForm,
+    			'message' => $message,
+    			'error' => $error,
+    	));
+    	return $view;
+    }
+
+    public function settleAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    		$logger = new \Zend\Log\Logger();
+    		$logger->addWriter($writer);
+    	}
+
+    	// Retrieve the commitment id
+    	$id = $this->params()->fromRoute('id', null);
+
+		// Submit the P-Pit get message
+		$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$url = $context->getConfig()['ppitCommitment']['getMessage']['url'].'/'.$id;
+		$client = new Client(
+				$url,
+				array(
+						'adapter' => 'Zend\Http\Client\Adapter\Curl',
+						'maxredirects' => 0,
+						'timeout'      => 30,
+				)
+				);
+		
+		$username = $context->getConfig()['ppitCommitment']['getMessage']['user'];
+		$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
+		$client->setEncType('text/xml');
+		$client->setMethod('GET');
+		$response = $client->send();
+		
+		$commitmentData = json_decode($response->getContent(), true);
+		$commitment = new Commitment();
+		$commitment->exchangeArray($commitmentData);
+		if ($commitment->status == 'deleted' || $commitment->status == 'canceled') {
+			return $this->redirect()->toRoute('home');
+		}
+	
+    	$parm="merchant_id=014022286611111";
+    	$parm="$parm merchant_country=fr";
+    	$parm="$parm amount=".($commitment->tax_inclusive * 100);
+    	$parm="$parm currency_code=978";
+    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
+    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
+    	$parm="$parm automatic_response_url=".$this->url()->fromRoute('commitmentMessage/paymentAutoresponse', array('id' => $id), array('force_canonical' => true));
+
+    	// Initialisation du chemin du fichier pathfile
+    	$parm="$parm pathfile=".$context->getConfig()['ppit-payment']['pathfile'];
+
+    	// Initialisation du chemin de l'exécutable response
+    	$path_bin = $context->getConfig()['ppit-payment']['path_bin'].'request';
+    	
+    	//      Appel du binaire request
+    	// La fonction escapeshellcmd() est incompatible avec certaines options avancées
+    	// comme le paiement en plusieurs fois qui nécessite  des caractères spéciaux
+    	// dans le paramètre data de la requête de paiement.
+    	// Dans ce cas particulier, il est préférable d.exécuter la fonction escapeshellcmd()
+    	// sur chacun des paramètres que l.on veut passer à l.exécutable sauf sur le paramètre data.
+    	$parm = escapeshellcmd($parm);
+    	$result=exec("$path_bin $parm");
+
+    	//      sortie de la fonction : $result=!code!error!buffer!
+    	//          - code=0    : la fonction génère une page html contenue dans la variable buffer
+    	//          - code=-1   : La fonction retourne un message d'erreur dans la variable error
+    	
+    	//On separe les differents champs et on les met dans une variable tableau
+    	$tableau = explode ("!", "$result");
+    	//      récupération des paramètres
+    	$code = (array_key_exists(1, $tableau)) ? $tableau[1] : null;
+    	$error = (array_key_exists(2, $tableau)) ? $tableau[2] : null;
+    	$message = (array_key_exists(3, $tableau)) ? $tableau[3] : null;
+    	
+    	//  analyse du code retour
+    	if (( $code == "" ) && ( $error == "" ) )
+    	{
+    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$logger->info("payment-autoresponse;;executable response non trouve $path_bin");
+	    	}
+    	}
+    	
+    	//      Erreur, affiche le message d'erreur
+    	
+    	else if ($code != 0){
+    	   	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    			$logger->info("payment-autoresponse;$code;$error");
+	    	}
+    	}
+
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'commitment' => $commitment,
+    			'message' => $message,
+    			'error' => $error,
+    	));
+    	return $view;
+    }
+
+    public function paymentResponseAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the commitment id
+    	$id = $this->params()->fromRoute('id', null);
+    	$commitment = Commitment::get($id);
+    	$message="message=$_POST[DATA]";
+
+    	// Initialisation du chemin du fichier pathfile
+    	$pathfile='pathfile='.$context->getConfig('ppit-payment')['pathfile'];
+    	 
+    	// Initialisation du chemin de l'exécutable response
+    	$path_bin = $context->getConfig('ppit-payment')['path_bin'].'response';
+
+    	// Appel du binaire response
+    	$message = escapeshellcmd($message);
+    	$result=exec("$path_bin $pathfile $message");
+    	
+    	//      Sortie de la fonction : !code!error!v1!v2!v3!...!v29
+    	//              - code=0        : la fonction retourne les données de la transaction dans les variables v1, v2, ...
+    	//                              : Ces variables sont décrites dans le GUIDE DU PROGRAMMEUR
+    	//              - code=-1       : La fonction retourne un message d'erreur dans la variable error
+    	//      on separe les differents champs et on les met dans une variable tableau
+    	$tableau = explode ("!", $result);
+
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'commitment' => $commitment,
+    			'tableau' => $tableau,
+    	));
+    	return $view;
+    }
+    
     public function notifyAction()
     {
     	Commitment::notify();

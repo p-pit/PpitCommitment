@@ -290,6 +290,42 @@ return array(
         								),
         						),
         				),
+        				'accept' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/accept[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'accept',
+        								),
+        						),
+        				),
+        				'settle' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/settle[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'settle',
+        								),
+        						),
+        				),
+        				'paymentResponse' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/payment-response[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'paymentResponse',
+        								),
+        						),
+        				),
         				'delete' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -354,7 +390,52 @@ return array(
             								),
             						),
             				),
-	        				'ppitSubscribe' => array(
+	        				'ppitGetList' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/ppit-get-list',
+	        								'defaults' => array(
+	        										'action' => 'ppitGetList',
+	        								),
+	        						),
+	        				),
+	        				'ppitGet' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/ppit-get[/:id]',
+            								'constraints' => array(
+            										'id'     => '[0-9]*',
+            								),
+	        								'defaults' => array(
+	        										'action' => 'ppitGet',
+	        								),
+	        						),
+	        				),
+	        				'ppitPost' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/ppit-post[/:id]',
+            								'constraints' => array(
+            										'id'     => '[0-9]*',
+            								),
+	        								'defaults' => array(
+	        										'action' => 'ppitPost',
+	        								),
+	        						),
+	        				),
+	        				'paymentAutoresponse' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/payment-autoresponse[/:id]',
+            								'constraints' => array(
+            										'id'     => '[0-9]*',
+            								),
+	        								'defaults' => array(
+	        										'action' => 'paymentAutoresponse',
+	        								),
+	        						),
+	        				),
+            				'ppitSubscribe' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
 	        								'route' => '/ppit-subscribe',
@@ -449,12 +530,19 @@ return array(
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
             	array('route' => 'commitment/update', 'roles' => array('user')),
+            	array('route' => 'commitment/accept', 'roles' => array('user')),
+            	array('route' => 'commitment/settle', 'roles' => array('user')),
+            	array('route' => 'commitment/paymentResponse', 'roles' => array('user')),
             	array('route' => 'commitment/delete', 'roles' => array(/*'admin'*/)),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/download', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/index', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/search', 'roles' => array('admin')),
-            	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('admin')),
+            	array('route' => 'commitmentMessage/ppitGetList', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/ppitGet', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/ppitPost', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/paymentAutoresponse', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/submit', 'roles' => array('admin')),

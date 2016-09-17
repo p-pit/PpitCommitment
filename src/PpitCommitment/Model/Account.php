@@ -184,6 +184,7 @@ class Account implements InputFilterAwareInterface
     	$select->where($where);
 		$cursor = Account::getTable()->selectWith($select);
 		$accounts = array();
+
 		foreach ($cursor as $account) {
 			$account->properties = $account->toArray();
 			
@@ -207,8 +208,8 @@ class Account implements InputFilterAwareInterface
     public static function get($id, $column = 'id')
     {
     	$account = Account::getTable()->get($id, $column);
+
     	if (!$account) return null;
-    	
     	// Retrieve the place, the customer and the supplier
     	$account->place = Place::getTable()->get($account->place_id);
     	if ($account->place) $account->place_name = $account->place->name;

@@ -1,0 +1,64 @@
+<!-- Load the common form javascript functions -->
+<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
+
+<?php
+$title = $this->translate('P-Pit', 'ppit-core', $context->getLocale());
+$this->headTitle($title);
+echo $this->partial('/partials/header');
+?>
+
+<div class="container">
+
+<!-- Front product 1 -->
+<div class="row">
+
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading front-page" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+                <div><?php echo $this->translate('Terms and conditions', 'ppit-commitment', $context->getLocale()) ?></div>
+            </div>
+            <div class="panel-body">
+       			<div>
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'update_time' => $commitment->update_time,
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+<?php if ($message && $message != "OK") : ?>
+					<div class="form-group">
+						<div class="alert alert-danger"><p class="help-block"><?php echo $this->translate('A technical error has occurred, please try again later', 'ppit-core', $context->getLocale()) ?></p></div>
+					</div>
+<?php endif?>
+
+<?php if ($message != "OK") : ?>
+					    <div class="form-group">
+							<label class="col-sm-5 control-label"><?php echo $this->translate('I accept the terms and conditions', 'ppit-commitment', $context->getLocale())?></label>
+							<div class="col-sm-7">
+								<input type="checkbox" id="accept" class="form-control" value="1">
+							</div>
+						</div>
+
+					    <div class="form-group">
+							<div class="col-sm-5">&nbsp;</div>
+							<div class="col-sm-7">
+								<input name="submit" type="submit" id="up-submit-button" class="btn btn-warning" value="<?php echo $this->translate('Accept', 'ppit-core', $context->getLocale()) ?>">
+							</div>
+						</div>
+<?php else : ?>
+						<div style="text-align: center"><a href="<?php echo $this->url('home') ?>"><?php echo $this->translate('Home', 'ppit-core', $context->getLocale()) ?></a></div>
+<?php endif;?>
+		
+					</form>
+
+<!-- Display the document -->
+					<div><?php echo $content ?></div>
+				</div>
+             </div>
+        </div>
+	</div>
+</div>

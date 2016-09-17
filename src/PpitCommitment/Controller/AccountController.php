@@ -161,7 +161,7 @@ class AccountController extends AbstractActionController
     	$type = $this->params()->fromRoute('type', 0);
     	 
     	$id = (int) $this->params()->fromRoute('id', 0);
-    	if ($id) $account= Account::get($id);
+    	if ($id) $account = Account::get($id);
     	else $account = Account::instanciate($type);
 
     	$view = new ViewModel(array(
