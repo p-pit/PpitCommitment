@@ -390,36 +390,45 @@ return array(
             								),
             						),
             				),
-	        				'ppitGetList' => array(
+	        				'accountPost' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
-	        								'route' => '/ppit-get-list',
+	        								'route' => '/account-post[/:instance_caption]',
 	        								'defaults' => array(
-	        										'action' => 'ppitGetList',
+	        										'action' => 'account-post',
 	        								),
 	        						),
 	        				),
-	        				'ppitGet' => array(
+            				'commitmentList' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
-	        								'route' => '/ppit-get[/:id]',
+	        								'route' => '/commitment-list[/:instance_caption]',
+	        								'defaults' => array(
+	        										'action' => 'commitmentList',
+	        								),
+	        						),
+	        				),
+	        				'commitmentGet' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/commitment-get[/:id]',
             								'constraints' => array(
             										'id'     => '[0-9]*',
             								),
 	        								'defaults' => array(
-	        										'action' => 'ppitGet',
+	        										'action' => 'commitmentGet',
 	        								),
 	        						),
 	        				),
-	        				'ppitPost' => array(
+	        				'commitmentPost' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
-	        								'route' => '/ppit-post[/:id]',
+	        								'route' => '/commitment-post[/:instance_caption][/:id]',
             								'constraints' => array(
             										'id'     => '[0-9]*',
             								),
 	        								'defaults' => array(
-	        										'action' => 'ppitPost',
+	        										'action' => 'commitment-post',
 	        								),
 	        						),
 	        				),
@@ -538,9 +547,10 @@ return array(
             	array('route' => 'commitmentMessage/download', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/index', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/search', 'roles' => array('admin')),
-            	array('route' => 'commitmentMessage/ppitGetList', 'roles' => array('guest')),
-            	array('route' => 'commitmentMessage/ppitGet', 'roles' => array('guest')),
-            	array('route' => 'commitmentMessage/ppitPost', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/accountPost', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/commitmentList', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/commitmentGet', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/commitmentPost', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/paymentAutoresponse', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
@@ -590,13 +600,13 @@ return array(
 
 	'ppitRoles' => array(
 			'ppitCommitment' => array(
-					'accountant' => array(
+/*					'accountant' => array(
 							'show' => true,
 							'labels' => array(
 									'en_US' => 'Accountant',
 									'fr_FR' => 'Comptable',
 							),
-					),
+					),*/
 					'sales_manager' => array(
 							'show' => true,
 							'labels' => array(

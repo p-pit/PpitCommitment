@@ -250,7 +250,7 @@ class Account implements InputFilterAwareInterface
     	return $account;
     }
 
-    public static function instanciate($type)
+    public static function instanciate($type = null)
     {
 		$account = new Account;
 		$account->status = 'new';

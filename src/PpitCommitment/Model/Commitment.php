@@ -414,7 +414,7 @@ class Commitment implements InputFilterAwareInterface
     	return $commitment;
     }
 
-    public function loadData($data, $files) 
+    public function loadData($data, $files = null) 
     {
     	$context = Context::getCurrent();
 		$settings = $context->getConfig();
@@ -706,7 +706,7 @@ class Commitment implements InputFilterAwareInterface
     	$commitment = Commitment::get($this->id);
 
     	// Isolation check
-    	if ($commitment->update_time > $update_time) return 'Isolation';
+    	if ($update_time && $commitment->update_time > $update_time) return 'Isolation';
 
     	// Consistency check
 	    $select = Commitment::getTable()->getSelect()->columns(array('id'))->where(array('identifier' => $this->identifier, 'id <> ?' => $this->id));

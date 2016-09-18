@@ -1,21 +1,11 @@
-<!-- Load the common form javascript functions -->
-<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
-
-<?php
-$title = $this->translate('P-Pit', 'ppit-core', $context->getLocale());
-$this->headTitle($title);
-echo $this->partial('/partials/header');
-?>
-
-<div class="container">
-
-<!-- Front product 1 -->
-<div class="row">
-
-    <div class="col-md-6 col-md-offset-3">
         <div class="panel panel-default">
             <div class="panel-heading front-page" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
-                <div><?php echo $this->translate('Terms and conditions', 'ppit-commitment', $context->getLocale()) ?></div>
+                <strong><?php echo $this->translate('Terms and conditions', 'ppit-commitment', $context->getLocale()) ?></strong>
+		 		<div class="btn-group pull-right">
+					<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+		 		 </div>
             </div>
             <div class="panel-body">
        			<div>
@@ -42,6 +32,7 @@ echo $this->partial('/partials/header');
 								<input type="checkbox" id="accept" class="form-control" value="1">
 							</div>
 						</div>
+						<div class="col-sm-12"><p class="help-block" id="accept_error"><?php if ($error == 'Unchecked') echo $this->translate('Please accept the conditions', 'ppit-commitment', $context->getLocale()) ?></p></div>
 
 					    <div class="form-group">
 							<div class="col-sm-5">&nbsp;</div>
@@ -60,5 +51,3 @@ echo $this->partial('/partials/header');
 				</div>
              </div>
         </div>
-	</div>
-</div>

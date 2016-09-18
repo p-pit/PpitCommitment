@@ -54,10 +54,118 @@ class CommitmentMessageController extends AbstractActionController
 		return $view;
     }
 
-    public function ppitGetListAction()
+    public function accountPostAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
+    
+    	// Initialize the logger
+    	$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    	$logger = new \Zend\Log\Logger();
+    	$logger->addWriter($writer);
+    
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$username = null;
+    	$password = null;
+    
+    	$instance_caption = $this->params()->fromRoute('instance_caption', null);
+    
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username, $password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
+    		 
+    		// Write to the log
+    		$logger->info('account-post/'.$instance_caption.';401;'.$username.';'.$password);
+    		$this->getResponse()->setStatusCode('401');
+    		return $this->getResponse();
+    	}
+    	else {
+    		// Log the received message
+    		$message = CommitmentMessage::instanciate('account', json_encode(array()));
+    		$message->direction = 'I';
+    		$message->format = 'application/json';
+    		$message->identifier = $instance_caption;
+    		$message->content = $this->getRequest()->getContent();
+	    	$message->http_status = 'OK';
+    		$message->add();
+
+    		// Atomically save
+    		$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
+    		$connection->beginTransaction();
+    		try {
+	    		
+	    		// Create the community and the account
+	    		$community = Community::instanciate();
+	    		$community->status = 'new';
+	    		$community->name = $instance_caption;
+	    		$rc = $community->add();
+
+	    		if ($rc != 'OK') {
+	    			$connection->rollback();
+
+	    			// Update the message with any return code from the account insert or update
+	    			$message->http_status = $rc;
+	    			$message->update($message->update_time);
+	    			
+	    			// Write to the log
+	    			$logger->info('accountPost/'.$instance_caption.';422;'.$rc.';');
+	    			$this->getResponse()->setStatusCode('422');
+	    			return $this->getResponse();
+	    		}
+
+	    		$account = Account::instanciate();
+	    		$account->status = 'new';
+	    		$account->customer_community_id = $community->id;
+	    		$rc = $account->add();
+	    			
+	    		if ($rc != 'OK') {
+	    			$connection->rollback();
+
+	    			// Update the message with any return code from the account insert or update
+	    			$message->http_status = $rc;
+	    			$message->update($message->update_time);
+	    			
+	    			// Write to the log
+	    			$logger->info('accountPost/'.$instance_caption.';422;'.$rc.';');
+	    			$this->getResponse()->setStatusCode('422');
+	    			return $this->getResponse();
+	    		}
+
+	    		$connection->commit();
+	    		
+	    		// Write to the log
+	    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    			$logger->info('accountPost/'.$instance_caption.';200;');
+	    		}
+	    		$this->getResponse()->setStatusCode('200');
+	    		return $this->getResponse();
+    		}
+    	    catch (\Exception $e) {
+    			$connection->rollback();
+	    			
+    			// Write to the log
+    			$logger->info('accountPost/'.$instance_caption.';500;'.$e->getMessage().';');
+    			$this->getResponse()->setStatusCode('500');
+    			return $this->getResponse();
+    	    }
+    	}
+    }
+
+    public function commitmentListAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	
+    	// Retrieve the account id
+    	$instance_caption = $this->params()->fromRoute('instance_caption', null);
+//    	if (!$account_id) return $this->redirect()->toRoute('home');
+    	
     	$safe = $context->getConfig()['ppitUserSettings']['safe'];
     	$username = null;
     	$password = null;
@@ -84,18 +192,20 @@ class CommitmentMessageController extends AbstractActionController
     		$this->getResponse()->setStatusCode('401');
     	}
     	else {
-    		$community = Community::get($username, 'name');
-    		if (!$community) $this->getResponse()->setStatusCode('400');
+    		$community = Community::get($instance_caption, 'name');
+    		if (!$community) {
+    			$this->getResponse()->setContent(json_encode(array()));
+    		}
     		else {
     			$account = Account::get($community->id, 'customer_community_id');
     			if (!$account) $this->getResponse()->setStatusCode('400');
-    			else echo json_encode(Commitment::getList(null, array('account_id' => $account->id), 'caption', 'ASC', 'search'), true);
+    			else $this->getResponse()->setContent(json_encode(Commitment::getList(null, array('account_id' => $account->id), 'caption', 'ASC', 'search')));
     		}
     	}
     	return $this->getResponse();
     }
     
-    public function ppitGetAction()
+    public function commitmentGetAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
@@ -139,18 +249,22 @@ class CommitmentMessageController extends AbstractActionController
     	return $this->getResponse();
     }
 
-    public function ppitPostAction()
+    public function commitmentPostAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
+
+    	// Initialize the logger
+    	$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+    	$logger = new \Zend\Log\Logger();
+    	$logger->addWriter($writer);
+
     	$safe = $context->getConfig()['ppitUserSettings']['safe'];
     	$username = null;
     	$password = null;
     
+    	$instance_caption = $this->params()->fromRoute('instance_caption', null);
     	$id = $this->params()->fromRoute('id', null);
-    	if (!$id) return $this->redirect()->toRoute('home');
-
-    	$content = DocumentPart::getTable()->transGet($context->getConfig('documentPart/currentTerms'))->content;
 
     	// Check basic authentication
     	if (isset($_SERVER['PHP_AUTH_USER'])) {
@@ -158,72 +272,116 @@ class CommitmentMessageController extends AbstractActionController
     		$password = $_SERVER['PHP_AUTH_PW'];
     	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
-    			list($username,$password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    			list($username, $password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
     	}
     	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
     		 
     		// Write to the log
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-    			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
-    			$logger = new \Zend\Log\Logger();
-    			$logger->addWriter($writer);
-    			$logger->info('ppit-post;401;'.$username.';'.$password);
-    		}
+    		$logger->info('commitment-post/'.$id.';401;'.$username.';'.$password);
     		$this->getResponse()->setStatusCode('401');
 	    	return $this->getResponse();
     	}
     	else {
-			$message = CommitmentMessage::instanciate('P-PIT', json_encode(array()));
+    		// Log the received message
+			$message = CommitmentMessage::instanciate('commitment', json_encode(array()));
 			$message->direction = 'I';
-			$message->format = 'JSON';
+			$message->format = 'application/json';
 			$message->identifier = $id;
-			$commitment = Commitment::get($id);
-	
-			// Bad request
-			if (!$commitment) {
-	
-				// Write to the log
-				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-					$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
-					$logger = new \Zend\Log\Logger();
-					$logger->addWriter($writer);
-					$logger->info('ppit-post;400');
-				}
-		    	$this->getResponse()->setStatusCode('400');
-		    	return $this->getResponse();
-			}
-			$message->content = json_decode($this->getRequest()->getContent(), true)['cgv'];
-			$data = json_decode($this->getRequest()->getContent(), true);
-			if (array_key_exists('status', $data)) $commitment->status = $data['status'];
-			if (array_key_exists('cgv', $data)) $commitment->cgv = $data['cgv'];
+			$message->content = $this->getRequest()->getContent();
 			$message->add();
-			$commitment->confirmation_message_id = $message->id;
-			$rc = $commitment->update($commitment->update_time);
-			$message->http_status = $rc;
-			$message->update(null);
-			
-			if ($rc != 'OK') {
+
+			// Atomically save
+			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+			$connection->beginTransaction();
+			try {
+
+				// Retrieve the community and account and create if not exist
+				$community = Community::get($instance_caption, 'name');
+				if ($community) $account = Account::get($community->id, 'customer_community_id');
+				else {
+					$community = Community::instanciate();
+		    		$community->status = 'new';
+		    		$community->name = $instance_caption;
+		    		$rc = $community->add();
 	
+		    		if ($rc != 'OK') {
+		    			$connection->rollback();
+	
+		    			// Update the message with any return code from the account insert or update
+		    			$message->http_status = $rc;
+		    			$message->update($message->update_time);
+		    			
+		    			// Write to the log
+		    			$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
+		    			$this->getResponse()->setStatusCode('422');
+		    			return $this->getResponse();
+		    		}
+	
+		    		$account = Account::instanciate();
+		    		$account->status = 'new';
+		    		$account->customer_community_id = $community->id;
+		    		$rc = $account->add();
+		    			
+		    		if ($rc != 'OK') {
+		    			$connection->rollback();
+	
+		    			// Update the message with any return code from the account insert or update
+		    			$message->http_status = $rc;
+		    			$message->update($message->update_time);
+		    			
+		    			// Write to the log
+		    			$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
+		    			$this->getResponse()->setStatusCode('422');
+		    			return $this->getResponse();
+		    		}
+				}
+				
+				// Create or update the commitment
+				if ($id) $commitment = Commitment::get($id);
+				else {
+					$commitment = Commitment::instanciate();
+					$commitment->type = 'rental';
+					$commitment->account_id = $account->id;
+				}
+				$data = json_decode($this->getRequest()->getContent(), true);
+				$commitment->loadData($data);
+				if ($commitment->status == 'new') $commitment->commitment_message_id = $message->id;
+				elseif ($commitment->status == 'approved') $commitment->confirmation_message_id = $message->id;
+				$rc = ($commitment->id) ? $commitment->update(null) : $commitment->add();
+				
+				if ($rc != 'OK') {
+
+					// Update the message with any return code from the commitment insert or update
+					$message->http_status = $rc;
+					$message->update($message->update_time);
+
+					// Write to the log
+					$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
+			    	$this->getResponse()->setStatusCode('422');
+			    	return $this->getResponse();
+				}
+
+				// Update the message with any return code from the commitment insert or update
+				$message->http_status = 'OK';
+				$message->update($message->update_time);
+
+				$connection->commit();
+				
 				// Write to the log
 				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-					$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
-					$logger = new \Zend\Log\Logger();
-					$logger->addWriter($writer);
-					$logger->info('ppit-post;422;'.$commitment->identifier);
+					$logger->info('commitmentPost/'.$id.';200;');
 				}
-		    	$this->getResponse()->setStatusCode('422');
+		    	$this->getResponse()->setStatusCode('200');
 		    	return $this->getResponse();
-			}
-		
-			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-				$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
-				$logger = new \Zend\Log\Logger();
-				$logger->addWriter($writer);
-				$logger->info('ppit-post;200');
-			}
-	    	$this->getResponse()->setStatusCode('200');
-	    	return $this->getResponse();
+	    	}
+    	   	catch (\Exception $e) {
+    			$connection->rollback();
+	    			
+    			// Write to the log
+    			$logger->info('accountPost/'.$instance_caption.';500;'.$e->getMessage().';');
+    			$this->getResponse()->setStatusCode('500');
+    			return $this->getResponse();
+    	    }
     	}
     }
 

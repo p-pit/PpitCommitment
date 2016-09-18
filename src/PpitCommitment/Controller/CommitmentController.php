@@ -294,6 +294,7 @@ class CommitmentController extends AbstractActionController
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
+    				// Add the instance, the main contact and the user
     				$rc = $instance->add();
     				
     				if ($rc != 'OK') {
@@ -454,13 +455,18 @@ class CommitmentController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    
+
+    	// Initialize the logger
+    	$writer = new \Zend\Log\Writer\Stream('data/log/commitment.txt');
+    	$logger = new \Zend\Log\Logger();
+    	$logger->addWriter($writer);
+
     	// Retrieve the commitment id
     	$id = $this->params()->fromRoute('id', null);
 
-    	// Submit the P-Pit get message
+    	// Submit the commitmentGet message
     	$safe = $context->getConfig()['ppitUserSettings']['safe'];
-    	$url = $context->getConfig()['ppitCommitment']['getMessage']['url'].'/'.$id;
+    	$url = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['url'].'/'.$id;
     	$client = new Client(
     			$url,
     			array(
@@ -470,7 +476,7 @@ class CommitmentController extends AbstractActionController
     			)
     	);
     	 
-    	$username = $context->getConfig()['ppitCommitment']['getMessage']['user'];
+    	$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['user'];
     	$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
     	$client->setEncType('text/xml');
     	$client->setMethod('GET');
@@ -483,6 +489,7 @@ class CommitmentController extends AbstractActionController
     		return $this->redirect()->toRoute('home');
     	}
     	 
+    	// To be replaced by a call to a web service
     	$content = DocumentPart::getTable()->transGet($context->getConfig('documentPart/currentTerms'))->content;
     	 
     	// Instanciate the csrf form
@@ -498,34 +505,34 @@ class CommitmentController extends AbstractActionController
     
     		if ($csrfForm->isValid()) { // CSRF check
 
-    			// Submit the P-Pit get-list message
-    			$safe = $context->getConfig()['ppitUserSettings']['safe'];
-    			$url = $context->getConfig()['ppitCommitment']['postMessage']['url'].'/'.$id;
-    			$client = new Client(
-    					$url,
-    					array(
-    							'adapter' => 'Zend\Http\Client\Adapter\Curl',
-    							'maxredirects' => 0,
-    							'timeout'      => 30,
-    					)
-    			);
-    			
-    			$username = $context->getConfig()['ppitCommitment']['getListMessage']['user'];
-    			$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
-    			$client->setEncType('application/json');
-    			$client->setMethod('POST');
-				$client->setRawBody(json_encode(array('status' => 'approved', 'cgv' => $content)));
-    			$response = $client->send();
-
-				// Write to the log
-		   		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-		   			$writer = new \Zend\Log\Writer\Stream('data/log/commitment.txt');
-		   			$logger = new \Zend\Log\Logger();
-		   			$logger->addWriter($writer);
-		   			$logger->info('commitment/accept;'.$commitment->id.';'.$url.';'.$response->renderStatusLine());
-		   		}
-		   		if ($response->renderStatusLine() == 'HTTP/1.1 200 OK') $message = 'OK';
-		   		else $error = $response->renderStatusLine();
+    			if ($request->getPost('accept')) {
+	    			// Submit the postCommitment message
+	    			$safe = $context->getConfig()['ppitUserSettings']['safe'];
+	    			$url = $context->getConfig()['ppitCommitment/P-Pit']['commitmentPostMessage']['url'].'/'.$context->getInstance()->caption.'/'.$id;
+	    			$client = new Client(
+	    					$url,
+	    					array(
+	    							'adapter' => 'Zend\Http\Client\Adapter\Curl',
+	    							'maxredirects' => 0,
+	    							'timeout'      => 30,
+	    					)
+	    			);
+	    			
+	    			$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentListMessage']['user'];
+	    			$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
+	    			$client->setEncType('application/json');
+	    			$client->setMethod('POST');
+					$client->setRawBody(json_encode(array('status' => 'approved', 'cgv' => $content)));
+	    			$response = $client->send();
+	
+					// Write to the log
+			   		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			   			$logger->info('commitment/accept;'.$commitment->id.';'.$url.';'.$response->renderStatusLine());
+			   		}
+			   		if ($response->renderStatusLine() == 'HTTP/1.1 200 OK') $message = 'OK';
+			   		else $error = $response->renderStatusLine();
+    			}
+    			else $error = 'Unchecked';
     		}
     	}
     	$view = new ViewModel(array(
@@ -537,6 +544,7 @@ class CommitmentController extends AbstractActionController
     			'message' => $message,
     			'error' => $error,
     	));
+    	$view->setTerminal(true);
     	return $view;
     }
 
@@ -556,7 +564,7 @@ class CommitmentController extends AbstractActionController
 
 		// Submit the P-Pit get message
 		$safe = $context->getConfig()['ppitUserSettings']['safe'];
-    	$url = $context->getConfig()['ppitCommitment']['getMessage']['url'].'/'.$id;
+    	$url = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['url'].'/'.$id;
 		$client = new Client(
 				$url,
 				array(
@@ -566,7 +574,7 @@ class CommitmentController extends AbstractActionController
 				)
 				);
 		
-		$username = $context->getConfig()['ppitCommitment']['getMessage']['user'];
+		$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['user'];
 		$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
 		$client->setEncType('text/xml');
 		$client->setMethod('GET');
