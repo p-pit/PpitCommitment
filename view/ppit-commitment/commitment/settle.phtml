@@ -21,14 +21,6 @@ echo $this->partial('/partials/header');
        			<div>
 
 <!-- Form header -->
-<?php echo $this->partial('/partials/form-header', array(
-		'update_time' => $commitment->update_time,
-		'message' => $message,
-		'error' => $error,
-		'csrfForm' => $csrfForm,
-		'context' => $context,
-));
-?>
 <?php echo $error ?>
 <?php echo $message ?>
 				</div>

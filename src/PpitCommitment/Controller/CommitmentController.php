@@ -6,7 +6,7 @@ use Date;
 use Zend\View\Model\ViewModel;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
-use PpitCommitment\Model\Message;
+use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\Subscription;
 use PpitContact\Model\Vcard;
 use PpitCore\Form\CsrfForm;
@@ -14,6 +14,7 @@ use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
+use PpitDocument\Model\Document;
 use PpitDocument\Model\DocumentPart;
 use PpitUser\Model\User;
 use DOMPDFModule\View\Model\PdfModel;
@@ -25,7 +26,7 @@ use Zend\Log\Writer;
 use Zend\Mvc\Controller\AbstractActionController;
 
 class CommitmentController extends AbstractActionController
-{
+{	
 	public function indexAction()
     {
     	$context = Context::getCurrent();
@@ -522,7 +523,7 @@ class CommitmentController extends AbstractActionController
 	    			$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
 	    			$client->setEncType('application/json');
 	    			$client->setMethod('POST');
-					$client->setRawBody(json_encode(array('status' => 'approved', 'cgv' => $content)));
+					$client->setRawBody(json_encode(array('n_fn' => $context->getFormatedName(), 'status' => 'approved', 'cgv' => $content)));
 	    			$response = $client->send();
 	
 					// Write to the log
@@ -548,6 +549,223 @@ class CommitmentController extends AbstractActionController
     	return $view;
     }
 
+    public function invoiceAction(/*$commitment*/)
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	
+    	require_once('vendor/TCPDF-master/tcpdf.php');
+    	// create new PDF document
+    	$pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	
+    	// set document information
+    	$pdf->SetCreator(PDF_CREATOR);
+    	$pdf->SetAuthor('P-PIT');
+    	$pdf->SetTitle('Invoice');
+    	$pdf->SetSubject('TCPDF Tutorial');
+    	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
+    	
+    	// set default header data
+    	$pdf->SetHeaderData('advert.png', '160');
+    	// set header and footer fonts
+    	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+    	
+    	// set default monospaced font
+    	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+    	
+    	// set margins
+    	$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+    	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+    	$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+    	
+    	// set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    	
+    	// set image scale factor
+    	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+    	
+    	// set some language-dependent strings (optional)
+    	if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+    		require_once(dirname(__FILE__).'/lang/eng.php');
+    		$pdf->setLanguageArray($l);
+    	}
+    	
+    	// ---------------------------------------------------------
+    	
+    	/*
+    	 NOTES:
+    	 - To create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
+    	 - To export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
+    	 - To convert pfx certificate to pem: openssl pkcs12 -in tcpdf.pfx -out tcpdf.crt -nodes
+    	 */
+    	
+    	// set certificate file
+    	$certificate = 'file://vendor/TCPDF-master/examples/data/cert/tcpdf.crt';
+    	
+    	// set additional information
+    	$info = array(
+    			'Name' => 'Invoice',
+    			'Location' => 'Office',
+    			'Reason' => 'Invoice',
+    			'ContactInfo' => 'https://www.p-pit.fr',
+    	);
+    	
+    	// set document signature
+    	$pdf->setSignature($certificate, $certificate, 'tcpdfdemo', '', 2, $info);
+    	
+    	// set font
+    	$pdf->SetFont('helvetica', '', 12);
+    	
+    	// add a page
+    	$pdf->AddPage();
+    	
+    	// print a line of text
+    	$text = 'This is a <b color="#FF0000">digitally signed document</b> using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />For more information check the source code of this example and the source code documentation for the <i>setSignature()</i> method.<br /><br /><a href="http://www.tcpdf.org">www.tcpdf.org</a>';
+    	$pdf->writeHTML($text, true, 0, true, 0);
+    	
+    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    	// *** set signature appearance ***
+    	
+    	// create content for signature (image and/or text)
+    	$pdf->Image('vendor/TCPDF-master/examples/images/tcpdf_signature.png', 180, 60, 15, 15, 'PNG');
+    	
+    	// define active area for signature appearance
+    	$pdf->setSignatureAppearance(180, 60, 15, 15);
+    	
+    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    	
+    	// *** set an empty signature appearance ***
+    	$pdf->addEmptySignatureAppearance(180, 80, 15, 15);
+    	    	 
+    	// ---------------------------------------------------------
+    	
+    	// Close and output PDF document
+    	// This method has several options, check the source code documentation for more information.
+    	$document = Document::instanciate(0);
+    	$document->type = 'application/pdf';
+//    	$document->add();
+//    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'w');
+    	$content = $pdf->Output(null, 'I');
+//    	fwrite($handle, $content);
+//    	fclose($handle);
+/*
+		$account = Account::get($commitment->account_id);
+		$community = Community::get($account->customer_community_id);
+		$contact = Vcard::get($community->contact_1_id);
+		$community_name = $community->name;
+		$contact_adr_street = $contact->adr_street;
+		$contact_adr_zip = $contact->adr_zip;
+		$contact_adr_city = $contact->adr_city;
+		$invoice_identifier = $commitment->invoice_identifier;
+		$commitment_date = $commitment->commmitment_date;
+		$commitment_caption = $commitment->caption;
+		$object = 'Location';
+		$invoice_date = $commitment->invoice_date;
+		$product = $commitment->product;
+		$amount = $commitment->amount;
+		$tax_amount = $commitment->tax_amount;
+		$tax_inclusive = $commitment->tax_inclusive;
+		$content = "
+<br><br>
+<table class='ppit ppit-address'>
+  <tr>
+    <td width='60%'>&nbsp;</td>
+    <td><strong>$community_name</strong></td
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>$contact_adr_street</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>$contact_adr_zip $contact_adr_city</td>
+  </tr>
+</table>
+<h3 class='ppit' align='center'>Facture $invoice_identifier</h3>
+<br>
+<table class='table ppit'>
+  <tr>
+    <td class='title'>Commande</td>
+    <td>$commitment_date</td>
+  </tr>
+  <tr>
+    <td class='title'>Référence</td>
+    <td>$commitment_caption</td>
+  </tr>
+  <tr>
+    <td class='title'>Objet</td>
+    <td>$object</td>
+  </tr>
+  <tr>
+    <td class='title'>Date de facture</td>
+    <td>$invoice_date</td>
+  </tr>
+</table>
+<br>
+<table width='80%' class='ppit ppit-bill-rows'>
+<tr>
+  <th width='70%'>Libellé</th>
+  <th width='30%'>Prix (€ HT)</th>
+</tr>
+<tr>
+  <td>$product</td>
+  <td align='right'>$amount</td>
+</tr>
+</table>
+<table class='ppit ppit-bill-sums'>
+  <tr>
+    <td width='75%' align='right'>Total HT :</td>
+    <td width='25%' align='right'>$amount €</td>
+  </tr>
+  <tr>
+    <td align='right'>TVA 20% :</td>
+    <td align='right'>$tax_amount €</td>
+  </tr>
+  <tr>
+    <td align='right'><strong>Total TTC :</td>
+    <td align='right'><strong>$tax_inclusive €</strong></td>
+  </tr>
+</table>
+<h5 class='ppit'>Valeur en votre obligeant règlement : <strong>$tax_inclusive €</strong></h5>
+<h5 class='ppit'>Par virement auprès de : <strong>Société Marseillaise de Crédit</strong></h5>
+<table class='table ppit' style='width: 90%'>
+  <tr>
+    <th>Code banque</th>
+    <th>Code agence</th>
+    <th>Numéro de compte</th>
+    <th>Clé RIB</th>
+    <th>Domiciliation</th>
+  </tr>
+  <tr>
+    <td>30077</td>
+    <td>04193</td>
+    <td>18222100200</td>
+    <td>87</td>
+    <td>AVIGNON CRILLON</td>
+  </tr>
+</table>
+<h5 class='ppit'><strong>IBAN : FR76 3007 7041 9318 2221 0020 087&nbsp;&nbsp;&nbsp;&nbsp;Code BIC : SMCTFR2A</strong</h5>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>
+<div class='ppit'>&nbsp;</div>";
+    			$document = Document::instanciate(array($content));
+    			$document->add();*/
+    }
+    
     public function settleAction()
     {
     	// Retrieve the context
@@ -587,12 +805,14 @@ class CommitmentController extends AbstractActionController
 			return $this->redirect()->toRoute('home');
 		}
 	
-    	$parm="merchant_id=014022286611111";
+    	$parm="merchant_id=080419959400024";
     	$parm="$parm merchant_country=fr";
     	$parm="$parm amount=".($commitment->tax_inclusive * 100);
     	$parm="$parm currency_code=978";
-    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
-    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
+//    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
+//    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
+    	$parm="$parm normal_return_url=".$this->url()->fromRoute('credit', array(), array('force_canonical' => true));
+    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('credit', array(), array('force_canonical' => true));
     	$parm="$parm automatic_response_url=".$this->url()->fromRoute('commitmentMessage/paymentAutoresponse', array('id' => $id), array('force_canonical' => true));
 
     	// Initialisation du chemin du fichier pathfile
@@ -633,7 +853,7 @@ class CommitmentController extends AbstractActionController
     	
     	else if ($code != 0){
     	   	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-    			$logger->info("payment-autoresponse;$code;$error");
+    			$logger->info("payment-autoresponse/$id;$code;$error");
 	    	}
     	}
 
@@ -682,7 +902,7 @@ class CommitmentController extends AbstractActionController
     	));
     	return $view;
     }
-    
+
     public function notifyAction()
     {
     	Commitment::notify();

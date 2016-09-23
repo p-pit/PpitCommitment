@@ -238,13 +238,13 @@ class CommitmentMessageController extends AbstractActionController
     		$this->getResponse()->setStatusCode('401');
     	}
     	else {
-	    	$community = Community::get($username, 'name');
+/*	    	$community = Community::get($username, 'name');
 	    	if (!$community) $this->getResponse()->setStatusCode('400');
 	    	else {
 		    	$account = Account::get($community->id, 'customer_community_id');
 	    		if (!$account) $this->getResponse()->setStatusCode('400');
-	    		else $this->getResponse()->setContent(json_encode(Commitment::get($id)));
-	    	}
+	    		else */$this->getResponse()->setContent(json_encode(Commitment::get($id)));
+//	    	}
     	}
     	return $this->getResponse();
     }
@@ -444,7 +444,7 @@ class CommitmentMessageController extends AbstractActionController
     	//	Erreur, affiche le message d'erreur
     	else if ( $code != 0 ) {
     		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-    			$logger->info("payment-autoresponse;$code;$error");
+    			$logger->info("payment-autoresponse/$id;$code;$error");
 	    	}
     	}
     	
@@ -501,17 +501,19 @@ class CommitmentMessageController extends AbstractActionController
 	    	$message->http_status = 'HTTP/1.1 200 OK';
 	    	$message->add();
 
-	    	$commitment->status = 'commissioned';
-	    	$commitment->commissioning_date = date('Y-m-d');
-	    	$commitment->invoice_date = date('Y-m-d');
-	    	$commitment->settlement_date = date('Y-m-d');
-	    	$commitment->settlement_message_id = $message->id;
-	    	$commitment->notification_time = null;
-	    	$commitment->update($commitment->update_time);
+	    	if ($tableau[11] == '00') {
+		    	$commitment->status = 'commissioned';
+		    	$commitment->commissioning_date = date('Y-m-d');
+	    		$commitment->invoice_date = date('Y-m-d');
+	    		$commitment->settlement_date = date('Y-m-d');
+		    	$commitment->settlement_message_id = $message->id;
+		    	$commitment->notification_time = null;
+	    		$commitment->update($commitment->update_time);
+	    	}
 
 	    	// Write to the log
 	    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-	    		$logger->info('payment-autoresponse;200;'.$id);
+	    		$logger->info('payment-autoresponse;'.$tableau[11].';'.$id);
 	    	}
 	    	$this->getResponse()->setStatusCode('200');
 	    	return $this->getResponse();

@@ -314,6 +314,18 @@ return array(
         								),
         						),
         				),
+        				'invoice' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/invoice[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'invoice',
+        								),
+        						),
+        				),
         				'paymentResponse' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -541,6 +553,7 @@ return array(
             	array('route' => 'commitment/update', 'roles' => array('user')),
             	array('route' => 'commitment/accept', 'roles' => array('user')),
             	array('route' => 'commitment/settle', 'roles' => array('user')),
+            	array('route' => 'commitment/invoice', 'roles' => array('user')),
             	array('route' => 'commitment/paymentResponse', 'roles' => array('user')),
             	array('route' => 'commitment/delete', 'roles' => array(/*'admin'*/)),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
@@ -599,27 +612,25 @@ return array(
 	),
 
 	'ppitRoles' => array(
-			'ppitCommitment' => array(
-/*					'accountant' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Accountant',
-									'fr_FR' => 'Comptable',
-							),
-					),*/
-					'sales_manager' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Sales manager',
-									'fr_FR' => 'Vendeur',
-							),
+			'accountant' => array(
+					'show' => true,
+					'labels' => array(
+							'en_US' => 'Accountant',
+							'fr_FR' => 'Comptable',
 					),
-					'business_owner' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Business owner',
-									'fr_FR' => 'Gestion',
-							),
+			),
+			'sales_manager' => array(
+					'show' => true,
+					'labels' => array(
+							'en_US' => 'Sales manager',
+							'fr_FR' => 'Vendeur',
+					),
+			),
+			'business_owner' => array(
+					'show' => true,
+					'labels' => array(
+							'en_US' => 'Business owner',
+							'fr_FR' => 'Gestion',
 					),
 			),
 	),

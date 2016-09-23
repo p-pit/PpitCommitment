@@ -667,7 +667,7 @@ class Commitment implements InputFilterAwareInterface
     	$this->audit[] = array(
 				'status' => $this->status,
 				'time' => Date('Y-m-d G:i:s'),
-				'n_fn' => $context->getFormatedName(),
+				'n_fn' => array_key_exists('n_fn', $data) ? $data['n_fn'] : $context->getFormatedName(),
 				'comment' => $this->comment,
 		);
 	    $this->notification_time = null;

@@ -57,6 +57,7 @@
 			'Object' => 'Objet',
 			'Order form' => 'Bon de commande',
 			'Orders in progress' => 'Commandes en cours',
+			'Please accept the conditions' => "Veuillez accepter les conditions",
 			'Positioning' => 'Positionnement',
 			'Quantity' => 'Quantité',
 			'Quotation identifier' => 'Référence de devis',
