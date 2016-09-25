@@ -807,6 +807,7 @@ class CommitmentController extends AbstractActionController
 	
     	$parm="merchant_id=080419959400024";
     	$parm="$parm merchant_country=fr";
+    	$parm="$parm advert=advert.png";
     	$parm="$parm amount=".($commitment->tax_inclusive * 100);
     	$parm="$parm currency_code=978";
 //    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
@@ -828,6 +829,7 @@ class CommitmentController extends AbstractActionController
     	// Dans ce cas particulier, il est préférable d.exécuter la fonction escapeshellcmd()
     	// sur chacun des paramètres que l.on veut passer à l.exécutable sauf sur le paramètre data.
     	$parm = escapeshellcmd($parm);
+    	$parm="$parm data='<USE_CSS>;https://www.p-pit.fr/css/default_sips_payment_perso.css</USE_CSS>; NO_COPYRIGHT; NO_WINDOWS_MSG;'";
     	$result=exec("$path_bin $parm");
 
     	//      sortie de la fonction : $result=!code!error!buffer!
