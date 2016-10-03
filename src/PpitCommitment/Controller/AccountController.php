@@ -232,32 +232,15 @@ class AccountController extends AbstractActionController
 	    			$connection->beginTransaction();
 	    			try {
 	    				if (!$account->id) {
-			        		$return = $account->customer_community->add();
-			        		if ($return != 'OK') $error = 'Duplicate commmunity';
+	    					$return = $account->customer_community->add();
+			        		if ($return != 'OK') $error = 'Duplicate';
 			        		else {
 			        			$account->customer_community_id = $account->customer_community->id;
 			        			$account->contact_1->community_id = $account->customer_community->id;
 		    					$account->contact_1 = Vcard::optimize($account->contact_1);
 		    					$account->customer_community->contact_1_id = $account->contact_1->id;
 		    					$account->customer_community->update($account->customer_community->update_time);
-		    					$account->user->contact_id = $account->contact_1->id;
-		
-			        			// Save the user
-				        		$return = $account->user->add($account->contact_1->email, ($account->is_notified) ? true : false);
-				        		if ($return != 'OK') $error = 'Duplicate user';
-								else {
-									// Save the user-contact link
-									$userContact = UserContact::instanciate();
-									$userContact->user_id = $account->user->user_id;
-									$userContact->contact_id = $account->contact_1->id;
-									$return = $userContact->add();
-					        		if ($return != 'OK') $error = $return;
-									else {
-										$return = $account->add();
-										if ($return != 'OK') $error = $return;
-										else $message = 'OK';
-									}
-								}
+		    					$account->add();
 			        		}
 	    				}
 	    				elseif ($action == 'delete') $return = $account->delete($request->getPost('update_time'));
