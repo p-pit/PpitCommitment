@@ -23,6 +23,11 @@ function getParams() {
 	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
 	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
 
+	<?php elseif ($rendering == 'select') : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+
 	<?php else : ?>
 
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
@@ -267,10 +272,6 @@ foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '
 	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
-$properties['username'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-$properties['is_notified'] = array('type' => 'checkbox');
-$properties['new_password'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-$properties['locale'] = array('type' => 'select', 'mandatory' => false);
 $properties['update_time'] = array('type' => 'hidden');
 
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Account', 'context' => $context, 'properties' => $properties)) 
@@ -304,7 +305,7 @@ function connectAccountUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -384,6 +385,7 @@ function getAccountUpdate(id, action) {
 <?php 
 $properties = array();
 $properties['username'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
+$properties['state'] = array('type' => 'checkbox');
 $properties['is_notified'] = array('type' => 'checkbox');
 $properties['new_password'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
 $properties['locale'] = array('type' => 'select', 'mandatory' => false);
@@ -420,7 +422,7 @@ function connectUserUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -471,7 +473,7 @@ function getUserUpdate(id, action) {
 			}
 			else $('#account-add-anchor').click(function () { getAccountUpdate(id, 'add'); });
 			
-			connectAccountUpdateForm(id, action);
+			connectUserUpdateForm(id, action);
 			
 <?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			}
@@ -524,7 +526,7 @@ function connect<?php echo $contactNumber ?>UpdateForm(id, action)
 			
 			// Get the properties values
 	<?php foreach ($properties as $propertyId => $property) : ?>
-		<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'specific' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+		<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 		<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -673,7 +675,7 @@ function getAccountDetail(id) {
 	<?php elseif ($tabId == 'user') : ?>
 				getUserUpdate(id, '');
 	<?php else : ?>
-				get<?php echo $contactNumber ?>Update(id, '');
+				get<?php echo $tabId ?>Update(id, '');
 	<?php endif;?>
 			});
 <?php endforeach;?>

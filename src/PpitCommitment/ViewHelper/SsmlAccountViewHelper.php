@@ -29,7 +29,7 @@ class SsmlAccountViewHelper
 		
 		foreach($context->getConfig('commitmentAccount/update'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 			$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
-			if ($property['type'] == 'specific') $property = $context->getConfig($property['definition']);
+			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 			$i++;
 			$sheet->setCellValue($colNames[$i].'1', $property['labels'][$context->getLocale()]);
 		}
@@ -40,7 +40,7 @@ class SsmlAccountViewHelper
 			$i = 0;
 		foreach($context->getConfig('commitmentAccount/update'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 			$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
-			if ($property['type'] == 'specific') $property = $context->getConfig($property['definition']);
+			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				$i++;
 				if ($propertyId == 'customer_name') $sheet->setCellValue($colNames[$i].$j, $account->customer_name);
 				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $context->getConfig('student/property/place')['modalities'][$account->place_id][$context->getLocale()]);

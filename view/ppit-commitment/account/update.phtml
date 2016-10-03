@@ -63,7 +63,7 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 <?php foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) : ?>
 	<?php 
 	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	if ($property['type'] == 'specific') $property = $context->getConfig($property['definition']);
+	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
@@ -129,57 +129,6 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 <?php endforeach;?>
 
 <?php if (!$account->id) : ?>
-
-		<h4><?php echo $this->translate('User account creation', 'ppit-user', $context->getLocale())?></h4>
-
-<!-- Connexion identifier -->		
-		<div class="form-group" id="username_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Identifier', 'ppit-user', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-				<input class="form-control" id="username" value="<?php echo $account->username ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error == 'Duplicate user') echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></div>
-		</div>
-
-<!-- Accept notifications ? -->
-		<div class="form-group" id="is_notified_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Accept notifications ?', 'ppit-user', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-				<input type="checkbox" id="is_notified" class="form-control" value="1"<?php if ($account->is_notified) echo ' checked="checked"' ?><?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
-			</div>
-		</div>
-					
-<!-- Password -->
-		<div class="form-group" id="new_password_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('New password', 'ppit-user', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-				<input type="password" id="new_password" class="form-control" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="new_password_error"></p></div>
-		</div>
-
-<!-- Password (2nd) -->
-		<div class="form-group" id="new_password2_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('New password', 'ppit-user', $context->getLocale()) ?> (2)</label>
-			<div class="col-sm-7">
-				<input type="password" id="new_password2" class="form-control" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="new_password2_error"></p></div>
-		</div>
-		
-<!-- Locale -->
-		<div class="form-group" id="locale_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Locale', 'ppit-user', $context->getLocale()) ?></label>
-			<div class="col-sm-7">
-				<select name="locale" id="locale" class="form-control"<?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
-					<option />
-					<option value="en_US" <?php if ($account->locale == 'en_US') echo 'selected="selected"'; ?>>en_US</option>
-					<option value="fr_FR" <?php if ($account->locale == 'fr_FR') echo 'selected="selected"'; ?>>fr_FR</option>
-				</select>
-			</div>
-			<div class="col-sm-12"><p class="help-block" id="locale_error"></p></div>
-		</div>
-
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">

@@ -10,12 +10,14 @@
 ));
 ?>
 
+<?php if ($message != 'OK') : ?>
 	    <div class="form-group">
 			<div class="col-sm-5">&nbsp;</div>
 			<div class="col-sm-7">
 				<input name="submit" type="submit" id="up-submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 			</div>
 		</div>
+<?php endif;?>
 <?php 
 if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
@@ -29,17 +31,21 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error == 'Duplicate user') echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></div>
 		</div>
 
+<!-- Re-active ? -->
+		<div class="form-group" id="state_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Revoke or reactivate', 'ppit-user', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input type="checkbox" id="state" class="form-control" value="1"<?php if ($account->user->state) echo ' checked="checked"' ?><?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
+			</div>
+		</div>
+
 <!-- Accept notifications ? -->
 		<div class="form-group" id="is_notified_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Accept notifications ?', 'ppit-user', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-				<input type="checkbox" id="is_notified" class="form-control" value="1"<?php if ($account->is_notified) echo ' checked="checked"' ?><?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
+				<input type="checkbox" id="is_notified" class="form-control" value="1"<?php if ($account->user->requires_notifications) echo ' checked="checked"' ?><?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
 			</div>
 		</div>
-
-<h5><?php echo $this->translate('The user will receive an email with a link in a password definition page', 'ppit-user', $context->getlocale()) ?></h5>
-
-<h5><?php echo $this->translate('Alternatively, you can specify the password below (no automatic email)', 'ppit-user', $context->getlocale()) ?></h5>
 
 <!-- Password -->
 		<div class="form-group" id="new_password_group">
@@ -63,20 +69,20 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 		<div class="form-group" id="locale_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Locale', 'ppit-user', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-				<select name="locale" id="locale" class="form-control"<?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
-					<option />
-					<option value="en_US" <?php if ($account->locale == 'en_US') echo 'selected="selected"'; ?>>en_US</option>
+				<select id="locale" class="form-control"<?php if (isset($isDisabled) && $isDisabled) echo ' disabled ="disabled"' ?>>
 					<option value="fr_FR" <?php if ($account->locale == 'fr_FR') echo 'selected="selected"'; ?>>fr_FR</option>
+					<option value="en_US" <?php if ($account->locale == 'en_US') echo 'selected="selected"'; ?>>en_US</option>
 				</select>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="locale_error"></p></div>
 		</div>
 
+<?php if ($message != 'OK') : ?>
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 				</div>
 			</div>
-		
+<?php endif;?>		
 		</form>

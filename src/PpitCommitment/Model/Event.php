@@ -93,7 +93,7 @@ class Event implements InputFilterAwareInterface
 		
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-    		$where->greaterThanOrEqualTo('end_time', date('Y-m-d H:i:s'));
+    		$where->greaterThanOrEqualTo('end_time', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s').' - 7 days')));
     	}
     	else {
 
@@ -150,7 +150,7 @@ class Event implements InputFilterAwareInterface
 		$where->notEqualTo('status', 'deleted');
 		$where->equalTo('type', $type);
 		if ($category) $where->equalTo('category', $category);
-		$where->greaterThanOrEqualTo('end_time', date('Y-m-d H:i:s'));
+		$where->greaterThanOrEqualTo('end_time', date('Y-m-d'));
 		$where->like('target', '%"'.$account_id.'"%');
 		$select->where($where);
     	$cursor = Event::getTable()->selectWith($select);

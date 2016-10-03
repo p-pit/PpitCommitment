@@ -16,11 +16,6 @@
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
-<?php if (!$context->getConfig('credit')['unlimitedCredits']) : ?>
-			&nbsp;&nbsp;
-			( <img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>">
-			Crédits <em>P-PIT Engagements</em> mensuels disponibles : <strong <?php if ($context->formatFloat($credit->quantity, 0) <= 0) echo 'style="color: red"'?>><?php echo $credit->quantity ?></strong> )
-<?php endif;?>
 		</td>
 	</tr>
 

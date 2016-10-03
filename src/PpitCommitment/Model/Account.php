@@ -149,8 +149,8 @@ class Account implements InputFilterAwareInterface
     	$data['property_8'] =  ($this->property_8) ? $this->property_8 : null;
     	$data['property_9'] =  ($this->property_9) ? $this->property_9 : null;
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
-    	$data['json_property_1'] =  ($this->json_property_1) ? json_encode($this->json_property_1) : null;
-    	$data['audit'] =  ($this->audit) ? json_encode($this->audit) : null;
+    	$data['json_property_1'] = json_encode($this->json_property_1);
+    	$data['audit'] = json_encode($this->audit);
     	return $data;
     }
     
@@ -233,12 +233,13 @@ class Account implements InputFilterAwareInterface
 		    	
 		    	$userContact = UserContact::get($account->contact_1_id, 'contact_id');
 		    	if ($userContact) {
-		    		$this->userContact = $userContact;
+		    		$account->userContact = $userContact;
 
-		    		$user = User::transGet($userContact->user_id);
+		    		$user = User::get($userContact->user_id);
 		    		$account->user = $user;
-		    		$account->username = $user->username;
 		    	}
+		    	else $account->user = User::instanciate();
+		    	$account->username = $account->user->username;
 	    	}
 	        if ($account->customer_community->contact_2_id) $account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
 	        if ($account->customer_community->contact_3_id) $account->contact_3 = Vcard::get($account->customer_community->contact_3_id);
@@ -349,14 +350,8 @@ class Account implements InputFilterAwareInterface
     		if (array_key_exists('json_property_1', $data)) {
 				$this->json_property_1 = $data['json_property_1'];
 			}
-        	if (array_key_exists('username', $data)) {
-				$this->username = $data['username'];
-			}
             if (array_key_exists('is_notified', $data)) {
 				$this->is_notified = $data['is_notified'];
-			}
-            if (array_key_exists('new_password', $data)) {
-				$this->new_password = $data['new_password'];
 			}
             if (array_key_exists('locale', $data)) {
 				$this->locale = $data['locale'];
@@ -386,47 +381,8 @@ class Account implements InputFilterAwareInterface
     public function add()
     {
     	$context = Context::getCurrent();
-/*
-    	$document = new Document;
-    	$document->parent_id = 0;
-    	$document->type = 'directory';
-    	$document->name = 'Documents';
-    	$document->acl = array('communities' => array($this->customer_community->id => 'write'), 'contacts' => array());
-    	Document::getTable()->save($document);
-    	 
-    	$this->customer_community->root_document_id = $document->id;
-    	$this->customer_community->add();
-    	$this->customer_community_id = $this->customer_community->id;
-
-    	$this->contact_1->community_id = $this->customer_community->id;
-    	$this->contact_1 = Vcard::optimize($this->contact_1);
-    	$this->contact_1->add();
-    	foreach ($this->files as $file) $this->contact_1->saveFile($file);
-    	$this->customer_community->contact_1_id = $this->contact_1->id;
-    	Community::getTable()->save($this->customer_community);
-
-    	if ($this->username) {
-    		$user = User::getNew();
-    		$user->username = $this->username;
-    		if ($this->is_notified) {
-    			$rc = $user->add(false, true);
-    			if ($rc != 'OK') return $rc;
-    		}
-    		else {
-    			$user->new_password = $this->new_password;
-    			$rc = $user->add();
-    			if ($rc != 'OK') return 'duplicate-user';
-    			$user->changePassword();
-    		}
-    		$userContact = UserContact::getNew();
-    		$userContact->user_id = $user->user_id;
-    		$userContact->contact_id = $this->contact_1_id;
-			$userContact->add();
-    	}*/
-
     	$this->id = null;
-    	Account::getTable()->save($this);
-    
+    	Account::getTable()->save($this);    
     	return ('OK');
     }
     
@@ -437,39 +393,10 @@ class Account implements InputFilterAwareInterface
 
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
-/*
-    	$this->customer_community->update($this->customer_community->update_time);
-    	
+		$this->customer_community->update($this->customer_community->update_time);
     	$this->contact_1->update($this->contact_1->update_time);
     	if ($this->files) foreach ($this->files as $file) $this->contact_1->saveFile($file);
-
-    	if ($this->user && $this->username != $this->user->username) {
-    		
-    		// Lock the current user
-    		$this->user->state = 0;
-    		$this->user->update($this->user->update_time);
-    		
-    		// And create a new one
-    		$user = User::getNew();
-    		$user->username = $this->username;
-    		if ($this->is_notified) {
-    			$rc = $user->add(false, true);
-    			if ($rc != 'OK') return $rc;
-    		}
-    		else {
-    			$user->new_password = $this->new_password;
-    			$rc = $user->add();
-    			if ($rc != 'OK') return $rc;
-    			$user->changePassword();
-    		}
-    		$userContact = UserContact::getNew();
-    		$userContact->user_id = $user->user_id;
-    		$userContact->contact_id = $this->contact_1_id;
-    		$userContact->add();
-    	}*/
-    	 
     	Account::getTable()->save($this);
-    
     	return 'OK';
     }
 

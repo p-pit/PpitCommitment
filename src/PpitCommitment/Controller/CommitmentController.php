@@ -25,6 +25,17 @@ use Zend\Log\Logger;
 use Zend\Log\Writer;
 use Zend\Mvc\Controller\AbstractActionController;
 
+require_once('vendor/TCPDF-master/tcpdf.php');
+
+class PpitPDF extends \TCPDF {
+	public function Footer() {
+		parent::Footer();
+		$this->SetY(-10);
+		$this->SetFont('helvetica', 'N', 8);
+		$this->Cell(0, 5, 'P-PIT – SAS au capital de 10 000 € - R.C.S PARIS 804 199 594 - 14, rue Charles V – 75004 PARIS', 0, false, 'L', 0, '', 0, false, 'T', 'M');
+	}
+}
+
 class CommitmentController extends AbstractActionController
 {	
 	public function indexAction()
@@ -554,9 +565,11 @@ class CommitmentController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
     	
-    	require_once('vendor/TCPDF-master/tcpdf.php');
+    	$commitment = Commitment::get(14);
+    	$account = Account::get($commitment->account_id);
+    	
     	// create new PDF document
-    	$pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     	
     	// set document information
     	$pdf->SetCreator(PDF_CREATOR);
@@ -566,11 +579,11 @@ class CommitmentController extends AbstractActionController
     	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
     	
     	// set default header data
-    	$pdf->SetHeaderData('advert.png', '160');
+    	$pdf->SetHeaderData('advert-1000.png', '180');
     	// set header and footer fonts
     	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
     	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-    	
+		
     	// set default monospaced font
     	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
     	
@@ -578,7 +591,7 @@ class CommitmentController extends AbstractActionController
     	$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
     	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
     	$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-    	
+    	 
     	// set auto page breaks
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     	
@@ -618,12 +631,105 @@ class CommitmentController extends AbstractActionController
     	$pdf->SetFont('helvetica', '', 12);
     	
     	// add a page
+    	$pdf->footerTitle = 'Bla bla bla';
     	$pdf->AddPage();
-    	
-    	// print a line of text
-    	$text = 'This is a <b color="#FF0000">digitally signed document</b> using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />For more information check the source code of this example and the source code documentation for the <i>setSignature()</i> method.<br /><br /><a href="http://www.tcpdf.org">www.tcpdf.org</a>';
+    	 
+    	// Invoice header
+    	$pdf->MultiCell(100, 5, '', 0, 'L', 0, 0, '', '', true);
+    	$pdf->SetTextColor(0);
+    	$pdf->SetFont('', '', 12);
+    	$addressee = $account->customer_name;
+    	$addressee .= "\n".$account->contact_1->n_title.' '.$account->contact_1->n_last.' '.$account->contact_1->n_first;
+    	$addressee .= "\n".$account->contact_1->adr_street;
+    	if ($account->contact_1->adr_extended) $addressee .= "\n".$account->contact_1->adr_extended;
+    	if ($account->contact_1->adr_post_office_box) $addressee .= "\n".$account->contact_1->adr_post_office_box;
+    	if ($account->contact_1->adr_zip) $addressee .= "\n".$account->contact_1->adr_zip;
+    	if ($account->contact_1->adr_city) $addressee .= "\n".$account->contact_1->adr_city;
+    	if ($account->contact_1->adr_state) $addressee .= "\n".$account->contact_1->adr_state;
+    	if ($account->contact_1->adr_country) $addressee .= "\n".$account->contact_1->adr_country;
+    	$pdf->MultiCell(80, 5, $addressee, 0, 'L', 0, 1, '', '', true);
+    	$pdf->Ln();
+
+    	// Title
+    	$text = '<div style="text-align: center"><strong>Facture n° '.$commitment->invoice_identifier.'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
+    	$pdf->Ln(10);
+    	 
+    	// Invoice references
+    	$pdf->SetFillColor(0, 97, 105);
+    	$pdf->SetTextColor(255);
+//    	$pdf->SetDrawColor(128, 0, 0);
+    	$pdf->SetLineWidth(0.2);
+    	$pdf->SetFont('', '', 10);
+		$pdf->MultiCell(50, 5, 'Engagement', 1, 'L', 1, 0, '', '', true);
+    	$pdf->SetTextColor(0);
+    	$pdf->MultiCell(130, 5, $commitment->identifier, 1, 'L', 0, 1, '', '', true);
+    	$pdf->SetTextColor(255);
+    	$pdf->MultiCell(50, 5, 'Projet', 1, 'L', 1, 0, '', '', true);
+    	$pdf->SetTextColor(0);
+    	$pdf->MultiCell(130, 5, $commitment->description, 1, 'L', 0, 1, '' ,'', true);
+    	$pdf->SetTextColor(255);
+    	$pdf->MultiCell(50, 5, 'Objet', 1, 'L', 1, 0, '', '', true);
+    	$pdf->SetTextColor(0);
+    	$pdf->MultiCell(130, 5, $commitment->caption, 1, 'L', 0, 1, '' ,'', true);
+    	$pdf->SetTextColor(255);
+    	$pdf->MultiCell(50, 5, 'Date de facture', 1, 'L', 1, 0, '', '', true);
+    	$pdf->SetTextColor(0);
+    	$pdf->MultiCell(130, 5, $context->decodeDate($commitment->invoice_date), 1, 'L', 0, 2, '' ,'', true);
+    	$pdf->Ln(10);
     	
+    	// Invoice lines
+    	$pdf->SetFillColor(196, 196, 196);
+    	$pdf->Cell(130, 7, 'Libellé', 1, 0, 'C', 1);
+    	$pdf->Cell(50, 7, 'Prix (€ HT)', 1, 0, 'R', 1);
+    	// Color and font restoration
+    	$pdf->SetTextColor(0);
+    	$pdf->SetFont('', '', 8);
+    	// Data
+    	$pdf->Ln();
+    	$pdf->Cell(130, 6, $commitment->caption, 'LR', 0, 'L', false);
+    	$pdf->Cell(50, 6, $context->formatFloat($commitment->amount, 2), 'LR', 0, 'R', false);
+    	$pdf->Ln();
+    	$pdf->Cell(180, 0, '', 'T');
+    	$pdf->Ln();
+    	$pdf->SetDrawColor(255, 255, 255);
+    	$pdf->Cell(130, 6, 'Total HT :', 'LR', 0, 'R', false);
+    	$pdf->Cell(50, 6, $context->formatFloat($commitment->amount, 2).' €', 'LR', 0, 'R', false);
+    	$pdf->Ln();
+    	$pdf->Cell(130, 6, 'TVA 20% :', 'LR', 0, 'R', false);
+    	$pdf->Cell(50, 6, $context->formatFloat($commitment->tax_amount, 2).' €', 'LR', 0, 'R', false);
+    	$pdf->Ln();
+    	$pdf->SetFont('', 'B');
+    	$pdf->Cell(130, 6, 'Total TTC :', 'LR', 0, 'R', false);
+    	$pdf->Cell(50, 6, $context->formatFloat($commitment->tax_inclusive, 2).' €', 'LR', 0, 'R', false);
+
+    	// Bank account
+    	$pdf->Ln(20);
+    	$text = '<strong>Valeur en votre obligeant règlement : '.$context->formatFloat($commitment->tax_inclusive, 2).' €'.'</strong>';
+    	$pdf->writeHTML($text, true, 0, true, 0);
+    	$pdf->Ln();
+    	$text = '<strong>Par carte ou virement auprès de : Société Marseillaise de Crédit'.'</strong>';
+    	$pdf->writeHTML($text, true, 0, true, 0);
+    	$pdf->Ln();
+    	 
+    	$pdf->SetFont('', '', 8);
+    	$pdf->SetFillColor(196, 196, 196);
+    	$pdf->Cell(20, 7, 'Code banque', 1, 0, 'C', 1);
+    	$pdf->Cell(20, 7, 'Code agence', 1, 0, 'C', 1);
+    	$pdf->Cell(40, 7, 'Numéro de compte', 1, 0, 'C', 1);
+    	$pdf->Cell(15, 7, 'Clé RIB', 1, 0, 'C', 1);
+    	$pdf->Cell(30, 7, 'Domiciliation', 1, 0, 'C', 1);
+    	$pdf->Ln();
+    	$pdf->Cell(20, 6, '30077', 'LR', 0, 'L', false);
+    	$pdf->Cell(20, 6, '04193', 'LR', 0, 'L', false);
+    	$pdf->Cell(40, 6, '18222100200', 'LR', 0, 'L', false);
+    	$pdf->Cell(15, 6, '87', 'LR', 0, 'L', false);
+    	$pdf->Cell(30, 6, 'AVIGNON CRILLON', 'LR', 0, 'L', false);
+    	$pdf->Ln(10);
+    	$text = '<strong>IBAN : </strong>FR76 3007 7041 9318 2221 0020 087    <strong>Code BIC : </strong>SMCTFR2A';
+    	$pdf->writeHTML($text, true, 0, true, 0);
+    	 
+
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     	// *** set signature appearance ***
     	

@@ -624,14 +624,14 @@ return array(
 							'show' => true,
 							'labels' => array(
 									'en_US' => 'Sales manager',
-									'fr_FR' => 'Vendeur',
+									'fr_FR' => 'Gestion commerciale',
 							),
 					),
 					'business_owner' => array(
 							'show' => true,
 							'labels' => array(
 									'en_US' => 'Business owner',
-									'fr_FR' => 'Gestion',
+									'fr_FR' => 'Gestion opérationnelle',
 							),
 					),
 			),

@@ -5,6 +5,7 @@ namespace PpitCommitment\Controller;
 use PpitCommitment\Model\Account;
 use PpitCommitment\ViewHelper\SsmlAccountViewHelper;
 use PpitContact\Model\Community;
+use PpitContact\Model\ContactMessage;
 use PpitContact\Model\Vcard;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
@@ -27,7 +28,7 @@ class AccountController extends AbstractActionController
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($community_id);
 
-		$applicationName = 'P-PIT Engagements';
+		$applicationName = 'P-Pit Engagements';
 		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
 		$currentEntry = $this->params()->fromQuery('entry', 'account');
 
@@ -44,7 +45,7 @@ class AccountController extends AbstractActionController
     	));
     }
 
-    public function getFilters($params)
+    public function getFilters($params, $type)
     {
 		$context = Context::getCurrent();
     	
@@ -54,7 +55,7 @@ class AccountController extends AbstractActionController
     	$customer_name = ($params()->fromQuery('customer_name', null));
     	if ($customer_name) $filters['customer_name'] = $customer_name;
 
-    	foreach ($context->getConfig('commitmentAccount/search')['main'] as $propertyId => $rendering) {
+    	foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) {
     
     		$property = ($params()->fromQuery($propertyId, null));
     		if ($property) $filters[$propertyId] = $property;
@@ -64,7 +65,7 @@ class AccountController extends AbstractActionController
     		if ($max_property) $filters['max_'.$propertyId] = $max_property;
     	}
 
-    	foreach ($context->getConfig('commitmentAccount/search')['more'] as $propertyId => $rendering) {
+    	foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['more'] as $propertyId => $rendering) {
     	
     		$property = ($params()->fromQuery($propertyId, null));
     		if ($property) $filters[$propertyId] = $property;
@@ -102,8 +103,9 @@ class AccountController extends AbstractActionController
 
     	$type = $this->params()->fromRoute('type', null);
     	 
-    	$params = $this->getFilters($this->params());
-    
+    	$params = $this->getFilters($this->params(), $type);
+    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
+
     	$major = ($this->params()->fromQuery('major', 'customer_name'));
     	$dir = ($this->params()->fromQuery('dir', 'ASC'));
     
@@ -187,7 +189,7 @@ class AccountController extends AbstractActionController
     	$action = $this->params()->fromRoute('act', null);
     	if ($id) $account = Account::get($id);
     	else $account = Account::instanciate($type);
-    	
+
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -210,13 +212,8 @@ class AccountController extends AbstractActionController
 					if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
 					else $data[$propertyId] =  $request->getPost($propertyId);
 				}
-				$data['roles'] = array('student' => true);
-				$data['perimeters'] = array();
 				if ($type) $data['credits'] = array($type => true);
-				$data['username'] = $request->getPost('username');
-				$data['is_notified'] = $request->getPost('is_notified');
-				$data['new_password'] = $request->getPost('new_password');
-				$data['locale'] = $request->getPost('locale');
+
 				if (!$account->id) {
 					
 					// Add the community
@@ -227,14 +224,8 @@ class AccountController extends AbstractActionController
 					// Add the main contact
 					$account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
-
-					// Add the main user
-					$account->user = User::instanciate();
-					$rc = $account->user->loadData($request, $account->contact_1);
-					if ($rc == 'Integrity') throw new \Exception('View error');
-					elseif ($rc == 'Duplicate') $error = 'Duplicate user';
 				}
-				if ($account->loadData($data) != 'OK') throw new \Exception('View error');
+				if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
 				if (!$error) {
 	    			// Atomically save
 	    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
@@ -275,7 +266,7 @@ class AccountController extends AbstractActionController
 	    					$return = $account->contact_1->update($account->contact_1->update_time);
 	    					if ($return != 'OK') $error = $return;
 	    					else {
-		    					$return = $account->update($request->getPost('update_time'));
+	    						$return = $account->update($request->getPost('update_time'));
 	    						if ($return != 'OK') $error = $return;
 	    					}
 	    				}
@@ -290,7 +281,7 @@ class AccountController extends AbstractActionController
 	    				throw $e;
 	    			}
 	    			$action = null;
-	    		}
+				}
     		}
     	}
     
@@ -320,19 +311,18 @@ class AccountController extends AbstractActionController
     
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
-    	if ($id) $account = Account::get($id);
-    	else $account = Account::instanciate($type);
-    	 
+    	if (!$id) return $this->redirect()->fromRoute('home'); 
+    	
+    	// Retrieve the account
+    	$account = Account::get($id);
+
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
     	$error = null;
-    	if ($action == 'delete') $message = 'confirm-delete';
-    	elseif ($action) $message =  'confirm-update';
-    	else $message = null;
+		$message = null;
     	$request = $this->getRequest();
     	if ($request->isPost()) {
-    		$message = null;
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		 
@@ -344,47 +334,53 @@ class AccountController extends AbstractActionController
     			$data['perimeters'] = array();
     			if ($type) $data['credits'] = array($type => true);
     			$data['username'] = $request->getPost('username');
+    			$data['state'] = $request->getPost('state');
     			$data['is_notified'] = $request->getPost('is_notified');
     			$data['new_password'] = $request->getPost('new_password');
     			$data['locale'] = $request->getPost('locale');
     			$data['is_demo_mode_active'] = false;
-    			if (!$account->username) {
-    
-    				// Add the main user
-    				$account->user = User::instanciate();
-    				$rc = $account->user->loadData($request, $account->contact_1);
-    				if ($rc == 'Integrity') throw new \Exception('View error');
-    				elseif ($rc == 'Duplicate') $error = 'Duplicate user';
-    			}
-    			if ($account->loadData($data) != 'OK') throw new \Exception('View error');
-    			if (!$error) {
+ 
+    			if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
+
+					// Load the user data
+					$rc = $account->user->loadData($request, $account->contact_1);
+					if ($rc == 'Integrity') throw new \Exception('View error');
+					elseif ($rc == 'Duplicate') $error = 'Duplicate user';
+					$account->user->state = $data['state'];
+
+    				if (!$error) {
     				// Atomically save
     				$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
     				$connection->beginTransaction();
     				try {
-    					if (!$account->username) {
-    							$account->contact_1->update($account->contact_1->update_time);
-    							$account->user->contact_id = $account->contact_1->id;
-    
-    							// Save the user
-    							$return = $account->user->add($account->contact_1->email, ($account->is_notified) ? true : false);
-    							if ($return != 'OK') $error = 'Duplicate user';
-    							else {
-    								// Save the user-contact link
-    								$userContact = UserContact::instanciate();
-    								$userContact->user_id = $account->user->user_id;
-    								$userContact->contact_id = $account->contact_1->id;
-    								$return = $userContact->add();
-    								if ($return != 'OK') $error = $return;
-    								else {
-    									$return = $account->add();
-    									if ($return != 'OK') $error = $return;
-    									else $message = 'OK';
-    								}
-    							}
+    					$account->contact_1->update($account->contact_1->update_time);
+    					if (!$account->user->user_id) {
+    						// Create a new user
+    						$user = User::getNew();
+    						$account->user = $user;
+    						$user->username = $data['username'];
+    						$user->contact_id = $account->contact_1_id;
+    						if ($account->is_notified && !$data['new_password']) {
+    							$rc = $user->add(false, true);
+    						}
+    						else $rc = $user->add(false, false);
+    						if ($rc != 'OK') $error = $rc;
+    						$userContact = UserContact::instanciate();
+    						$userContact->user_id = $user->user_id;
+    						$userContact->contact_id = $account->contact_1_id;
+    						$userContact->add();
+    						$account->username = $user->username;
     					}
-    					else {
-    						// To do
+    					if (!$error) {
+    						$rc = $account->user->update(null);
+    						if ($rc != 'OK') $error = $rc;
+    					}
+    					if (!$error) {
+	    					if ($data['new_password']) {
+	    						$account->user->new_password = $data['new_password'];
+	    						if ($rc != 'OK') $error = $rc;
+	    						else $account->user->changePassword(false);
+	    					}
     					}
     					if ($error) $connection->rollback();
     					else {
@@ -424,7 +420,6 @@ class AccountController extends AbstractActionController
     	$type = $this->params()->fromRoute('type');    
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$contactNumber = $this->params()->fromRoute('contactNumber', 0);
-
     	$account = Account::get($id);
     	if ($contactNumber == 'contact_1') {
     		if (!$account->contact_1) $account->contact_1 = Vcard::instanciate($account->customer_community_id);
@@ -535,7 +530,7 @@ class AccountController extends AbstractActionController
     			$action = null;
     		}
     	}
-    
+    	$contact->properties = $contact->toArray();
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),

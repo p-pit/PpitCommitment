@@ -172,8 +172,11 @@ class Notification implements InputFilterAwareInterface
     				require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     				$dropboxClient = new \Dropbox\Client($context->getConfig('ppitDocument')['dropboxCredential'], "P-PIT");
     			}
-    			$notification->link = $dropboxClient->createShareableLink($notification->attachment_path);
-    		}
+ 				try {
+    				$notification->link = $dropboxClient->createShareableLink($notification->attachment_path);
+ 				}
+    			catch(\Exception $e) {}
+ 			}
     		$notifications[] = $notification;
     	}
     	return $notifications;
