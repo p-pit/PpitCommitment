@@ -1,5 +1,5 @@
 <?php 
-if (array_key_exists($xmlMessage->type, $context->getConfig('commitment')['importTypes'])) {
+if (array_key_exists($xmlMessage->type, $context->getConfig('commitmentMessage')['importTypes'])) {
 	header('Content-Type: text/csv; charset=utf-8');
 	header("Content-disposition: filename=osi-".$xmlMessage->id.".csv");
 	echo "\xEF\xBB\xBF";

@@ -42,6 +42,7 @@ class Commitment implements InputFilterAwareInterface
 	public $identifier;
 	public $quotation_identifier;
 	public $invoice_identifier;
+	public $credit_identifier;
 	public $commitment_date;
 	public $retraction_limit;
     public $retraction_date;
@@ -136,6 +137,7 @@ class Commitment implements InputFilterAwareInterface
         $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
         $this->quotation_identifier = (isset($data['quotation_identifier'])) ? $data['quotation_identifier'] : null;
         $this->invoice_identifier = (isset($data['invoice_identifier'])) ? $data['invoice_identifier'] : null;
+        $this->credit_identifier = (isset($data['credit_identifier'])) ? $data['credit_identifier'] : null;
         $this->commitment_date = (isset($data['commitment_date'])) ? $data['commitment_date'] : null;
         $this->retraction_limit = (isset($data['retraction_limit'])) ? $data['retraction_limit'] : null;
         $this->retraction_date = (isset($data['retraction_date'])) ? $data['retraction_date'] : null;
@@ -214,6 +216,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['identifier'] = $this->identifier;
     	$data['quotation_identifier'] = $this->quotation_identifier;
     	$data['invoice_identifier'] = $this->invoice_identifier;
+    	$data['credit_identifier'] = $this->credit_identifier;
     	$data['commitment_date'] = ($this->commitment_date) ? $this->commitment_date : null;
     	$data['retraction_limit'] = ($this->retraction_limit) ? $this->retraction_limit : null;
     	$data['retraction_date'] = ($this->retraction_date) ? $this->retraction_date : null;
@@ -285,9 +288,9 @@ class Commitment implements InputFilterAwareInterface
 			foreach($todo as $role => $properties) {
 				if ($context->hasRole($role)) {
 					foreach($properties as $property => $predicate) {
-						if ($predicate['selector'] == 'equalTo') $where->equalTo($property, $predicate['value']);
-						elseif ($predicate['selector'] == 'in') $where->in($property, $predicate['value']);
-						elseif ($predicate['selector'] == 'deadline') $where->lessThanOrEqualTo($property, date('Y-m-d', strtotime(date('Y-m-d').'+ '.$predicate['value'].' days')));
+						if ($predicate['selector'] == 'equalTo') $where->equalTo('commitment.'.$property, $predicate['value']);
+						elseif ($predicate['selector'] == 'in') $where->in('commitment.'.$property, $predicate['value']);
+						elseif ($predicate['selector'] == 'deadline') $where->lessThanOrEqualTo('commitment.'.$property, date('Y-m-d', strtotime(date('Y-m-d').'+ '.$predicate['value'].' days')));
 					}
 				}
 			}

@@ -44,7 +44,7 @@
 						<span class="glyphicon glyphicon-send"></span>
 					</button>
 				</td>
-	<?php elseif (array_key_exists($xmlMessage->type, $context->getConfig('commitment')['importTypes'])) : ?>
+	<?php elseif (array_key_exists($xmlMessage->type, $context->getConfig('commitmentMessage')['importTypes'])) : ?>
 				<td>
 					<button type="button" class="btn btn-default commitment-message-import-anchor" title="<?php echo $this->translate('Process', 'ppit-core', $context->getLocale()) ?>" id="<?php echo 'commitment-message-process-anchor_'.$xmlMessage->id ?>">
 						<span class="glyphicon glyphicon-cog"></span>

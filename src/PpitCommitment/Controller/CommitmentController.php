@@ -896,7 +896,7 @@ class CommitmentController extends AbstractActionController
 						'maxredirects' => 0,
 						'timeout'      => 30,
 				)
-				);
+		);
 		
 		$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['user'];
 		$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);

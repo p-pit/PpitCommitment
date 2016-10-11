@@ -23,7 +23,7 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
-		$type = $this->params()->fromRoute('type', null);
+		$type = $this->params()->fromRoute('type', 0);
 
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($community_id);

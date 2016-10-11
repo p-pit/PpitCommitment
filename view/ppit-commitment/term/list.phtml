@@ -1,0 +1,48 @@
+<table class="table table-striped ppit_index">
+	<tr>
+		<th>&nbsp;</th>
+
+<?php foreach ($context->getConfig('commitmentTerm/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
+		<th align="center">
+	<?php $label = $context->getConfig('commitmentTerm')['properties'][$propertyId]['labels'][$context->getLocale()] ?>
+	<?php if ($label) : ?>
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="<?php echo $propertyId ?>-anchor">
+				<span><?php echo $label ?></span>
+<?php if ($major == $propertyId) : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+	<?php endif;?>
+		</th>
+<?php endforeach;?>
+
+	<tr>
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn term-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-detail-anchor_0">
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+			</button>
+		</td>
+		
+		<td colspan="6">&nbsp;</td>
+	</tr>
+
+<?php $i = 0; foreach ($terms as $term) : ?>
+	
+	<tr class="term">
+	
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn term-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="term-detail-anchor_<?php echo $term->id ?>">
+				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $term->id ?>-glyphicon"></span>
+			</button>
+		</td>
+
+	<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
+	
+		<td><?php echo $term->properties[$propertyId] ?></td>
+		
+	<?php endforeach;?>
+	</tr>
+	
+<?php $i++; endforeach; ?>
+
+</table>

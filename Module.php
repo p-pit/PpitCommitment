@@ -8,6 +8,7 @@ use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\Event;
 use PpitCommitment\Model\Notification;
 use PpitCommitment\Model\Subscription;
+use PpitCommitment\Model\Term;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
@@ -108,6 +109,17 @@ class Module
                     $resultSetPrototype = new ResultSet();
                     $resultSetPrototype->setArrayObjectPrototype(new Subscription());
                     return new TableGateway('commitment_subscription', $dbAdapter, null, $resultSetPrototype);
+                },
+                'PpitCommitment\Model\TermTable' =>  function($sm) {
+                    $tableGateway = $sm->get('TermTableGateway');
+                    $table = new GenericTable($tableGateway);
+                    return $table;
+                },
+                'TermTableGateway' => function ($sm) {
+                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultSetPrototype = new ResultSet();
+                    $resultSetPrototype->setArrayObjectPrototype(new Term());
+                    return new TableGateway('commitment_term', $dbAdapter, null, $resultSetPrototype);
                 },
             ),
         );

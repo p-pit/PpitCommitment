@@ -8,6 +8,7 @@ return array(
         	'PpitCommitment\Controller\CommitmentMessage' => 'PpitCommitment\Controller\CommitmentMessageController',
         	'PpitCommitment\Controller\OrderResponse' => 'PpitCommitment\Controller\OrderResponseController',
         	'PpitCommitment\Controller\OrderProduct' => 'PpitCommitment\Controller\OrderProductController',
+            'PpitCommitment\Controller\Term' => 'PpitCommitment\Controller\TermController',
         ),
     ),
 		
@@ -503,7 +504,92 @@ return array(
             				),
             		),
         	),
-       	),
+        	'commitmentTerm' => array(
+                'type'    => 'literal',
+                'options' => array(
+                    'route'    => '/commitment-term',
+                    'defaults' => array(
+                        'controller' => 'PpitCommitment\Controller\Term',
+                        'action'     => 'index',
+                    ),
+                ),
+           		'may_terminate' => true,
+	       		'child_routes' => array(
+        						'index' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/index',
+        										'defaults' => array(
+        												'action' => 'index',
+        										),
+        								),
+        						),
+        						'search' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/search',
+        										'defaults' => array(
+        												'action' => 'search',
+        										),
+        								),
+        						),
+        						'list' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/list',
+        										'defaults' => array(
+        												'action' => 'list',
+        										),
+        								),
+        						),
+        						'export' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/export',
+        										'defaults' => array(
+        												'action' => 'export',
+        										),
+        								),
+        						),
+	       						'detail' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/detail[/:id]',
+        										'constraints' => array(
+        												'id' => '[0-9]*',
+        										),
+        										'defaults' => array(
+        												'action' => 'detail',
+        										),
+        								),
+        						),
+		        				'update' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/update[/:id]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'update',
+		        								),
+		        						),
+		        				),
+	       			'delete' => array(
+	                    'type' => 'segment',
+	                    'options' => array(
+	                        'route' => '/delete[/:id]',
+		                    'constraints' => array(
+		                    	'id' => '[0-9]*',
+		                    ),
+	                    	'defaults' => array(
+	                            'action' => 'delete',
+	                        ),
+	                    ),
+	                ),
+	       		),
+			),
+        ),
     ),
 
     'bjyauthorize' => array(
@@ -569,6 +655,14 @@ return array(
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/submit', 'roles' => array('admin')),
+				array('route' => 'commitmentTerm', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/index', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/search', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/detail', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/delete', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/export', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/list', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
             )
         )
     ),
@@ -649,26 +743,6 @@ return array(
 
 	'menus' => array(
 			'p-pit-engagements' => array(
-					'rental' => array(
-							'action' => 'Commitment',
-							'route' => 'commitment/index',
-							'params' => array('type' => 'rental'),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Rental',
-									'fr_FR' => 'Location',
-							),
-					),
-					'service' => array(
-							'action' => 'Commitment',
-							'route' => 'commitment/index',
-							'params' => array('type' => 'service'),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Service offer',
-									'fr_FR' => 'Prestation de service',
-							),
-					),
 					'account' => array(
 							'action' => 'Account',
 							'route' => 'commitmentAccount/index',
@@ -677,6 +751,26 @@ return array(
 							'label' => array(
 									'en_US' => 'Accounts',
 									'fr_FR' => 'Comptes',
+							),
+					),
+					'commitment' => array(
+							'action' => 'Commitment',
+							'route' => 'commitment/index',
+							'params' => array('type' => 0),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Commitments',
+									'fr_FR' => 'Engagements',
+							),
+					),
+					'term' => array(
+							'action' => 'Term',
+							'route' => 'commitmentTerm/index',
+							'params' => array(),
+							'urlParams' => array(),
+							'label' => array(
+									'en_US' => 'Terms',
+									'fr_FR' => 'Echéances',
 							),
 					),
 					'commitmentMessage' => array(
@@ -894,7 +988,7 @@ Commandes enregistrées %s : %s
 					),
 			),
 	),
-	'commitment/rental' => array(
+	'commitment' => array(
 			'properties' => array(
 			),
 			'statuses' => array(
@@ -926,7 +1020,7 @@ Commandes enregistrées %s : %s
 			'deadlines' => array(),
 			'todo' => array(
 					'sales_manager' => array(
-							'status' => array('selector' => 'equalTo', 'value' => array('new')),
+							'status' => array('selector' => 'in', 'value' => array('new')),
 					),
 			),
 			'actions' => array(
@@ -1071,7 +1165,7 @@ Commandes enregistrées %s : %s
 			),
 			'todo' => array(
 					'sales_manager' => array(
-							'status' => array('selector' => 'equalTo', 'value' => array('new')),
+							'status' => array('selector' => 'in', 'value' => array('new')),
 					),
 					'business_owner' => array(
 							'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
@@ -1166,6 +1260,92 @@ Commandes enregistrées %s : %s
 						),
 					),
 			),
+	),
+		
+	'commitmentTerm' => array(
+			'statuses' => array(),
+			'properties' => array(
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'to_come' => array('fr_FR' => 'A venir', 'en_US' => 'To come'),
+									'to_be_settled' => array('fr_FR' => 'A régler', 'en_US' => 'To settle'),
+									'settled' => array('fr_FR' => 'Régler', 'en_US' => 'Settled'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'caption' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Caption',
+									'fr_FR' => 'Libellé',
+							),
+					),
+					'due_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Due date',
+									'fr_FR' => 'Date d\'échéance',
+							),
+					),
+					'amount' => array(
+							'type' => 'number',
+							'minValue' => 0,
+							'maxValue' => 99999999,
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
+					'means_of_payment' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'bank_card' => array('fr_FR' => 'Carte bancaire', 'en_US' => 'Bank card'),
+									'transfer' => array('fr_FR' => 'Virement', 'en_US' => 'Transfer'),
+									'check' => array('fr_FR' => 'Chèque', 'en_US' => 'Check'),
+									'cash' => array('fr_FR' => 'Espèces', 'en_US' => 'Cash'),
+							),
+							'labels' => array(
+									'en_US' => 'Means of payment',
+									'fr_FR' => 'Mode de règlement',
+							),
+					),
+			),
+	),
+	'commitmentTerm/index' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	'commitmentTerm/search' => array(
+			'title' => array('en_US' => 'Terms', 'fr_FR' => 'Echéances'),
+			'todoTitle' => array('en_US' => 'to come', 'fr_FR' => 'à venir'),
+			'main' => array(
+				'status' => 'select',
+				'due_date' => 'range',
+				'amount' => 'range',
+			),
+			'more' => array(
+				'caption' => 'contains',
+				'means_of_payment' => 'select',
+			),
+	),
+	'commitmentTerm/list' => array(
+			'status' => 'select',
+			'due_date' => 'date',
+			'amount' => 'number',
+	),
+	'commitmentTerm/detail' => array(
+			'title' => array('en_US' => 'Term detail', 'fr_FR' => 'Détail de l\'échéance'),
+			'displayAudit' => true,
+	),
+	'commitmentTerm/update' => array(
+			'status' => array('mandatory' => true),
+			'caption' => array('mandatory' => true),
+			'due_date' => array('mandatory' => true),
+			'amount' => array('mandatory' => true),
+			'means_of_payment' => array('mandatory' => true),
 	),
 	'commitmentMessage' => array(
 			'inputMessages' => array(
@@ -1303,13 +1483,13 @@ L\'équipe P-PIT
 					),
 			),
 	),
-	'commitment/index/rental' => array(
+	'commitment/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 	'commitment/subscribe/rental' => array(
 //			'due_date' => array('mandatory' => false, 'disabled' => true),
 	),
-	'commitmentMessage/index/rental' => array(
+	'commitmentMessage/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 );

@@ -55,3 +55,193 @@
 <?php endif;?>
 
 	<div id="commitment-update-panel"></div>
+
+	<div id="commitment-options-panel">
+		<h4><?php echo $this->translate('Options', 'ppit-commitment', $context->getLocale()) ?></h4>
+		<table class="table table-striped ppit_index">
+			<tr>
+				<th>&nbsp;</th>
+				<th>&nbsp;</th>
+				<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Quantity', 'ppit-core', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Unit price', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('VAT', 'ppit-commitment', $context->getLocale()) ?></th>
+			</tr>
+		
+<?php foreach ($commitment->options as $option) : ?>
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-default action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>
+					<button type="button" class="btn btn-default action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-trash" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td style="text-align: left"><?php echo $option['caption'] ?></td>
+				<td style="text-align: right"><?php echo $option['quantity'] ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($option['unit_price'], 2) ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($option['amount'], 2) ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($option['vat_rate']*100, 2) ?></td>
+			</tr>
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-warning action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left">
+					<input class="form-control" id="option_caption-<?php echo $commitment->id ?>" value="<?php echo $option['caption'] ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_quantity-<?php echo $commitment->id ?>" value="<?php echo $option['quantity'] ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_unit_price-<?php echo $commitment->id ?>" value="<?php echo $option['unit_price'] ?>" />
+				</td>
+				<td style="text-align: right">&nbsp;</td>
+				<td style="text-align: right">
+					<select class="form-control" id="option_vat_rate-<?php echo $commitment->id ?>">
+						<option value="0.2" <?php if ($option['vat_rate'] == 0.2) echo 'selected="selected"' ?>>20%</option>
+						<option value="0" <?php if ($option['vat_rate'] == 0) echo 'selected="selected"' ?>>Exonéré</option>
+						<option value="0.055" <?php if ($option['vat_rate'] == 0.055) echo 'selected="selected"' ?>>5,5%</option>
+					</select>
+				</td>
+			</tr>
+<?php endforeach; ?>
+
+			<tr>
+				<td colspan="5">
+					<button type="button" class="btn btn-default action-btn btn-xs option-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="option-list-anchor">
+						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+					</button>
+				</td>
+			</tr>
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-warning action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left">
+					<input class="form-control" id="option_caption" value="" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_quantity" value="" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_unit_price" value="" />
+				</td>
+				<td style="text-align: right">&nbsp;</td>
+				<td style="text-align: right">
+					<select class="form-control" id="option_vat_rate-<?php echo $commitment->id ?>">
+						<option value="0.2" <?php if ($option['vat_rate'] == 0.2) echo 'selected="selected"' ?>>20%</option>
+						<option value="0" <?php if ($option['vat_rate'] == 0) echo 'selected="selected"' ?>>Exonéré</option>
+						<option value="0.055" <?php if ($option['vat_rate'] == 0.055) echo 'selected="selected"' ?>>5,5%</option>
+					</select>
+				</td>
+			</tr>
+
+		</table>
+	</div>
+
+	<div id="commitment-settlement-panel">
+		<h4><?php echo $this->translate('Schedule', 'ppit-commitment', $context->getLocale()) ?></h4>
+		<table class="table table-striped ppit_index">
+			<tr>
+				<th>&nbsp;</th>
+				<th>&nbsp;</th>
+				<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Date', 'ppit-core', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Means', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></th>
+			</tr>
+		
+<?php foreach ($commitment->terms as $term) : ?>
+			<tr class="term">
+				<td>
+					<button type="button" class="btn btn-default action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-update_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>
+					<button type="button" class="btn btn-default action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-delete_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-trash" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td style="text-align: left"><?php echo $term->caption ?></td>
+				<td style="text-align: right"><?php echo $context->decodeDate($term->due_date) ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($term->amount, 2) ?></td>
+				<td style="text-align: right"><?php echo $term->means_of_payment ?></td>
+				<td style="text-align: right"><?php echo $term->status ?></td>
+			</tr>
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-warning action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left">
+					<input class="form-control" id="term_caption-<?php echo $commitment->id ?>" value="<?php echo $term->caption ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="term_due_date-<?php echo $commitment->id ?>" value="<?php echo $term->due_date ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="term_amount-<?php echo $commitment->id ?>" value="<?php echo $term->amount ?>" />
+				</td>
+				<td style="text-align: right">&nbsp;</td>
+				<td style="text-align: right">
+					<select class="form-control" id="term_means_of_payment-<?php echo $commitment->id ?>">
+						<option value="bank_card" <?php if ($option['vat_rate'] == 'bank_card') echo 'selected="selected"' ?>>CB</option>
+						<option value="transfer" <?php if ($option['vat_rate'] == 'transfer') echo 'selected="selected"' ?>>Virement</option>
+						<option value="check" <?php if ($option['vat_rate'] == 'check') echo 'selected="selected"' ?>>Chèque</option>
+						<option value="cash" <?php if ($option['vat_rate'] == 'cash') echo 'selected="selected"' ?>>Espèces</option>
+					</select>
+				</td>
+			</tr>
+<?php endforeach; ?>
+
+			<tr>
+				<td colspan="5">
+					<button type="button" class="btn btn-default action-btn btn-xs term-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-list-anchor">
+						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+					</button>
+				</td>
+			</tr>
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-warning action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left">
+					<input class="form-control" id="term_caption" value="" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="term_due_date" value="" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="term_amount" value="" />
+				</td>
+				<td style="text-align: right">&nbsp;</td>
+				<td style="text-align: right">
+					<select class="form-control" id="term_means_of_payment">
+						<option value="bank_card" <?php if ($option['vat_rate'] == 'bank_card') echo 'selected="selected"' ?>>CB</option>
+						<option value="transfer" <?php if ($option['vat_rate'] == 'transfer') echo 'selected="selected"' ?>>Virement</option>
+						<option value="check" <?php if ($option['vat_rate'] == 'check') echo 'selected="selected"' ?>>Chèque</option>
+						<option value="cash" <?php if ($option['vat_rate'] == 'cash') echo 'selected="selected"' ?>>Espèces</option>
+					</select>
+				</td>
+			</tr>
+
+		</table>
+	</div>

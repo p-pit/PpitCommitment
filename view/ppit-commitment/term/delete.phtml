@@ -1,0 +1,43 @@
+<?php
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+
+<!-- Display header on MPA mode -->
+<?php if (!$spa) : ?>
+	<?php 
+		echo $this->partial('/partials/menu'); 
+	?>
+<?php endif;?>
+
+<h4><?php echo $this->translate('Delete a term', 'ppit-commitment', $context->getLocale()) ?></h4>
+
+<table class="table-condensed">
+	<tr>
+		<td class="ppit-header-caption"><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale())?></td>
+		<td><?php echo $term->caption ?>
+	</tr>
+	<tr>
+		<td class="ppit-header-caption"><?php echo $this->translate('Due date', 'ppit-commitment', $context->getLocale())?></td>
+		<td><?php echo $context->decodeDate($term->due_date) ?>
+	</tr>
+</table>
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+	'update_time' => $term->update_time,
+	'message' => $message,
+	'error' => $error,
+	'csrfForm' => $csrfForm,
+	'context' => $context,
+)) ?>
+
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-danger" value="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+			</div>
+		</div>

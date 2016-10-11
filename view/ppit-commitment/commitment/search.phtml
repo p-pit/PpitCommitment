@@ -22,7 +22,7 @@
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
 	    		<select class="form-control" id="search_status">
-	    			<option value=""><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></option>
+	    			<option value=""></option>
 <?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'] as $statusId => $status) : ?>
 	    			<option value="<?php echo $statusId ?>"><?php echo $status['labels'][$context->getLocale()] ?></option>
 <?php endforeach;?>

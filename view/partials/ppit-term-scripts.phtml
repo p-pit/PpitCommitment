@@ -1,0 +1,439 @@
+
+function connectRemoveIcon(id, target)
+{
+	$('#' + id).click(function () {
+		$('#' + target).hide();
+		filterTermList();
+	});
+}
+
+function getParams() {
+
+	var params = '?', todo = true;
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	
+	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
+	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
+	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	<?php elseif ($rendering == 'select') : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+
+	<?php else : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	
+	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
+	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
+	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+
+	<?php elseif ($rendering == 'select') : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php else : ?>
+
+	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+	<?php
+	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$searchTitle = (isset ($context->getConfig('commitmentTerm/search')['searchTitle']) ? $context->getConfig('commitmentTerm/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
+	?>
+	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
+
+	return params;
+}
+
+// Export the list
+function exportTermList() {
+
+	var params = getParams();
+	document.location.href = '<?php echo $this->url('commitmentTerm/export') ?>' + params;
+}
+
+function eraseTermSearch() {
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').val('');
+	$('#search_max_<?php echo $propertyId ?>').val('');
+
+	<?php else : ?>
+	$('#search_<?php echo $propertyId ?>').val('');
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').val('');
+	$('#search_max_<?php echo $propertyId ?>').val('');
+
+	<?php else : ?>
+	$('#search_<?php echo $propertyId ?>').val('');
+	
+	<?php endif;?>
+
+<?php endforeach;?>
+
+	getTermList(getParams(), 'amount', 'DESC');
+}
+
+function sortTermList(criterion) {
+
+	var dir;
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
+	getTermList(getParams(), criterion, dir);
+}
+
+function filterTermList() {
+
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (ascCriterion) {
+		criterion = ascCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	else {
+		criterion = descCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	getTermList(getParams(), criterion, dir);
+}
+
+function connectTermSearchInputs() {
+
+	$('#export-button').click(function () { exportTermList(); });
+	
+	$('#erase-button').unbind();
+	$('#erase-button').click(function () { eraseTermSearch(); });
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+
+		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_min_<?php echo $propertyId ?>").datepicker();
+	$("#search_max_<?php echo $propertyId ?>").datepicker();
+	$('#search_min_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+	$('#search_max_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+		<?php endif;?>
+	
+	<?php elseif ($rendering == 'select') : ?>
+		$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+	
+	<?php else : ?>
+		$('#search_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+
+		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_<?php echo $propertyId ?>").datepicker();
+	$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+		<?php endif;?>
+
+	<?php endif;?>
+
+<?php endforeach;?>
+
+<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
+
+	<?php if ($rendering == 'range') : ?>
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+
+		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_min_<?php echo $propertyId ?>").datepicker();
+	$("#search_max_<?php echo $propertyId ?>").datepicker();
+	$('#search_min_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+	$('#search_max_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+		<?php endif;?>
+	
+	<?php elseif ($rendering == 'select') : ?>
+		$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+
+	<?php else : ?>
+		$('#search_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+
+		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
+	$("#search_<?php echo $propertyId ?>").datepicker();
+	$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+		<?php endif;?>
+		
+	<?php endif;?>
+
+<?php endforeach;?>
+}
+
+// Load the list
+function getTermList(params, major, dir) {		
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitmentTerm/list') ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('term-list-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
+			
+			// Connect the sort anchors
+			$('.ppit-sort-anchor').each(function () {
+				$(this).click(function () {
+					sortTermList($(this).attr('id').split('-')[0]);
+				});
+			});
+			
+			// Connect the detail anchors
+			$('.term-detail-anchor').each(function () {
+				$(this).click(function () {
+					getTermDetail($(this).attr('id').split('_')[1]);
+				});
+			});
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+}
+
+function connectAuditPanel()
+{
+	$('#audit-panel').hide();
+	$('#audit-label').click(function () {
+		if ($('#audit-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#audit-panel').show();
+			$('#audit-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#audit-panel').hide();
+			$('#audit-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
+<?php 
+$properties = array();
+
+foreach ($context->getConfig('commitmentTerm/update') as $propertyId => $options) {
+	$property = $context->getConfig('commitmentTerm')['properties'][$propertyId];
+	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Term', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectTermUpdateForm(id, action)
+{
+
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkTermUpdateProperties(id);
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'attachment') : ?>
+				var fileSelect = document.getElementById('<?php echo $propertyId ?>');
+				if (fileSelect) {
+					var files = fileSelect.files;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						formData.append('<?php echo $propertyId ?>', file, file.name);
+					}
+				}
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentTerm/update', array('type' => $type)) ?>/' + id;
+			if (action) route += '/' + action;
+			target = 'term-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					document.getElementById(target).innerHTML = xhttp.responseText;
+					filterTermList();
+					connectTermUpdateForm(id, action);
+					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getTermUpdate(id, action) {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentTerm/update', array('type' => $type)) ?>/' + id;
+	if (action) route += '/' + action;
+
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('term-update-panel').innerHTML = xhttp.responseText;
+
+			if (id) {
+				$('#term-update-anchor').click(function () { getTermUpdate(id, 'update'); });
+				$('#term-delete-anchor').click(function () { getTermUpdate(id, 'delete'); });
+			}
+			else $('#term-add-anchor').click(function () { getTermUpdate(id, 'add'); });
+			
+			connectTermUpdateForm(id, action);
+			
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.action-btn').removeClass("btn-primary").addClass("btn-default");
+	if (action == 'update') $('#term-update-anchor').removeClass("btn-default").addClass("btn-primary");
+	else if (action == 'delete') $('#term-delete-anchor').removeClass("btn-default").addClass("btn-primary");
+}
+
+// Load the detail panel
+function getTermDetail(id) {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+
+	// Anchor to the new panel
+	$(location).attr('hash', 'form_action');
+
+	var route = '<?php echo $this->url('commitmentTerm/detail') ?>' + '/' + id;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			
+			connectAuditPanel();
+			connectRemoveIcon('remove-anchor', 'form_action');
+
+			getTermUpdate(id, '');
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#term-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
+}
+
+function activateTerm() {
+
+	// Load the search panel and highlight the menu entry
+	loadPanel('index_action', '<?php echo $this->url('commitmentTerm/search') ?>');
+	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
+	var termAnchor;
+	termAnchor = '#term-anchor';
+	$(termAnchor).removeClass("btn-default").addClass("btn-primary");
+
+	<?php
+	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	?>
+	$('#mode-text').text('<?php echo $todoTitle ?>');
+		
+	// Connect the search inputs
+	connectTermSearchInputs();
+	
+	getTermList('?', '<?php echo $context->getConfig('commitmentTerm')['order'] ?>', 'ASC');
+	
+	$('#add-criteria').click(function () {
+		mode = $('#add-criteria').text();
+		if (mode == '<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>') {
+			$('#add-criteria').text('<?php echo $this->translate('Less criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').show();
+		}
+		else {
+			$('#add-criteria').text('<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>');
+			$('#search-area').hide();
+		}
+	});
+	$('#search-area').hide();
+}
