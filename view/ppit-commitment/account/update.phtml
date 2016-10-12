@@ -77,6 +77,10 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			
 	<?php elseif ($propertyId == 'email') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'birth_date') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->contact_1->birth_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 	<?php elseif ($propertyId == 'closing_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />

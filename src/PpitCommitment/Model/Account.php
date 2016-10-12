@@ -53,6 +53,7 @@ class Account implements InputFilterAwareInterface
     public $n_last;
     public $n_fn;
     public $email;
+    public $birth_date;
     public $tel_work;
     public $tel_cell;
     
@@ -122,6 +123,7 @@ class Account implements InputFilterAwareInterface
         $this->n_last = (isset($data['n_last'])) ? $data['n_last'] : null;
         $this->n_fn = (isset($data['n_fn'])) ? $data['n_fn'] : null;
         $this->email = (isset($data['email'])) ? $data['email'] : null;
+        $this->birth_date = (isset($data['birth_date'])) ? $data['birth_date'] : null;
         $this->tel_work = (isset($data['tel_work'])) ? $data['tel_work'] : null;
         $this->tel_cell = (isset($data['tel_cell'])) ? $data['tel_cell'] : null;
     }
@@ -162,7 +164,7 @@ class Account implements InputFilterAwareInterface
 			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
 			->join(array('supplier' => 'contact_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
 			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'contact_1_id'), 'left')
-			->join('contact_vcard', 'customer.contact_1_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'tel_work', 'tel_cell'), 'left')
+			->join('contact_vcard', 'customer.contact_1_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
@@ -226,6 +228,7 @@ class Account implements InputFilterAwareInterface
 		    	$account->n_first = $account->contact_1->n_first;
 		    	$account->n_last = $account->contact_1->n_last;
 		    	$account->email = $account->contact_1->email;
+		    	$account->birth_date = $account->contact_1->birth_date;
 		    	$account->tel_work = $account->contact_1->tel_work;
 		    	$account->tel_cell = $account->contact_1->tel_cell;
 		    	$account->is_notified = $account->contact_1->is_notified;
@@ -290,6 +293,10 @@ class Account implements InputFilterAwareInterface
 				$this->email = trim(strip_tags($data['email']));
 				if (strlen($this->email) > 255) return 'Integrity';
 			}
+    		if (array_key_exists('birth_date', $data)) {
+				$this->birth_date = trim(strip_tags($data['birth_date']));
+		    	if ($this->birth_date && !checkdate(substr($this->birth_date, 5, 2), substr($this->birth_date, 8, 2), substr($this->birth_date, 0, 4))) return 'Integrity';
+    		}
 			if (array_key_exists('tel_work', $data)) {
 		    	$this->tel_work = trim(strip_tags($data['tel_work']));
 		    	if (strlen($this->tel_work) > 255) return 'Integrity';
@@ -362,6 +369,7 @@ class Account implements InputFilterAwareInterface
 			$this->contact_1->n_first = $this->n_first;
 			$this->contact_1->n_last = $this->n_last;
 			$this->contact_1->email = $this->email;
+			$this->contact_1->birth_date = $this->birth_date;
 			$this->contact_1->tel_work = $this->tel_work;
 			$this->contact_1->tel_cell = $this->tel_cell;
 			$this->contact_1->n_fn = $this->n_last.', '.$this->n_first;
