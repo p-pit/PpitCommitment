@@ -40,7 +40,7 @@
 <?php endif;?>
 		<div>&nbsp;</div>
 
-<?php if ($commitment->id) : ?>
+<?php /*if ($commitment->id) : ?>
 	<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
 			<?php if (array_key_exists($commitment->status, $action['currentStatuses'])) : ?>
 			<button type="button" class="btn btn-default action-btn" id="<?php echo $actionId ?>-anchor" title="<?php echo $action['label'][$context->getLocale()]?>">
@@ -52,12 +52,11 @@
 			</button>
 			<?php endif;?>
 	<?php endforeach;?>
-<?php endif;?>
+<?php endif; */?>
 
 	<div id="commitment-update-panel"></div>
 
 	<div id="commitment-options-panel">
-		<h4><?php echo $this->translate('Options', 'ppit-commitment', $context->getLocale()) ?></h4>
 		<table class="table table-striped ppit_index">
 			<tr>
 				<th>&nbsp;</th>
@@ -66,8 +65,45 @@
 				<th><?php echo $this->translate('Quantity', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Unit price', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
-				<th><?php echo $this->translate('VAT', 'ppit-commitment', $context->getLocale()) ?></th>
 			</tr>
+
+			<tr class="option">
+				<td>
+					<button type="button" class="btn btn-default action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left"><?php echo $commitment->product_identifier ?></td>
+				<td style="text-align: right"><?php echo $commitment->quantity ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($commitment->unit_price, 2) ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
+			</tr>
+
+			<tr class="option" style="display: none">
+				<td>
+					<button type="button" class="btn btn-warning action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
+						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
+					</button>
+				</td>
+				<td>&nbsp;</td>
+				<td style="text-align: left">
+					<input class="form-control" id="option_caption-<?php echo $commitment->id ?>" value="<?php echo $commitment->product_identifier ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_quantity-<?php echo $commitment->id ?>" value="<?php echo $commitment->quantity ?>" />
+				</td>
+				<td style="text-align: right">
+					<input class="form-control" id="option_unit_price-<?php echo $commitment->id ?>" value="<?php echo $context->formatFloat($commitment->unit_price, 2) ?>" />
+				</td>
+				<td style="text-align: right">&nbsp;</td>
+			</tr>
+
+			<tr class="option">
+				<td colspan="6"><strong><?php echo $this->translate('Options', 'ppit-master-data', $context->getLocale())?></strong></td>
+			</tr>
+
+			<tr class="option" style="display: none">&nbsp;</tr>
 		
 <?php foreach ($commitment->options as $option) : ?>
 			<tr class="option">
@@ -85,9 +121,8 @@
 				<td style="text-align: right"><?php echo $option['quantity'] ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($option['unit_price'], 2) ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($option['amount'], 2) ?></td>
-				<td style="text-align: right"><?php echo $context->formatFloat($option['vat_rate']*100, 2) ?></td>
 			</tr>
-			<tr class="option">
+			<tr class="option" style="display: none">
 				<td>
 					<button type="button" class="btn btn-warning action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
 						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -104,24 +139,17 @@
 					<input class="form-control" id="option_unit_price-<?php echo $commitment->id ?>" value="<?php echo $option['unit_price'] ?>" />
 				</td>
 				<td style="text-align: right">&nbsp;</td>
-				<td style="text-align: right">
-					<select class="form-control" id="option_vat_rate-<?php echo $commitment->id ?>">
-						<option value="0.2" <?php if ($option['vat_rate'] == 0.2) echo 'selected="selected"' ?>>20%</option>
-						<option value="0" <?php if ($option['vat_rate'] == 0) echo 'selected="selected"' ?>>Exonéré</option>
-						<option value="0.055" <?php if ($option['vat_rate'] == 0.055) echo 'selected="selected"' ?>>5,5%</option>
-					</select>
-				</td>
 			</tr>
 <?php endforeach; ?>
 
 			<tr>
-				<td colspan="5">
+				<td colspan="6">
 					<button type="button" class="btn btn-default action-btn btn-xs option-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="option-list-anchor">
 						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 					</button>
 				</td>
 			</tr>
-			<tr class="option">
+			<tr class="option" style="display: none">
 				<td>
 					<button type="button" class="btn btn-warning action-btn btn-xs option-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="option-list-anchor_<?php $commitment->id ?>">
 						<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -138,13 +166,6 @@
 					<input class="form-control" id="option_unit_price" value="" />
 				</td>
 				<td style="text-align: right">&nbsp;</td>
-				<td style="text-align: right">
-					<select class="form-control" id="option_vat_rate-<?php echo $commitment->id ?>">
-						<option value="0.2" <?php if ($option['vat_rate'] == 0.2) echo 'selected="selected"' ?>>20%</option>
-						<option value="0" <?php if ($option['vat_rate'] == 0) echo 'selected="selected"' ?>>Exonéré</option>
-						<option value="0.055" <?php if ($option['vat_rate'] == 0.055) echo 'selected="selected"' ?>>5,5%</option>
-					</select>
-				</td>
 			</tr>
 
 		</table>
@@ -158,9 +179,9 @@
 				<th>&nbsp;</th>
 				<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Date', 'ppit-core', $context->getLocale()) ?></th>
-				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Means', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
 			</tr>
 		
 <?php foreach ($commitment->terms as $term) : ?>
@@ -176,12 +197,12 @@
 					</button>
 				</td>
 				<td style="text-align: left"><?php echo $term->caption ?></td>
-				<td style="text-align: right"><?php echo $context->decodeDate($term->due_date) ?></td>
+				<td style="text-align: left"><?php echo $context->decodeDate($term->due_date) ?></td>
+				<td style="text-align: left"><?php if ($term->means_of_payment) echo $context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term->means_of_payment][$context->getLocale()] ?></td>
+				<td style="text-align: left"><?php if ($term->status) echo $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term->status][$context->getLocale()] ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($term->amount, 2) ?></td>
-				<td style="text-align: right"><?php echo $term->means_of_payment ?></td>
-				<td style="text-align: right"><?php echo $term->status ?></td>
 			</tr>
-			<tr class="option">
+			<tr class="option" style="display: none">
 				<td>
 					<button type="button" class="btn btn-warning action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-anchor_<?php $commitment->id ?>">
 						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -191,32 +212,39 @@
 				<td style="text-align: left">
 					<input class="form-control" id="term_caption-<?php echo $commitment->id ?>" value="<?php echo $term->caption ?>" />
 				</td>
-				<td style="text-align: right">
+				<td style="text-align: left">
 					<input class="form-control" id="term_due_date-<?php echo $commitment->id ?>" value="<?php echo $term->due_date ?>" />
+				</td>
+				<td style="text-align: left">
+					<select class="form-control" id="term_means_of_payment-<?php echo $commitment->id ?>">
+						<option />
+	<?php foreach ($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'] as $modalityId => $modality) : ?>
+						<option value="<?php echo $modalityId?>" <?php if ($term->means_of_payment == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
+	<?php endforeach;?>
+					</select>
+				</td>
+				<td style="text-align: left">
+					<select class="form-control" id="term_status-<?php echo $commitment->id ?>">
+						<option />
+	<?php foreach ($context->getConfig('commitmentTerm')['properties']['status']['modalities'] as $modalityId => $modality) : ?>
+						<option value="<?php echo $modalityId?>" <?php if ($term->status == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
+	<?php endforeach;?>
+					</select>
 				</td>
 				<td style="text-align: right">
 					<input class="form-control" id="term_amount-<?php echo $commitment->id ?>" value="<?php echo $term->amount ?>" />
-				</td>
-				<td style="text-align: right">&nbsp;</td>
-				<td style="text-align: right">
-					<select class="form-control" id="term_means_of_payment-<?php echo $commitment->id ?>">
-						<option value="bank_card" <?php if ($option['vat_rate'] == 'bank_card') echo 'selected="selected"' ?>>CB</option>
-						<option value="transfer" <?php if ($option['vat_rate'] == 'transfer') echo 'selected="selected"' ?>>Virement</option>
-						<option value="check" <?php if ($option['vat_rate'] == 'check') echo 'selected="selected"' ?>>Chèque</option>
-						<option value="cash" <?php if ($option['vat_rate'] == 'cash') echo 'selected="selected"' ?>>Espèces</option>
-					</select>
 				</td>
 			</tr>
 <?php endforeach; ?>
 
 			<tr>
-				<td colspan="5">
+				<td colspan="7">
 					<button type="button" class="btn btn-default action-btn btn-xs term-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-list-anchor">
 						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 					</button>
 				</td>
 			</tr>
-			<tr class="option">
+			<tr class="option" style="display: none">
 				<td>
 					<button type="button" class="btn btn-warning action-btn btn-xs term-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="term-list-anchor_<?php $commitment->id ?>">
 						<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -226,20 +254,27 @@
 				<td style="text-align: left">
 					<input class="form-control" id="term_caption" value="" />
 				</td>
-				<td style="text-align: right">
+				<td style="text-align: left">
 					<input class="form-control" id="term_due_date" value="" />
+				</td>
+				<td style="text-align: left">
+					<select class="form-control" id="term_means_of_payment">
+						<option />
+	<?php foreach ($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'] as $modalityId => $modality) : ?>
+						<option value="<?php echo $modalityId?>" <?php if ($term->means_of_payment == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
+	<?php endforeach;?>
+					</select>
+				</td>
+				<td style="text-align: left">
+					<select class="form-control" id="term_status-<?php echo $commitment->id ?>">
+						<option />
+	<?php foreach ($context->getConfig('commitmentTerm')['properties']['status']['modalities'] as $modalityId => $modality) : ?>
+						<option value="<?php echo $modalityId?>" <?php if ($term->status == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
+	<?php endforeach;?>
+					</select>
 				</td>
 				<td style="text-align: right">
 					<input class="form-control" id="term_amount" value="" />
-				</td>
-				<td style="text-align: right">&nbsp;</td>
-				<td style="text-align: right">
-					<select class="form-control" id="term_means_of_payment">
-						<option value="bank_card" <?php if ($option['vat_rate'] == 'bank_card') echo 'selected="selected"' ?>>CB</option>
-						<option value="transfer" <?php if ($option['vat_rate'] == 'transfer') echo 'selected="selected"' ?>>Virement</option>
-						<option value="check" <?php if ($option['vat_rate'] == 'check') echo 'selected="selected"' ?>>Chèque</option>
-						<option value="cash" <?php if ($option['vat_rate'] == 'cash') echo 'selected="selected"' ?>>Espèces</option>
-					</select>
 				</td>
 			</tr>
 

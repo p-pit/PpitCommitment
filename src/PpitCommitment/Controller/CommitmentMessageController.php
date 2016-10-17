@@ -165,7 +165,6 @@ class CommitmentMessageController extends AbstractActionController
     	// Retrieve the account id
     	$instance_caption = $this->params()->fromRoute('instance_caption', null);
 //    	if (!$account_id) return $this->redirect()->toRoute('home');
-    	
     	$safe = $context->getConfig()['ppitUserSettings']['safe'];
     	$username = null;
     	$password = null;

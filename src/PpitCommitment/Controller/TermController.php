@@ -156,13 +156,18 @@ class TermController extends AbstractActionController
     	if ($id) $term = Term::get($id);
     	else $term = Term::instanciate();
 
+    	$action = $this->params()->fromRoute('act', null);
+
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
     	$error = null;
-		$message = null;
+    	if ($action == 'delete') $message = 'confirm-delete';
+    	elseif ($action) $message =  'confirm-update';
+    	else $message = null;
     	$request = $this->getRequest();
     	if ($request->isPost()) {
+    		$message = null;
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		 
@@ -182,6 +187,7 @@ class TermController extends AbstractActionController
 	    			$connection->beginTransaction();
 	    			try {
 	    				if (!$term->id) $term->add();
+	    				elseif ($action == 'delete') $return = $term->delete($request->getPost('update_time'));
 	    				else {
     						$rc = $term->update($request->getPost('update_time'));
     						if ($rc != 'OK') $error = $rc;
@@ -196,6 +202,7 @@ class TermController extends AbstractActionController
 	    				$connection->rollback();
 	    				throw $e;
 	    			}
+	    			$action = null;
 				}
     		}
     	}
@@ -204,6 +211,7 @@ class TermController extends AbstractActionController
     			'context' => $context,
     			'config' => $context->getconfig(),
     			'id' => $id,
+    			'action' => $action,
     			'term' => $term,
     			'csrfForm' => $csrfForm,
     			'error' => $error,

@@ -2,7 +2,7 @@
 	<tr>
 		<th>&nbsp;</th>
 
-<?php foreach ($context->getConfig('commitmentTerm/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
 		<th align="center">
 	<?php $label = $context->getConfig('commitmentTerm')['properties'][$propertyId]['labels'][$context->getLocale()] ?>
 	<?php if ($label) : ?>
@@ -38,7 +38,15 @@
 
 	<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
 	
+		<?php if ($propertyId == 'name') : ?>
+		<td><?php echo $term->name ?></td>
+		<?php elseif ($rendering == 'date') : ?>
+		<td><?php echo $context->decodeDate($term->properties[$propertyId]) ?></td>
+		<?php elseif ($rendering == 'number') : ?>
+		<td style="text-align: right"><?php echo $context->formatFloat($term->properties[$propertyId], 2) ?></td>
+		<?php else : ?>
 		<td><?php echo $term->properties[$propertyId] ?></td>
+		<?php endif;?>
 		
 	<?php endforeach;?>
 	</tr>

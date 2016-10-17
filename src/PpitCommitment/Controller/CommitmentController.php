@@ -16,6 +16,8 @@ use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
 use PpitDocument\Model\Document;
 use PpitDocument\Model\DocumentPart;
+use PpitMasterData\Model\Product;
+use PpitMasterData\Model\ProductOption;
 use PpitUser\Model\User;
 use DOMPDFModule\View\Model\PdfModel;
 use Zend\Session\Container;
@@ -243,6 +245,8 @@ class CommitmentController extends AbstractActionController
     		'type' => $type,
     		'id' => $commitment->id,
     		'commitment' => $commitment,
+    		'products' => Product::getList(null, array()),
+    		'options' => ProductOption::getList(array()),
     	));
 		$view->setTerminal(true);
 		return $view;
@@ -354,7 +358,7 @@ class CommitmentController extends AbstractActionController
        	return $view;
     }
     
-    public function updateAction()
+    public function workflowAction()
     {
 		// Retrieve the context
 		$context = Context::getCurrent();
@@ -463,6 +467,97 @@ class CommitmentController extends AbstractActionController
        	return $view;
     }
 
+    public function updateAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the type
+    	$type = $this->params()->fromRoute('type', null);
+    
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	$action = $this->params()->fromRoute('act', null);
+    	if ($id) $commitment = Commitment::get($id);
+    	else $commitment = Commitment::instanciate($type);
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	if ($action == 'delete') $message = 'confirm-delete';
+    	elseif ($action) $message =  'confirm-update';
+    	else $message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$message = null;
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    
+    			// Retrieve the data from the request
+    			$data = array();
+    			foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $unused) {
+					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+					if ($property['type'] == 'file' && array_key_exists($propertyId, $request->getFiles()->toArray())) $files = $request->getFiles()->toArray()[$propertyId];
+					else $data[$propertyId] = $request->getPost($propertyId);
+    			}
+    
+    			$rc = $commitment->loadData($data, $files);
+    			if ($rc != 'OK') throw new \Exception('View error');
+    
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				if (!$commitment->id) {
+    					if ($commitment->subscription_id) {
+    						$subscription = $commitment->subscriptions[$commitment->subscription_id];
+    						$commitment->description = $subscription->description;
+    						$commitment->product_identifier = $subscription->product_identifier;
+    						$commitment->unit_price = $subscription->unit_price;
+    					}
+    					$rc = $commitment->add();
+    				}
+	    			elseif ($action == 'delete') $rc = $commitment->delete($request->getPost('update_time'));
+    				else {
+    					$rc = $commitment->update($request->getPost('update_time'));
+    				}
+    
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'type' => $type,
+    			'id' => $id,
+    			'action' => $action,
+    			'accounts' => Account::getList(null, array(), 'customer_name', 'ASC'),
+    			'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
+    			'commitment' => $commitment,
+    			'csrfForm' => $csrfForm,
+    			'error' => $error,
+    			'message' => $message
+    	));
+    	if ($context->isSpaMode()) $view->setTerminal(true);
+    	return $view;
+    }
+    
     public function acceptAction()
     {
     	// Retrieve the context
@@ -565,7 +660,10 @@ class CommitmentController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
     	
-    	$commitment = Commitment::get(14);
+    	$id = $this->params()->fromRoute('id', null);
+    	if (!$id) return $this->redirect()->toRoute('index');
+    	
+    	$commitment = Commitment::get($id);
     	$account = Account::get($commitment->account_id);
     	
     	// create new PDF document
@@ -625,7 +723,7 @@ class CommitmentController extends AbstractActionController
     	);
     	
     	// set document signature
-    	$pdf->setSignature($certificate, $certificate, 'tcpdfdemo', '', 2, $info);
+//    	$pdf->setSignature($certificate, $certificate, 'tcpdfdemo', '', 2, $info);
     	
     	// set font
     	$pdf->SetFont('helvetica', '', 12);
@@ -703,33 +801,43 @@ class CommitmentController extends AbstractActionController
     	$pdf->Cell(130, 6, 'Total TTC :', 'LR', 0, 'R', false);
     	$pdf->Cell(50, 6, $context->formatFloat($commitment->tax_inclusive, 2).' €', 'LR', 0, 'R', false);
 
-    	// Bank account
-    	$pdf->Ln(20);
-    	$text = '<strong>Valeur en votre obligeant règlement : '.$context->formatFloat($commitment->tax_inclusive, 2).' €'.'</strong>';
-    	$pdf->writeHTML($text, true, 0, true, 0);
-    	$pdf->Ln();
-    	$text = '<strong>Par carte ou virement auprès de : Société Marseillaise de Crédit'.'</strong>';
-    	$pdf->writeHTML($text, true, 0, true, 0);
-    	$pdf->Ln();
-    	 
-    	$pdf->SetFont('', '', 8);
-    	$pdf->SetFillColor(196, 196, 196);
-    	$pdf->Cell(20, 7, 'Code banque', 1, 0, 'C', 1);
-    	$pdf->Cell(20, 7, 'Code agence', 1, 0, 'C', 1);
-    	$pdf->Cell(40, 7, 'Numéro de compte', 1, 0, 'C', 1);
-    	$pdf->Cell(15, 7, 'Clé RIB', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Domiciliation', 1, 0, 'C', 1);
-    	$pdf->Ln();
-    	$pdf->Cell(20, 6, '30077', 'LR', 0, 'L', false);
-    	$pdf->Cell(20, 6, '04193', 'LR', 0, 'L', false);
-    	$pdf->Cell(40, 6, '18222100200', 'LR', 0, 'L', false);
-    	$pdf->Cell(15, 6, '87', 'LR', 0, 'L', false);
-    	$pdf->Cell(30, 6, 'AVIGNON CRILLON', 'LR', 0, 'L', false);
-    	$pdf->Ln(10);
-    	$text = '<strong>IBAN : </strong>FR76 3007 7041 9318 2221 0020 087    <strong>Code BIC : </strong>SMCTFR2A';
-    	$pdf->writeHTML($text, true, 0, true, 0);
-    	 
-
+    	if ($commitment->settlement_date) {
+	    	$pdf->Ln(20);
+    		$text = '<strong>Réglé le : '.$context->decodeDate($commitment->settlement_date, 2).'</strong>';
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+	    	$pdf->Ln();
+    		$text = '<strong>Vous n\'avez rien à payer</strong>';
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+	    	$pdf->Ln();
+    	}
+    	else {
+	    	// Bank account
+	    	$pdf->Ln(20);
+	    	$text = '<strong>Valeur en votre obligeant règlement : '.$context->formatFloat($commitment->tax_inclusive, 2).' €'.'</strong>';
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+	    	$pdf->Ln();
+	    	$text = '<strong>Par carte ou virement auprès de : Société Marseillaise de Crédit'.'</strong>';
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+	    	$pdf->Ln();
+	    	 
+	    	$pdf->SetFont('', '', 8);
+	    	$pdf->SetFillColor(196, 196, 196);
+	    	$pdf->Cell(20, 7, 'Code banque', 1, 0, 'C', 1);
+	    	$pdf->Cell(20, 7, 'Code agence', 1, 0, 'C', 1);
+	    	$pdf->Cell(40, 7, 'Numéro de compte', 1, 0, 'C', 1);
+	    	$pdf->Cell(15, 7, 'Clé RIB', 1, 0, 'C', 1);
+	    	$pdf->Cell(30, 7, 'Domiciliation', 1, 0, 'C', 1);
+	    	$pdf->Ln();
+	    	$pdf->Cell(20, 6, '30077', 'LR', 0, 'L', false);
+	    	$pdf->Cell(20, 6, '04193', 'LR', 0, 'L', false);
+	    	$pdf->Cell(40, 6, '18222100200', 'LR', 0, 'L', false);
+	    	$pdf->Cell(15, 6, '87', 'LR', 0, 'L', false);
+	    	$pdf->Cell(30, 6, 'AVIGNON CRILLON', 'LR', 0, 'L', false);
+	    	$pdf->Ln(10);
+	    	$text = '<strong>IBAN : </strong>FR76 3007 7041 9318 2221 0020 087    <strong>Code BIC : </strong>SMCTFR2A';
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+    	}
+/*
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     	// *** set signature appearance ***
     	
@@ -742,7 +850,7 @@ class CommitmentController extends AbstractActionController
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     	
     	// *** set an empty signature appearance ***
-    	$pdf->addEmptySignatureAppearance(180, 80, 15, 15);
+    	$pdf->addEmptySignatureAppearance(180, 80, 15, 15);*/
     	    	 
     	// ---------------------------------------------------------
     	
@@ -750,126 +858,10 @@ class CommitmentController extends AbstractActionController
     	// This method has several options, check the source code documentation for more information.
     	$document = Document::instanciate(0);
     	$document->type = 'application/pdf';
-//    	$document->add();
-//    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'w');
-    	$content = $pdf->Output(null, 'I');
-//    	fwrite($handle, $content);
-//    	fclose($handle);
-/*
-		$account = Account::get($commitment->account_id);
-		$community = Community::get($account->customer_community_id);
-		$contact = Vcard::get($community->contact_1_id);
-		$community_name = $community->name;
-		$contact_adr_street = $contact->adr_street;
-		$contact_adr_zip = $contact->adr_zip;
-		$contact_adr_city = $contact->adr_city;
-		$invoice_identifier = $commitment->invoice_identifier;
-		$commitment_date = $commitment->commmitment_date;
-		$commitment_caption = $commitment->caption;
-		$object = 'Location';
-		$invoice_date = $commitment->invoice_date;
-		$product = $commitment->product;
-		$amount = $commitment->amount;
-		$tax_amount = $commitment->tax_amount;
-		$tax_inclusive = $commitment->tax_inclusive;
-		$content = "
-<br><br>
-<table class='ppit ppit-address'>
-  <tr>
-    <td width='60%'>&nbsp;</td>
-    <td><strong>$community_name</strong></td
-  </tr>
-  <tr>
-    <td>&nbsp;</td>
-    <td>$contact_adr_street</td>
-  </tr>
-  <tr>
-    <td>&nbsp;</td>
-    <td>$contact_adr_zip $contact_adr_city</td>
-  </tr>
-</table>
-<h3 class='ppit' align='center'>Facture $invoice_identifier</h3>
-<br>
-<table class='table ppit'>
-  <tr>
-    <td class='title'>Commande</td>
-    <td>$commitment_date</td>
-  </tr>
-  <tr>
-    <td class='title'>Référence</td>
-    <td>$commitment_caption</td>
-  </tr>
-  <tr>
-    <td class='title'>Objet</td>
-    <td>$object</td>
-  </tr>
-  <tr>
-    <td class='title'>Date de facture</td>
-    <td>$invoice_date</td>
-  </tr>
-</table>
-<br>
-<table width='80%' class='ppit ppit-bill-rows'>
-<tr>
-  <th width='70%'>Libellé</th>
-  <th width='30%'>Prix (€ HT)</th>
-</tr>
-<tr>
-  <td>$product</td>
-  <td align='right'>$amount</td>
-</tr>
-</table>
-<table class='ppit ppit-bill-sums'>
-  <tr>
-    <td width='75%' align='right'>Total HT :</td>
-    <td width='25%' align='right'>$amount €</td>
-  </tr>
-  <tr>
-    <td align='right'>TVA 20% :</td>
-    <td align='right'>$tax_amount €</td>
-  </tr>
-  <tr>
-    <td align='right'><strong>Total TTC :</td>
-    <td align='right'><strong>$tax_inclusive €</strong></td>
-  </tr>
-</table>
-<h5 class='ppit'>Valeur en votre obligeant règlement : <strong>$tax_inclusive €</strong></h5>
-<h5 class='ppit'>Par virement auprès de : <strong>Société Marseillaise de Crédit</strong></h5>
-<table class='table ppit' style='width: 90%'>
-  <tr>
-    <th>Code banque</th>
-    <th>Code agence</th>
-    <th>Numéro de compte</th>
-    <th>Clé RIB</th>
-    <th>Domiciliation</th>
-  </tr>
-  <tr>
-    <td>30077</td>
-    <td>04193</td>
-    <td>18222100200</td>
-    <td>87</td>
-    <td>AVIGNON CRILLON</td>
-  </tr>
-</table>
-<h5 class='ppit'><strong>IBAN : FR76 3007 7041 9318 2221 0020 087&nbsp;&nbsp;&nbsp;&nbsp;Code BIC : SMCTFR2A</strong</h5>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>
-<div class='ppit'>&nbsp;</div>";
-    			$document = Document::instanciate(array($content));
-    			$document->add();*/
+    	$document->add();
+//    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'I');
+    	$content = $pdf->Output('data/documents/'.$document->id.'.pdf', 'F');
+    	return $this->response;
     }
     
     public function settleAction()

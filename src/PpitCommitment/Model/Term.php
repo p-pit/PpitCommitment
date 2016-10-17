@@ -26,7 +26,10 @@ class Term implements InputFilterAwareInterface
     public $invoice_id;
     public $audit;
     public $update_time;
-	
+
+    // Joined properties
+    public $name;
+    
     // Transient properties
     public $properties;
     
@@ -55,6 +58,9 @@ class Term implements InputFilterAwareInterface
         $this->invoice_id = (isset($data['invoice_id'])) ? $data['invoice_id'] : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
+
+        // Joined properties
+        $this->name = (isset($data['name'])) ? $data['name'] : null;
     }
     
     public function toArray()
@@ -78,7 +84,10 @@ class Term implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
 
-    	$select = Account::getTable()->getSelect()
+    	$select = Term::getTable()->getSelect()
+    		->join('commitment', 'commitment.id = commitment_term.commitment_id', array(), 'left')
+    		->join('commitment_account', 'commitment_account.id = commitment.account_id', array(), 'left')
+    		->join('contact_community', 'contact_community.id = commitment_account.customer_community_id', array('name'), 'left')
 			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
 		$where->notEqualTo('commitment_term.status', 'deleted');

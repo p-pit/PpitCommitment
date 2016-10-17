@@ -282,6 +282,18 @@ return array(
         								),
         						),
         				),
+        				'workflow' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/workflow[/:type][/:id][/:act]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'workflow',
+        								),
+        						),
+        				),
         				'try' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -637,6 +649,7 @@ return array(
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
             	array('route' => 'commitment/update', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accept', 'roles' => array('accountant')),
             	array('route' => 'commitment/settle', 'roles' => array('accountant')),
             	array('route' => 'commitment/invoice', 'roles' => array('sales_manager', 'accountant')),
@@ -988,9 +1001,8 @@ Commandes enregistrées %s : %s
 					),
 			),
 	),
+
 	'commitment' => array(
-			'properties' => array(
-			),
 			'statuses' => array(
 					'new' => array(
 							'labels' => array(
@@ -1017,19 +1029,35 @@ Commandes enregistrées %s : %s
 							)
 					),
 			),
-			'deadlines' => array(),
 			'todo' => array(
 					'sales_manager' => array(
 							'status' => array('selector' => 'in', 'value' => array('new')),
 					),
 			),
+			'properties' => array(
+					'caption' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'School year',
+									'fr_FR' => 'Année scolaire',
+							),
+					),
+					'description' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Description',
+									'fr_FR' => 'Description',
+							),
+					),
+			),
+			'order' => 'school_year DESC',
 			'actions' => array(
 					'' => array(
 						'currentStatuses' => array(),
 						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
 						'properties' => array(
 								'account_id' => 'update',
-								'subscription_id' => 'update',
+//								'subscription_id' => 'update',
 								'caption' => 'update',
 								'description' => 'update',
 								'quantity' => 'update',
@@ -1037,6 +1065,7 @@ Commandes enregistrées %s : %s
 								'amount' => 'update',
 								'identifier' => 'update',
 								'comment' => 'update',
+								'product_identifier' => 'update',
 						),
 					),
 					'update' => array(
@@ -1046,7 +1075,7 @@ Commandes enregistrées %s : %s
 						'properties' => array(
 								'status' => 'display',
 								'account_id' => 'update',
-								'subscription_id' => 'update',
+//								'subscription_id' => 'update',
 								'caption' => 'update',
 								'description' => 'update',
 								'quantity' => 'update',
@@ -1054,6 +1083,7 @@ Commandes enregistrées %s : %s
 								'amount' => 'update',
 								'identifier' => 'update',
 								'comment' => 'update',
+								'product_identifier' => 'update',
 						),
 					),
 					'delete' => array(
@@ -1094,6 +1124,12 @@ Commandes enregistrées %s : %s
 					),
 			),
 	),
+		
+	'commitment/update' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+	
 	'commitment/service' => array(
 			'properties' => array(
 					'type' => array(
@@ -1265,12 +1301,18 @@ Commandes enregistrées %s : %s
 	'commitmentTerm' => array(
 			'statuses' => array(),
 			'properties' => array(
+					'name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
-									'to_come' => array('fr_FR' => 'A venir', 'en_US' => 'To come'),
-									'to_be_settled' => array('fr_FR' => 'A régler', 'en_US' => 'To settle'),
-									'settled' => array('fr_FR' => 'Régler', 'en_US' => 'Settled'),
+									'expected' => array('fr_FR' => 'Attendu', 'en_US' => 'Expected'),
+									'settled' => array('fr_FR' => 'Réglé', 'en_US' => 'Settled'),
 							),
 							'labels' => array(
 									'en_US' => 'Status',
@@ -1332,6 +1374,7 @@ Commandes enregistrées %s : %s
 			),
 	),
 	'commitmentTerm/list' => array(
+			'name' => 'text',
 			'status' => 'select',
 			'due_date' => 'date',
 			'amount' => 'number',

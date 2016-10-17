@@ -3,6 +3,7 @@ namespace PpitCommitment\Model;
 
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Subscription;
+use PpitCommitment\Model\Term;
 use PpitContact\Model\Community;
 use PpitContact\Model\Vcard;
 use PpitContact\Model\ContactMessage;
@@ -97,6 +98,7 @@ class Commitment implements InputFilterAwareInterface
 	
 	// Transient properties
 //	public $properties;
+	public $terms;
 	public $subscriptions;
 	public $subscription;
 	public $breadcrumb;
@@ -338,7 +340,9 @@ class Commitment implements InputFilterAwareInterface
     	$commitment->properties = $commitment->toArray();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 
-		return $commitment;
+    	$commitment->terms = Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search');
+
+    	return $commitment;
     }
 
     public function computeDeadlines()
@@ -675,7 +679,6 @@ class Commitment implements InputFilterAwareInterface
 		);
 	    $this->notification_time = null;
 		$this->properties = $this->toArray();
-		$this->update_time = $data['update_time'];
 		return 'OK';
     }
 

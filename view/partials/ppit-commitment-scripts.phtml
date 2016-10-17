@@ -299,38 +299,6 @@ function connectAuditPanel()
 	});
 }
 
-function connectCgvPanel()
-{
-	$('#cgv-panel').hide();
-	$('#cgv-label').click(function () {
-		if ($('#cgv-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
-			$('#cgv-panel').show();
-			$('#cgv-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
-		}
-		else {
-			$('#cgv-panel').hide();
-			$('#cgv-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
-		}
-	});
-}
-
-function connectDescriptionPanel()
-{
-	$('#description-panel').hide();
-	$('#description-label').click(function () {
-		if ($('#description-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
-			$('#description-panel').show();
-			$('#description-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
-		}
-		else {
-			$('#description-panel').hide();
-			$('#description-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
-		}
-	});
-}
-
-<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
-
 /////////////////////////////
 // Commitment update panel //
 /////////////////////////////
@@ -338,40 +306,17 @@ function connectDescriptionPanel()
 <?php 
 $properties = array();
 
-if (array_key_exists('settlement_date', $action['properties'])) $properties['settlement_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('expected_settlement_date', $action['properties'])) $properties['expected_settlement_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('invoice_date', $action['properties'])) $properties['invoice_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('due_date', $action['properties'])) $properties['due_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('commissioning_date', $action['properties'])) $properties['commissioning_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('expected_commissioning_date', $action['properties'])) $properties['expected_commissioning_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('delivery_date', $action['properties'])) $properties['delivery_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('expected_delivery_date', $action['properties'])) $properties['expected_delivery_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('shipment_date', $action['properties'])) $properties['shipment_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('expected_shipment_date', $action['properties'])) $properties['expected_shipment_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('retraction_date', $action['properties'])) $properties['retraction_date'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('retraction_limit', $action['properties'])) $properties['retraction_limit'] = array('type' => 'date', 'mandatory' => false);
-if (array_key_exists('commitment_date', $action['properties'])) $properties['commitment_date'] = array('type' => 'date', 'mandatory' => true);
-if (array_key_exists('invoice_identifier', $action['properties'])) $properties['invoice_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-if (array_key_exists('quotation_identifier', $action['properties'])) $properties['quotation_identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-if (array_key_exists('identifier', $action['properties'])) $properties['identifier'] = array('type' => 'input', 'mandatory' => false, 'maxSize' => 255);
-if (array_key_exists('comment', $action['properties'])) $properties['comment'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
-if (array_key_exists('amount', $action['properties'])) $properties['amount'] = array('type' => 'number', 'mandatory' => false, 'minValue' => 0, 'maxValue' => 9999999999);
-if (array_key_exists('unit_price', $action['properties'])) $properties['unit_price'] = array('type' => 'number', 'mandatory' => true, 'minValue' => 0, 'maxValue' => 9999999999);
-if (array_key_exists('quantity', $action['properties'])) $properties['quantity'] = array('type' => 'number', 'mandatory' => true, 'minValue' => 0, 'maxValue' => 9999999999);
-if (array_key_exists('description', $action['properties'])) $properties['description'] = array('type' => 'textarea', 'mandatory' => false, 'maxSize' => 2047);
-if (array_key_exists('caption', $action['properties'])) $properties['caption'] = array('type' => 'input', 'mandatory' => true, 'maxSize' => 255);
-if (array_key_exists('subscription_id', $action['properties'])) $properties['subscription_id'] = array('type' => 'select', 'mandatory' => false);
-if (array_key_exists('account_id', $action['properties'])) $properties['account_id'] = array('type' => 'select', 'mandatory' => true);
-$properties['update_time'] = array('type' => 'hidden');
-
-foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
-	if (array_key_exists($propertyId, $action)) $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment'.$actionId, 'context' => $context, 'properties' => $properties)) 
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
 ?>
 
-function connectCommitment<?php echo $actionId ?>UpdateForm(type, id)
+function connectCommitmentUpdateForm(type, id, action)
 {
 <?php foreach ($properties as $property_id => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
@@ -385,7 +330,7 @@ function connectCommitment<?php echo $actionId ?>UpdateForm(type, id)
 		event.preventDefault();
 	
 		// Check validity
-		var validity = checkCommitment<?php echo $actionId ?>UpdateProperties(id);
+		var validity = checkCommitmentUpdateProperties(id);
 	
 		if (validity) {
 		
@@ -417,7 +362,8 @@ function connectCommitment<?php echo $actionId ?>UpdateForm(type, id)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '<?php echo ($actionId) ? '/'.$actionId : '' ?>';
+			route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id;
+			if (action) route += '/' + action;
 			target = 'commitment-update-panel';
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
@@ -439,51 +385,34 @@ function connectCommitment<?php echo $actionId ?>UpdateForm(type, id)
 	}
 }
 
-function connect<?php echo $actionId ?>Anchors(type, id)
-{
-	// Show and anchor to the new panel
-	$('.action-btn').removeClass('btn-primary').addClass('btn-default');
-	$('#<?php echo $actionId ?>-anchor').removeClass('btn-default').addClass('btn-primary');
-	$('#commitment-update-panel').show();
+function getCommitmentUpdate(type, id, action) {
 
-	// Execute the ajax request
-	xhttp = new XMLHttpRequest();
-	var route;
-
-	route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id + '/<?php echo $actionId ?>';
-
-	xhttp.open("GET", route, true);
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
-			connectCommitment<?php echo $actionId ?>UpdateForm(type, id);
-		}
-	}
-	xhttp.send();
-}
-
-function getCommitment<?php echo $actionId ?>Update(type, id) {
-	
 	var xhttp = new XMLHttpRequest();
 	var route = '<?php echo $this->url('commitment/update') ?>/' + type + '/' + id;
+	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
 	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 <?php if (!$config['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
-<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
-			console.log('commitment-update-panel, route = ' + route);
-			console.log(xhttp.responseText);
+		if (xhttp.readyState == 4) {
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
 <?php endif;?>
+			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+
+			if (id) {
+				$('#commitment-update-anchor').click(function () { getCommitmentUpdate(type, id, 'update'); });
+				$('#commitment-delete-anchor').click(function () { getCommitmentUpdate(type, id, 'delete'); });
+			}
+			else $('#commitment-add-anchor').click(function () { getCommitmentUpdate(type, id, 'add'); });
 			
-			connectDescriptionPanel();
-			connectCommitment<?php echo $actionId ?>UpdateForm(type, id);
+			connectCommitmentUpdateForm(type, id, action);
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
 		}
 	}
 	xhttp.send();
 }
-
-<?php endforeach;?>
 
 // Load the detail panel
 function getCommitmentDetail(type, id) {
@@ -508,12 +437,8 @@ function getCommitmentDetail(type, id) {
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
 
 			connectAuditPanel();
-			connectCgvPanel();
 			connectRemoveIcon(type, 'remove-anchor', 'form_action');
-			getCommitmentUpdate(type, id);
-<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'] as $actionId => $action) : ?>
-			if (id) $('#<?php echo $actionId ?>-anchor').click(function () { connect<?php echo $actionId ?>Anchors(type, id, '<?php echo $actionId ?>'); });
-<?php endforeach;?>
+			getCommitmentUpdate(type, id, '');
 	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			}
 	<?php endif;?>

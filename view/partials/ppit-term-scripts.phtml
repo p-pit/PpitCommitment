@@ -262,7 +262,8 @@ $properties = array();
 
 foreach ($context->getConfig('commitmentTerm/update') as $propertyId => $options) {
 	$property = $context->getConfig('commitmentTerm')['properties'][$propertyId];
-	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+	if ($property['type'] == 'number') $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'minValue' => $property['minValue'], 'maxValue' => $property['maxValue']);
+	else $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
 $properties['update_time'] = array('type' => 'hidden');
@@ -315,7 +316,7 @@ function connectTermUpdateForm(id, action)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitmentTerm/update', array('type' => $type)) ?>/' + id;
+			route = '<?php echo $this->url('commitmentTerm/update') ?>/' + id;
 			if (action) route += '/' + action;
 			target = 'term-update-panel';
 			xhttp.open('POST', route, true);
@@ -337,7 +338,7 @@ function connectTermUpdateForm(id, action)
 function getTermUpdate(id, action) {
 
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitmentTerm/update', array('type' => $type)) ?>/' + id;
+	var route = '<?php echo $this->url('commitmentTerm/update') ?>/' + id;
 	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
@@ -422,7 +423,7 @@ function activateTerm() {
 	// Connect the search inputs
 	connectTermSearchInputs();
 	
-	getTermList('?', '<?php echo $context->getConfig('commitmentTerm')['order'] ?>', 'ASC');
+	getTermList('?', 'amount', 'DESC');
 	
 	$('#add-criteria').click(function () {
 		mode = $('#add-criteria').text();

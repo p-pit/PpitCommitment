@@ -9,7 +9,7 @@
 	</div>
 	<div class="panel-body">
 
-<?php if ($context->getConfig('commitmentTerm/detail')['displayAudit'] && $account->id) : ?>
+<?php if ($context->getConfig('commitmentTerm/detail')['displayAudit'] && $term->id) : ?>
 <!-- Display the audit -->
 		<?php echo $this->translate('History', 'ppit-core', $context->getLocale()) ?> (<a id="audit-label" href="#"><?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?></a>)
 		<div id="audit-panel" class="panel panel-default">

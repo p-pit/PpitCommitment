@@ -1,0 +1,358 @@
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'update_time' => $commitment->update_time,
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+			
+<!-- Global message -->
+<?php if (!$commitment->id) : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php elseif ($action) : ?>
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" type="submit" id="submit-button" class="btn <?php echo ($action == 'delete') ? 'btn-danger' : 'btn-warning' ?>" value="<?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['label'][$context->getLocale()] ?>">
+				</div>
+			</div>
+<?php endif;?>
+
+<?php
+if (!$action && $commitment->id || $message == 'OK') $isDisabled = true; else $isDisabled = false;
+$updatableProperties = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['properties'];
+?>
+
+<?php if (array_key_exists('account_id', $updatableProperties)) : ?>
+		<div class="form-group" id="account_id_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Account', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<select class="form-control" id="account_id"  <?php if ($updatableProperties['account_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""><-- <?php echo $this->translate('Please choose', 'ppit-core', $context->getLocale()) ?> --></option>
+<?php foreach ($accounts as $account) : ?>
+	    			<option value="<?php echo $account->id ?>" <?php if ($commitment->account_id == $account->id) echo 'selected="selected"' ?>><?php echo $account->customer_name ?></option>
+<?php endforeach;?>
+	    		</select>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="account_id_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('caption', $updatableProperties)) : ?>
+		<div class="form-group" id="caption_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="caption" name="caption" value="<?php echo $commitment->caption ?>" <?php if ($updatableProperties['caption'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="caption_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('subscription_id', $updatableProperties)) : ?>
+		<div class="form-group" id="subscription_id_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Subscription', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<select class="form-control" id="subscription_id"  <?php if ($updatableProperties['subscription_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""></option>
+<?php foreach ($commitment->subscriptions as $subscriptionId => $subscription) : ?>	
+	    			<option value="<?php echo $subscriptionId ?>" <?php if ($commitment->subscription_id == $subscriptionId) echo 'selected="selected"' ?>><?php echo $subscription->product_identifier ?></option>
+<?php endforeach;?>
+	    		</select>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="subscription_id_error"></p></div>
+		</div>
+<?php endif;?>
+		
+<?php if (array_key_exists('status', $updatableProperties)) : ?>
+		<div class="form-group" id="status_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="status" name="status" disabled="disabled" value="<?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'][$commitment->status]['labels'][$context->getLocale()] ?>" />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="area_id_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('description', $updatableProperties)) : ?>
+	<?php $mode = $updatableProperties['description'] ?>
+		<div class="form-group" id="description_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Description', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<textarea class="form-control" id="description" name="description" <?php if ($updatableProperties['description'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>><?php echo $commitment->description ?></textarea>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="description_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('comment', $updatableProperties)) : ?>
+		<div class="form-group" id="comment_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Comment', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<textarea class="form-control" id="comment" name="comment" <?php if ($updatableProperties['comment'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>></textarea>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="comment_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('identifier', $updatableProperties)) : ?>
+		<div class="form-group" id="identifier_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="identifier" name="identifier" value="<?php echo $commitment->identifier ?>" <?php if ($updatableProperties['identifier'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="identifier_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('quotation_identifier', $updatableProperties)) : ?>
+		<div class="form-group" id="quotation_identifier_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Quotation identifier', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="quotation_identifier" name="quotation_identifier" value="<?php echo $commitment->quotation_identifier ?>" <?php if ($updatableProperties['quotation_identifier'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="quotation_identifier_error"></p></div>
+		</div>
+<?php endif;?>
+
+<?php if (array_key_exists('invoice_identifier', $updatableProperties)) : ?>
+		<div class="form-group" id="invoice_identifier_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Invoice identifier', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="invoice_identifier" name="invoice_identifier" value="<?php echo $commitment->invoice_identifier ?>" <?php if ($updatableProperties['invoice_identifier'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="invoice_identifier_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="product_identifier" />
+<?php if (array_key_exists('product_identifier', $updatableProperties)) : ?>
+		<div class="form-group" id="product_identifier_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Product', 'ppit-master-data', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="product_identifier" value="<?php echo $commitment->product_identifier ?>" <?php if ($updatableProperties['quantity'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="product_identifier_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="quantity" />
+<?php if (array_key_exists('quantity', $updatableProperties)) : ?>
+		<div class="form-group" id="input_quantity_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Quantity', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_quantity" name="input_quantity" value="<?php echo $context->formatFloat($commitment->quantity, 0) ?>" <?php if ($updatableProperties['quantity'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_quantity_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="unit_price" />
+<?php if (array_key_exists('unit_price', $updatableProperties)) : ?>
+		<div class="form-group" id="input_unit_price_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Unit price', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_unit_price" value="<?php echo $context->formatFloat($commitment->unit_price, 2) ?>" <?php if ($updatableProperties['unit_price'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_unit_price_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="amount" name="amount" />
+<?php if (array_key_exists('amount', $updatableProperties)) : ?>
+		<div class="form-group" id="input_amount_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_amount" name="input_amount" value="<?php echo $context->formatFloat($commitment->amount, 2) ?>" <?php if ($updatableProperties['amount'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_amount_error"></p></div>
+		</div>
+<?php endif;?>
+		
+		<input type="hidden" id="commitment_date" name="commitment_date" />
+<?php if (array_key_exists('commitment_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_commitment_date_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Commitment date', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+	    		<input class="form-control" id="input_commitment_date" name="input_commitment_date" value="<?php echo $context->decodeDate(($commitment->commitment_date) ? $commitment->commitment_date : date('Y-m-d')) ?>" <?php if ($updatableProperties['commitment_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_commitment_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="retraction_limit" name="retraction_limit" />
+<?php if (array_key_exists('retraction_limit', $updatableProperties)) : ?>
+		<div class="form-group" id="input_retraction_limit_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Retraction_limit', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_retraction_limit" name="input_retraction_limit" value="<?php echo $context->decodeDate($commitment->retraction_limit) ?>" <?php if ($updatableProperties['retraction_limit'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_retraction_limit_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="retraction_date" name="retraction_date" />
+<?php if (array_key_exists('retraction_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_retraction_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Retraction date', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_retraction_date" name="input_retraction_date" value="<?php echo $context->decodeDate($commitment->retraction_date) ?>" <?php if ($updatableProperties['retraction_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_retraction_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="expected_shipment_date" name="expected_shipment_date" />
+<?php if (array_key_exists('expected_shipment_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_expected_shipment_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Expected shipment', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_expected_shipment_date" name="input_expected_shipment_date" value="<?php echo $context->decodeDate($commitment->expected_shipment_date) ?>" <?php if ($updatableProperties['expected_shipment_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_expected_shipment_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="shipment_date" name="shipment_date" />
+<?php if (array_key_exists('shipment_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_shipment_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Actual shipment', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_shipment_date" name="input_shipment_date" value="<?php echo $context->decodeDate($commitment->shipment_date) ?>" <?php if ($updatableProperties['shipment_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_shipment_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="expected_delivery_date" name="expected_delivery_date" />
+<?php if (array_key_exists('expected_delivery_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_expected_delivery_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Expected delivery', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_expected_delivery_date" name="input_expected_delivery_date" value="<?php echo $context->decodeDate($commitment->expected_delivery_date) ?>" <?php if ($updatableProperties['expected_delivery_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_expected_delivery_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="delivery_date" name="delivery_date" />
+<?php if (array_key_exists('delivery_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_delivery_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Actual delivery', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_delivery_date" name="input_delivery_date" value="<?php echo $context->decodeDate($commitment->delivery_date) ?>" <?php if ($updatableProperties['delivery_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_delivery_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="expected_commissioning_date" name="expected_commissioning_date" />
+<?php if (array_key_exists('expected_commissioning_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_expected_commissioning_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Expected commissioning', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_expected_commissioning_date" name="input_expected_commissioning_date" value="<?php echo $context->decodeDate($commitment->expected_commissioning_date) ?>" <?php if ($updatableProperties['expected_commissioning_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_expected_commissioning_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="commissioning_date" name="commissioning_date" />
+<?php if (array_key_exists('commissioning_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_commissioning_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Actual commissioning', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_commissioning_date" name="input_commissioning_date" value="<?php echo $context->decodeDate($commitment->commissioning_date) ?>" <?php if ($updatableProperties['commissioning_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_commissioning_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="due_date" name="due_date" />
+<?php if (array_key_exists('due_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_due_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Due date', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_due_date" name="input_due_date" value="<?php echo $context->decodeDate($commitment->due_date) ?>" <?php if ($updatableProperties['due_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_due_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="invoice_date" name="invoice_date" />
+<?php if (array_key_exists('invoice_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_invoice_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Invoicing date', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_invoice_date" name="input_invoice_date" value="<?php echo $context->decodeDate($commitment->invoice_date) ?>" <?php if ($updatableProperties['invoice_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_invoice_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="expected_settlement_date" name="expected_settlement_date" />
+<?php if (array_key_exists('expected_settlement_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_expected_settlement_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Expected settlement', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_expected_settlement_date" name="input_expected_settlement_date" value="<?php echo $context->decodeDate($commitment->expected_settlement_date) ?>" <?php if ($updatableProperties['expected_settlement_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_expected_settlement_date_error"></p></div>
+		</div>
+<?php endif;?>
+
+		<input type="hidden" id="settlement_date" name="settlement_date" />
+<?php if (array_key_exists('settlement_date', $updatableProperties)) : ?>
+		<div class="form-group" id="input_settlement_date_group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Actual settlement', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" id="input_settlement_date" name="input_settlement_date" value="<?php echo $context->decodeDate($commitment->settlement_date) ?>" <?php if ($updatableProperties['settlement_date'] == 'display' || $isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="input_settlement_date_error"></p></div>
+		</div>
+<?php endif;?>
+		
+<?php foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) : ?>
+
+		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+			<label class="col-sm-5 control-label"><?php echo $property['labels'][$context->getLocale()] ?></label>
+			<div class="col-sm-7">
+	<?php if ($property['type'] == 'date') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($commitment->properties[$propertyId]) ?>" <?php if (!array_key_exists($propertyId, $updatableProperties) || $isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'number') : ?>
+				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($commitment->properties[$propertyId], 2) ?>" <?php if (!array_key_exists($propertyId, $updatableProperties) || $isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($property['type'] == 'textarea') : ?>
+				<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?> <?php if (!array_key_exists($propertyId, $updatableProperties) || $isDisabled) echo 'disabled="disabled"'?>>
+					<?php echo $commitment->properties[$propertyId] ?>
+				</textarea>>
+
+	<?php elseif ($property['type'] == 'select') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if (!array_key_exists($propertyId, $updatableProperties) || $isDisabled) echo 'disabled="disabled"'?>>
+	    			<option value=""><-- <?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?> --></option>
+		<?php foreach ($property['modalities'] as $key => $labels) : ?>
+	    			<option value="<?php echo $key ?>" <?php if ($commitment->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
+		<?php endforeach;?>
+				</select>
+				
+	<?php else : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $commitment->properties[$propertyId] ?>" <?php if (!array_key_exists($propertyId, $updatableProperties) || $isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php endif;?>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
+		</div>
+
+<?php endforeach;?>
+		
+		</form>
