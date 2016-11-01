@@ -169,9 +169,10 @@ class Notification implements InputFilterAwareInterface
     	foreach ($cursor as $notification) {
     		if ($notification->attachment_type == 'dropbox') {
     			if (!$dropboxClient) {
-			 		if (array_key_exists('dropboxCredential', $context->getConfig('ppitDocument'))) {
+			 		if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
 	    				require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-	    				$dropboxClient = new \Dropbox\Client($context->getConfig('ppitDocument')['dropboxCredential'], "P-PIT");
+			    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+	    				$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
 	    			}
     			}
  				try {

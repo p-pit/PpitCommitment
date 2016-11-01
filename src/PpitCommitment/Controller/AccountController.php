@@ -23,13 +23,13 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
-		$type = $this->params()->fromRoute('type', 0);
-
+		$type = $this->params()->fromRoute('type', 'p-pit-studies');
+		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
+		
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($community_id);
 
 		$applicationName = 'P-Pit Engagements';
-		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
 		$currentEntry = $this->params()->fromQuery('entry', 'account');
 
     	return new ViewModel(array(
@@ -38,7 +38,7 @@ class AccountController extends AbstractActionController
     			'active' => 'application',
     			'applicationName' => $applicationName,
     			'community_id' => $community_id,
-    			'menu' => $menu,
+    			'types' => $types,
     			'contact' => $contact,
     			'currentEntry' => $currentEntry,
     			'type' => $type,

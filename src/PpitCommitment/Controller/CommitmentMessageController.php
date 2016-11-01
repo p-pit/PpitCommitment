@@ -22,12 +22,12 @@ class CommitmentMessageController extends AbstractActionController
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$type = $this->params()->fromRoute('type', null);
-		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
+		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 		
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
-    			'menu' => $menu,
+    			'types' => $types,
     			'type' => $type,
     	));
     }
@@ -595,6 +595,61 @@ class CommitmentMessageController extends AbstractActionController
     	return $view;
     }
 
+    public function addPhotographAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+		$folder = '';
+    	
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$message = null;
+    	$error = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		 
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    			$folder = $request->getPost('folder');
+		    	$files = $request->getFiles()->toArray();
+		    	reset($files);
+		    	$file = current($files);
+				$name = $file['name'];
+				$destinationPath = time();
+				$adapter = new \Zend\File\Transfer\Adapter\Http();
+				$adapter->addFilter('Rename', 'data/documents/'.$destinationPath);
+				if ($adapter->receive($file['name'])) {
+					try {
+				    	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
+						$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+						$dbxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
+						$f = fopen('data/documents/'.$destinationPath, "rb");
+						$result = $dbxClient->uploadFile('/'.$dropbox['folders'][$folder].'/'.$name, \Dropbox\WriteMode::add(), $f);
+						fclose($f);
+						$message = 'OK';
+					}
+					catch (\Exception $e) {
+						$error = 'Consistency';
+					}
+				}
+				else $error = 'Consistency';
+    		}
+    	}
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'csrfForm' => $csrfForm,
+    			'folder' => $folder,
+    			'message' => $message,
+    			'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+    
     public function processAction()
     {
     	// Retrieve the context

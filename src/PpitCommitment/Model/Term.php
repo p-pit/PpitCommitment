@@ -20,9 +20,10 @@ class Term implements InputFilterAwareInterface
     public $subscription_id;
 	public $caption;
     public $due_date;
+    public $settlement_date;
     public $amount;
 	public $means_of_payment;
-    public $document_id;
+    public $document;
     public $invoice_id;
     public $audit;
     public $update_time;
@@ -52,9 +53,10 @@ class Term implements InputFilterAwareInterface
         $this->subscription_id = (isset($data['subscription_id'])) ? $data['subscription_id'] : null;
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->due_date = (isset($data['due_date'])) ? $data['due_date'] : null;
+        $this->settlement_date = (isset($data['settlement_date'])) ? $data['settlement_date'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->means_of_payment = (isset($data['means_of_payment'])) ? $data['means_of_payment'] : null;
-        $this->document_id = (isset($data['document_id'])) ? $data['document_id'] : null;
+        $this->document = (isset($data['document'])) ? $data['document'] : null;
         $this->invoice_id = (isset($data['invoice_id'])) ? $data['invoice_id'] : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
@@ -72,9 +74,10 @@ class Term implements InputFilterAwareInterface
     	$data['subscription_id'] = (int) $this->subscription_id;
     	$data['caption'] = $this->caption;
     	$data['due_date'] =  ($this->due_date) ? $this->due_date : null;
+    	$data['settlement_date'] =  ($this->settlement_date) ? $this->settlement_date : null;
     	$data['amount'] = $this->amount;
     	$data['means_of_payment'] = $this->means_of_payment;
-    	$data['document_id'] = (int) $this->document_id;
+    	$data['document'] = $this->document;
     	$data['invoice_id'] = (int) $this->invoice_id;
     	$data['audit'] = json_encode($this->audit);
     	return $data;
@@ -148,15 +151,22 @@ class Term implements InputFilterAwareInterface
 		    	$this->due_date = trim(strip_tags($data['due_date']));
 		    	if ($this->due_date && !checkdate(substr($this->due_date, 5, 2), substr($this->due_date, 8, 2), substr($this->due_date, 0, 4))) return 'Integrity';
 			}
+        	if (array_key_exists('settlement_date', $data)) {
+		    	$this->settlement_date = trim(strip_tags($data['settlement_date']));
+		    	if ($this->settlement_date && !checkdate(substr($this->settlement_date, 5, 2), substr($this->settlement_date, 8, 2), substr($this->settlement_date, 0, 4))) return 'Integrity';
+			}
 			if (array_key_exists('amount', $data)) {
 				$this->amount = trim(strip_tags($data['amount']));
 				if (strlen($this->amount) > 255) return 'Integrity';
 			}
-			if (array_key_exists('menas_of_payment', $data)) {
+			if (array_key_exists('means_of_payment', $data)) {
 				$this->means_of_payment = trim(strip_tags($data['means_of_payment']));
 				if (strlen($this->means_of_payment) > 255) return 'Integrity';
 			}
-    		if (array_key_exists('document_id', $data)) $this->document_id = (int) $data['document_id'];
+    		if (array_key_exists('document', $data)) {
+    			$this->document = trim(strip_tags($data['document']));
+				if (strlen($this->document) > 255) return 'Integrity';
+    		}
     		if (array_key_exists('invoice_id', $data)) $this->invoice_id = (int) $data['invoice_id'];
     		if (array_key_exists('update_time', $data)) $this->update_time = $data['update_time'];
     		$this->properties = $this->toArray();
@@ -166,7 +176,6 @@ class Term implements InputFilterAwareInterface
     	$this->audit[] = array(
     			'time' => Date('Y-m-d G:i:s'),
     			'n_fn' => $context->getFormatedName(),
-    			'comment' => $this->comment,
     	);
 
     	return 'OK';

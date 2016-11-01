@@ -1,5 +1,5 @@
 <div class="panel panel-default">
-	<div class="panel-heading">
+	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
 		<strong><?php echo $this->translate('Messages', 'ppit-commitment', $context->getLocale()); ?></strong>
     </div>
     <div class="panel-body">
@@ -30,6 +30,9 @@
 				<td colspan="6">
 					<button type="button" class="btn btn-default" title="<?php echo $this->translate('Submit', 'ppit-core', $context->getLocale()) ?>" id="<?php echo 'commitment-message-add-anchor' ?>">
 						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+					<button type="button" class="btn btn-default" title="<?php echo $this->translate('Add a photograph', 'ppit-commitment', $context->getLocale()) ?>" id="<?php echo 'add-photograph-anchor' ?>">
+						<span class="glyphicon glyphicon-camera"></span>
 					</button>
 				</td>
 			</tr>

@@ -82,7 +82,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			
 	<?php elseif ($propertyId == 'tel_work') : ?>
 		<div class="form-group" id="<?php echo $propertyId ?>_group">
-			<label class="col-sm-5 control-label"><?php echo $this->translate('Phone', 'ppit-contact', $context->getLocale()) ?></label>
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Phone', 'ppit-contact', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $contact->tel_work ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>

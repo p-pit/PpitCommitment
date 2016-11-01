@@ -602,11 +602,10 @@ function get<?php echo $contactNumber ?>Update(id, action) {
 <?php endforeach;?>
 
 // Load the list
-function getCommitmentAccountList(type, params, major, dir) {		
+function getCommitmentAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitment/accountList') ?>'
-	if (type != '') route += '/' + type;
+	route = '<?php echo $this->url('commitment/accountList', array('type' => $type)) ?>'
 	route += params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
@@ -618,10 +617,22 @@ function getCommitmentAccountList(type, params, major, dir) {
 	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
 			
+			// Connect the add anchors
+			$('#commitment-add').click(function () {
+				getCommitmentUpdate(0, '', params);
+			});
+			
 			// Connect the detail anchors
 			$('.commitment-detail-anchor').each(function () {
 				$(this).click(function () {
-					getCommitmentDetail(type, $(this).attr('id').split('_')[1]);
+					getCommitmentUpdate($(this).attr('id').split('_')[1], 'update', params);
+				});
+			});
+			
+			// Connect the delete anchors
+			$('.commitment-delete-anchor').each(function () {
+				$(this).click(function () {
+					getCommitmentUpdate($(this).attr('id').split('_')[1], 'delete', params);
 				});
 			});
 
@@ -681,7 +692,7 @@ function getAccountDetail(id) {
 <?php endforeach;?>
 
 <?php if (array_key_exists('p-pit-engagements', $context->getApplications())) : ?>
-			if (id != 0) getCommitmentAccountList('<?php echo $type ?>', '?account_id=' + id, 'identifier', 'DESC');
+			if (id != 0) getCommitmentAccountList('?account_id=' + id, 'identifier', 'DESC');
 <?php endif;?>
 <?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			}
@@ -726,4 +737,121 @@ function activateAccount() {
 		}
 	});
 	$('#search-area').hide();
+}
+
+/////////////////////////////
+// Commitment update panel //
+/////////////////////////////
+
+<?php 
+$properties = array();
+
+foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	$properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectCommitmentUpdateForm(id, action, params)
+{
+
+	if (action == 'update') $('#commitment-update-anchor').removeClass('btn-default').addClass('btn-primary');
+	if (action == 'delete') $('#commitment-delete-anchor').removeClass('btn-default').addClass('btn-primary');
+
+<?php foreach ($properties as $property_id => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $property_id ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('commitment-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+	
+		// Check validity
+		var validity = checkCommitmentUpdateProperties(id);
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'file') : ?>
+				var fileSelect = document.getElementById('order_form');
+				if (fileSelect) {
+					var files = fileSelect.files;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						formData.append('order_form', file, file.name);
+					}
+				}
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+			if (action) route += '/' + action;
+			route += params;
+			target = 'commitment-update-panel';
+			xhttp.open('POST', route, true);
+			// Set up a handler for when the request finishes.
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+
+<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
+					console.log('post, route = ' + route);
+					console.log(xhttp.responseText);
+<?php endif;?>
+					document.getElementById(target).innerHTML = xhttp.responseText;
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getCommitmentUpdate(id, action, params) {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+	if (action) route += '/' + action;
+	route += params;
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4) {
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+<?php endif;?>
+			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+
+			if (id) {
+				$('#commitment-update-anchor').click(function () { getCommitmentUpdate(id, 'update'); });
+				$('#commitment-delete-anchor').click(function () { getCommitmentUpdate(id, 'delete'); });
+			}
+			else $('#commitment-add-anchor').click(function () { getCommitmentUpdate(id, 'add'); });
+			
+			connectCommitmentUpdateForm(id, action, params);
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
 }

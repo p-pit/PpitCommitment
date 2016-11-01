@@ -15,6 +15,76 @@ function sortCommitmentMessageList(type, criterion) {
 	getCommitmentMessageList(type, criterion, dir);
 }
 
+function connectAddPhotographForm()
+{
+	var validity = true;
+
+	// Folder
+	val = $('#folder').val();
+	if (!val) {
+		renderElement("folder", "<?php echo $this->translate('Please select a value', 'ppit-core', $context->getLocale()) ?>");
+		validity = false;
+	}
+
+	if (validity) {
+		var formData = new FormData();
+		formData.append('folder', $('#folder').val());
+		var fileSelect = document.getElementById('attachment');
+		if (fileSelect) {
+			var files = fileSelect.files;
+			for (var i = 0; i < files.length; i++) {
+				var file = files[i];
+				formData.append('attachment', file, file.name);
+			}
+		}
+		var xhttp = new XMLHttpRequest();
+		var route, target;
+		route = '<?php echo $this->url('commitmentMessage/addPhotograph') ?>';
+		xhttp.open('POST', route, true);
+		xhttp.onload = function () {
+			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				$('#form_action').html(xhttp.responseText);
+				$('#remove-anchor').click(function () { 
+					$('#form_action').hide();
+					$('#add-photograph-anchor').removeClass("btn-primary").addClass("btn-default");
+				});
+			}
+		};
+		xhttp.send(formData);
+	}
+	else return false;
+}
+
+function getAddPhotograph() {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentMessage/addPhotograph') ?>';
+	xhttp.open('GET', route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+<?php endif;?>
+			$('#form_action').show();
+			$('#form_action').html(xhttp.responseText);
+			$('#remove-anchor').click(function () { 
+				$('#form_action').hide();
+				$('#add-photograph-anchor').removeClass("btn-primary").addClass("btn-default");
+			});
+			$('#submit-button').click(function () { connectAddPhotographForm(); });
+<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.action-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#add-photograph-anchor').removeClass("btn-default").addClass("btn-primary");
+}
+
 // Load the list
 function getCommitmentMessageList(type, major, dir) {
 
@@ -36,10 +106,8 @@ function getCommitmentMessageList(type, major, dir) {
 				});
 			});
 
-			// Connect the add anchor
-			$('#commitment-message-add-anchor').click(function () {
-				showCommitmentMessageDetail(type, '0', 'import');
-			});
+			$('#commitment-message-add-anchor').click(function () { showCommitmentMessageDetail(type, '0', 'import'); });
+			$('#add-photograph-anchor').click(function () { getAddPhotograph(); });
 			
 			// Connect the detail anchors
 			$('.commitment-message-submit-anchor').each(function () {
@@ -133,7 +201,7 @@ function activateCommitmentMessage(type) {
 	// Load the search panel and highlight the menu entry
 	loadPanel('index_action', '<?php echo $this->url('commitmentMessage/search') ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
-	$('#commitmentMessage-anchor').removeClass("btn-default").addClass("btn-primary");
+	$('#message-anchor').removeClass("btn-default").addClass("btn-primary");
 
 	getCommitmentMessageList(type, 'id', 'DESC');
 }

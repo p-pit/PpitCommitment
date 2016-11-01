@@ -18,15 +18,15 @@ class TermController extends AbstractActionController
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$applicationName = 'P-Pit Engagements';
-		$menu = Context::getCurrent()->getConfig('menus')['p-pit-engagements'];
 		$currentEntry = $this->params()->fromQuery('entry', 'term');
-
+		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
+		
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
     			'active' => 'application',
     			'applicationName' => $applicationName,
-    			'menu' => $menu,
+    			'types' => $types,
     			'currentEntry' => $currentEntry,
     	));
     }

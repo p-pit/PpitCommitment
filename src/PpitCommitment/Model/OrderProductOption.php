@@ -52,6 +52,21 @@ class OrderProductOption implements InputFilterAwareInterface
     	$data['price'] = (float) $this->price;
     	return $data;
     }
+
+    public static function getList($order, $major = 'id', $dir = '')
+    {    
+    	// Retrieve the order products
+    	$select = OrderProductOption::getTable()->getSelect()
+    		->join('md_product', 'order_product.product_id = md_product.id', array('brand', 'product_reference' => 'reference', 'product_caption' => 'caption'), 'left')
+    		->where(array('order_id' => $order->id))
+    		->order(array($major.' '.$dir, 'id'));
+    	$cursor = OrderProduct::getTable()->selectWith($select);
+    	$orderProducts = array();
+    	foreach ($cursor as $orderProduct) {
+    		$orderProducts[$orderProduct->id] = $orderProduct;
+    	}
+    	return $orderProducts;
+    }
     
 	public function setInputFilter(InputFilterInterface $inputFilter)
     {

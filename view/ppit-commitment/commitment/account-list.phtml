@@ -2,7 +2,8 @@
 
 <?php $colspan = count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['properties'])
 	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'])
-	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors']) ?>
+	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors']) 
+			   + 2 ?>
 
 <table class="table table-striped ppit_index">
 	<tr>
@@ -13,8 +14,14 @@
 	<tr>
 <?php $route = $context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['addRoute']?>
 		<td colspan="<?php echo $colspan ?>">
+			<button type="button" class="btn btn-default action-btn btn-xs commitment-add-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-add">
+				<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-newadd-glyphicon"></span>
+			</button>
+			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url('commitment/index', array('type' => $type)) ?>?account_id=<?php echo $params['account_id'] ?>">
+				<?php echo $this->translate('Invoices', 'ppit-commitment', $context->getLocale()) ?>
+			</button>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
-				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon">Old</span>
 			</button>
 		</td>
 	</tr>
@@ -33,11 +40,21 @@
 		<?php endif;?>
 		
 	<?php endforeach;?>
+		<td>
+			<button type="button" class="btn btn-default action-btn btn-xs commitment-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-detail_<?php echo $commitment->id ?>">
+				<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-zoom-glyphicon"></span>
+			</button>
+		</td>
+		<td>
+			<button type="button" class="btn btn-default action-btn btn-xs commitment-delete-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-delete_<?php echo $commitment->id ?>">
+				<span class="glyphicon glyphicon-trash" id="<?php echo $commitment->id ?>-delete-glyphicon"></span>
+			</button>
+		</td>
 
 	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'] as $route => $params) : ?>
 		<td>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="<?php echo $this->url($route, array('eid' => $commitment->identifier)) ?>">
-				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon"></span>
+				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon">Old</span>
 			</button>
 		</td>
 	<?php endforeach;?>
@@ -45,8 +62,8 @@
 	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors'] as $route => $params) : ?>
 		<td>
 		<?php if ($params['type'] == 'btn') : ?>
-			<button type="button" class="btn btn-default action-btn account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">
-				<?php echo $params['labels'][$context->getLocale()] ?>
+			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">
+				<?php echo $params['labels'][$context->getLocale()] ?> Old
 			</button>
 		<?php elseif ($params['type'] == 'nav') : ?>
 			<ul class="nav nav-tabs">
@@ -61,10 +78,11 @@
 		    </ul>
 		<?php endif;?>
 		</td>
-	<?php endforeach;?>
-	
+	<?php endforeach;?>	
 	</tr>
 
 <?php endforeach; ?>
 
 </table>
+
+<div id="commitment-update-panel"></div>

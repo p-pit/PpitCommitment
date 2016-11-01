@@ -1,44 +1,20 @@
 <table class="table table-striped ppit_index">
 	<tr>
 		<th>&nbsp;</th>
-		<th align="center">
-			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="identifier-anchor">
-				<span><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></span>
-<?php if ($major == 'identifier') : ?>
-				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
-<?php endif ?>
-			</button>
-		</th>
 
+<?php foreach ($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
 		<th align="center">
-			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="status-anchor">
-				<span><?php echo $this->translate('Next step', 'ppit-core', $context->getLocale()) ?></span>
-<?php if ($major == 'status') : ?>
+	<?php $label = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['labels'][$context->getLocale()] ?>
+	<?php if ($label) : ?>
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="<?php echo $propertyId ?>-anchor">
+				<span><?php echo $label ?></span>
+<?php if ($major == $propertyId) : ?>
 				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
 <?php endif ?>
 			</button>
+	<?php endif;?>
 		</th>
-
-		<th align="center">
-			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="expected_delivery_date-anchor">
-				<span><?php echo $this->translate('Deadline', 'ppit-commitment', $context->getLocale()) ?></span>
-<?php if ($major == 'expected_delivery_date') : ?>
-				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
-<?php endif ?>
-			</button>
-		</th>
-
-		<th align="center">
-			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="expected_delivery_date-anchor">
-				<span><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></span>
-<?php if ($major == 'amount') : ?>
-				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
-<?php endif ?>
-			</button>
-		</th>
-		
-		<th>&nbsp;</th>
-	</tr>
+<?php endforeach;?>
 		
 	<tr>
 		<td>
@@ -46,9 +22,7 @@
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
 		</td>
-		<td colspan="4">
-			<img height="30" src="<?php echo $this->basePath('images/carre80.png') ?>"> 45 pépites disponibles
-		</td>
+		<td colspan="4">&nbsp;</td>
 	</tr>
 	
 <?php foreach ($commitments as $commitment) : ?>
@@ -57,7 +31,6 @@
 	<tr>
 		<td colspan="6">
 			<strong><?php echo $commitment->customer_name ?></strong> -
-			<?php if ($commitment->subscription_id) echo $commitment->product_identifier.' - ' ?>
 			<?php echo $commitment->caption ?>
 		</td>
 	</tr>
@@ -68,17 +41,31 @@
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $commitment->id ?>-glyphicon"></span>
 			</button>
 		</td>
-		<td><?php echo $commitment->identifier ?></td>
-		<td><?php echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'][$commitment->status]['labels']['fr_FR'] ?></td>
-		<td <?php if ($commitment->expected_delivery_date < date('Y-m-d')) echo 'style="color: red"' ?>><?php echo $context->decodeDate($commitment->expected_delivery_date) ?></td>
-		<td align="right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
-		<td>
-		<?php if ($commitment->order_form_id) : ?>
-			<a class="glyphicon glyphicon-cloud-download" title="<?php echo $this->translate('Download', 'ppit-core', $context->getLocale()) ?>" href="<?php echo $this->url('document/download', array('id' => $commitment->order_form_id)) ?>"></a>
+
+	<?php foreach ($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
+		<?php 
+		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+		if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+		?>
+	
+		<?php if ($propertyId == 'customer_name') : ?>
+		<td><?php echo $commitment->customer_name ?></td>
+	
+		<?php elseif ($rendering == 'text') : ?>
+		<td><?php echo $commitment->properties[$propertyId] ?></td>
+	
+		<?php elseif ($rendering == 'select') : ?>
+		<td><?php echo ($commitment->properties[$propertyId]) ? $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()] : '' ?></td>
+	
+		<?php elseif ($rendering == 'number') : ?>
+		<td style="text-align: right"><?php echo $context->formatFloat($commitment->properties[$propertyId], 2) ?></td>
+	
 		<?php else : ?>
-			&nbsp;
+		<td><?php echo $commitment->properties[$propertyId] ?></td>
+		
 		<?php endif;?>
-		</td>
+		
+	<?php endforeach;?>
 	</tr>
 
 	<?php endif;?>

@@ -12,6 +12,7 @@ use PpitCore\Model\Credit;
 use PpitCore\Model\Instance;
 use PpitDocument\Model\Document;
 use PpitEquipment\Model\Area;
+use PpitMasterData\Model\ProductOption;
 use PpitMasterData\Model\Place;
 use PpitMasterData\Model\OrgUnit;
 use Zend\InputFilter\Factory as InputFactory;
@@ -37,6 +38,9 @@ class Commitment implements InputFilterAwareInterface
 	public $quantity;
 	public $unit_price;
 	public $amount;
+	public $taxable_1_amount;
+	public $taxable_2_amount;
+	public $taxable_3_amount;
 	public $options;
 	public $including_options_amount;
 	public $cgv;
@@ -99,6 +103,7 @@ class Commitment implements InputFilterAwareInterface
 	// Transient properties
 //	public $properties;
 	public $terms;
+	public $termSum;
 	public $subscriptions;
 	public $subscription;
 	public $breadcrumb;
@@ -133,6 +138,9 @@ class Commitment implements InputFilterAwareInterface
         $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
         $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
+        $this->taxable_1_amount = (isset($data['taxable_1_amount'])) ? $data['taxable_1_amount'] : null;
+        $this->taxable_2_amount = (isset($data['taxable_2_amount'])) ? $data['taxable_2_amount'] : null;
+        $this->taxable_3_amount = (isset($data['taxable_3_amount'])) ? $data['taxable_3_amount'] : null;
         $this->options = (isset($data['options'])) ? json_decode($data['options'], true) : null;
         $this->including_options_amount = (isset($data['including_options_amount'])) ? $data['including_options_amount'] : null;
         $this->cgv = (isset($data['cgv'])) ? $data['cgv'] : null;
@@ -212,6 +220,9 @@ class Commitment implements InputFilterAwareInterface
     	$data['quantity'] = $this->quantity;
     	$data['unit_price'] = $this->unit_price;
     	$data['amount'] = $this->amount;
+    	$data['taxable_1_amount'] = $this->taxable_1_amount;
+    	$data['taxable_2_amount'] = $this->taxable_2_amount;
+    	$data['taxable_3_amount'] = $this->taxable_3_amount;
     	$data['options'] = json_encode($this->options);
     	$data['including_options_amount'] = $this->including_options_amount;
     	$data['cgv'] = $this->cgv;
@@ -303,7 +314,7 @@ class Commitment implements InputFilterAwareInterface
 			foreach ($params as $propertyId => $property) {
 				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
-				elseif ($propertyId == 'customer_name') $where->like('customer_name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'customer_name') $where->like('contact_community.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -341,6 +352,8 @@ class Commitment implements InputFilterAwareInterface
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 
     	$commitment->terms = Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search');
+    	$commitment->termSum = 0;
+    	foreach ($commitment->terms as $term) $commitment->termSum += $term->amount;
 
     	return $commitment;
     }
@@ -383,6 +396,8 @@ class Commitment implements InputFilterAwareInterface
     	$commitment->status = 'new';
     	$commitment->properties = $commitment->toArray();
     	$commitment->subscriptions = Subscription::getList(array('type' => $type), 'product_identifier', 'ASC');
+    	$commitment->options = array();
+    	$commitment->terms = array();
     	return $commitment;
     }
     
@@ -453,31 +468,50 @@ class Commitment implements InputFilterAwareInterface
 		}
 
 		if (array_key_exists('quantity', $data)) {
-			$this->quantity = trim(strip_tags($data['quantity']));
-			if (strlen($this->quantity) > 255) return 'Integrity';
+			$this->quantity = (float) $data['quantity'];
 		}
 
 		if (array_key_exists('unit_price', $data)) {
-			$this->unit_price = trim(strip_tags($data['unit_price']));
-			if (strlen($this->unit_price) > 255) return 'Integrity';
+			$this->unit_price = (float) $data['unit_price'];
 		}
 		
 		if (array_key_exists('amount', $data)) {
 			$this->amount = trim(strip_tags($data['amount']));
-			$this->including_options_amount = trim(strip_tags($data['amount']));
 			if (strlen($this->amount) > 255) return 'Integrity';
 		}
-		
-    	if (array_key_exists('options', $data)) {
-    		$this->options = array();
-    		foreach($data['options'] as $option) {
-				$option = trim(strip_tags($option));
-				if (strlen($option) > 255) return 'Integrity';
-				$this->options[] = $option;
-				$this->including_options_amount += $option;
-    		}
+
+		if (array_key_exists('taxable_1_amount', $data)) {
+			$this->taxable_1_amount = (float) $data['taxable_1_amount'];
 		}
 
+		if (array_key_exists('taxable_2_amount', $data)) {
+			$this->taxable_2_amount = (float) $data['taxable_2_amount'];
+		}
+
+		if (array_key_exists('taxable_3_amount', $data)) {
+			$this->taxable_3_amount = (float) $data['taxable_3_amount'];
+		}
+
+    	if (array_key_exists('options', $data)) {
+    		$this->options = array();
+    		foreach($data['options'] as $entry) {
+				$entry['identifier'] = trim(strip_tags($entry['identifier']));
+    			$productOption = ProductOption::get($entry['identifier'], 'reference');
+    			if ($productOption) {
+    				$option = array();
+    				$option['identifier'] = $entry['identifier'];
+					$option['caption'] = $productOption->caption;
+    				$option['unit_price'] = $entry['unit_price'];
+    				$option['quantity'] = $entry['quantity'];
+    				$option['amount'] = $option['unit_price'] * $option['quantity'];
+					$option['vat_id'] = $productOption->vat_id;
+					$this->options[] = $option;
+    			}
+    		}
+		}
+		$this->including_options_amount = $this->amount;
+		foreach($this->options as $option) $this->including_options_amount += $option['amount'];
+		
 		if (array_key_exists('cgv', $data)) {
 			$this->cgv = trim(strip_tags($data['cgv']));
 			if (strlen($this->cgv) > 16777215) return 'Integrity';

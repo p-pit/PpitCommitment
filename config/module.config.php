@@ -282,6 +282,44 @@ return array(
         								),
         						),
         				),
+        				'updateProduct' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/update-product[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'updateProduct',
+        								),
+        						),
+        				),
+        				'updateOption' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/update-option[/:id][/:number]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        										'number'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'updateOption',
+        								),
+        						),
+        				),
+        				'updateTerm' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/update-term[/:id][/:number]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        										'number'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'updateTerm',
+        								),
+        						),
+        				),
         				'workflow' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -330,7 +368,7 @@ return array(
         				'invoice' => array(
         						'type' => 'segment',
         						'options' => array(
-        								'route' => '/invoice[/:id]',
+        								'route' => '/invoice[/:type][/:id]',
         								'constraints' => array(
         										'id'     => '[0-9]*',
         								),
@@ -478,6 +516,15 @@ return array(
 	        								),
 	        						),
 	        				),
+            				'addPhotograph' => array(
+            						'type' => 'segment',
+            						'options' => array(
+            								'route' => '/add-photograph',
+            								'defaults' => array(
+            										'action' => 'addPhotograph',
+            								),
+            						),
+            				),
             				'import' => array(
             						'type' => 'segment',
             						'options' => array(
@@ -649,6 +696,9 @@ return array(
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
             	array('route' => 'commitment/update', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/updateProduct', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/updateOption', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/updateTerm', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accept', 'roles' => array('accountant')),
             	array('route' => 'commitment/settle', 'roles' => array('accountant')),
@@ -665,6 +715,7 @@ return array(
             	array('route' => 'commitmentMessage/commitmentPost', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/paymentAutoresponse', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/addPhotograph', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/submit', 'roles' => array('admin')),
@@ -754,51 +805,6 @@ return array(
 	'ppitCommitmentDependencies' => array(
 	),
 
-	'menus' => array(
-			'p-pit-engagements' => array(
-					'account' => array(
-							'action' => 'Account',
-							'route' => 'commitmentAccount/index',
-							'params' => array(),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Accounts',
-									'fr_FR' => 'Comptes',
-							),
-					),
-					'commitment' => array(
-							'action' => 'Commitment',
-							'route' => 'commitment/index',
-							'params' => array('type' => 0),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Commitments',
-									'fr_FR' => 'Engagements',
-							),
-					),
-					'term' => array(
-							'action' => 'Term',
-							'route' => 'commitmentTerm/index',
-							'params' => array(),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Terms',
-									'fr_FR' => 'Echéances',
-							),
-					),
-					'commitmentMessage' => array(
-							'action' => 'CommitmentMessage',
-							'route' => 'commitmentMessage/index',
-							'params' => array('type' => ''),
-							'urlParams' => array(),
-							'label' => array(
-									'en_US' => 'Messages',
-									'fr_FR' => 'Messages',
-							),
-					),
-			),
-	),
-		
 	'commitmentAccount' => array(
 			'statuses' => array(),
 			'properties' => array(
@@ -807,6 +813,18 @@ return array(
 							'labels' => array(
 									'en_US' => 'Name',
 									'fr_FR' => 'Nom',
+							),
+					),
+					'n_title' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
+									'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
+									'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
+							),
+							'labels' => array(
+									'en_US' => 'Title',
+									'fr_FR' => 'Titre',
 							),
 					),
 					'n_first' => array(
@@ -878,7 +896,7 @@ return array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
-				'place_id' => 'select',
+//				'place_id' => 'select',
 				'customer_name' => 'contains',
 			),
 			'more' => array(
@@ -918,6 +936,7 @@ return array(
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
 	),
+		
 	'commitment/try' => array(
 			'caption' => array('mandatory' => true),
 			'n_title' => array('mandatory' => true),
@@ -927,6 +946,231 @@ return array(
 			'tel_work' => array('mandatory' => false),
 			'tel_cell' => array('mandatory' => false),
 	),
+
+	'commitment/types' => array(
+			'type' => 'select',
+			'modalities' => array(
+					'rental' => array('labels' => array('en_US' => 'Rentals', 'fr_FR' => 'Locations')),
+					'service' => array('labels' => array('en_US' => 'Services', 'fr_FR' => 'Prestations')),
+			),
+	),
+	
+	'commitment/rental' => array(
+			'properties' => array(
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+									'invoiced' => array('en_US' => 'Invoiced', 'fr_FR' => 'Facturé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
+					'caption' => array(
+							'type' => 'repository',
+							'definition' => 'student/property/school_year',
+							'labels' => array(
+									'en_US' => 'School year',
+									'fr_FR' => 'Année scolaire',
+							),
+					),
+					'description' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Description',
+									'fr_FR' => 'Description',
+							),
+					),
+					'including_options_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
+			),
+			'order' => 'customer_name ASC',
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
+			'actions' => array(
+					'confirm' => array(
+							'currentStatuses' => array('new' => null),
+							'targetStatus' => 'confirmed',
+							'label' => array('en_US' => 'Confirm', 'fr_FR' => 'Confirmer'),
+							'properties' => array(
+							),
+					),
+					'reject' => array(
+							'currentStatuses' => array('new' => null),
+							'targetStatus' => 'rejected',
+							'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
+							'properties' => array(
+							),
+					),
+					'settle' => array(
+							'currentStatuses' => array('approved' => null),
+							'targetStatus' => 'settled',
+							'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
+							'properties' => array(
+							),
+					),
+					'invoice' => array(
+							'currentStatuses' => array('settled' => null),
+							'targetStatus' => 'invoiced',
+							'label' => array('en_US' => 'Invoice', 'fr_FR' => 'Facturer'),
+							'properties' => array(
+							),
+					),
+			),
+	),
+	
+	'commitment/index/rental' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/rental' => array(
+			'title' => array('en_US' => 'Rentals', 'fr_FR' => 'Locations'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actives'),
+			'main' => array(
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+			),
+	),
+	
+	'commitment/list/rental' => array(
+			'including_options_amount' => 'number',
+			'status' => 'select',
+	),
+	
+	'commitment/update/rental' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+	
+	'commitment/service' => array(
+			'currencySymbol' => '€',
+			'tax' => 'excluding',
+			'properties' => array(
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+									'invoiced' => array('en_US' => 'Invoiced', 'fr_FR' => 'Facturé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
+					'caption' => array(
+							'type' => 'repository',
+							'definition' => 'student/property/school_year',
+							'labels' => array(
+									'en_US' => 'School year',
+									'fr_FR' => 'Année scolaire',
+							),
+					),
+					'description' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Description',
+									'fr_FR' => 'Description',
+							),
+					),
+					'including_options_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
+			),
+			'order' => 'customer_name ASC',
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
+			'actions' => array(
+					'confirm' => array(
+							'currentStatuses' => array('new' => null),
+							'targetStatus' => 'confirmed',
+							'label' => array('en_US' => 'Confirm', 'fr_FR' => 'Confirmer'),
+							'properties' => array(
+							),
+					),
+					'reject' => array(
+							'currentStatuses' => array('new' => null),
+							'targetStatus' => 'rejected',
+							'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
+							'properties' => array(
+							),
+					),
+					'settle' => array(
+							'currentStatuses' => array('approved' => null),
+							'targetStatus' => 'settled',
+							'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
+							'properties' => array(
+							),
+					),
+					'invoice' => array(
+							'currentStatuses' => array('settled' => null),
+							'targetStatus' => 'invoiced',
+							'label' => array('en_US' => 'Invoice', 'fr_FR' => 'Facturer'),
+							'properties' => array(
+							),
+					),
+			),
+	),
+	
+	'commitment/index/service' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/service' => array(
+			'title' => array('en_US' => 'Services', 'fr_FR' => 'Prestations'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actives'),
+			'main' => array(
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+			),
+	),
+	
+	'commitment/list/service' => array(
+			'including_options_amount' => 'number',
+			'status' => 'select',
+	),
+	
+	'commitment/update/service' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+/*		
 	'commitment' => array(
 			'types' => array(
 					'rental' => array(
@@ -1035,6 +1279,25 @@ Commandes enregistrées %s : %s
 					),
 			),
 			'properties' => array(
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+								'new' => array('en_US' => 'To be confirmed', 'fr_FR' => 'A confirmer'),
+								'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+								'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
 					'caption' => array(
 							'type' => 'input',
 							'labels' => array(
@@ -1047,6 +1310,13 @@ Commandes enregistrées %s : %s
 							'labels' => array(
 									'en_US' => 'Description',
 									'fr_FR' => 'Description',
+							),
+					),
+					'including_options_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
 							),
 					),
 			),
@@ -1123,6 +1393,25 @@ Commandes enregistrées %s : %s
 						),
 					),
 			),
+	),
+
+	'commitment/index' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+
+	'commitment/search' => array(
+			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+			),
+	),
+
+	'commitment/list' => array(
+			'including_options_amount' => 'number',
+			'status' => 'select',
 	),
 		
 	'commitment/update' => array(
@@ -1296,7 +1585,7 @@ Commandes enregistrées %s : %s
 						),
 					),
 			),
-	),
+	),*/
 		
 	'commitmentTerm' => array(
 			'statuses' => array(),
