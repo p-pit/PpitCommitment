@@ -17,6 +17,7 @@ echo $this->partial('/partials/header');
 
 	<?php if ($context->isAllowed('commitmentAccount/index')) : ?>
 				<button type="button" class="btn btn-default menu-btn" id="account-anchor">
+					<span class="glyphicon glyphicon-user"></span>
 					<?php echo $this->translate('Accounts', 'ppit-commitment', $context->getLocale()) ?>
 				</button>
 	<?php endif ?>
@@ -31,13 +32,22 @@ echo $this->partial('/partials/header');
 
 	<?php if ($context->isAllowed('commitmentTerm/index')) : ?>
 				<button type="button" class="btn btn-default menu-btn" id="term-anchor">
+					<span class="glyphicon glyphicon-calendar"></span>
 					<?php echo $this->translate('Terms', 'ppit-commitment', $context->getLocale()) ?>
+				</button>
+	<?php endif ?>
+
+	<?php if ($context->isAllowed('product/index')) : ?>
+				<button type="button" class="btn btn-default menu-btn" id="product-anchor">
+					<span class="glyphicon glyphicon-book"></span>
+					<?php echo $this->translate('Catalogue', 'ppit-master-data', $context->getLocale()) ?>
 				</button>
 	<?php endif ?>
 
 	<?php if ($context->isAllowed('commitmentMessage/index')) : ?>
 				<button type="button" class="btn btn-default menu-btn" id="message-anchor">
-					<?php echo $this->translate('Messages', 'ppit-commitment', $context->getLocale()) ?>
+					<span class="glyphicon glyphicon-transfer"></span>
+					<?php echo $this->translate('Interactions', 'ppit-commitment', $context->getLocale()) ?>
 				</button>
 	<?php endif ?>
 
@@ -71,6 +81,7 @@ echo $this->partial('/partials/ppit-controller')
 	$('#commitment-<?php echo $typeId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitment/index', array('type' => $typeId)) ?>'); });
 <?php endforeach;?>
 	$('#term-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitmentTerm/index') ?>'); });
+	$('#product-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('product/index') ?>'); });
 	$('#message-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitmentMessage/index') ?>'); });
 
 activateCommitment('<?php echo $type ?>');

@@ -33,7 +33,9 @@
 		</div>
 
 <?php if ($message == 'OK') $isDisabled = true; else $isDisabled = false; ?>
-
+<?php if ($context->getConfig('ppitDocument')['dropbox']['mode'] == 'demo') : ?>
+		<div class="alert alert-danger"><p class="help-block"><?php echo $this->translate('Use of Dropbox in demo mode. Files are deleted each evening.', 'ppit-commitment', $context->getLocale()) ?></p></div>
+<?php endif ?>
 		<div class="form-group" id="folder_group">
 			<label class="col-sm-4 control-label">* <?php echo $this->translate('Folder', 'ppit-document', $context->getLocale()) ?></label>
 			<div class="col-sm-8">

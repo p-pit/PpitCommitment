@@ -54,6 +54,7 @@ class CommitmentController extends AbstractActionController
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
 		$type = $this->params()->fromRoute('type', null);
+		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-PIT Engagements';
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 
@@ -63,12 +64,13 @@ class CommitmentController extends AbstractActionController
     			'context' => $context,
     			'config' => $context->getConfig(),
     			'active' => 'application',
+    			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,
     			'types' => $types,
     			'type' => $type,
     			'params' => $params,
 	    		'products' => Product::getList(null, array()),
-	    		'options' => ProductOption::getList(array()),
+	    		'options' => ProductOption::getList(null, array()),
     	));
     }
 	
@@ -269,7 +271,7 @@ class CommitmentController extends AbstractActionController
     		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
     		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
     		try {
-    			$properties = $dropboxClient->getMetadataWithChildren('/'.$dropbox['folders']['settlements']);
+    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['settlements']);
     			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
     		}
     		catch(\Exception $e) {}
@@ -282,8 +284,8 @@ class CommitmentController extends AbstractActionController
     		'type' => $type,
     		'id' => $commitment->id,
     		'commitment' => $commitment,
-    		'products' => Product::getList(null, array()),
-    		'options' => ProductOption::getList(array()),
+    		'products' => Product::getList(null, array(), null, null, 'todo'),
+    		'options' => ProductOption::getList(null, array(), null, null, 'todo'),
     		'dropbox' => $dropbox,
     		'documentList' => $documentList,
     	));
@@ -306,9 +308,10 @@ class CommitmentController extends AbstractActionController
     	$logger->addWriter($writer);
     	$logger->info($logText);
     	
-    	$product = $this->params()->fromRoute('product', null);
+//    	$product = $this->params()->fromRoute('product', null);
     	$instance = Instance::instanciate();
     	$contact = Vcard::instanciate();
+    	$credit = Credit::instanciate();
     	$user = User::getNew();
     	 
     	// Instanciate the csrf form
@@ -330,7 +333,7 @@ class CommitmentController extends AbstractActionController
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['attributed_credits'] = array($product => true);
+    			$data['attributed_credits'] = array('p-pit-studies' => null, 'p-pit-engagements' => null);
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
@@ -357,13 +360,22 @@ class CommitmentController extends AbstractActionController
     				else {
     					$contact->instance_id = $instance->id;
     					Vcard::getTable()->transSave($contact);
-		    			$user->contact_id = $contact->id;
+		    			$user->instance_id = $instance->id;
+    					$user->contact_id = $contact->id;
 		    			$user->email = $contact->email;
     					$rc = $user->add($contact->email, true);
 						$userContact = new UserContact;
 						$userContact->instance_id = $instance->id;
 						$userContact->user_id = $user->user_id;
 						$userContact->contact_id = $contact->id;
+						$credit->instance_id = $instance->id;
+						$credit->type = 'p-pit-engagements';
+						$credit->quantity = 0;
+						$credit->activation_date = date('Y-m-d');
+						Credit::getTable()->transSave($credit);
+						$credit->id = 0;
+						$credit->type = 'p-pit-studies';
+						Credit::getTable()->transSave($credit);
 						
     					if ($rc != 'OK') {
     						if ($rc == 'Duplicate') $error = 'Duplicate identifier';
@@ -387,7 +399,6 @@ class CommitmentController extends AbstractActionController
     	$view = new ViewModel(array(
 				'context' => $context,
 				'config' => $context->getconfig(),
-    			'product' => $product,
     			'instance' => $instance,
     			'contact' => $contact,
     			'user' => $user,
@@ -1072,7 +1083,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($commitment->taxable_2_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' - '.$product->description.' (TVA 10%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product->caption.' (TVA 10%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1080,7 +1091,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($commitment->taxable_3_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' - '.$product->description.' (TVA 5,5%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product->caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1088,7 +1099,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($taxExemptAmount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' - '.$product->description.' (exonéré)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product->caption.' (exonéré)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount * $commitment->quantity, 2), 'LR', 0, 'R', $color);

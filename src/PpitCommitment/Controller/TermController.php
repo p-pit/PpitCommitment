@@ -17,6 +17,7 @@ class TermController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
+		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
 		$currentEntry = $this->params()->fromQuery('entry', 'term');
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
@@ -25,6 +26,7 @@ class TermController extends AbstractActionController
     			'context' => $context,
     			'config' => $context->getConfig(),
     			'active' => 'application',
+    			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,
     			'types' => $types,
     			'currentEntry' => $currentEntry,

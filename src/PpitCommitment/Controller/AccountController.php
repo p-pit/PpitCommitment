@@ -29,6 +29,7 @@ class AccountController extends AbstractActionController
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::getNew($community_id);
 
+		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
 		$currentEntry = $this->params()->fromQuery('entry', 'account');
 
@@ -37,6 +38,7 @@ class AccountController extends AbstractActionController
     			'config' => $context->getConfig(),
     			'active' => 'application',
     			'applicationName' => $applicationName,
+    			'applicationId' => $applicationId,
     			'community_id' => $community_id,
     			'types' => $types,
     			'contact' => $contact,

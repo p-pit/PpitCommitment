@@ -606,9 +606,7 @@ function activateCommitment() {
 	// Load the search panel and highlight the menu entry
 	loadPanel('index_action', '<?php echo $this->url('commitment/search', array('type' => $type)) ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
-	var commitmentAnchor;
-	commitmentAnchor = '#commitment-<?php echo $type ?>-anchor';
-	$(commitmentAnchor).removeClass("btn-default").addClass("btn-primary");
+	$('#commitment-anchor').removeClass("btn-default").addClass("btn-primary");
 	
 	<?php
 	$todoTitle = (isset ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
