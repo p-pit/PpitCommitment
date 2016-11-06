@@ -1787,7 +1787,7 @@ Bien cordialement,
 L\'équipe P-PIT
 ',
 					),
-					'consumeCreditTitle' => array(
+/*					'consumeCreditTitle' => array(
 							'en_US' => 'Monthly P-PIT Commitments credits consumption report',
 							'fr_FR' => 'Rapport mensuel de consommation de crédits P-PIT Engagements',
 					),
@@ -1811,6 +1811,42 @@ Nous espérons que nos services vous donnent entière satisfaction. Veuillez adr
 Bien cordialement,
 
 L\'équipe P-PIT
+',
+					),*/
+					'suspendedServiceTitle' => array(
+							'en_US' => 'P-Pit Commitments records suspended',
+							'fr_FR' => 'Dossiers P-Pit Engagements suspendus',
+					),
+					'suspendedServiceText' => array(
+							'en_US' => 'Hello %s,
+							
+Your available P-Pit Commitments credits reserve for %s is out of stock (*). 
+Please note that the access has been automatically suspended for the records listed below until a new subscription of credits occurs:
+%s
+Our tip : Have peace of mind by renewing for a record average life-time (for example 6 monthly credits per the yearly average number of records).
+					
+(*) Your current P-Pit Commitments solde rises %s units.
+
+We hope that our services are giving you satisfaction. Please send your requests or questions to the P-Pit support: support@p-pit.fr or 06 29 87 90 02.
+					
+Best regards,
+
+The P-Pit staff
+',
+							'fr_FR' => 'Bonjour %s,
+							
+Votre réserve de crédits P-Pit Engagements pour %s est épuisée (*). 
+Veuillez noter que l\'accès a été automatiquement suspendu pour les dossiers listées ci-après jusqu\'à la souscription de nouveaux crédits :
+%s
+Notre conseil : Ayez l\'esprit tranquille en souscrivant le nombre de crédits pour la durée de vie moyenne de vos dossiers (par exemple 6 crédits mensuels par le nombre moyen de dossiers par an).
+
+(*) Votre solde actuel P-Pit Engagements est de %s unités.
+
+Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-Pit : support@p-pit.fr ou 06 29 87 90 02.
+					
+Bien cordialement,
+
+L\'équipe P-Pit
 ',
 					),
 			),

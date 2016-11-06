@@ -27,6 +27,8 @@ class Commitment implements InputFilterAwareInterface
 {
     public $id;
     public $instance_id;
+    public $credit_status;
+    public $next_credit_consumption_date;
     public $last_credit_consumption_date;
     public $type;
 	public $subscription_id;
@@ -127,6 +129,8 @@ class Commitment implements InputFilterAwareInterface
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
         $this->instance_id = (isset($data['instance_id'])) ? $data['instance_id'] : null;
+        $this->credit_status = (isset($data['credit_status'])) ? $data['credit_status'] : null;
+        $this->next_credit_consumption_date = (isset($data['next_credit_consumption_date'])) ? $data['next_credit_consumption_date'] : null;
         $this->last_credit_consumption_date = (isset($data['last_credit_consumption_date'])) ? $data['last_credit_consumption_date'] : null;
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->account_id = (isset($data['account_id'])) ? $data['account_id'] : null;
@@ -209,6 +213,8 @@ class Commitment implements InputFilterAwareInterface
     public function toArray() {
     	$data = array();
     	$data['id'] = (int) $this->id;
+    	$data['credit_status'] = (int) $this->credit_status;
+    	$data['next_credit_consumption_date'] = ($this->next_credit_consumption_date) ? $this->next_credit_consumption_date : null;
     	$data['last_credit_consumption_date'] = ($this->last_credit_consumption_date) ? $this->last_credit_consumption_date : null;
     	$data['type'] = $this->type;
     	$data['account_id'] = $this->account_id;
@@ -1003,8 +1009,8 @@ class Commitment implements InputFilterAwareInterface
     		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left');
     	$where = new Where();
     	$where->in('instance_id', $instanceIds);
-		$where->notEqualTo('commitment.status', 'closed');
-		$where->notEqualTo('commitment.status', 'suspended');
+		$where->notEqualTo('commitment.credit_status', 'closed');
+		$where->notEqualTo('commitment.credit_status', 'suspended');
 		$select->where($where);
 		$cursor = Commitment::getTable()->transSelectWith($select);
 		foreach ($cursor as $commitment) {
@@ -1023,105 +1029,119 @@ class Commitment implements InputFilterAwareInterface
 		
 		// Check enough credits are available
 		foreach ($credits as $credit) {
-			$counter = count($credit->consumers);
-			if ($credit->quantity < $counter) {
-    		
-	    		// Log
-				$logText = 'ALERT : Not enough credits for P-PIT Engagements available on instance '.$credit->instance_id.'. Available='.$credit->quantity.', required='.$counter;
-				if ($live) $logger->info($logText);
-	    		else print_r($logText."\n");
-				
-				// Notify
-				if ($live) {
-		    		$url = $config['ppitCoreSettings']['domainName'];
-		    		$instance = $instances[$credit->instance_id];
-		    		foreach ($instance->administrators as $contact) {
-		    			if (!$mailTo || !strcmp($contact->email, $mailTo)) { // Restriction on the given mailTo parameter
-				    		$title = sprintf($config['commitment/consumeCredit']['messages']['availabilityAlertTitle'][$contact->locale], 'P-PIT Engagements');
-				    		$text = sprintf(
-		    						$config['commitment/consumeCredit']['messages']['availabilityAlertText'][$contact->locale],
-		    						$contact->n_first,
-		    						$instance->caption,
-		    						'p-pit-engagements',
-		    						$credit->quantity,
-		    						count($credit->consumers)
-				    		);
-			    			ContactMessage::sendMail($contact->email, $text, $title);
-		    			}
-		    		}
-	    		}
-			}
-			if (	date('m') != substr($credit->activation_date, 5, 2) // The first month is free
-				&&	!array_key_exists(date('Y-m'), $credit->audit) // The current month has not already been consumed
-				&&	date('Y-m-d') >= date('Y-m-').substr($credit->activation_date, 8, 2) // The monthly date is reached
-			)
-			{
-    			$logText = 'Consuming '.$counter.' credits for instance: '.$credit->instance_id;
-    			if ($live) {
-					$connection = Credit::getTable()->getAdapter()->getDriver()->getConnection();
-	    			$connection->beginTransaction();
-	    			try {
-	
-		    			// Update the credit quantity
-						$credit->quantity -= $counter;
-						$credit->audit[date('Y-m')] = array(
-								'status' => 'used',
-								'quantity' => $counter,
-								'time' => Date('Y-m-d G:i:s'),
-				    			'n_fn' => 'P-PIT',
-				    			'comment' => 'Monthly consuming',
-						);
-						Credit::getTable()->transSave($credit);
-		
-						// Audit the credit consumption in the commitment records
-						foreach ($credit->consumers as $commitment) {
+		 
+			// Compute the credit consumption at -7 days and at due date
+    		$counter7 = 0;
+			$counter0 = 0;
+			$dailyConsumption = 0;
+			$creditModified = false;
+			$blocked = array();
+			foreach($credit->consumers as $commitment) {
+				if ($commitment->credit_status == 'blocked') $blocked[] = $commitment->identifier;
+    			else {
+					if ($commitment->next_credit_consumption_date <= date('Y-m-d', strtotime(date('Y-m-d').' + 7 days'))) $counter7++;
+	    			if ($commitment->next_credit_consumption_date <= date('Y-m-d')) $counter0++;
+	    			if ($commitment->next_credit_consumption_date <= date('Y-m-d')) {
+	    				if ($credit->quantity > 0) {
+		    				// Consume 1 credit
+		    				$credit->quantity--;
+							$commitment->next_credit_consumption_date = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
 							$commitment->last_credit_consumption_date = date('Y-m-d');
-							$commitment->audit[] = array(
-								'time' => Date('Y-m-d G:i:s'),
-				    			'n_fn' => 'P-PIT',
-				    			'comment' => 'Monthly consuming',
-							);
-							Commitment::getTable()->transSave($commitment);
-
-				    		// Log
-				    		if ($config['isTraceActive']) {
-								$logText = 'Commitment : instance_id='.$commitment->instance_id.', id='.$commitment->id.', caption='.$commitment->caption.', status='.$commitment->status;
-								if ($live) $logger->info($logText);
-					    		else print_r($logText."\n");
-				    		}
-						}
-		
-						// Notify
-			    		$url = $config['ppitCoreSettings']['domainName'];
-			    		$instance = $instances[$credit->instance_id];
-			    		foreach ($instance->administrators as $contact) {
-			    			if (!$mailTo || !strcmp($contact->email, $mailTo)) { // Restriction on the given mailTo parameter
-				    			$title = sprintf($config['commitment/consumeCredit']['messages']['consumeCreditTitle'][$contact->locale], 'P-PIT Engagements');
-					    		$text = sprintf(
-			    						$config['commitment/consumeCredit']['messages']['consumeCreditText'][$contact->locale],
-			    						$contact->n_first,
-					    				Context::sDecodeDate(date('Y-m-d'), $contact->locale),
-			    						$instance->caption,
-			    						count($credit->consumers),
-			    						$credit->quantity
-			    				);
-				    			ContactMessage::sendMail($contact->email, $text, $title);
-			    			}
-			    		}
-			    		$connection->commit();
-
-			    		// Log
-			    		$logger->info($logText);
+			    			$credit->audit[] = array(
+		    						'period' => date('Y-m'),
+			    					'quantity' => -1,
+			    					'status' => 'used',
+			    					'reference' => $commitment->identifier,
+			    					'time' => Date('Y-m-d G:i:s'),
+			    					'n_fn' => 'P-PIT',
+			    					'comment' => array(
+											'en_US' => 'Monthly use for period '.$context->decodeDate($commitment->last_credit_consumption_date).' to '.$context->decodeDate($commitment->last_credit_consumption_date),
+											'fr_FR' => 'Utilisation mensuelle pour la période du '.$context->decodeDate($commitment->last_credit_consumption_date).' au '.$context->decodeDate($commitment->last_credit_consumption_date),
+									),
+			    			);
+								
+		    				// Log
+		    				if ($config['isTraceActive']) {
+		   						$logText = 'Commitment : instance_id='.$commitment->instance_id.', id='.$commitment->id.', caption='.$commitment->identifier.', status='.$commitment->credit_status;
+		    					if ($live) $logger->info($logText);
+		    					else print_r($logText."\n");
+		    				}
+	    				}
+	    				else {
+	    					$blocked[] = $commitment->identifier;
+	    					$commitment->credit_status = 'blocked';
+			    			$credit->audit[] = array(
+		    						'period' => date('Y-m'),
+			    					'quantity' => 0,
+			    					'status' => 'blocked',
+			    					'reference' => $commitment->identifier,
+			    					'time' => Date('Y-m-d G:i:s'),
+			    					'n_fn' => 'P-PIT',
+			    					'comment' => array(
+										'en_US' => 'Record suspended due to lack of credit',
+										'fr_FR' => 'Dossier suspendu faute de crédit suffisant',
+									),
+			    			);
+	    				}
+	    				$creditModified = true;
+	    				if ($live) Commitment::getTable()->transSave($commitment);
 	    			}
-	           	    catch (\Exception $e) {
-		    			$connection->rollback();
-		    			throw $e;
-		    		}
-				}
-	    		else {
-		    		if ($config['isTraceActive']) print_r($logText."\n");
-	    		}
-	    			
+    			}
+			}
+			if ($creditModified && $live) Credit::getTable()->transSave($credit);
+
+			// Notify a suspension of service
+    		if ($blocked) {
+
+    			// Log
+    			$logText = 'ALERT : Not enough credits for P-Pit Engagements available on instance '.$credit->instance_id.'. Available='.$credit->quantity.', 7 days estimation='.$counter7;
+    			if ($live) $logger->info($logText);
+    			else print_r($logText."\n");
+    			
+    			// Notify
+    			if ($live) {
+    				$url = $config['ppitCoreSettings']['domainName'];
+    				$instance = $instances[$credit->instance_id];
+    				foreach ($instance->administrators as $contact) {
+    					if (!$mailTo || !strcmp($contact->email, $mailTo)) { // Restriction on the given mailTo parameter
+    						$title = sprintf($config['commitment/consumeCredit']['messages']['suspendedServiceTitle'][$contact->locale], 'P-PIT Communities');
+    						$text = sprintf(
+    								$config['commitment/consumeCredit']['messages']['suspendedServiceText'][$contact->locale],
+    								$contact->n_first,
+    								$instance->caption,
+    								implode(' ; ', $blocked),
+    								$credit->quantity
+    						);
+    						ContactMessage::sendMail($contact->email, $text, $title);
+    					}
+    				}
+    			}
+    		}
+    		elseif ($credit->quantity >= 0 && $credit->quantity - $counter7 < 0) {
+    
+    			// Log
+    			$logText = 'ALERT : Risk of credits lacking for P-PIT Communities on instance '.$credit->instance_id.'. Available='.$credit->quantity.', 7 days estimation='.$counter7;
+    			if ($live) $logger->info($logText);
+    			else print_r($logText."\n");
+    
+    			// Notify
+    			if ($live) {
+    				$url = $config['ppitCoreSettings']['domainName'];
+    				$instance = $instances[$credit->instance_id];
+    				foreach ($instance->administrators as $contact) {
+    					if (!$mailTo || !strcmp($contact->email, $mailTo)) { // Restriction on the given mailTo parameter
+    						$title = sprintf($config['commitment/consumeCredit']['messages']['availabilityAlertTitle'][$contact->locale], 'P-PIT Communities');
+    						$text = sprintf(
+    								$config['commitment/consumeCredit']['messages']['availabilityAlertText'][$contact->locale],
+    								$contact->n_first,
+    								$instance->caption,
+    								$credit->quantity,
+    								$counter7
+    						);
+    						ContactMessage::sendMail($contact->email, $text, $title);
+    					}
+    				}
+    			}
     		}
 		}
     }
