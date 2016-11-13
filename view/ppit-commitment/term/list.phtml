@@ -23,8 +23,12 @@
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
 		</td>
-		
-		<td colspan="7">&nbsp;</td>
+	<?php $total=0; foreach($terms as $term) $total += $term->amount; ?>
+		<td colspan="<?php echo count($context->getConfig('commitmentTerm/list')) ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
+			<?php echo $this->translate('Total', 'ppit-core', $context->getLocale()) ?>: 
+			<?php echo $context->formatFloat($total, 2) ?>
+		</td>		
+		<td>&nbsp;</td>
 	</tr>
 
 <?php $i = 0; foreach ($terms as $term) : ?>

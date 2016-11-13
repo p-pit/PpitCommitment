@@ -87,7 +87,7 @@ class TermController extends AbstractActionController
     	$dir = ($this->params()->fromQuery('dir', 'ASC'));
     
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
-    
+
     	// Retrieve the list
     	$terms = Term::getList($params, $major, $dir, $mode);
 
@@ -154,12 +154,25 @@ class TermController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
 
+    	$commitment_id = (int) $this->params()->fromRoute('commitment_id', 0);
     	$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $term = Term::get($id);
-    	else $term = Term::instanciate();
-
+    	else $term = Term::instanciate($commitment_id);
     	$action = $this->params()->fromRoute('act', null);
 
+    	$documentList = array();
+    	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
+    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
+    		try {
+    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['settlements']);
+    			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
+    		}
+    		catch(\Exception $e) {}
+    	}
+    	else $dropbox = null;
+    	 
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -177,35 +190,30 @@ class TermController extends AbstractActionController
 
     			// Load the input data
 		    	$data = array();
-				$data['status'] = $request->getPost(('status'));
-				$data['caption'] = $request->getPost(('caption'));
-				$data['due_date'] = $request->getPost(('due_date'));
-				$data['amount'] = $request->getPost(('amount'));
-				$data['means_of_payment'] = $request->getPost(('means_of_payment'));
+		    	foreach($context->getConfig('commitmentTerm/update') as $propertyId => $unused) {
+		    		$data[$propertyId] = $request->getPost(($propertyId));
+		    	}
 				if ($term->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
-				if (!$error) {
-	    			// Atomically save
-	    			$connection = Term::getTable()->getAdapter()->getDriver()->getConnection();
-	    			$connection->beginTransaction();
-	    			try {
-	    				if (!$term->id) $term->add();
-	    				elseif ($action == 'delete') $return = $term->delete($request->getPost('update_time'));
-	    				else {
-    						$rc = $term->update($request->getPost('update_time'));
-    						if ($rc != 'OK') $error = $rc;
-	    				}
-	    				if ($error) $connection->rollback();
-	    				else {
-	    					$connection->commit();
-	    					$message = 'OK';
-	    				}
+
+	    		// Atomically save
+	    		$connection = Term::getTable()->getAdapter()->getDriver()->getConnection();
+	    		$connection->beginTransaction();
+	    		try {
+	    			if (!$term->id) $rc = $term->add();
+	    			elseif ($action == 'delete') $rc = $term->delete($request->getPost('update_time'));
+	    			else $rc = $term->update($request->getPost('term_update_time'));
+    				if ($rc != 'OK') $error = $rc;
+	    			if ($error) $connection->rollback();
+	    			else {
+	    				$connection->commit();
+	    				$message = 'OK';
 	    			}
-	    			catch (\Exception $e) {
-	    				$connection->rollback();
-	    				throw $e;
-	    			}
-	    			$action = null;
-				}
+	    		}
+	    		catch (\Exception $e) {
+	    			$connection->rollback();
+	    			throw $e;
+	    		}
+	    		$action = null;
     		}
     	}
     
@@ -215,6 +223,8 @@ class TermController extends AbstractActionController
     			'id' => $id,
     			'action' => $action,
     			'term' => $term,
+	    		'dropbox' => $dropbox,
+	    		'documentList' => $documentList,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
     			'message' => $message

@@ -292,10 +292,14 @@ function connectAccountUpdateForm(id, action)
 		event.preventDefault();
 	
 		// Check validity
-		var validity = checkAccountUpdateProperties(id);
-		if ($('#new_password').val() != $('#new_password2').val()) {
-			renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
-			validity = false;
+		var validity;
+		if (action == 'delete') validity = true;
+		else {
+			validity = checkAccountUpdateProperties(id);
+			if ($('#new_password').val() != $('#new_password2').val()) {
+				renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
+				validity = false;
+			}
 		}
 
 		if (validity) {
@@ -743,7 +747,8 @@ function activateAccount() {
 // Commitment update panel //
 /////////////////////////////
 
-<?php 
+<?php
+$type = 'p-pit-studies';
 $properties = array();
 
 foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {

@@ -12,7 +12,7 @@ function getParams() {
 	// Create a new FormData object.
 	var params = '?', todo = true;
 
-<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search')['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	
@@ -24,7 +24,7 @@ function getParams() {
 	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = max_<?php echo $propertyId ?>;
 	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
 
-	<?php elseif ($rendering == 'select') : ?>
+	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
 
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
 	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
@@ -39,8 +39,8 @@ function getParams() {
 <?php endforeach;?>
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
-	$searchTitle = (isset ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['searchTitle']) ? $context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
+	$todoTitle = $this->translate('todo list', 'ppit-core', $context->getLocale());
+	$searchTitle = $this->translate('search', 'ppit-core', $context->getLocale());
 	?>
 	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
 
@@ -56,7 +56,7 @@ function exportCommitmentList() {
 
 function eraseCommitmentSearch() {
 
-<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search')['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').val('');
@@ -117,7 +117,7 @@ function connectCommitmentSearchInputs() {
 	$('#search_max_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
 		<?php endif;?>
 	
-	<?php elseif ($rendering == 'select') : ?>
+	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
 		$('#search_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
 	
 	<?php else : ?>
@@ -184,9 +184,26 @@ function connectAuditPanel()
 	});
 }
 
+function connectCgvPanel()
+{
+	$('#cgv-panel').hide();
+	$('#cgv-label').click(function () {
+		if ($('#cgv-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#cgv-panel').show();
+			$('#cgv-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#cgv-panel').hide();
+			$('#cgv-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
 /////////////////////////////
 // Commitment update panel //
 /////////////////////////////
+
+<?php foreach ($context->getConfig('commitment/types')['modalities'] as $type => $typeDef) : ?>
 
 <?php 
 $properties = array();
@@ -225,19 +242,25 @@ function getCommitmentUpdate(id, action) {
 
 function fillRowPrice() {
 <?php foreach ($products as $product) : ?>
+	<?php if (array_key_exists(0, $product->variants)) : ?>
 	if ($('#product_identifier').val() == "<?php echo $product->reference ?>") $('#input_unit_price').val('<?php echo $product->variants[0]['price'] ?>');
+	<?php endif;?>
 <?php endforeach;?>
 }
 
 function fillOptionPrice(i) {
 <?php foreach ($options as $option) : ?>
+	<?php if (array_key_exists(0, $option->variants)) : ?>
 	if ($('#option_identifier-' + i).val() == "<?php echo $option->reference ?>") $('#input_option_unit_price-' + i).val('<?php echo $option->variants[0]['price'] ?>');
+	<?php endif;?>
 <?php endforeach;?>
 }
 
 function fillAddOptionPrice() {
 <?php foreach ($options as $option) : ?>
+	<?php if (array_key_exists(0, $option->variants)) : ?>
 	if ($('#option_identifier').val() == "<?php echo $option->reference ?>") $('#input_option_unit_price').val('<?php echo $option->variants[0]['price'] ?>');
+	<?php endif;?>
 <?php endforeach;?>
 }
 
@@ -399,8 +422,8 @@ function connectCommitmentUpdateTermForm(id)
 // Caption
 		caption = $('#term_caption-' + i).val();
 	    if (caption.length > 255) {
-			$('#terms-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
-			$('#terms-error').show();
+			$('#terms_caption-' + i + '-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+			$('#terms_caption-' + i + '-error').show();
 			document.getElementById('term_caption-' + i).focus();
 			validity = false;
 		}
@@ -409,16 +432,16 @@ function connectCommitmentUpdateTermForm(id)
  		term_due_date = $('#input_term_due_date-' + i).val();
 		if (caption) {
 			if (term_due_date == "") {
-				$('#terms-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
-				$('#terms-error').show();
+				$('#input_term_due_date-' + i + '-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+				$('#input_term_due_date-' + i + '-error').show();
 				document.getElementById('input_term_due_date-' + i).focus();
 				validity = false;
 			}
 		 	else {
 				error = checkDate(term_due_date);
 				if (error) {
-					$('#terms-error').text(error);
-					$('#terms-error').show();
+					$('#input_term_due_date-' + i + '-error').text(error);
+					$('#input_term_due_date-' + i + '-error').show();
 					document.getElementById('input_term_due_date-' + i).focus();
 					validity = false;
 				}
@@ -428,19 +451,67 @@ function connectCommitmentUpdateTermForm(id)
 				}
 			}
 		}
+
+// Settlement date	
+ 		term_settlement_date = $('#input_term_settlement_date-' + i).val();
+		if (caption) {
+			if (term_settlement_date == "") {
+				$('#input_term_settlement_date-' + i + '-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+				$('#input_term_settlement_date-' + i + '-error').show();
+				document.getElementById('input_term_settlement_date-' + i).focus();
+				validity = false;
+			}
+		 	else {
+				error = checkDate(term_settlement_date);
+				if (error) {
+					$('#input_term_settlement_date-' + i + '-error').text(error);
+					$('#input_term_settlement_date-' + i + '-error').show();
+					document.getElementById('input_term_settlement_date-' + i).focus();
+					validity = false;
+				}
+				else {
+					term_settlement_date = encodeDate(term_settlement_date);
+					$('#term_settlement_date-' + i).val(term_settlement_date);
+				}
+			}
+		}
+
+// Collection date	
+ 		term_collection_date = $('#input_term_collection_date-' + i).val();
+		if (caption) {
+			if (term_collection_date == "") {
+				$('#input_term_collection_date-' + i + '-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+				$('#input_term_collection_date-' + i + '-error').show();
+				document.getElementById('input_term_collection_date-' + i).focus();
+				validity = false;
+			}
+		 	else {
+				error = checkDate(term_collection_date);
+				if (error) {
+					$('#input_term_collection_date-' + i + '-error').text(error);
+					$('#input_term_collection_date-' + i + '-error').show();
+					document.getElementById('input_term_collection_date-' + i).focus();
+					validity = false;
+				}
+				else {
+					term_collection_date = encodeDate(term_collection_date);
+					$('#term_collection_date-' + i).val(term_collection_date);
+				}
+			}
+		}
 		
 // Means of payment
 		val = $('#term_means_of_payment-' + i).val();
 		if (caption && !val) {
-			$('#terms-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
-			$('#terms-error').show();
+			$('#term_means_of_payment-' + i + '-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+			$('#term_means_of_payment-' + i + '-error').show();
 			document.getElementById('term_means_of_payment-' + i).focus();
 			validity = false;
 		}
 		else {
 		    if (val.length > 255) {
-				$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
-				$('#rows-error').show();
+				$('#term_means_of_payment-' + i + '-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+				$('#term_means_of_payment-' + i + '-error').show();
 				document.getElementById('term_means_of_payment-' + i).focus();
 				validity = false;
 			}
@@ -449,15 +520,15 @@ function connectCommitmentUpdateTermForm(id)
 // Status
 		val = $('#term_status-' + i).val();
 		if (caption && !val) {
-			$('#terms-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
-			$('#terms-error').show();
+			$('#term_status-' + i + '-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+			$('#term_status-' + i + '-error').show();
 			document.getElementById('term_status-' + i).focus();
 			validity = false;
 		}
 		else {
 		    if (val.length > 255) {
-				$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
-				$('#rows-error').show();
+				$('#term_status-' + i + '-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+				$('#term_status-' + i + '-error').show();
 				document.getElementById('term_status-' + i).focus();
 				validity = false;
 			}
@@ -467,8 +538,8 @@ function connectCommitmentUpdateTermForm(id)
 		number = $('#input_term_amount-' + i).val();
 		error = checkNumber(number, 0, 999999);
 		if (error) {
-			$('#terms-error').text(error);
-			$('#terms-error').show();
+			$('#term_status-' + i + '-error').text(error);
+			$('#term_status-' + i + '-error').show();
 			document.getElementById('input_term_amount-' + i).focus();
 			validity = false;
 		}
@@ -485,6 +556,8 @@ function connectCommitmentUpdateTermForm(id)
 		for (i = 0; i < count; i++) {
 			formData.append('term_caption-' + i, $('#term_caption-' + i).val());
 			formData.append('term_due_date-' + i, $('#term_due_date-' + i).val());
+			formData.append('term_settlement_date-' + i, $('#term_settlement_date-' + i).val());
+			formData.append('term_collection_date-' + i, $('#term_collection_date-' + i).val());
 			formData.append('term_means_of_payment-' + i, $('#term_means_of_payment-' + i).val());
 			formData.append('term_status-' + i, $('#term_status-' + i).val());
 			formData.append('term_amount-' + i, $('#term_amount-' + i).val());
@@ -528,9 +601,12 @@ function getCommitmentDetail(id) {
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
 
 			connectAuditPanel();
+			connectCgvPanel();
 			connectRemoveIcon('remove-anchor', 'form_action');
 			getCommitmentUpdate(id, '');
 			
+			$('.detail-remove-anchor').click(function () { getCommitmentDetail(id); });
+
 			$('#row-anchor').click(function () {
 				$('.row-tr').hide();
 				$('#row-tr').show();
@@ -556,29 +632,13 @@ function getCommitmentDetail(id) {
 				$('.term-tr').hide();
 				i = $(this).attr('id').split('_')[1]
 				$('#term-tr_' + i).show();
-			});
-			$('#term-add-anchor').click(function () {
-				$('.term-tr').hide();
-				$('#term-tr-add').show();
-			});
-			$('.term-delete-anchor').click(function () {
-				$('.term-tr').hide();
-				i = $(this).attr('id').split('_')[1]
-				$('#term_caption-' + i).val('');
-				$('#input_term_due_date-' + i).val('');
-				$('#term_means_of_payment-' + i).val('');
-				$('#term_status-' + i).val('');
-				$('#input_term_amount-' + i).val('');
-				$('#term-tr_' + i).show();
+				getTermUpdate($('#term_commitment_id').val(), $('#term_id-' + i).val(), '', 'term-update-panel_' + i);
 			});
 			$('#product_identifier').change(fillRowPrice);
 			$('.option_identifier').each(function () {
 				$(this).change(function () {
 					fillOptionPrice($(this).attr('id').split('-')[1]);
 				});
-			});
-			$('.term_due_date').each(function () {
-				$(this).datepicker();
 			});
 			$('#row-action').click(function() {
 				connectCommitmentUpdateProductForm(id);
@@ -601,15 +661,17 @@ function getCommitmentDetail(id) {
 	$('#commitment-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
 }
 
+<?php endforeach;?>
+
 function activateCommitment() {
 
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitment/search', array('type' => $type)) ?>');
+	loadPanel('index_action', '<?php echo $this->url('commitment/search') ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
 	$('#commitment-anchor').removeClass("btn-default").addClass("btn-primary");
 	
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
+	$todoTitle = $this->translate('todo list', 'ppit-core', $context->getLocale());
 	?>
 	$('#mode-text').text('<?php echo $todoTitle ?>');
 	

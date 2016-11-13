@@ -449,14 +449,16 @@ class Commitment implements InputFilterAwareInterface
 
     	// Retrieve the data from the request
 
-		if (array_key_exists('account_id', $data)) $this->account_id = (int) $data['account_id'];
-
-		if (array_key_exists('subscription_id', $data)) $this->subscription_id = (int) $data['subscription_id'];
-
 		if (array_key_exists('status', $data)) {
 			$this->status = trim(strip_tags($data['status']));
 			if (strlen($this->status) > 255) return 'Integrity';
 		}
+		
+		if (array_key_exists('next_credit_consumption_date', $data)) $this->next_credit_consumption_date = $data['next_credit_consumption_date'];
+		
+		if (array_key_exists('account_id', $data)) $this->account_id = (int) $data['account_id'];
+
+		if (array_key_exists('subscription_id', $data)) $this->subscription_id = (int) $data['subscription_id'];
 
 		if (array_key_exists('caption', $data)) {
 		    $this->caption = trim(strip_tags($data['caption']));
@@ -506,11 +508,11 @@ class Commitment implements InputFilterAwareInterface
     			if ($productOption) {
     				$option = array();
     				$option['identifier'] = $entry['identifier'];
-					$option['caption'] = $productOption->caption;
+					$option['caption'] = $productOption->caption; // Redundancy to solve
     				$option['unit_price'] = $entry['unit_price'];
     				$option['quantity'] = $entry['quantity'];
-    				$option['amount'] = $option['unit_price'] * $option['quantity'];
-					$option['vat_id'] = $productOption->vat_id;
+    				$option['amount'] = $option['unit_price'] * $option['quantity']; // Redundancy to solve
+					$option['vat_id'] = $productOption->vat_id; // Redundancy to solve
 					$this->options[] = $option;
     			}
     		}

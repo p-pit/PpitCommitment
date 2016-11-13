@@ -87,6 +87,9 @@ class CommitmentController extends AbstractActionController
 
 		$subscription_id = ($params()->fromQuery('subscription_id', null));
 		if ($subscription_id) $filters['subscription_id'] = $subscription_id;
+
+		$type = ($params()->fromQuery('type', null));
+		if ($type) $filters['type'] = $type;
 		
 		$status = ($params()->fromQuery('status', null));
 		if ($status) $filters['status'] = $status;
@@ -185,7 +188,7 @@ class CommitmentController extends AbstractActionController
 		$type = $this->params()->fromRoute('type', 0);
 
 		$params = $this->getFilters($this->params());
-		
+
    		// Return the link list
    		$view = new ViewModel(array(
    				'context' => $context,
@@ -265,16 +268,9 @@ class CommitmentController extends AbstractActionController
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
 
-    	$documentList = array();
     	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
     		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
-    		try {
-    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['settlements']);
-    			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
-    		}
-    		catch(\Exception $e) {}
     	}
     	else $dropbox = null;
 
@@ -284,10 +280,9 @@ class CommitmentController extends AbstractActionController
     		'type' => $type,
     		'id' => $commitment->id,
     		'commitment' => $commitment,
-    		'products' => Product::getList(null, array(), null, null, 'todo'),
-    		'options' => ProductOption::getList(null, array(), null, null, 'todo'),
+    		'products' => Product::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
+    		'options' => ProductOption::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
     		'dropbox' => $dropbox,
-    		'documentList' => $documentList,
     	));
 		$view->setTerminal(true);
 		return $view;
@@ -912,6 +907,168 @@ class CommitmentController extends AbstractActionController
     	));
     	$view->setTerminal(true);
     	return $view;
+    }
+
+    public function serviceAddAction()
+    {
+    	$context = Context::getCurrent();
+    	$writer = new Writer\Stream('data/log/service_add.txt');
+    	$logger = new Logger();
+    	$logger->addWriter($writer);
+    
+    	$instance_caption = $context->getInstance()->caption;
+    	$type = 'service';
+    
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$safeEntry = $safe[$instance_caption];
+    	$username = null;
+    	$password = null;
+    
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username, $password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safeEntry) || $password != $safeEntry[$username]) {
+    		$logger->info('commitment/serviceAdd;'.$instance_caption.';401;'.$username.';');
+    		$this->getResponse()->setStatusCode('401');
+    		return $this->getResponse();
+    	}
+    	else {
+			$commitment = Commitment::instanciate('service');
+			$contact_email = $this->request->getPost('email');
+
+    		// Retrieve the data from the request
+    		$data = array();
+    		$account_identifier = explode('-', $this->request->getPost('account_identifier'));
+    		$account = Account::get($account_identifier[0]);
+    		if (!$account || $account->customer_community_id != $account_identifier[1]) {
+    			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'account_identifier: '.$this->request->getPost('account_identifier').';');
+    			$this->getResponse()->setStatusCode('400');
+    			return $this->getResponse();
+    		}
+    		
+    		$data['status'] = 'new';
+    		$data['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
+    		$data['account_id'] = $account->id;
+    		foreach ($context->getConfig('commitment/update/service') as $propertyId => $unused) {
+    			if ($this->request->getPost($propertyId)) $data[$propertyId] = $this->request->getPost($propertyId);
+    		}
+    		// Retrieve the product
+    		$data['product_identifier'] = $this->request->getPost('product_identifier');
+    		$product = Product::get($data['product_identifier'], 'reference');
+    	    if (!$product) {
+    			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'product_identifier: '.$data['product_identifier'].';');
+    			$this->getResponse()->setStatusCode('400');
+    			return $this->getResponse();
+    		}
+    		$data['property_1'] = $product->property_1;
+    		$data['property_2'] = $product->property_2;
+    		$data['property_3'] = $product->property_3;
+    		$data['property_4'] = $product->property_4;
+    		$data['property_5'] = $product->property_5;
+    		
+    		// Retrieve the variant
+    		$variant = $product->variants[$this->request->getPost('variant_identifier')];
+    	   	if (!array_key_exists($this->request->getPost('variant_identifier'), $product->variants)) {
+    			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'variant_identifier: '.$this->request->getPost('variant_identifier').';');
+    			$this->getResponse()->setStatusCode('400');
+    			return $this->getResponse();
+    		}
+    		$i = 10;
+    		foreach ($context->getConfig('ppitProduct/service')['criteria'] as $variantId => $unused) {
+    			$data['property_' + $i] = $variant[$variantId];
+    			$i++;
+    		}
+    		$data['unit_price'] = $variant['price'];
+
+    		$data['quantity'] = 1;
+    		$data['amount'] = $data['unit_price'];
+    		$data['taxable_1_amount'] = round($data['amount'] * $product->tax_1_share, 2);
+    		$data['taxable_2_amount'] = round($data['amount'] * $product->tax_2_share, 2);
+    		$data['taxable_3_amount'] = round($data['amount'] * $product->tax_3_share, 2);
+
+	    	$including_options_amount = 0;
+    		$data['options'] = array();
+    		for ($i=0; $i < $this->request->getPost('number_of_options'); $i++) {
+    			$option = ProductOption::get($this->request->getPost('option_identifier_'.$i), 'reference');
+	    		if (!$option) {
+	    			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'option_identifier: '.$data['option_identifier_'.$i].';');
+	    			$this->getResponse()->setStatusCode('400');
+	    			return $this->getResponse();
+	    		}
+    			$amount = round($option->variants[0]['price'] * $this->request->getPost('option_quantity_'.$i), 2);
+				$including_options_amount += $amount;
+	    		$data['options'][] = array(
+    					'identifier' => $option->reference,
+    					'caption' => $option->caption,
+    					'unit_price' => $option->variants[0]['price'],
+    					'quantity' => $this->request->getPost('option_quantity_'.$i),
+    					'amount' => $amount,
+    					'vat_id' => $option->vat_id,
+    			);
+    		}
+    		
+    		$rc = $commitment->loadData($data);
+    		if ($rc != 'OK') {
+		    		$logger->info('commitment/serviceAdd;'.$instance_caption.';500;');
+    				$this->getResponse()->setStatusCode('500');
+		    		return $this->getResponse();
+    		}
+
+    		// Atomically save
+    		$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    		$connection->beginTransaction();
+    		try {
+    			$rc = $commitment->add();
+    		
+    			if ($rc != 'OK') {
+    				$connection->rollback();
+    				$logger->info('commitment/serviceAdd;'.$instance_caption.';409;');
+    				$this->getResponse()->setStatusCode('409');
+		    		return $this->getResponse();
+    			}
+    			else {
+
+    				for ($i=0; $i < $this->request->getPost('number_of_terms'); $i++) {
+    					$term = Term::instanciate($commitment->id);
+    					$data = array(
+    							'status' => ($this->request->getPost('term_status_'.$i)) ? $this->request->getPost('term_status_'.$i) : 'expected',
+    							'caption' => ($this->request->getPost('term_caption_'.$i)) ? $this->request->getPost('term_caption_'.$i) : 'Echéance '.($i+1),
+    							'due_date' => $this->request->getPost('term_date_'.$i),
+    							'amount' => $this->request->getPost('term_amount_'.$i),
+    							'means_of_payment' => $this->request->getPost('term_means_of_payment_'.$i),
+    					);
+			    		$rc = $term->loadData($data);
+			    		if ($rc != 'OK') {
+					    		$logger->info('commitment/serviceAdd;'.$instance_caption.';500;');
+			    				$this->getResponse()->setStatusCode('500');
+					    		return $this->getResponse();
+			    		}
+    					$rc = $term->add();
+		    			if ($rc != 'OK') {
+		    				$connection->rollback();
+		    				$logger->info('commitment/serviceAdd;'.$instance_caption.';409;');
+		    				$this->getResponse()->setStatusCode('409');
+				    		return $this->getResponse();
+		    			}
+    				}
+    			}
+		    	$connection->commit();
+			    $logger->info('commitment/serviceAdd;'.$instance_caption.';200;'.$commitment->id);
+			    $this->getResponse()->setStatusCode('200');
+				return $this->getResponse();
+    		}
+    		catch (\Exception $e) {
+    			$connection->rollback();
+    			$logger->info('commitment/serviceAdd;'.$instance_caption.';500;');
+    			$this->getResponse()->setStatusCode('500');
+		    	return $this->getResponse();
+    		}
+    	}
     }
 
     public function invoiceAction(/*$commitment*/)

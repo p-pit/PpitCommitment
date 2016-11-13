@@ -15,41 +15,16 @@ echo $this->partial('/partials/header');
 	    <div class="col-md-10 col-md-offset-1">
 			<div align="center">
 
-	<?php if ($context->isAllowed('commitmentAccount/index')) : ?>
-				<button type="button" class="btn btn-default menu-btn" id="account-anchor">
-					<span class="glyphicon glyphicon-user"></span>
-					<?php echo $this->translate('Accounts', 'ppit-commitment', $context->getLocale()) ?>
+<?php foreach ($context->getConfig('menus')['p-pit-engagements'] as $entryId => $entryDef) : ?>
+	<?php if ($context->isAllowed($entryDef['route'])) : ?>
+				<button type="button" class="btn btn-default menu-btn" id="<?php echo $entryId ?>-anchor">
+		<?php if (array_key_exists('glyphicon', $entryDef)) : ?>
+					<span class="glyphicon <?php echo $entryDef['glyphicon'] ?>"></span>
+		<?php endif;?>
+					<?php echo $entryDef['label'][$context->getLocale()] ?>
 				</button>
 	<?php endif ?>
-
-<?php foreach ($types as $typeId => $typeDef) : ?>
-	<?php if ($context->isAllowed('commitment/index')) : ?>
-				<button type="button" class="btn btn-default menu-btn" id="commitment-<?php echo $typeId ?>-anchor">
-					<?php echo $typeDef['labels'][$context->getLocale()] ?>
-				</button>
-	<?php endif ?>
-<?php endforeach ?>
-
-	<?php if ($context->isAllowed('commitmentTerm/index')) : ?>
-				<button type="button" class="btn btn-default menu-btn" id="term-anchor">
-					<span class="glyphicon glyphicon-calendar"></span>
-					<?php echo $this->translate('Terms', 'ppit-commitment', $context->getLocale()) ?>
-				</button>
-	<?php endif ?>
-
-	<?php if ($context->isAllowed('product/index')) : ?>
-				<button type="button" class="btn btn-default menu-btn" id="product-anchor">
-					<span class="glyphicon glyphicon-book"></span>
-					<?php echo $this->translate('Catalogue', 'ppit-master-data', $context->getLocale()) ?>
-				</button>
-	<?php endif ?>
-
-	<?php if ($context->isAllowed('commitmentMessage/index')) : ?>
-				<button type="button" class="btn btn-default menu-btn" id="message-anchor">
-					<span class="glyphicon glyphicon-transfer"></span>
-					<?php echo $this->translate('Interactions', 'ppit-commitment', $context->getLocale()) ?>
-				</button>
-	<?php endif ?>
+<?php endforeach;?>
 
 			</div>
 			<div>&nbsp;</div>
@@ -76,13 +51,9 @@ echo $this->partial('/partials/ppit-term-scripts');
 echo $this->partial('/partials/ppit-controller') 
 ?>
 
-$('#account-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitmentAccount/index', array('type' => $typeId)) ?>'); });
-<?php foreach ($types as $typeId => $unused) : ?>
-$('#commitment-<?php echo $typeId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitment/index', array('type' => $typeId)) ?>'); });
+<?php foreach ($context->getConfig('menus')['p-pit-engagements'] as $entryId => $entryDef) : ?>
+$('#<?php echo $entryId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url($entryDef['route']) ?>'); });
 <?php endforeach;?>
-$('#term-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitmentTerm/index') ?>'); });
-$('#product-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('product/index') ?>'); });
-$('#message-anchor').click(function () { $(location).attr('href', '<?php echo $this->url('commitmentMessage/index') ?>'); });
 
 activateTerm();
 

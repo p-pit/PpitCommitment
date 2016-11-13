@@ -7,7 +7,7 @@ function connectRemoveIcon(id, target)
 	});
 }
 
-function getParams() {
+function termGetParams() {
 
 	var params = '?', todo = true;
 
@@ -64,7 +64,7 @@ function getParams() {
 <?php endforeach;?>
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
 	$searchTitle = (isset ($context->getConfig('commitmentTerm/search')['searchTitle']) ? $context->getConfig('commitmentTerm/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
@@ -75,7 +75,7 @@ function getParams() {
 // Export the list
 function exportTermList() {
 
-	var params = getParams();
+	var params = termGetParams();
 	document.location.href = '<?php echo $this->url('commitmentTerm/export') ?>' + params;
 }
 
@@ -107,7 +107,7 @@ function eraseTermSearch() {
 
 <?php endforeach;?>
 
-	getTermList(getParams(), 'due_date', 'DESC');
+	getTermList(termGetParams(), 'due_date', 'DESC');
 }
 
 function sortTermList(criterion) {
@@ -116,7 +116,7 @@ function sortTermList(criterion) {
 	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
 	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
 	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
-	getTermList(getParams(), criterion, dir);
+	getTermList(termGetParams(), criterion, dir);
 }
 
 function filterTermList() {
@@ -131,7 +131,7 @@ function filterTermList() {
 		criterion = descCriterion.split('-')[0];
 		dir = 'ASC';
 	}
-	getTermList(getParams(), criterion, dir);
+	getTermList(termGetParams(), criterion, dir);
 }
 
 function connectTermSearchInputs() {
@@ -266,12 +266,12 @@ foreach ($context->getConfig('commitmentTerm/update') as $propertyId => $options
 	else $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
-$properties['update_time'] = array('type' => 'hidden');
+$properties['term_update_time'] = array('type' => 'hidden');
 
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Term', 'context' => $context, 'properties' => $properties)) 
 ?>
 
-function connectTermUpdateForm(id, action)
+function connectTermUpdateForm(commitment_id, id, action, target)
 {
 
 <?php foreach ($properties as $propertyId => $property) : ?>
@@ -294,7 +294,7 @@ function connectTermUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'dropbox' || $property['type'] == 'hidden') : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -315,17 +315,16 @@ function connectTermUpdateForm(id, action)
 <?php endforeach ?>
 
 			var xhttp = new XMLHttpRequest();
-			var route, target;
-			route = '<?php echo $this->url('commitmentTerm/update') ?>/' + id;
+			var route;
+			route = '<?php echo $this->url('commitmentTerm/update') ?>/' + commitment_id + '/' + id;
 			if (action) route += '/' + action;
-			target = 'term-update-panel';
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
 				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					filterTermList();
-					connectTermUpdateForm(id, action);
+					connectTermUpdateForm(id, action, target);
 					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
 				}
 			};
@@ -335,10 +334,10 @@ function connectTermUpdateForm(id, action)
 	}
 }
 
-function getTermUpdate(id, action) {
+function getTermUpdate(commitment_id, id, action, target) {
 
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitmentTerm/update') ?>/' + id;
+	var route = '<?php echo $this->url('commitmentTerm/update') ?>/' + commitment_id + '/' + id;
 	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
@@ -348,15 +347,15 @@ function getTermUpdate(id, action) {
 	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
-			document.getElementById('term-update-panel').innerHTML = xhttp.responseText;
+			document.getElementById(target).innerHTML = xhttp.responseText;
 
 			if (id) {
-				$('#term-update-anchor').click(function () { getTermUpdate(id, 'update'); });
-				$('#term-delete-anchor').click(function () { getTermUpdate(id, 'delete'); });
+				$('#term-update-anchor').click(function () { getTermUpdate(commitment_id, id, 'update', target); });
+				$('#term-delete-anchor').click(function () { getTermUpdate(commitment_id, id, 'delete', target); });
 			}
-			else $('#term-add-anchor').click(function () { getTermUpdate(id, 'add'); });
+			else $('#term-add-anchor').click(function () { getTermUpdate(commitment_id, id, 'add', target); });
 			
-			connectTermUpdateForm(id, action);
+			connectTermUpdateForm(commitment_id, id, action, target);
 			
 <?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			}
@@ -380,7 +379,7 @@ function getTermDetail(id) {
 	// Anchor to the new panel
 	$(location).attr('hash', 'form_action');
 
-	var route = '<?php echo $this->url('commitmentTerm/detail') ?>' + '/' + id;
+	var route = '<?php echo $this->url('commitmentTerm/detail') ?>/' + id;
 
 	// Execute the ajax request
 	xhttp = new XMLHttpRequest();
@@ -396,7 +395,7 @@ function getTermDetail(id) {
 			connectAuditPanel();
 			connectRemoveIcon('remove-anchor', 'form_action');
 
-			getTermUpdate(id, '');
+			getTermUpdate(0, id, '', 'term-update-panel');
 		}
 	}
 	xhttp.send();
@@ -416,7 +415,7 @@ function activateTerm() {
 	$(termAnchor).removeClass("btn-default").addClass("btn-primary");
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text('<?php echo $todoTitle ?>');
 		

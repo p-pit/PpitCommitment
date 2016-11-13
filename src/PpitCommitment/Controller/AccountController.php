@@ -14,6 +14,9 @@ use PpitMasterData\Model\Place;
 use PpitUser\Model\User;
 use PpitUser\Model\UserContact;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Log\Logger;
+use Zend\Log\Writer;
+use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 class AccountController extends AbstractActionController
@@ -23,7 +26,7 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
-		$type = $this->params()->fromRoute('type', 'p-pit-studies');
+		$type = $this->params()->fromRoute('type', null);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 		
 		$community_id = (int) $context->getCommunityId();
@@ -106,7 +109,7 @@ class AccountController extends AbstractActionController
     	$type = $this->params()->fromRoute('type', null);
     	 
     	$params = $this->getFilters($this->params(), $type);
-    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
+//    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
 
     	$major = ($this->params()->fromQuery('major', 'customer_name'));
     	$dir = ($this->params()->fromQuery('dir', 'ASC'));
@@ -185,7 +188,7 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
     	
     	// Retrieve the type
-    	$type = $this->params()->fromRoute('type');
+    	$type = $this->params()->fromRoute('type', null);
 
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
@@ -208,26 +211,28 @@ class AccountController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
 
     			// Load the input data
-		    	$data = array();
-				foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
-					$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-					if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
-					else $data[$propertyId] =  $request->getPost($propertyId);
-				}
-				if ($type) $data['credits'] = array($type => true);
-
-				if (!$account->id) {
-					
-					// Add the community
-					$account->customer_community = Community::instanciate();
-					$communityData = array('name' => $data['n_last'].', '.$data['n_first']);
-					if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
-
-					// Add the main contact
-					$account->contact_1 = Vcard::instanciate();
-					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
-				}
-				if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
+    			if ($action != 'delete') {
+			    	$data = array();
+					foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
+						$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+						if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
+						else $data[$propertyId] =  $request->getPost($propertyId);
+					}
+					if ($type) $data['credits'] = array($type => true);
+	
+					if (!$account->id) {
+						
+						// Add the community
+						$account->customer_community = Community::instanciate();
+						$communityData = array('name' => $data['n_last'].', '.$data['n_first']);
+						if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
+	
+						// Add the main contact
+						$account->contact_1 = Vcard::instanciate();
+						if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
+					}
+					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
+    			}
 				if (!$error) {
 	    			// Atomically save
 	    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
@@ -595,6 +600,179 @@ class AccountController extends AbstractActionController
     	));
     	$view->setTerminal(true);
     	return $view;
+    }
+
+    public function getAction()
+    {
+    	$context = Context::getCurrent();
+    	$writer = new Writer\Stream('data/log/account_get.txt');
+    	$logger = new Logger();
+    	$logger->addWriter($writer);
+    
+    	$instance_caption = $context->getInstance()->caption;
+    
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$safeEntry = $safe[$instance_caption];
+    	$username = null;
+    	$password = null;
+    
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username, $password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safeEntry) || $password != $safeEntry[$username]) {
+    			
+    		// Write to the log
+    		$logger->info('account/get/'.$instance_caption.'/'.';401;'.$username);
+    		$this->getResponse()->setStatusCode('401');
+    		return $this->getResponse();
+    	}
+    	else {
+    
+    		$email = $this->params()->fromRoute('email');
+    		$contact = Vcard::get($email, 'email');
+    	   	if (!$contact) {
+    			$logger->info('account/get;'.$instance_caption.';404;'.'email: '.$email.';');
+    			$this->getResponse()->setStatusCode('404');
+    			return $this->getResponse();
+    		}
+    		$community = Community::get($contact->id, 'contact_1_id');
+    	   	if (!$community) {
+    			$logger->info('account/get;'.$instance_caption.';404;'.'contact_id: '.$contact->id.';');
+    			$this->getResponse()->setStatusCode('404');
+    			return $this->getResponse();
+    		}
+    		$account =  Account::get($community->id, 'customer_community_id');
+    	    if (!$community) {
+    			$logger->info('account/get;'.$instance_caption.';404;'.'customer_community_id: '.$community->id.';');
+    			$this->getResponse()->setStatusCode('404');
+    			return $this->getResponse();
+    		}
+    		$result = array(
+    				'account_identifier' => $account->id.'-'.$community->id,
+    				'status' => $account->status,
+    				'name' => $community->name,
+    				'title' => $contact->n_title,
+    				'n_first' => $contact->n_first,
+    				'n_last' => $contact->n_last,
+    		);
+    		return new JsonModel($result);
+    	}
+    }
+
+    public function putAction()
+    {
+    	$context = Context::getCurrent();
+    	$writer = new Writer\Stream('data/log/account_get.txt');
+    	$logger = new Logger();
+    	$logger->addWriter($writer);
+    
+    	$instance_caption = $context->getInstance()->caption;
+    
+    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+    	$safeEntry = $safe[$instance_caption];
+    	$username = null;
+    	$password = null;
+    
+    	// Check basic authentication
+    	if (isset($_SERVER['PHP_AUTH_USER'])) {
+    		$username = $_SERVER['PHP_AUTH_USER'];
+    		$password = $_SERVER['PHP_AUTH_PW'];
+    	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    		if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+    			list($username, $password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+    	}
+    	if (!array_key_exists($username, $safeEntry) || $password != $safeEntry[$username]) {
+    		 
+    		// Write to the log
+    		$logger->info('account/put/'.$instance_caption.'/'.';401;'.$username);
+    		$this->getResponse()->setStatusCode('401');
+    		return $this->getResponse();
+    	}
+    	else {
+
+    		// Atomically save
+    		$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
+    		$connection->beginTransaction();
+    		try {
+	    		$email = $this->params()->fromRoute('email');
+	    		$contact = Vcard::get($email, 'email');
+	    		if (!$contact) {
+	    			$data = array();
+	    			$data['n_title'] = $this->request->getPost('n_title');
+	    			$data['n_first'] = $this->request->getPost('n_first');
+	    			$data['n_last'] = $this->request->getPost('n_last');
+	    			$data['email'] = $email;
+	    			$contact = Vcard::instanciate();
+	    			if ($contact->loadData($data) != 'OK') {
+						$logger->info('account/put;500;vcard;');
+				    	$this->getResponse()->setStatusCode('500');
+						return $this->getResponse();
+	    			}
+	    			$rc = $contact->add();
+	    			if ($rc != 'OK') {
+	    				$connection->rollback();
+	    				$logger->info('account/put;409;vcard');
+	    				$this->getResponse()->setStatusCode('409');
+	    				return $this->getResponse();
+	    			}
+	    		}
+	    		$community = Community::get($contact->id, 'contact_1_id');
+	    		if (!$community) {
+	    			$data = array();
+	    			$data['contact_1_id'] = $contact->id;
+	    			$data['name'] = $contact->n_fn;
+	    			$data['next_credit_consumption_date'] = '9999-12-31';
+	    			$community = Community::instanciate();
+	    			if ($community->loadData($data) != 'OK') {
+						$logger->info('account/put;500;community;');
+				    	$this->getResponse()->setStatusCode('500');
+						return $this->getResponse();
+	    			}
+	    			$rc = $community->add();
+	    			if ($rc != 'OK') {
+	    				$connection->rollback();
+	    				$logger->info('account/put;409;community;');
+	    				$this->getResponse()->setStatusCode('409');
+	    				return $this->getResponse();
+	    			}
+	    		}
+	    		$account =  Account::get($community->id, 'customer_community_id');
+	    		if (!$account) {
+	    			$data = array();
+	    			$data['customer_community_id'] = $community->id;
+	    			$data['status'] = 'new';
+	    			$data['opening_date'] = date('Y-m-d');
+	    			$account = Account::instanciate();
+	    			if ($account->loadData($data) != 'OK') {
+						$logger->info('account/put;500;account;');
+				    	$this->getResponse()->setStatusCode('500');
+						return $this->getResponse();
+	    			}
+	    			$rc = $account->add();
+	    			if ($rc != 'OK') {
+	    				$connection->rollback();
+	    				$logger->info('account/put;409;account;');
+	    				$this->getResponse()->setStatusCode('409');
+	    				return $this->getResponse();
+	    			}
+	    		}
+		    	$connection->commit();
+	    		$logger->info('account/put;'.';200;'.$account->id.';');
+	    		$this->getResponse()->setStatusCode('200');
+				return $this->getResponse();
+    		}
+    		catch (\Exception $e) {
+    			$connection->rollback();
+    			$logger->info('account/put;'.';500;');
+    			$this->getResponse()->setStatusCode('500');
+    			return $this->getResponse();
+    		}
+    	}
     }
     
 	public function deleteAction()

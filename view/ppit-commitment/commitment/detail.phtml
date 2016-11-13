@@ -1,4 +1,4 @@
-	<div class="panel panel-default">
+<div class="panel panel-default">
 	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
 		<strong><?php echo $this->translate('Detail', 'ppit-core', $context->getLocale()) ?></strong>
  		<div class="btn-group pull-right">
@@ -17,13 +17,13 @@
 				<div class="row">
 					<div class="col-md-12">
 						<strong><?php echo $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10) ?>:</strong>&nbsp;
-						<?php if ($commitment->status) echo $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties']['status'][$comment['status']]['labels'][$context->getLocale()] ?>&nbsp;
+						<?php if (array_key_exists('status', $comment)) echo $context->getConfig('commitment')['properties']['status']['modalities'][$comment['status']][$context->getLocale()] ?>&nbsp;
 						(<?php echo $comment['n_fn'] ?>)
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-2" align="right">&nbsp;</div>
-					<div class="col-md-10"><em><?php echo $comment['comment'] ?></em></div>
+					<div class="col-md-10"><em><?php if (array_key_exists('comment', $comment)) echo $comment['comment'] ?></em></div>
 				</div>
 <?php endforeach;?>
 			</div>
@@ -54,8 +54,7 @@
 	<?php endforeach;?>
 <?php endif; */?>
 
-	<div id="commitment-update-panel"></div>
-
+		<div id="commitment-update-panel"></div>
 	<div>
 		<a href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
 		&nbsp;&nbsp;|&nbsp;&nbsp;
@@ -210,16 +209,18 @@
 		</table>
 		<input type="hidden" id="optionCount" value="<?php echo ++$i ?>" />
 	</div>
+	</form>
 
 	<div id="commitment-settlement-panel">
+		<input type="hidden" id="term_commitment_id" value="<?php echo $commitment->id ?>" />
 		<h4><?php echo $this->translate('Schedule', 'ppit-commitment', $context->getLocale()) ?></h4>
-		<table class="table table-striped ppit_index">
-			<tr>
-				<th>&nbsp;</th>
+		<table class="table ppit_index">
+			<tr style="font-size: 85%">
 				<th>&nbsp;</th>
 				<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
-				<th><?php echo $this->translate('Date', 'ppit-core', $context->getLocale()) ?></th>
-				<th><?php echo $this->translate('Means', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Due date', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Settlement', 'ppit-commitment', $context->getLocale()) ?></th>
+				<th><?php echo $this->translate('Collection', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Status', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><span class="glyphicon glyphicon-paperclip" /></th>
@@ -230,21 +231,18 @@
 			</tr>
 			<tr class="term" style="display: none;">&nbsp;</tr>
 		
-	<?php $i=0; foreach ($commitment->terms as $term) : ?>
-			<tr class="term">
+	<?php $i=0; $totalSettled = 0; foreach ($commitment->terms as $term) : ?>
+	<?php if ($term->status == 'settled') $totalSettled += $term->amount ?>
+			<tr class="term" style="font-size: 85%">
 				<td>
 					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="term-update-anchor_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-edit"></span>
-					</button>
-				</td>
-				<td>
-					<button type="button" class="btn btn-default action-btn btn-xs term-delete-anchor" title="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>" id="term-delete-anchor_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-trash"></span>
+						<span class="glyphicon glyphicon-zoom-in"></span>
 					</button>
 				</td>
 				<td style="text-align: left"><?php echo $term->caption ?></td>
 				<td style="text-align: left"><?php echo $context->decodeDate($term->due_date) ?></td>
-				<td style="text-align: left"><?php if ($term->means_of_payment) echo $context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term->means_of_payment][$context->getLocale()] ?></td>
+				<td style="text-align: left"><?php echo $context->decodeDate($term->settlement_date) ?></td>
+				<td style="text-align: left"><?php echo $context->decodeDate($term->collection_date) ?></td>
 				<td style="text-align: left"><?php if ($term->status) echo $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term->status][$context->getLocale()] ?></td>
 				<td style="text-align: right; <?php if ($term->status != 'settled' && $term->due_date <= date('Y-m-d')) echo 'color: red' ?>"><?php echo $context->formatFloat($term->amount, 2) ?></td>
 				<td>
@@ -254,104 +252,63 @@
 				</td>
 			</tr>
 			<tr class="term term-tr" id="term-tr_<?php echo $i ?>" style="display: none">
-				<td>
-					<button type="button" class="btn btn-warning action-btn btn-xs term-action" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="term-action_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-edit"></span>
-					</button>
-				</td>
-				<td>&nbsp;</td>
-				<td style="text-align: left">
-					<input class="form-control" id="term_caption-<?php echo $i ?>" value="<?php echo $term->caption ?>" />
-				</td>
-				<td style="text-align: left">
-					<input type="hidden" id="term_due_date-<?php echo $i ?>" />
-					<input class="form-control term_due_date" id="input_term_due_date-<?php echo $i ?>" value="<?php echo $context->decodeDate($term->due_date) ?>" />
-				</td>
-				<td style="text-align: left">
-					<select class="form-control" id="term_means_of_payment-<?php echo $i ?>">
-						<option />
-		<?php foreach ($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'] as $modalityId => $modality) : ?>
-						<option value="<?php echo $modalityId?>" <?php if ($term->means_of_payment == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
-		<?php endforeach;?>
-					</select>
-				</td>
-				<td style="text-align: left">
-					<select class="form-control" id="term_status-<?php echo $i ?>">
-						<option />
-		<?php foreach ($context->getConfig('commitmentTerm')['properties']['status']['modalities'] as $modalityId => $modality) : ?>
-						<option value="<?php echo $modalityId?>" <?php if ($term->status == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
-		<?php endforeach;?>
-					</select>
-				</td>
-				<td style="text-align: right">
-					<input type="hidden" id="term_amount-<?php echo $i ?>" />
-					<input class="form-control" id="input_term_amount-<?php echo $i ?>" value="<?php echo $term->amount ?>" />
-				</td>
-				<td>
-					<select class="form-control" id="term_document-<?php echo $i ?>">
-						<option />
-		<?php foreach ($documentList as $document) : ?>
-						<option value="<?php echo $document ?>" <?php if ($term->document == $document) echo 'selected="selected"' ?>><?php echo $document ?></option>
-		<?php endforeach;?>
-					</select>
+				<td colspan="8">
+					<div class="panel panel-default">
+						<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+							<strong><?php echo $this->translate('Term', 'ppit-commitment', $context->getLocale()) ?></strong>
+					 		<div class="btn-group pull-right">
+								<button type="button" class="btn btn-default detail-remove-anchor" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+					 		 </div>
+						</div>
+						<input type="hidden" id="term_id-<?php echo $i ?>" value="<?php echo $term->id ?>" />
+						<div class="panel-body" id="term-update-panel_<?php echo $i ?>"></div>
+					<div>
 				</td>
 			</tr>
 	<?php $i++; endforeach; ?>
 
 			<tr class="term">
 				<td colspan="8">
-					<button type="button" class="btn btn-default action-btn btn-xs term-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-add-anchor">
+					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-update-anchor_<?php echo $i ?>">
 						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 					</button>
 				</td>
 			</tr>
-			<tr class="term term-tr" id="term-tr-add" style="display: none">
-				<td>
-					<button type="button" class="btn btn-warning action-btn btn-xs term-action" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>" id="term-action_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-plus"></span>
-					</button>
-				</td>
-				<td>&nbsp;</td>
-				<td style="text-align: left">
-					<input class="form-control" id="term_caption-<?php echo $i ?>" value="" />
-				</td>
-				<td style="text-align: left">
-					<input type="hidden" id="term_due_date-<?php echo $i ?>" />
-					<input class="form-control term_due_date" id="input_term_due_date-<?php echo $i ?>" value="" />
-				</td>
-				<td style="text-align: left">
-					<select class="form-control" id="term_means_of_payment-<?php echo $i ?>">
-						<option />
-	<?php foreach ($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'] as $modalityId => $modality) : ?>
-						<option value="<?php echo $modalityId?>"><?php echo $modality[$context->getLocale()]?></option>
-	<?php endforeach;?>
-					</select>
-				</td>
-				<td style="text-align: left">
-					<select class="form-control" id="term_status-<?php echo $i ?>">
-						<option />
-	<?php foreach ($context->getConfig('commitmentTerm')['properties']['status']['modalities'] as $modalityId => $modality) : ?>
-						<option value="<?php echo $modalityId?>"><?php echo $modality[$context->getLocale()]?></option>
-	<?php endforeach;?>
-					</select>
-				</td>
-				<td style="text-align: right">
-					<input type="hidden" id="term_amount-<?php echo $i ?>" />
-					<input class="form-control" id="input_term_amount-<?php echo $i ?>" value="" />
-				</td>
-				<td>
-					<select class="form-control" id="document-<?php echo $i ?>">
-						<option />
-		<?php foreach ($documentList as $document) : ?>
-						<option value="<?php echo $document ?>" <?php if ($term->document == $document) echo 'selected="selected"' ?>><?php echo $document ?></option>
-		<?php endforeach;?>
-					</select>
+			<tr class="term term-tr" id="term-tr_<?php echo $i ?>" style="display: none">
+				<td colspan="8">
+					<div class="panel panel-default">
+						<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+							<strong><?php echo $this->translate('Term', 'ppit-commitment', $context->getLocale()) ?></strong>
+					 		<div class="btn-group pull-right">
+								<button type="button" class="btn btn-default detail-remove-anchor" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+					 		 </div>
+						</div>
+						<input type="hidden" id="term_id-<?php echo $i ?>" value="0" />
+						<div class="panel-body" id="term-update-panel_<?php echo $i ?>"></div>
+					<div>
 				</td>
 			</tr>
 
 			<tr class="term" style="font-weight: bold;">
-				<td colspan="6" style="text-align: right"><?php echo $this->translate('Sum', 'ppit-commitment', $context->getLocale()) ?></td>
-				<td style="text-align: right; <?php if ($commitment->termSum != $commitment->including_options_amount) echo 'color: red' ?>"><?php echo $context->formatFloat($commitment->termSum, 2) ?></td>
+				<td colspan="6" style="text-align: right"><?php echo $this->translate('Rest to be planned', 'ppit-commitment', $context->getLocale()) ?></td>
+		<?php $rest = $commitment->including_options_amount - $commitment->termSum ?>
+				<td style="text-align: right; <?php if ($rest != 0) echo 'color: red' ?>"><?php echo $context->formatFloat($rest, 2) ?></td>
+				<td>&nbsp;</td>
+			</tr>
+
+			<tr class="term" style="font-weight: bold;">
+				<td colspan="6" style="text-align: right"><?php echo $this->translate('Total settled', 'ppit-commitment', $context->getLocale()) ?></td>
+				<td style="text-align: right;"><?php echo $context->formatFloat($totalSettled, 2) ?></td>
+				<td>&nbsp;</td>
+			</tr>
+
+			<tr class="term" style="font-weight: bold;">
+				<td colspan="6" style="text-align: right"><?php echo $this->translate('Rest to be settled', 'ppit-commitment', $context->getLocale()) ?></td>
+				<td style="text-align: right;"><?php echo $context->formatFloat($commitment->including_options_amount - $totalSettled, 2) ?></td>
 				<td>&nbsp;</td>
 			</tr>
 
@@ -359,4 +316,3 @@
 		<input type="hidden" id="termCount" value="<?php echo ++$i ?>" />
 	</div>
 <?php endif;?>
-	</form>

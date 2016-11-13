@@ -1,7 +1,9 @@
 <?php
 namespace PpitCommitment\Model;
 
+use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
+use PpitContact\Model\Community;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use Zend\Db\Sql\Where;
@@ -21,6 +23,7 @@ class Term implements InputFilterAwareInterface
 	public $caption;
     public $due_date;
     public $settlement_date;
+    public $collection_date;
     public $amount;
 	public $means_of_payment;
     public $document;
@@ -30,6 +33,7 @@ class Term implements InputFilterAwareInterface
 
     // Joined properties
     public $name;
+    public $commitment_caption;
     
     // Transient properties
     public $properties;
@@ -54,6 +58,7 @@ class Term implements InputFilterAwareInterface
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->due_date = (isset($data['due_date'])) ? $data['due_date'] : null;
         $this->settlement_date = (isset($data['settlement_date'])) ? $data['settlement_date'] : null;
+        $this->collection_date = (isset($data['collection_date'])) ? $data['collection_date'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->means_of_payment = (isset($data['means_of_payment'])) ? $data['means_of_payment'] : null;
         $this->document = (isset($data['document'])) ? $data['document'] : null;
@@ -63,6 +68,7 @@ class Term implements InputFilterAwareInterface
 
         // Joined properties
         $this->name = (isset($data['name'])) ? $data['name'] : null;
+        $this->commitment_caption = (isset($data['commitment_caption'])) ? $data['commitment_caption'] : null;
     }
     
     public function toArray()
@@ -75,6 +81,7 @@ class Term implements InputFilterAwareInterface
     	$data['caption'] = $this->caption;
     	$data['due_date'] =  ($this->due_date) ? $this->due_date : null;
     	$data['settlement_date'] =  ($this->settlement_date) ? $this->settlement_date : null;
+    	$data['collection_date'] =  ($this->collection_date) ? $this->collection_date : null;
     	$data['amount'] = $this->amount;
     	$data['means_of_payment'] = $this->means_of_payment;
     	$data['document'] = $this->document;
@@ -88,7 +95,7 @@ class Term implements InputFilterAwareInterface
     	$context = Context::getCurrent();
 
     	$select = Term::getTable()->getSelect()
-    		->join('commitment', 'commitment.id = commitment_term.commitment_id', array(), 'left')
+    		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
     		->join('commitment_account', 'commitment_account.id = commitment.account_id', array(), 'left')
     		->join('contact_community', 'contact_community.id = commitment_account.customer_community_id', array('name'), 'left')
 			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
@@ -97,12 +104,14 @@ class Term implements InputFilterAwareInterface
 
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-    		$where->greaterThanOrEqualTo('commitment_term.due_date', date('Y-m-d'));
+    		$where->notEqualTo('commitment_term.status', 'collected');
+    		$where->lessThanOrEqualTo('collection_date', date('Y-m-d'));
     	}
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-				if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
+    			if ($propertyId == 'name') $where->like('contact_community.name', '%'.$params[$propertyId].'%');
+    			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
@@ -110,6 +119,7 @@ class Term implements InputFilterAwareInterface
     	$select->where($where);
 		$cursor = Term::getTable()->selectWith($select);
 		$terms = array();
+
 		foreach ($cursor as $term) {
 			$term->properties = $term->toArray();
 			$terms[] = $term;
@@ -121,14 +131,24 @@ class Term implements InputFilterAwareInterface
     {
     	$term = Term::getTable()->get($id, $column);
     	if (!$term) return null;
-        $term->properties = $term->toArray();
+    	$commitment = Commitment::get($term->commitment_id);
+    	if ($commitment) {
+    		$term->commitment_caption = $commitment->caption;
+			$account = Account::get($commitment->account_id);
+			if ($account) {
+				$community = Community::get($account->customer_community_id);
+				$term->name = $community->name;
+			}
+    	}
+    	$term->properties = $term->toArray();
     	return $term;
     }
 
-    public static function instanciate($type = null)
+    public static function instanciate($commitment_id = null)
     {
 		$term = new Term;
-		$term->status = 'new';
+		$term->status = 'expected';
+		$term->commitment_id = $commitment_id;
 		$term->audit = array();
 		return $term;
     }
@@ -154,7 +174,13 @@ class Term implements InputFilterAwareInterface
         	if (array_key_exists('settlement_date', $data)) {
 		    	$this->settlement_date = trim(strip_tags($data['settlement_date']));
 		    	if ($this->settlement_date && !checkdate(substr($this->settlement_date, 5, 2), substr($this->settlement_date, 8, 2), substr($this->settlement_date, 0, 4))) return 'Integrity';
+		    	$this->settlement_date = max($this->settlement_date, $this->due_date);
 			}
+            if (array_key_exists('collection_date', $data)) {
+		    	$this->collection_date = trim(strip_tags($data['collection_date']));
+		    	if ($this->collection_date && !checkdate(substr($this->collection_date, 5, 2), substr($this->collection_date, 8, 2), substr($this->collection_date, 0, 4))) return 'Integrity';
+		    	$this->collection_date = max($this->collection_date, $this->settlement_date);
+            }
 			if (array_key_exists('amount', $data)) {
 				$this->amount = trim(strip_tags($data['amount']));
 				if (strlen($this->amount) > 255) return 'Integrity';
@@ -210,7 +236,7 @@ class Term implements InputFilterAwareInterface
     public function isDeletable()
     {
     	// Only deleted while deleting the related commitment
-    	return false;
+    	return true;
     }
     
     public function delete($update_time)

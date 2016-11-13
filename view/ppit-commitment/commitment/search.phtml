@@ -2,7 +2,7 @@
 	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
 		<strong>
 			<?php 
-			$title = (isset ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['title']) ? $context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] : $this->translate('Commitments', 'ppit-commitment', $context->getLocale()));
+			$title = $this->translate('Commitments', 'ppit-commitment', $context->getLocale());
 			echo $title;
 			?>
 			(<span id="mode-text"></span>)
@@ -21,9 +21,9 @@
 			</div>
 		</div>
 		
-<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search')['main'] as $propertyId => $rendering) : ?>
 	<?php 
-	$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	$property = $context->getConfig('commitment')['properties'][$propertyId];
 	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	?>
 	<?php $label = $property['labels'][$context->getLocale()] ?>

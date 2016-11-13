@@ -172,7 +172,7 @@ class Account implements InputFilterAwareInterface
 
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-    		$where->greaterThanOrEqualTo('commitment_account.closing_date', date('Y-m-d'));
+    		$where->equalTo('commitment_account.status', 'active');
     	}
     	else {
     		// Set the filters
@@ -272,6 +272,10 @@ class Account implements InputFilterAwareInterface
     
     	$context = Context::getCurrent();
 
+        	if (array_key_exists('status', $data)) {
+		    	$this->status = trim(strip_tags($data['status']));
+		    	if (strlen($this->status) > 255) return 'Integrity';
+			}
     		if (array_key_exists('type', $data)) {
 		    	$this->type = trim(strip_tags($data['type']));
 		    	if (strlen($this->type) > 255) return 'Integrity';
@@ -281,6 +285,7 @@ class Account implements InputFilterAwareInterface
 		    	$this->customer_name = trim(strip_tags($data['customer_name']));
 		    	if (!$this->customer_name || strlen($this->customer_name) > 255) return 'Integrity';
 			}
+    		if (array_key_exists('customer_community_id', $data)) $this->customer_community_id = (int) $data['customer_community_id'];
 			if (array_key_exists('n_first', $data)) {
 		    	$this->n_first = trim(strip_tags($data['n_first']));
 		    	if (!$this->n_first || strlen($this->n_first) > 255) return 'Integrity';
@@ -431,7 +436,7 @@ class Account implements InputFilterAwareInterface
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
     	$user = User::get($this->contact_1->id, 'contact_id');
-    	$user->delete($user->update_time);
+    	if ($user) $user->delete($user->update_time);
 
     	$this->contact_1->delete($this->contact_1->update_time);
     	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->customer_community->update_time);

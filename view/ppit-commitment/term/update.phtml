@@ -1,6 +1,4 @@
-<h4 style="text-align: center"><strong><?php echo $context->getConfig('commitmentTerm/detail')['title'][$context->getLocale()] ?></strong></h4>
-
-<?php if ($term->id) : ?>
+<?php if ($term->id && !$action && !$message) : ?>
 		<button type="button" class="btn btn-default action-btn" id="term-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>
@@ -19,17 +17,7 @@
 		'context' => $context,
 ));
 ?>
-			
-<!-- Global message -->
-<?php if ($message == 'confirm-update') : ?>
-<!--			<div class="form-group" id="message">
-				<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to update the term?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
-			</div> -->
-<?php elseif ($message == 'confirm-delete') : ?>
-<!--				<div class="form-group" id="message">
-						<div class="col-sm-12"><h4><?php echo $this->translate('Are you sure you want to delete the term?', 'ppit-commitment', $context->getLocale()) ?></h4></div>
-					</div> -->
-<?php endif;?>
+		<input type="hidden" id="term_update_time" value="<?php echo $term->update_time ?>" />
 
 <?php if (!$term->id) : ?>
 		    <div class="form-group">
@@ -59,6 +47,19 @@
 <?php 
 if ($term->id && $action != 'update' || $message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
+		<div class="form-group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Name', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" value="<?php echo $term->name ?>" disabled="disabled" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-5 control-label"><?php echo $this->translate('Commitment', 'ppit-commitment', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<input class="form-control" value="<?php echo $term->commitment_caption ?>" disabled="disabled" />
+			</div>
+		</div>
 
 <?php foreach ($context->getConfig('commitmentTerm/update') as $propertyId => $options) : ?>
 	<?php 
@@ -66,7 +67,13 @@ if ($term->id && $action != 'update' || $message == 'OK') $isDisabled = true; el
 	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
-			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
+			<label class="col-sm-5 control-label">
+				<?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?>
+	<?php if ($term->document && $property['type'] == 'dropbox') : ?>
+				<?php $dropbox = $context->getConfig('ppitDocument')['dropbox'] ?>
+				<a class="glyphicon glyphicon-paperclip" href="<?php echo $dropbox['root'].$dropbox['folders']['settlements'].'/'.$term->document ?>" title="<?php echo $this->translate('Attachment', 'ppit-document', $context->getLocale()) ?>" target=".blank"></a>
+	<?php endif;?>
+			</label>
 			<div class="col-sm-7">
 				
 	<?php if ($property['type'] == 'date') : ?>
@@ -87,6 +94,14 @@ if ($term->id && $action != 'update' || $message == 'OK') $isDisabled = true; el
 	    			<option />
 		<?php foreach ($property['modalities'] as $key => $labels) : ?>
 	    			<option value="<?php echo $key ?>" <?php if ($term->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
+		<?php endforeach;?>
+				</select>
+	
+	<?php elseif ($property['type'] == 'dropbox') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+					<option />
+		<?php foreach ($documentList as $document) : ?>
+					<option value="<?php echo $document ?>" <?php if ($term->document == $document) echo 'selected="selected"' ?>><?php echo $document ?></option>
 		<?php endforeach;?>
 				</select>
 	
