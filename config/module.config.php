@@ -1166,7 +1166,11 @@ return array(
 			'properties' => array(
 			),
 	),
-	
+
+	'commitment/detail/rental' => array(
+			'title' => array('en_US' => 'Commitment detail', 'fr_FR' => 'Détail de l\'engagement'),
+	),
+		
 	'commitment/update/rental' => array(
 //			'caption' => array('mandatory' => true),
 //			'description' => array('mandatory' => false),
@@ -1220,7 +1224,11 @@ return array(
 					),
 			),
 	),
-	
+
+	'commitment/detail/service' => array(
+			'title' => array('en_US' => 'Commitment detail', 'fr_FR' => 'Détail de l\'engagement'),
+	),
+		
 	'commitment/update/service' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),

@@ -18,11 +18,7 @@
 
 		<th>&nbsp;</th>
 	<tr>
-		<td style="text-align: center">
-			<button type="button" class="btn btn-default index-btn term-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-detail-anchor_0">
-				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
-			</button>
-		</td>
+		<td style="text-align: center">&nbsp;</td>
 	<?php $total=0; foreach($terms as $term) $total += $term->amount; ?>
 		<td colspan="<?php echo count($context->getConfig('commitmentTerm/list')) ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
 			<?php echo $this->translate('Total', 'ppit-core', $context->getLocale()) ?>: 

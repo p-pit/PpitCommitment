@@ -213,7 +213,7 @@ class Commitment implements InputFilterAwareInterface
     public function toArray() {
     	$data = array();
     	$data['id'] = (int) $this->id;
-    	$data['credit_status'] = (int) $this->credit_status;
+    	$data['credit_status'] = $this->credit_status;
     	$data['next_credit_consumption_date'] = ($this->next_credit_consumption_date) ? $this->next_credit_consumption_date : null;
     	$data['last_credit_consumption_date'] = ($this->last_credit_consumption_date) ? $this->last_credit_consumption_date : null;
     	$data['type'] = $this->type;
@@ -400,6 +400,7 @@ class Commitment implements InputFilterAwareInterface
     		$commitment->description = $subscription->description;
     	}
     	$commitment->status = 'new';
+    	$commitment->quantity = 1;
     	$commitment->properties = $commitment->toArray();
     	$commitment->subscriptions = Subscription::getList(array('type' => $type), 'product_identifier', 'ASC');
     	$commitment->options = array();
@@ -1047,8 +1048,9 @@ class Commitment implements InputFilterAwareInterface
 	    				if ($credit->quantity > 0) {
 		    				// Consume 1 credit
 		    				$credit->quantity--;
-							$commitment->next_credit_consumption_date = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
-							$commitment->last_credit_consumption_date = date('Y-m-d');
+		    				$credit_consumption_date = $commitment->next_credit_consumption_date;
+							$commitment->next_credit_consumption_date = date('Y-m-d', strtotime($credit_consumption_date.' + 31 days'));
+							$commitment->last_credit_consumption_date = $credit_consumption_date;
 			    			$credit->audit[] = array(
 		    						'period' => date('Y-m'),
 			    					'quantity' => -1,
@@ -1056,10 +1058,7 @@ class Commitment implements InputFilterAwareInterface
 			    					'reference' => $commitment->identifier,
 			    					'time' => Date('Y-m-d G:i:s'),
 			    					'n_fn' => 'P-PIT',
-			    					'comment' => array(
-											'en_US' => 'Monthly use for period '.$context->decodeDate($commitment->last_credit_consumption_date).' to '.$context->decodeDate($commitment->last_credit_consumption_date),
-											'fr_FR' => 'Utilisation mensuelle pour la période du '.$context->decodeDate($commitment->last_credit_consumption_date).' au '.$context->decodeDate($commitment->last_credit_consumption_date),
-									),
+			    					'comment' => 'Utilisation mensuelle pour la période du '.$context->decodeDate($commitment->last_credit_consumption_date).' au '.$context->decodeDate($commitment->next_credit_consumption_date),
 			    			);
 								
 		    				// Log

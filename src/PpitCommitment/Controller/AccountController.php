@@ -26,7 +26,7 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 
-		$type = $this->params()->fromRoute('type', null);
+		$type = $this->params()->fromRoute('type', 0);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 		
 		$community_id = (int) $context->getCommunityId();
@@ -166,15 +166,16 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
 
     	$type = $this->params()->fromRoute('type', 0);
-    	 
+
     	$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $account = Account::get($id);
     	else $account = Account::instanciate($type);
+    	if (!$type) $type = $account->type;
 
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
-    			'type' => $account->type,
+    			'type' => $type,
     			'id' => $account->id,
     			'account' => $account,
     	));
@@ -225,6 +226,7 @@ class AccountController extends AbstractActionController
 						// Add the community
 						$account->customer_community = Community::instanciate();
 						$communityData = array('name' => $data['n_last'].', '.$data['n_first']);
+    					$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
 						if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
 	
 						// Add the main contact

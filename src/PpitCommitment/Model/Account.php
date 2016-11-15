@@ -46,6 +46,7 @@ class Account implements InputFilterAwareInterface
     // Joined properties
     public $place_name;
     public $customer_name;
+    public $customer_status;
     public $contact_1_id;
     public $supplier_name;
     public $n_title;
@@ -116,6 +117,7 @@ class Account implements InputFilterAwareInterface
         // Joined properties
         $this->place_name = (isset($data['place_name'])) ? $data['place_name'] : null;
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->customer_status = (isset($data['customer_status'])) ? $data['customer_status'] : null;
         $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
         $this->supplier_name = (isset($data['supplier_name'])) ? $data['supplier_name'] : null;
         $this->n_title = (isset($data['n_title'])) ? $data['n_title'] : null;
@@ -163,7 +165,7 @@ class Account implements InputFilterAwareInterface
     	$select = Account::getTable()->getSelect()
 			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
 			->join(array('supplier' => 'contact_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'contact_1_id'), 'left')
+			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id'), 'left')
 			->join('contact_vcard', 'customer.contact_1_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
@@ -222,7 +224,8 @@ class Account implements InputFilterAwareInterface
     	if ($account->customer_community_id) {
     		$account->customer_community = Community::getTable()->get($account->customer_community_id);
     		$account->customer_name = $account->customer_community->name;
-	    	if ($account->customer_community->contact_1_id) {
+    		$account->customer_status = $account->customer_community->status;
+    		if ($account->customer_community->contact_1_id) {
 	    		$account->contact_1_id = $account->customer_community->contact_1_id;
 		    	$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
 		    	$account->n_first = $account->contact_1->n_first;

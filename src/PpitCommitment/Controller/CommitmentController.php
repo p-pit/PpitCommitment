@@ -528,7 +528,7 @@ class CommitmentController extends AbstractActionController
     	$action = $this->params()->fromRoute('act', null);
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
-    
+
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -561,6 +561,8 @@ class CommitmentController extends AbstractActionController
     			$connection->beginTransaction();
     			try {
     				if (!$commitment->id) {
+    					$commitment->credit_status = 'active';
+    					$commitment->next_credit_consumption_date = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
     					if ($commitment->subscription_id) {
     						$subscription = $commitment->subscriptions[$commitment->subscription_id];
     						$commitment->description = $subscription->description;
@@ -951,8 +953,9 @@ class CommitmentController extends AbstractActionController
     			return $this->getResponse();
     		}
     		
-    		$data['status'] = 'new';
+    		$data['credit_status'] = 'active';
     		$data['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
+    		$data['status'] = 'new';
     		$data['account_id'] = $account->id;
     		foreach ($context->getConfig('commitment/update/service') as $propertyId => $unused) {
     			if ($this->request->getPost($propertyId)) $data[$propertyId] = $this->request->getPost($propertyId);
@@ -1173,7 +1176,7 @@ class CommitmentController extends AbstractActionController
 
     	// Title
     	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma '.$commitment->invoice_identifier.'</strong></div>';
-    	else $text = '<div style="text-align: center"><strong>Facture n° '.$commitment->invoice_identifier.'</strong></div>';
+    	else $text = '<div style="text-align: center"><strong>Facture n° '.(($commitment->invoice_identifier) ? $commitment->invoice_identifier : $commitment->identifier).'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(10);
     	 
@@ -1267,11 +1270,15 @@ class CommitmentController extends AbstractActionController
     	foreach ($commitment->options as $option) {
     		$pdf->Ln();
     		$productOption = ProductOption::get($option['identifier'], 'reference');
-    		if ($option['vat_id'] == 0) $taxCaption = ' (exonéré)';
-    		elseif ($option['vat_id'] == 1) $taxCaption = ' (TVA 20%)';
-    		elseif ($option['vat_id'] == 2) $taxCaption = ' (TVA 10%)';
-    		elseif ($option['vat_id'] == 3) $taxCaption = ' (TV 5,5%)';
-    		$pdf->Cell(105, 6, $productOption->caption.$taxCaption, 'LR', 0, 'L', $color);
+    		$caption = $productOption->caption;
+    		if (!$proforma) {
+	    		if ($option['vat_id'] == 0) $taxCaption = ' (exonéré)';
+	    		elseif ($option['vat_id'] == 1) $taxCaption = ' (TVA 20%)';
+	    		elseif ($option['vat_id'] == 2) $taxCaption = ' (TVA 10%)';
+	    		elseif ($option['vat_id'] == 3) $taxCaption = ' (TV 5,5%)';
+	    		$caption .= $taxCaption;
+    		}
+    		$pdf->Cell(105, 6, $caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($option['unit_price'], 2), 'LR', 0, 'R', $color);    		
     		$pdf->Cell(25, 6, $option['quantity'], 'LR', 0, 'C', $color);    		
     		$pdf->Cell(25, 6, $context->formatFloat($option['amount'], 2), 'LR', 0, 'R', $color);

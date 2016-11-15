@@ -19,6 +19,7 @@
 			'Before starting the trial, we have to know you' => 'Avant de démarrer l\'essai, nous avons besoin de vous connaitre',
 			'Begin of display' => 'Début d\'affichage',
 			'Begin' => 'Début',
+			'blocked' => 'bloqué',
 			'By entering this few informations, you will get a fresh-installed, immediately available version of P-Pit application.' => 'Veuillez saisir ces quelques informations, nécessaires à l\'installation de votre version de P-Pit, disponible immédiatement, et gratuite pendant un mois.',
 			'Collection' => 'Encaisst',
 			'Comming events' => 'Evènements à venir',

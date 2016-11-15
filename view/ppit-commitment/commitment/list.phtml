@@ -15,27 +15,19 @@
 	<?php endif;?>
 		</th>
 <?php endforeach;?>
-		
-	<tr>
-		<td>
-			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_0">
-				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
-			</button>
-		</td>
-		<td colspan="4">&nbsp;</td>
-	</tr>
 	
 <?php foreach ($commitments as $commitment) : ?>
 	<?php if ($context->isAllowed('commitment/detail')) : ?>
 	
-	<tr>
+	<tr <?php if ($commitment->credit_status == 'blocked') echo 'style="font-style: italic"' ?>>
 		<td colspan="6">
 			<strong><?php echo $commitment->customer_name ?></strong> -
 			<?php echo $commitment->caption ?>
+			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate('blocked', 'ppit-commitment', $context->getLocale()).')' ?>
 		</td>
 	</tr>
 	
-	<tr class="commitment">
+	<tr class="commitment" <?php if ($commitment->credit_status == 'blocked') echo 'style="font-style: italic"' ?>>
 		<td >
 			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_<?php echo $commitment->id ?>">
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $commitment->id ?>-glyphicon"></span>

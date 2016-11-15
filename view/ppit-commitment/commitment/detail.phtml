@@ -1,6 +1,6 @@
 <div class="panel panel-default">
 	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
-		<strong><?php echo $this->translate('Detail', 'ppit-core', $context->getLocale()) ?></strong>
+		<strong><?php echo ($commitment->id) ? $commitment->customer_name.' - '.$commitment->caption : $this->translate('Add a commitment', 'ppit-commitment', $context->getLocale()) ?></strong>
  		<div class="btn-group pull-right">
 			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
 				<span class="glyphicon glyphicon-remove"></span>
@@ -8,6 +8,16 @@
  		 </div>
 	</div>
 	<div class="panel-body">
+
+<!-- Blocked commitment -->
+<?php if ($commitment->credit_status == 'blocked') : ?>
+		<div class="form-group">
+			<div class="alert alert-danger" style="text-align: center">
+				<?php echo $this->translate('This record is only consultable due to a lack of credit.', 'ppit-core', $context->getLocale()) ?>
+				<?php echo sprintf($this->translate('But you can release it by <strong><a href="%s">subscribing credits</a></strong>.', 'ppit-core', $context->getLocale()), $this->url('credit')) ?>
+			</div>
+		</div>
+<?php endif;?>
 
 <!-- Display the audit -->
 		<?php echo $this->translate('History', 'ppit-core', $context->getLocale()) ?> (<a id="audit-label" href="#audit-panel"><?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?></a>)
@@ -55,11 +65,14 @@
 <?php endif; */?>
 
 		<div id="commitment-update-panel"></div>
+
+<?php if ($commitment->product_identifier) : ?>
 	<div>
 		<a href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
 		&nbsp;&nbsp;|&nbsp;&nbsp;
 		<a href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>?proforma=true"><?php echo $this->translate('Proforma', 'ppit-commitment', $context->getLocale()) ?></a>
 	</div>
+<?php endif;?>
 
 <!-- Form opening tag -->
 	<form action="" id="rows-form" method="post" class="form-horizontal" enctype="multipart/form-data">
@@ -82,7 +95,7 @@
 
 			<tr class="row">
 				<td>
-					<button type="button" class="btn btn-default action-btn btn-xs row-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="row-anchor">
+					<button type="button" class="btn btn-default action-btn btn-xs row-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="row-anchor" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-edit" id="<?php echo $commitment->id ?>-glyphicon"></span>
 					</button>
 				</td>
@@ -171,7 +184,7 @@
 
 			<tr class="row">
 				<td colspan="6">
-					<button type="button" class="btn btn-default action-btn btn-xs row-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="row-add-anchor">
+					<button type="button" class="btn btn-default action-btn btn-xs row-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="row-add-anchor" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-plus"></span>
 					</button>
 				</td>
@@ -235,7 +248,7 @@
 	<?php if ($term->status == 'settled') $totalSettled += $term->amount ?>
 			<tr class="term" style="font-size: 85%">
 				<td>
-					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="term-update-anchor_<?php echo $i ?>">
+					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="term-update-anchor_<?php echo $i ?>" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-zoom-in"></span>
 					</button>
 				</td>
@@ -271,7 +284,7 @@
 
 			<tr class="term">
 				<td colspan="8">
-					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-update-anchor_<?php echo $i ?>">
+					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-update-anchor_<?php echo $i ?>" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 					</button>
 				</td>
