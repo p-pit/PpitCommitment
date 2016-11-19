@@ -1152,6 +1152,11 @@ return array(
 			'status' => 'select',
 	),
 
+	'commitment/update' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+		
 	'commitment/try' => array(
 			'caption' => array('mandatory' => true),
 			'n_title' => array('mandatory' => true),
@@ -1740,10 +1745,10 @@ Commandes enregistrées %s : %s
 			'main' => array(
 				'name' => 'contains',
 				'status' => 'select',
+				'collection_date' => 'range',
+				'amount' => 'range',
 			),
 			'more' => array(
-				'due_date' => 'range',
-				'amount' => 'range',
 				'caption' => 'contains',
 				'means_of_payment' => 'select',
 			),
@@ -1751,7 +1756,7 @@ Commandes enregistrées %s : %s
 	'commitmentTerm/list' => array(
 			'name' => 'text',
 			'status' => 'select',
-			'due_date' => 'date',
+			'collection_date' => 'date',
 			'amount' => 'number',
 	),
 	'commitmentTerm/detail' => array(

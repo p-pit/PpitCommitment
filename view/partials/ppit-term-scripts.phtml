@@ -107,7 +107,7 @@ function eraseTermSearch() {
 
 <?php endforeach;?>
 
-	getTermList(termGetParams(), 'due_date', 'DESC');
+	getTermList(termGetParams(), 'collection_date', 'DESC');
 }
 
 function sortTermList(criterion) {
@@ -422,7 +422,7 @@ function activateTerm() {
 	// Connect the search inputs
 	connectTermSearchInputs();
 	
-	getTermList('?', 'due_date', 'ASC');
+	getTermList('?', 'collection_date', 'ASC');
 	
 	$('#add-criteria').click(function () {
 		mode = $('#add-criteria').text();

@@ -10,6 +10,7 @@ use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentTerm;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
+use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
 use PpitContact\Model\Vcard;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Credit;
@@ -253,7 +254,19 @@ class CommitmentController extends AbstractActionController
    	
    	public function exportAction()
    	{
-   		return $this->getList();
+   		$view = $this->getList();
+
+   		include 'public/PHPExcel_1/Classes/PHPExcel.php';
+   		include 'public/PHPExcel_1/Classes/PHPExcel/Writer/Excel2007.php';
+
+		$workbook = new \PHPExcel;
+		(new SsmlTermViewHelper)->formatXls($workbook, $view);		
+		$writer = new \PHPExcel_Writer_Excel2007($workbook);
+
+		header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition:inline;filename=P-Pit_Engagements.xlsx ');
+		$writer->save('php://output');
+		return $this->response;
    	}
     
     public function detailAction()

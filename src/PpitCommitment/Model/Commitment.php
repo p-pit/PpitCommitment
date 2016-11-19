@@ -104,6 +104,7 @@ class Commitment implements InputFilterAwareInterface
 	
 	// Transient properties
 //	public $properties;
+	public $account;
 	public $terms;
 	public $termSum;
 	public $subscriptions;
@@ -346,8 +347,8 @@ class Commitment implements InputFilterAwareInterface
     	$commitment = Commitment::getTable()->get($id, $column);
     	if (!$commitment) return null;
         if ($commitment->account_id) {
-	    	$account = Account::get($commitment->account_id);
-	    	$community = Community::get($account->customer_community_id);
+	    	$commitment->account = Account::get($commitment->account_id);
+	    	$community = Community::get($commitment->account->customer_community_id);
 	    	$commitment->customer_name = $community->name;
     	}
     	if ($commitment->subscription_id) {
@@ -1166,7 +1167,8 @@ class Commitment implements InputFilterAwareInterface
     
     	// Isolation check
     	if ($commitment->update_time > $update_time) return 'Isolation';
-    	 
+ 
+    	Term::getTable()->multipleDelete(array('commitment_id' => $this->id));
     	Commitment::getTable()->delete($this->id);
     
     	return 'OK';

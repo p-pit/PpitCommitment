@@ -152,7 +152,7 @@ class AccountController extends AbstractActionController
 		$writer = new \PHPExcel_Writer_Excel2007($workbook);
 		
 		header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition:inline;filename=Fichier.xlsx ');
+		header('Content-Disposition:inline;filename=P-Pit_Comptes.xlsx ');
 		$writer->save('php://output');
 
     	$view = new ViewModel(array());

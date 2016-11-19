@@ -57,8 +57,8 @@ class Term implements InputFilterAwareInterface
         $this->subscription_id = (isset($data['subscription_id'])) ? $data['subscription_id'] : null;
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->due_date = (isset($data['due_date'])) ? $data['due_date'] : null;
-        $this->settlement_date = (isset($data['settlement_date'])) ? $data['settlement_date'] : null;
-        $this->collection_date = (isset($data['collection_date'])) ? $data['collection_date'] : null;
+        $this->settlement_date = (isset($data['settlement_date'])) ? (($data['settlement_date'] == '9999-12-31') ? null : $data['settlement_date']) : null;
+        $this->collection_date = (isset($data['collection_date'])) ? (($data['collection_date'] == '9999-12-31') ? null : $data['collection_date']) : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->means_of_payment = (isset($data['means_of_payment'])) ? $data['means_of_payment'] : null;
         $this->document = (isset($data['document'])) ? $data['document'] : null;
@@ -71,7 +71,7 @@ class Term implements InputFilterAwareInterface
         $this->commitment_caption = (isset($data['commitment_caption'])) ? $data['commitment_caption'] : null;
     }
     
-    public function toArray()
+    public function toArray($flat = false)
     {
     	$data = array();
     	$data['id'] = (int) $this->id;
@@ -80,8 +80,8 @@ class Term implements InputFilterAwareInterface
     	$data['subscription_id'] = (int) $this->subscription_id;
     	$data['caption'] = $this->caption;
     	$data['due_date'] =  ($this->due_date) ? $this->due_date : null;
-    	$data['settlement_date'] =  ($this->settlement_date) ? $this->settlement_date : null;
-    	$data['collection_date'] =  ($this->collection_date) ? $this->collection_date : null;
+    	$data['settlement_date'] = ($this->settlement_date) ? $this->settlement_date : (($flat) ? null : '9999-12-31');
+    	$data['collection_date'] = ($this->collection_date) ? $this->collection_date : (($flat) ? null : '9999-12-31');
     	$data['amount'] = $this->amount;
     	$data['means_of_payment'] = $this->means_of_payment;
     	$data['document'] = $this->document;
@@ -121,7 +121,7 @@ class Term implements InputFilterAwareInterface
 		$terms = array();
 
 		foreach ($cursor as $term) {
-			$term->properties = $term->toArray();
+			$term->properties = $term->toArray('flat');
 			$terms[] = $term;
 		}
 		return $terms;
@@ -140,7 +140,7 @@ class Term implements InputFilterAwareInterface
 				$term->name = $community->name;
 			}
     	}
-    	$term->properties = $term->toArray();
+    	$term->properties = $term->toArray('flat');
     	return $term;
     }
 
@@ -174,12 +174,10 @@ class Term implements InputFilterAwareInterface
         	if (array_key_exists('settlement_date', $data)) {
 		    	$this->settlement_date = trim(strip_tags($data['settlement_date']));
 		    	if ($this->settlement_date && !checkdate(substr($this->settlement_date, 5, 2), substr($this->settlement_date, 8, 2), substr($this->settlement_date, 0, 4))) return 'Integrity';
-		    	$this->settlement_date = max($this->settlement_date, $this->due_date);
 			}
             if (array_key_exists('collection_date', $data)) {
 		    	$this->collection_date = trim(strip_tags($data['collection_date']));
 		    	if ($this->collection_date && !checkdate(substr($this->collection_date, 5, 2), substr($this->collection_date, 8, 2), substr($this->collection_date, 0, 4))) return 'Integrity';
-		    	$this->collection_date = max($this->collection_date, $this->settlement_date);
             }
 			if (array_key_exists('amount', $data)) {
 				$this->amount = trim(strip_tags($data['amount']));
