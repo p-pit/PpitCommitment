@@ -648,6 +648,7 @@ class CommitmentController extends AbstractActionController
     			// Retrieve the data from the request
     			$data = array();
     			$data['product_identifier'] = $request->getPost('product_identifier');
+    			$data['product_caption'] = $request->getPost('product_caption');
     			$data['quantity'] = $request->getPost('quantity');
     			$data['unit_price'] = $request->getPost('unit_price');
     			$data['amount'] = $data['quantity'] * $data['unit_price'];
@@ -713,7 +714,7 @@ class CommitmentController extends AbstractActionController
     	$error = null;
     	$message = null;
     	$request = $this->getRequest();
-    	if ($request->isPost()) {
+		if ($request->isPost()) {
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		 
@@ -726,7 +727,8 @@ class CommitmentController extends AbstractActionController
     				if ($request->getPost('option_identifier-'.$i)) {
 		    			$option = array();
 	    				$option['identifier'] = $request->getPost('option_identifier-'.$i);
-		    			$option['quantity'] = $request->getPost('option_quantity-'.$i);
+	    				$option['caption'] = $request->getPost('option_caption-'.$i);
+	    				$option['quantity'] = $request->getPost('option_quantity-'.$i);
 		    			$option['unit_price'] = $request->getPost('option_unit_price-'.$i);
 		    			$options[] = $option;
     				}
@@ -759,7 +761,7 @@ class CommitmentController extends AbstractActionController
     	}
 		return $this->response;
     }
-
+    
     public function updateTermAction()
     {
     	// Retrieve the context

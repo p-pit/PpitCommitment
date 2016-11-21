@@ -243,7 +243,10 @@ function getCommitmentUpdate(id, action) {
 function fillRowPrice() {
 <?php foreach ($products as $product) : ?>
 	<?php if (array_key_exists(0, $product->variants)) : ?>
-	if ($('#product_identifier').val() == "<?php echo $product->reference ?>") $('#input_unit_price').val('<?php echo $product->variants[0]['price'] ?>');
+	if ($('#product_identifier').val() == "<?php echo $product->reference ?>") {
+		$('#input_unit_price').val('<?php echo $product->variants[0]['price'] ?>');
+		$('#product_caption').val("<?php echo $product->caption ?>");
+	}
 	<?php endif;?>
 <?php endforeach;?>
 }
@@ -251,7 +254,10 @@ function fillRowPrice() {
 function fillOptionPrice(i) {
 <?php foreach ($options as $option) : ?>
 	<?php if (array_key_exists(0, $option->variants)) : ?>
-	if ($('#option_identifier-' + i).val() == "<?php echo $option->reference ?>") $('#input_option_unit_price-' + i).val('<?php echo $option->variants[0]['price'] ?>');
+	if ($('#option_identifier-' + i).val() == "<?php echo $option->reference ?>") {
+		$('#input_option_unit_price-' + i).val('<?php echo $option->variants[0]['price'] ?>');
+		$('#option_caption-' + i).val("<?php echo $option->caption ?>");
+	}
 	<?php endif;?>
 <?php endforeach;?>
 }
@@ -287,6 +293,15 @@ function connectCommitmentUpdateProductForm(id)
 			}
 		}
 		
+// Option caption
+		val = $('#product_caption').val();
+	    if (val.length > 255) {
+			$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+			$('#rows-error').show();
+			document.getElementById('product_caption').focus();
+			validity = false;
+		}
+		
 // Quantity
 		number = $('#input_quantity').val();
 		error = checkNumber(number, 0, 999999);
@@ -320,6 +335,7 @@ function connectCommitmentUpdateProductForm(id)
 			// Create a new FormData object.
 			var formData = new FormData();
 			formData.append('product_identifier', $('#product_identifier').val());
+			formData.append('product_caption', $('#product_caption').val());
 			formData.append('quantity', $('#quantity').val());
 			formData.append('unit_price', $('#unit_price').val());
 			formData.append('update_time', $('#update_time').val());
@@ -353,6 +369,15 @@ function connectCommitmentUpdateOptionForm(id)
 			$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
 			$('#rows-error').show();
 			document.getElementById('option_identifier-' + i).focus();
+			validity = false;
+		}
+		
+// Option caption
+		val = $('#option_caption-' + i).val();
+	    if (val.length > 255) {
+			$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+			$('#rows-error').show();
+			document.getElementById('option_caption-' + i).focus();
 			validity = false;
 		}
 		
@@ -391,6 +416,7 @@ function connectCommitmentUpdateOptionForm(id)
 		var formData = new FormData();
 		for (i = 0; i < count; i++) {
 			formData.append('option_identifier-' + i, $('#option_identifier-' + i).val());
+			formData.append('option_caption-' + i, $('#option_caption-' + i).val());
 			formData.append('option_quantity-' + i, $('#option_quantity-' + i).val());
 			formData.append('option_unit_price-' + i, $('#option_unit_price-' + i).val());
 			formData.append('update_time', $('#update_time').val());

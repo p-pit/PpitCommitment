@@ -37,6 +37,7 @@ class Commitment implements InputFilterAwareInterface
 	public $caption;
 	public $description;
 	public $product_identifier;
+	public $product_caption;
 	public $quantity;
 	public $unit_price;
 	public $amount;
@@ -142,6 +143,7 @@ class Commitment implements InputFilterAwareInterface
         $this->quantity = (isset($data['quantity'])) ? $data['quantity'] : null;
         $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
         $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
+        $this->product_caption = (isset($data['product_caption'])) ? $data['product_caption'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->taxable_1_amount = (isset($data['taxable_1_amount'])) ? $data['taxable_1_amount'] : null;
         $this->taxable_2_amount = (isset($data['taxable_2_amount'])) ? $data['taxable_2_amount'] : null;
@@ -224,6 +226,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
     	$data['product_identifier'] = $this->product_identifier;
+    	$data['product_caption'] = $this->product_caption;
     	$data['quantity'] = $this->quantity;
     	$data['unit_price'] = $this->unit_price;
     	$data['amount'] = $this->amount;
@@ -472,6 +475,11 @@ class Commitment implements InputFilterAwareInterface
 		    if (strlen($this->description) > 2047) return 'Integrity';
 		}
 
+		if (array_key_exists('product_caption', $data)) {
+			$this->product_caption = trim(strip_tags($data['product_caption']));
+			if (strlen($this->product_caption) > 255) return 'Integrity';
+		}
+		
 		if (array_key_exists('product_identifier', $data)) {
 			$this->product_identifier = trim(strip_tags($data['product_identifier']));
 			if (strlen($this->product_identifier) > 255) return 'Integrity';
@@ -510,7 +518,7 @@ class Commitment implements InputFilterAwareInterface
     			if ($productOption) {
     				$option = array();
     				$option['identifier'] = $entry['identifier'];
-					$option['caption'] = $productOption->caption; // Redundancy to solve
+					$option['caption'] = $entry['caption'];
     				$option['unit_price'] = $entry['unit_price'];
     				$option['quantity'] = $entry['quantity'];
     				$option['amount'] = $option['unit_price'] * $option['quantity']; // Redundancy to solve

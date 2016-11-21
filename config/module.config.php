@@ -1168,6 +1168,8 @@ return array(
 	),
 	
 	'commitment/rental' => array(
+			'currencySymbol' => '€',
+			'tax' => 'excluding',
 			'properties' => array(
 			),
 	),
@@ -1183,7 +1185,7 @@ return array(
 
 	'commitment/service' => array(
 			'currencySymbol' => '€',
-			'tax' => 'including',
+			'tax' => 'excluding',
 			'properties' => array(
 					'status' => array(
 							'type' => 'select',

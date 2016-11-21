@@ -83,13 +83,14 @@
 			<tr class="row">
 				<th>&nbsp;</th>
 				<th>&nbsp;</th>
+				<th><?php echo $this->translate('Reference', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Quantity', 'ppit-core', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Unit price', 'ppit-commitment', $context->getLocale()) ?></th>
 				<th><?php echo $this->translate('Amount', 'ppit-commitment', $context->getLocale()) ?></th>
 			</tr>
 			<tr class="row">
-				<td colspan="6" class="alert alert-danger" style="display: none; text-align: center" id="rows-error"></td>
+				<td colspan="7" class="alert alert-danger" style="display: none; text-align: center" id="rows-error"></td>
 			</tr>
 			<tr class="row" style="display: none;">&nbsp;</tr>
 
@@ -101,6 +102,7 @@
 				</td>
 				<td>&nbsp;</td>
 				<td style="text-align: left"><?php echo $commitment->product_identifier ?></td>
+				<td style="text-align: left"><?php echo $commitment->product_caption ?></td>
 				<td style="text-align: right"><?php echo $commitment->quantity ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($commitment->unit_price, 2) ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($commitment->amount, 2) ?></td>
@@ -122,6 +124,9 @@
 					</select>
 				</td>
 				<td style="text-align: right">
+					<input class="form-control" id="product_caption" value="<?php echo $commitment->product_caption ?>" />
+				</td>
+				<td style="text-align: right">
 					<input type="hidden" id="quantity" />
 					<input class="form-control" id="input_quantity" value="<?php echo $commitment->quantity ?>" />
 				</td>
@@ -133,7 +138,7 @@
 			</tr>
 
 			<tr class="row">
-				<td colspan="6"><strong><?php echo $this->translate('Options', 'ppit-master-data', $context->getLocale())?></strong></td>
+				<td colspan="7"><strong><?php echo $this->translate('Options', 'ppit-master-data', $context->getLocale())?></strong></td>
 			</tr>
 
 			<tr class="row" style="display: none">&nbsp;</tr>
@@ -150,6 +155,7 @@
 						<span class="glyphicon glyphicon-trash"></span>
 					</button>
 				</td>
+				<td style="text-align: left"><?php echo $option['identifier'] ?></td>
 				<td style="text-align: left"><?php echo $option['caption'] ?></td>
 				<td style="text-align: right"><?php echo $option['quantity'] ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($option['unit_price'], 2) ?></td>
@@ -171,6 +177,9 @@
 					</select>
 				</td>
 				<td style="text-align: right">
+					<input class="form-control" id="option_caption-<?php echo $i ?>" value="<?php echo $option['caption'] ?>" />
+				</td>
+				<td style="text-align: right">
 					<input type="hidden" id="option_quantity-<?php echo $i ?>" />
 					<input class="form-control" id="input_option_quantity-<?php echo $i ?>" value="<?php echo $option['quantity'] ?>" />
 				</td>
@@ -183,7 +192,7 @@
 	<?php $i++; endforeach; ?>
 
 			<tr class="row">
-				<td colspan="6">
+				<td colspan="7">
 					<button type="button" class="btn btn-default action-btn btn-xs row-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="row-add-anchor" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-plus"></span>
 					</button>
@@ -205,8 +214,11 @@
 					</select>
 				</td>
 				<td style="text-align: right">
+					<input class="form-control" id="option_caption-<?php echo $i ?>" value="1" />
+				</td>
+				<td style="text-align: right">
 					<input type="hidden" id="option_quantity-<?php echo $i ?>" />
-					<input class="form-control" id="input_option_quantity-<?php echo $i ?>" value="1" />
+					<input class="form-control" id="input_option_quantity-<?php echo $i ?>" value="" />
 				</td>
 				<td style="text-align: right">
 					<input type="hidden" id="option_unit_price-<?php echo $i ?>" />
@@ -216,7 +228,7 @@
 			</tr>
 
 			<tr class="row" style="font-weight: bold;">
-				<td colspan="5" style="text-align: right"><?php echo $this->translate('Sum', 'ppit-commitment', $context->getLocale()) ?></td>
+				<td colspan="6" style="text-align: right"><?php echo $this->translate('Sum', 'ppit-commitment', $context->getLocale()) ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($commitment->including_options_amount, 2) ?></td>
 			</tr>
 		</table>
