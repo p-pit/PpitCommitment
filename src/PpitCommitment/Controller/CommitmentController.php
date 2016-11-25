@@ -34,12 +34,13 @@ use Zend\Mvc\Controller\AbstractActionController;
 require_once('vendor/TCPDF-master/tcpdf.php');
 
 class PpitPDF extends \TCPDF {
+	public $footer;
 	public function Footer() {
 		$context = Context::getCurrent();
 		parent::Footer();
 		$this->SetY(-10);
 		$this->SetFont('helvetica', 'N', 8);
-		if ($context->getConfig('headerParams')['footer']['type'] == 'text') $this->Cell(0, 5, $context->getConfig('headerParams')['footer']['value'], 0, false, 'C', 0, '', 0, false, 'T', 'M');
+		if ($context->getConfig('headerParams')['footer']['type'] == 'text') $this->Cell(0, 5, $this->footer, 0, false, 'C', 0, '', 0, false, 'T', 'M');
 		else {
 			$img = file_get_contents('http://localhost/~bruno/p-pit.fr/public/img/FM%20Sports/bas-page.jpg');
 			$this->Image('@' . $img, 20, 270, '', '', 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
@@ -648,6 +649,7 @@ class CommitmentController extends AbstractActionController
     			// Retrieve the data from the request
     			$data = array();
     			$data['product_identifier'] = $request->getPost('product_identifier');
+    			$data['product_brand'] = $request->getPost('product_brand');
     			$data['product_caption'] = $request->getPost('product_caption');
     			$data['quantity'] = $request->getPost('quantity');
     			$data['unit_price'] = $request->getPost('unit_price');
@@ -1093,8 +1095,6 @@ class CommitmentController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-
-    	$type = $this->params()->fromRoute('type', null);
     	 
     	$id = $this->params()->fromRoute('id', null);
     	if (!$id) return $this->redirect()->toRoute('index');
@@ -1106,6 +1106,7 @@ class CommitmentController extends AbstractActionController
     	
     	// create new PDF document
     	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	$pdf->footer = $context->getConfig('headerParams')['footer']['value'];
     	
     	// set document information
     	$pdf->SetCreator(PDF_CREATOR);
@@ -1173,21 +1174,44 @@ class CommitmentController extends AbstractActionController
     	$pdf->MultiCell(100, 5, '', 0, 'L', 0, 0, '', '', true);
     	$pdf->SetTextColor(0);
     	$pdf->SetFont('', '', 12);
+    	
+    	$addressee = "\n"."\n";
+
+    	$type = $commitment->type;
+    	foreach($context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''))['header'] as $line) {
+    		$arguments = array();
+    		foreach($line['params'] as $propertyId) {
+    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
+    			else {
+    				$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+    				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+    				if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
+    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
+    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
+    				elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
+    				else $arguments[] = $commitment->properties[$propertyId];
+    			}
+    		}
+    		$addressee .= vsprintf($line['format'][$context->getLocale()], $arguments)."\n";
+    	}
+    	 
     	$invoicingContact = ($account->contact_2) ? $account->contact_2 : $account->contact_1;
-    	$addressee = $account->customer_name;
-    	$addressee .= "\n";
-    	if ($invoicingContact->n_title) $addressee .= $invoicingContact->n_title.' ';
-    	if ($invoicingContact->n_last) $addressee .= $invoicingContact->n_last.' ';
-    	if ($invoicingContact->n_first) $addressee .= $invoicingContact->n_first.' ';
-    	if ($invoicingContact->adr_street) $addressee .= "\n".$invoicingContact->adr_street;
-    	if ($invoicingContact->adr_extended) $addressee .= "\n".$invoicingContact->adr_extended;
-    	if ($invoicingContact->adr_post_office_box) $addressee .= "\n".$invoicingContact->adr_post_office_box;
-    	if ($invoicingContact->adr_zip) $addressee .= "\n".$invoicingContact->adr_zip;
-    	if ($invoicingContact->adr_city) $addressee .= "\n".$invoicingContact->adr_city;
-    	if ($invoicingContact->adr_state) $addressee .= "\n".$invoicingContact->adr_state;
-    	if ($invoicingContact->adr_country) $addressee .= "\n".$invoicingContact->adr_country;
+    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
+    		$addressee .= $invoicingContact->n_title.' ';
+    		$addressee .= $invoicingContact->n_last.' ';
+    		$addressee .= $invoicingContact->n_first."\n";
+    	}
+    	if ($invoicingContact->adr_street) $addressee .= $invoicingContact->adr_street."\n";
+    	if ($invoicingContact->adr_extended) $addressee .= $invoicingContact->adr_extended."\n";
+    	if ($invoicingContact->adr_post_office_box) $addressee .= $invoicingContact->adr_post_office_box."\n";
+    	if ($invoicingContact->adr_zip || $invoicingContact->adr_city) {
+    		if ($invoicingContact->adr_zip) $addressee .= $invoicingContact->adr_zip." ";
+    		$addressee .= $invoicingContact->adr_city."\n";
+    	}
+    	if ($invoicingContact->adr_state) $addressee .= $invoicingContact->adr_state."\n";
+    	if ($invoicingContact->adr_country) $addressee .= $invoicingContact->adr_country."\n";
     	$pdf->MultiCell(80, 5, $addressee, 0, 'L', 0, 1, '', '', true);
-    	$pdf->Ln();
+    	$pdf->Ln(10);
 
     	// Title
     	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma '.$commitment->invoice_identifier.'</strong></div>';
@@ -1202,19 +1226,24 @@ class CommitmentController extends AbstractActionController
 //    	$pdf->SetDrawColor(128, 0, 0);
     	$pdf->SetLineWidth(0.2);
     	$pdf->SetFont('', '', 9);
-    	if ($commitment->description) {
-	    	$pdf->MultiCell(30, 5, '<strong>Description</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
-	    	$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
-	    	$pdf->MultiCell(145, 5, $commitment->description, 1, 'L', 0, 1, '' ,'', true);
+    	foreach($context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''))['description'] as $line) {
+    		$arguments = array();
+    		foreach($line['params'] as $propertyId) {
+    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
+    			else {
+	    			$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	    			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+	    			if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
+	    			elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
+	    			elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
+	    			elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
+	    			else $arguments[] = $commitment->properties[$propertyId];
+    			}
+    		}
+    		$pdf->MultiCell(30, 5, '<strong>'.$line['left'][$context->getLocale()].'</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
+    		$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
+    		$pdf->MultiCell(145, 5, vsprintf($line['right'][$context->getLocale()], $arguments), 1, 'L', 0, 1, '' ,'', true);
     	}
-    	if ($commitment->caption) {
-	    	$pdf->MultiCell(30, 5, '<strong>Libellé</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
-	    	$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
-	    	$pdf->MultiCell(145, 5, $commitment->caption, 1, 'L', 0, 1, '' ,'', true);
-    	}
-    	$pdf->MultiCell(30, 5, '<strong>Date de facture</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
-	   	$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
-    	$pdf->MultiCell(145, 5, $context->decodeDate(date('Y-m-d')), 1, 'L', 0, 2, '' ,'', true);
     	 
     	// Invoice lines
     	$pdf->Ln(10);
@@ -1241,7 +1270,7 @@ class CommitmentController extends AbstractActionController
     	$color = 0;
     	if ($proforma) {
     		$pdf->Ln();
-    		$pdf->Cell(105, 6, $product->caption, 'LR', 0, 'L', $color);
+    		$pdf->Cell(105, 6, $commitment->product_caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount, 2), 'LR', 0, 'R', $color);
     		$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1250,7 +1279,7 @@ class CommitmentController extends AbstractActionController
     	else {
 	    	if ($commitment->taxable_1_amount != 0) {
 	    		$pdf->Ln();
-	    		$pdf->Cell(105, 6, $product->caption.' (TVA 20%)', 'LR', 0, 'L', $color);
+	    		$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable1Amount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable1Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1258,7 +1287,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($commitment->taxable_2_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' (TVA 10%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1266,7 +1295,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($commitment->taxable_3_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1274,7 +1303,7 @@ class CommitmentController extends AbstractActionController
 	    	}
 	        if ($taxExemptAmount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product->caption.' (exonéré)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $commitment->product_caption.' (exonéré)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
@@ -1357,11 +1386,11 @@ class CommitmentController extends AbstractActionController
     	$pdf->SetFillColor(0, 97, 105);
     	$pdf->SetFont('', '', 8);
     	$pdf->SetTextColor(255);
-    	$pdf->Cell(80, 7, 'Echéance', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Prévue le', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Statut', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Réglée le', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
+    	$pdf->Cell(60, 7, 'Echéance', 1, 0, 'C', 1);
+    	$pdf->Cell(30, 7, 'Prévue le', 1, 0, 'C', 1);
+    	$pdf->Cell(30, 7, 'Statut', 1, 0, 'C', 1);
+    	$pdf->Cell(30, 7, 'Réglée le', 1, 0, 'C', 1);
+    	$pdf->Cell(30, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
     	// Color and font restoration
     	$pdf->SetFillColor(239, 239, 239);
     	$pdf->SetTextColor(0);
@@ -1371,17 +1400,22 @@ class CommitmentController extends AbstractActionController
     	$color = 0;
     	foreach($terms as $term) {
     		if ($term->status == 'settled') $settledAmount += $term->amount;
+    		if ($term->status == 'expected' && $term->due_date < date('Y-m-d')) $pdf->SetTextColor(255, 0, 0); else $pdf->SetTextColor(0);
+    		$meansOfPayment = ($term->means_of_payment) ? $context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term->means_of_payment][$context->getLocale()] : '';
 	    	$pdf->Ln();
-	    	$pdf->Cell(80, 6, $term->caption, 'LR', 0, 'L', $color);
-	    	$pdf->Cell(25, 6, $context->decodeDate($term->due_date), 'LR', 0, 'C', $color);
+	    	$pdf->Cell(60, 6, $term->caption, 'LR', 0, 'L', $color);
+	    	$pdf->Cell(30, 6, $context->decodeDate($term->due_date), 'LR', 0, 'C', $color);
 	    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term->status][$context->getLocale()];
-	    	$pdf->Cell(25, 6, $status, 'LR', 0, 'C', $color);
-	    	$pdf->Cell(25, 6, $context->decodeDate($term->settlement_date), 'LR', 0, 'C', $color);
-	    	$pdf->Cell(25, 6, $context->formatFloat($term->amount, 2), 'LR', 0, 'R', $color);
+	    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
+	    	$pdf->Cell(30, 6, $context->decodeDate($term->settlement_date).(($meansOfPayment) ? ' ('.$meansOfPayment.')' : ''), 'LR', 0, 'L', $color);
+	    	$pdf->Cell(30, 6, $context->formatFloat($term->amount, 2), 'LR', 0, 'R', $color);
 	    	$color = ($color+1)%2;
     	}
     	$pdf->Ln();
     	$pdf->Cell(180, 0, '', 'T');
+
+    	$pdf->SetTextColor(0);
+    	$pdf->SetFont('', 'B');
 
     	$pdf->Ln();
     	$pdf->SetDrawColor(255, 255, 255);

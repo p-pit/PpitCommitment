@@ -68,9 +68,9 @@
 
 <?php if ($commitment->product_identifier) : ?>
 	<div>
-		<a href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
+		<a target="_blank" href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
 		&nbsp;&nbsp;|&nbsp;&nbsp;
-		<a href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>?proforma=true"><?php echo $this->translate('Proforma', 'ppit-commitment', $context->getLocale()) ?></a>
+		<a target="_blank" href="<?php echo $this->url('commitment/invoice', array('type' => $type, 'id' => $commitment->id)) ?>?proforma=true"><?php echo $this->translate('Proforma', 'ppit-commitment', $context->getLocale()) ?></a>
 	</div>
 <?php endif;?>
 
@@ -123,6 +123,7 @@
 	<?php endforeach;?>
 					</select>
 				</td>
+					<input type="hidden" id="product_brand" value="<?php echo $commitment->product_brand ?>" />
 				<td style="text-align: right">
 					<input class="form-control" id="product_caption" value="<?php echo $commitment->product_caption ?>" />
 				</td>
@@ -214,11 +215,11 @@
 					</select>
 				</td>
 				<td style="text-align: right">
-					<input class="form-control" id="option_caption-<?php echo $i ?>" value="1" />
+					<input class="form-control" id="option_caption-<?php echo $i ?>" value="" />
 				</td>
 				<td style="text-align: right">
 					<input type="hidden" id="option_quantity-<?php echo $i ?>" />
-					<input class="form-control" id="input_option_quantity-<?php echo $i ?>" value="" />
+					<input class="form-control" id="input_option_quantity-<?php echo $i ?>" value="1" />
 				</td>
 				<td style="text-align: right">
 					<input type="hidden" id="option_unit_price-<?php echo $i ?>" />

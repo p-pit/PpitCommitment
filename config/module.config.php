@@ -1006,7 +1006,18 @@ return array(
 	'commitmentAccount/detail' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
-			'tabs' => array(),
+			'tabs' => array(
+					'contact_1' => array(
+							'route' => 'commitmentAccount/update',
+							'params' => array('type' => ''),
+							'labels' => array('en_US' => 'Main contact', 'fr_FR' => 'Contact principal'),
+					),
+					'contact_2' => array(
+							'route' => 'commitmentAccount/updateContact',
+							'params' => array('type' => '', 'contactNumber' => 2),
+							'labels' => array('en_US' => 'Invoicing', 'fr_FR' => 'Facturation'),
+					),
+			),
 	),
 	'commitmentAccount/update' => array(
 			'status' => array('mandatory' => true),
@@ -1093,6 +1104,13 @@ return array(
 									'fr_FR' => 'Montant',
 							),
 					),
+					'invoice_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Invoice date',
+									'fr_FR' => 'Date de facture',
+							),
+					),
 			),
 			'order' => 'customer_name ASC',
 			'todo' => array(
@@ -1155,6 +1173,32 @@ return array(
 	'commitment/update' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
+	),
+
+	'commitment/invoice' => array(
+			'header' => array(
+					array(
+							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('customer_name'),
+					),
+			),
+			'description' => array(
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
+					),
+					array(
+							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('invoice_date'),
+					),
+			),
 	),
 		
 	'commitment/try' => array(
@@ -1670,7 +1714,7 @@ Commandes enregistrées %s : %s
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
-									'expected' => array('fr_FR' => 'Facturé', 'en_US' => 'Invoiced'),
+									'expected' => array('fr_FR' => 'Attendu', 'en_US' => 'Expected'),
 									'settled' => array('fr_FR' => 'Réglé', 'en_US' => 'Settled'),
 									'collected' => array('fr_FR' => 'Encaissé', 'en_US' => 'Collected'),
 							),
@@ -1719,7 +1763,7 @@ Commandes enregistrées %s : %s
 					'means_of_payment' => array(
 							'type' => 'select',
 							'modalities' => array(
-									'bank_card' => array('fr_FR' => 'Carte bancaire', 'en_US' => 'Bank card'),
+									'bank_card' => array('fr_FR' => 'CB', 'en_US' => 'Bank card'),
 									'transfer' => array('fr_FR' => 'Virement', 'en_US' => 'Transfer'),
 									'check' => array('fr_FR' => 'Chèque', 'en_US' => 'Check'),
 									'cash' => array('fr_FR' => 'Espèces', 'en_US' => 'Cash'),

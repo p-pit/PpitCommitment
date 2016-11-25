@@ -245,6 +245,7 @@ function fillRowPrice() {
 	<?php if (array_key_exists(0, $product->variants)) : ?>
 	if ($('#product_identifier').val() == "<?php echo $product->reference ?>") {
 		$('#input_unit_price').val('<?php echo $product->variants[0]['price'] ?>');
+		$('#product_brand').val("<?php echo $product->brand ?>");
 		$('#product_caption').val("<?php echo $product->caption ?>");
 	}
 	<?php endif;?>
@@ -293,7 +294,7 @@ function connectCommitmentUpdateProductForm(id)
 			}
 		}
 		
-// Option caption
+// Product caption
 		val = $('#product_caption').val();
 	    if (val.length > 255) {
 			$('#rows-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
@@ -335,6 +336,7 @@ function connectCommitmentUpdateProductForm(id)
 			// Create a new FormData object.
 			var formData = new FormData();
 			formData.append('product_identifier', $('#product_identifier').val());
+			formData.append('product_brand', $('#product_brand').val());
 			formData.append('product_caption', $('#product_caption').val());
 			formData.append('quantity', $('#quantity').val());
 			formData.append('unit_price', $('#unit_price').val());

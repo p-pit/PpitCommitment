@@ -1,6 +1,6 @@
 <h4 style="text-align: center"><strong><?php echo $this->translate('Contact', 'ppit-contact', $context->getLocale()) ?>: <?php echo $context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['tabs'][$contactNumber]['labels'][$context->getLocale()] ?></strong></h4>
 
-<?php if ($contact->id) : ?>
+<?php if ($contact->id && !$message) : ?>
 		<button type="button" class="btn btn-default action-btn" id="account-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>

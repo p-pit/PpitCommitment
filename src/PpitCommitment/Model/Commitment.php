@@ -37,6 +37,7 @@ class Commitment implements InputFilterAwareInterface
 	public $caption;
 	public $description;
 	public $product_identifier;
+	public $product_brand;
 	public $product_caption;
 	public $quantity;
 	public $unit_price;
@@ -143,6 +144,7 @@ class Commitment implements InputFilterAwareInterface
         $this->quantity = (isset($data['quantity'])) ? $data['quantity'] : null;
         $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
         $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
+        $this->product_brand = (isset($data['product_brand'])) ? $data['product_brand'] : null;
         $this->product_caption = (isset($data['product_caption'])) ? $data['product_caption'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->taxable_1_amount = (isset($data['taxable_1_amount'])) ? $data['taxable_1_amount'] : null;
@@ -226,6 +228,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
     	$data['product_identifier'] = $this->product_identifier;
+    	$data['product_brand'] = $this->product_brand;
     	$data['product_caption'] = $this->product_caption;
     	$data['quantity'] = $this->quantity;
     	$data['unit_price'] = $this->unit_price;
@@ -478,6 +481,11 @@ class Commitment implements InputFilterAwareInterface
 		if (array_key_exists('product_caption', $data)) {
 			$this->product_caption = trim(strip_tags($data['product_caption']));
 			if (strlen($this->product_caption) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('product_brand', $data)) {
+			$this->product_brand = trim(strip_tags($data['product_brand']));
+			if (strlen($this->product_brand) > 255) return 'Integrity';
 		}
 		
 		if (array_key_exists('product_identifier', $data)) {
