@@ -40,6 +40,7 @@ class Account implements InputFilterAwareInterface
     public $property_9;
     public $property_10;
     public $json_property_1;
+    public $json_property_2;
     public $audit;
     public $update_time;
         
@@ -111,6 +112,7 @@ class Account implements InputFilterAwareInterface
         $this->property_9 = (isset($data['property_9'])) ? $data['property_9'] : null;
         $this->property_10 = (isset($data['property_10'])) ? $data['property_10'] : null;
         $this->json_property_1 = (isset($data['json_property_1'])) ? json_decode($data['json_property_1'], true) : null;
+        $this->json_property_2 = (isset($data['json_property_2'])) ? json_decode($data['json_property_2'], true) : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
@@ -154,6 +156,7 @@ class Account implements InputFilterAwareInterface
     	$data['property_9'] =  ($this->property_9) ? $this->property_9 : null;
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
     	$data['json_property_1'] = json_encode($this->json_property_1);
+    	$data['json_property_2'] = json_encode($this->json_property_2);
     	$data['audit'] = json_encode($this->audit);
     	return $data;
     }
@@ -191,7 +194,7 @@ class Account implements InputFilterAwareInterface
 
 		foreach ($cursor as $account) {
 			$account->properties = $account->toArray();
-			
+
 			// Filter on authorized perimeter
 			if (array_key_exists($type, $context->getPerimeters())) {
 				$keep = true;
@@ -266,6 +269,7 @@ class Account implements InputFilterAwareInterface
 		$account->customer_community = Community::instanciate();
 		$account->contact_1 = Vcard::instanciate();
 		$account->json_property_1 = array();
+		$account->json_property_2 = array();
 		$account->is_notified = 1;
 		$account->locale = 'fr_FR';
 		return $account;
@@ -365,7 +369,10 @@ class Account implements InputFilterAwareInterface
     		if (array_key_exists('json_property_1', $data)) {
 				$this->json_property_1 = $data['json_property_1'];
 			}
-            if (array_key_exists('is_notified', $data)) {
+        	if (array_key_exists('json_property_2', $data)) {
+				$this->json_property_2 = $data['json_property_2'];
+			}
+			if (array_key_exists('is_notified', $data)) {
 				$this->is_notified = $data['is_notified'];
 			}
             if (array_key_exists('locale', $data)) {
