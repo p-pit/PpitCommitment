@@ -20,9 +20,6 @@
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url('commitment/index', array('type' => $type)) ?>?account_id=<?php echo $params['account_id'] ?>">
 				<?php echo $this->translate('Invoices', 'ppit-commitment', $context->getLocale()) ?>
 			</button>
-			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url($route, array('account_id' => $params['account_id'])) ?>">
-				<span class="glyphicon glyphicon-plus" id="add-glyphicon">Old</span>
-			</button>
 		</td>
 	</tr>
 
@@ -50,14 +47,6 @@
 				<span class="glyphicon glyphicon-trash" id="<?php echo $commitment->id ?>-delete-glyphicon"></span>
 			</button>
 		</td>
-
-	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'] as $route => $params) : ?>
-		<td>
-			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $params['labels'][$context->getLocale()] ?>" id="<?php echo $this->url($route, array('eid' => $commitment->identifier)) ?>">
-				<span class="glyphicon <?php echo $params['glyphicon'] ?>" id="<?php echo $commitment->id ?>-glyphicon">Old</span>
-			</button>
-		</td>
-	<?php endforeach;?>
 
 	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors'] as $route => $params) : ?>
 		<td>

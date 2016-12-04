@@ -1881,10 +1881,6 @@ Commandes enregistrées %s : %s
 						'entries' => array(
 						),
 				),
-				'bill' => array(
-						'type' => 'btn',
-						'labels' => array('en_US' => 'Bill', 'fr_FR' => 'Facture'),
-				),
 			),
 	),
 	'commitment/consumeCredit' => array(

@@ -342,14 +342,14 @@ class CommitmentController extends AbstractActionController
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['attributed_credits'] = array('p-pit-studies' => null, 'p-pit-engagements' => null);
+    			$data['attributed_credits'] = array('p-pit-engagements' => true, 'p-pit-studies' => true);
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
     			$data['email'] = $request->getPost('email');
     			$data['tel_work'] = $request->getPost('tel_work');
     			$data['tel_cell'] = null;
-    			$data['roles'] = array('admin' => true, 'manager' => true);
+    			$data['roles'] = array('admin' => true, 'sales_manager' => true, 'manager' => true);
     			$data['is_notified'] = 1;
     			$rc = $contact->loadData($data);
     			if ($rc != 'OK') throw new \Exception('View error');

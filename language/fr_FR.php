@@ -84,6 +84,7 @@
 			'Subscribe' => 'Souscrire',
 			'Subscription' => 'Souscription',
 			'Sum' => 'Total',
+			'Summary' => 'Synthèse',
 			'Targeting' => 'Ciblage',
 			'Tax excl.' => 'HT',
 			'Tax incl.' => 'TTC',
