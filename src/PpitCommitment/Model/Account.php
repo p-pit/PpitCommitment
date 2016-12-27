@@ -1,12 +1,12 @@
 <?php
 namespace PpitCommitment\Model;
 
-use PpitContact\Model\Community;
-use PpitContact\Model\Vcard;
+use PpitCore\Model\Community;
+use PpitCore\Model\Vcard;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
+use PpitCore\Model\Place;
 use PpitDocument\Model\Document;
-use PpitMasterData\Model\Place;
 use PpitUser\Model\User;
 use PpitUser\Model\UserContact;
 use Zend\Db\Sql\Where;
@@ -45,7 +45,7 @@ class Account implements InputFilterAwareInterface
     public $update_time;
         
     // Joined properties
-    public $place_name;
+    public $place_caption;
     public $customer_name;
     public $customer_status;
     public $contact_1_id;
@@ -63,11 +63,16 @@ class Account implements InputFilterAwareInterface
     public $place;
 	public $customer_community;
 	public $supplier_community;
-	public $contact_1;
-	public $contact_2;
-	public $contact_3;
-	public $contact_4;
-	public $contact_5;
+    public $contact_1;
+    public $contact_1_status;
+    public $contact_2;
+    public $contact_2_status;
+    public $contact_3;
+    public $contact_3_status;
+    public $contact_4;
+    public $contact_4_status;
+    public $contact_5;
+    public $contact_5_status;
 	public $properties;
     public $files;
 	public $comment;
@@ -117,7 +122,7 @@ class Account implements InputFilterAwareInterface
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
         // Joined properties
-        $this->place_name = (isset($data['place_name'])) ? $data['place_name'] : null;
+        $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
         $this->customer_status = (isset($data['customer_status'])) ? $data['customer_status'] : null;
         $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
@@ -166,10 +171,10 @@ class Account implements InputFilterAwareInterface
     	$context = Context::getCurrent();
 
     	$select = Account::getTable()->getSelect()
-			->join('md_place', 'commitment_account.place_id = md_place.id', array('place_name' => 'name'), 'left')
-			->join(array('supplier' => 'contact_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'contact_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id'), 'left')
-			->join('contact_vcard', 'customer.contact_1_id = contact_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell'), 'left')
+			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
+			->join(array('supplier' => 'core_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
+			->join(array('customer' => 'core_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id'), 'left')
+			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
@@ -219,7 +224,7 @@ class Account implements InputFilterAwareInterface
     	if (!$account) return null;
     	// Retrieve the place, the customer and the supplier
     	$account->place = Place::getTable()->get($account->place_id);
-    	if ($account->place) $account->place_name = $account->place->name;
+    	if ($account->place) $account->place_caption = $account->place->caption;
     	if ($account->supplier_community_id) {
     		$account->supplier_community = Community::getTable()->get($account->supplier_community_id);
 	    	$account->supplier_name = $account->supplier_community->name;
@@ -230,7 +235,8 @@ class Account implements InputFilterAwareInterface
     		$account->customer_status = $account->customer_community->status;
     		if ($account->customer_community->contact_1_id) {
 	    		$account->contact_1_id = $account->customer_community->contact_1_id;
-		    	$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
+	    		$account->contact_1_status = $account->customer_community->contact_1_status;
+	    		$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
 		    	$account->n_first = $account->contact_1->n_first;
 		    	$account->n_last = $account->contact_1->n_last;
 		    	$account->email = $account->contact_1->email;
@@ -247,19 +253,80 @@ class Account implements InputFilterAwareInterface
 		    		$user = User::get($userContact->user_id);
 		    		$account->user = $user;
 		    	}
-		    	else $account->user = User::instanciate();
+		    	if (!$account->user) $account->user = User::instanciate();
 		    	$account->username = $account->user->username;
 	    	}
-	        if ($account->customer_community->contact_2_id) $account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
-	        if ($account->customer_community->contact_3_id) $account->contact_3 = Vcard::get($account->customer_community->contact_3_id);
-	        if ($account->customer_community->contact_4_id) $account->contact_4 = Vcard::get($account->customer_community->contact_4_id);
-	        if ($account->customer_community->contact_5_id) $account->contact_5 = Vcard::get($account->customer_community->contact_5_id);
+	        if ($account->customer_community->contact_2_id) {
+	        	$account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
+	    		$account->contact_2_status = $account->customer_community->contact_2_status;
+	        }
+	        if ($account->customer_community->contact_3_id) {
+	        	$account->contact_3 = Vcard::get($account->customer_community->contact_3_id);
+	    		$account->contact_3_status = $account->customer_community->contact_3_status;
+	        }
+	        if ($account->customer_community->contact_4_id) {
+	        	$account->contact_4 = Vcard::get($account->customer_community->contact_4_id);
+	    		$account->contact_4_status = $account->customer_community->contact_4_status;
+	        }
+	        if ($account->customer_community->contact_5_id) {
+	        	$account->contact_5 = Vcard::get($account->customer_community->contact_5_id);
+	    		$account->contact_5_status = $account->customer_community->contact_5_status;
+	        }
     	}
         $account->properties = $account->toArray();
 
     	return $account;
     }
 
+    public static function getArray($id, $column = 'id')
+    {
+    	$account = Account::get($id, $column);
+    
+    	if (!$account) return null;
+    	$data = $account->toarray();
+
+    	// Retrieve the place, the customer and the supplier
+    	$data['place'] = $account->place;
+    	$data['place_caption'] = $account->place_caption;
+    	if ($account->supplier_community_id) {
+    		$data['supplier_community'] = $account->supplier_community;
+    		$data['supplier_name'] = $account->supplier_name;
+    	}
+    	if ($account->customer_community_id) {
+    		$data['customer_community'] = $account->customer_community;
+    		$data['customer_name'] = $account->customer_name;
+    		$data['customer_status'] = $account->customer_status;
+    		if ($account->customer_community->contact_1_id) {
+    			$data['contact_1_id'] = $account->contact_1_id;
+    			$data['constact_1_status'] = $account->contact_1_status;
+    			$data['contact_1'] = $account->contact_1->toArray();
+    		  
+    			if ($account->userContact) {
+    				$data['userContact'] = $account->userContact->toArray();
+    				$data['user'] = $account->user;
+    			}
+    			$data['username'] = $account->username;
+    		}
+    		if ($account->customer_community->contact_2_id) {
+    			$data['contact_2'] = $account->contact_2->toArray();
+    			$data['contact_2_status'] = $account->contact_2_status;
+    		}
+    	    if ($account->customer_community->contact_3_id) {
+    			$data['contact_3'] = $account->contact_3->toArray();
+    			$data['contact_3_status'] = $account->contact_3_status;
+    		}
+    	    if ($account->customer_community->contact_4_id) {
+    			$data['contact_4'] = $account->contact_4->toArray();
+    			$data['contact_4_status'] = $account->contact_4_status;
+    		}
+    	    if ($account->customer_community->contact_5_id) {
+    			$data['contact_5'] = $account->contact_5->toArray();
+    			$data['contact_5_status'] = $account->contact_5_status;
+    		}
+    	}
+    	return $data;
+    }
+    
     public static function instanciate($type = null)
     {
 		$account = new Account;
@@ -423,6 +490,15 @@ class Account implements InputFilterAwareInterface
     	return 'OK';
     }
 
+    public function isUsed($object)
+    {
+    	// Allow or not deleting a place
+    	if (get_class($object) == 'PpitCore\Model\PLace') {
+    		if (Generic::getTable()->cardinality('commitment_account', array('place_id' => $object->id)) > 0) return true;
+    	}
+    	return false;
+    }
+    
     public function isDeletable()
     {
     	$context = Context::getCurrent();

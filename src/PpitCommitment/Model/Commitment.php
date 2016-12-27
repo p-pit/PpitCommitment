@@ -4,16 +4,16 @@ namespace PpitCommitment\Model;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
-use PpitContact\Model\Community;
-use PpitContact\Model\Vcard;
+use PpitCore\Model\Community;
+use PpitCore\Model\Vcard;
 use PpitContact\Model\ContactMessage;
 use PpitCore\Model\Context;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Instance;
+use PpitCore\Model\Place;
 use PpitDocument\Model\Document;
 use PpitEquipment\Model\Area;
 use PpitMasterData\Model\ProductOption;
-use PpitMasterData\Model\Place;
 use PpitMasterData\Model\OrgUnit;
 use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;
@@ -47,6 +47,9 @@ class Commitment implements InputFilterAwareInterface
 	public $taxable_3_amount;
 	public $options;
 	public $including_options_amount;
+	public $taxable_1_total;
+	public $taxable_2_total;
+	public $taxable_3_total;
 	public $cgv;
 	public $identifier;
 	public $quotation_identifier;
@@ -87,7 +90,11 @@ class Commitment implements InputFilterAwareInterface
 	public $property_19;
 	public $property_20;
 	public $audit = array();
+	public $excluding_tax;
 	public $tax_regime;
+	public $tax_1_amount;
+	public $tax_2_amount;
+	public $tax_3_amount;
 	public $tax_amount;
 	public $tax_inclusive;
 	public $commitment_message_id;
@@ -150,8 +157,11 @@ class Commitment implements InputFilterAwareInterface
         $this->taxable_1_amount = (isset($data['taxable_1_amount'])) ? $data['taxable_1_amount'] : null;
         $this->taxable_2_amount = (isset($data['taxable_2_amount'])) ? $data['taxable_2_amount'] : null;
         $this->taxable_3_amount = (isset($data['taxable_3_amount'])) ? $data['taxable_3_amount'] : null;
-        $this->options = (isset($data['options'])) ? json_decode($data['options'], true) : null;
+        $this->options = (isset($data['options'])) ? ((is_array($data['options'])) ? $data['options'] : json_decode($data['options'], true)) : null;
         $this->including_options_amount = (isset($data['including_options_amount'])) ? $data['including_options_amount'] : null;
+        $this->taxable_1_total = (isset($data['taxable_1_total'])) ? $data['taxable_1_total'] : null;
+        $this->taxable_2_total = (isset($data['taxable_2_total'])) ? $data['taxable_2_total'] : null;
+        $this->taxable_3_total = (isset($data['taxable_3_total'])) ? $data['taxable_3_total'] : null;
         $this->cgv = (isset($data['cgv'])) ? $data['cgv'] : null;
         $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
         $this->quotation_identifier = (isset($data['quotation_identifier'])) ? $data['quotation_identifier'] : null;
@@ -192,7 +202,11 @@ class Commitment implements InputFilterAwareInterface
         $this->property_19 = (isset($data['property_19'])) ? $data['property_19'] : null;
         $this->property_20 = (isset($data['property_20'])) ? $data['property_20'] : null;
         $this->audit = (isset($data['audit'])) ? ((is_array($data['audit'])) ? $data['audit'] : json_decode($data['audit'], true)) : array();
+        $this->excluding_tax = (isset($data['excluding_tax'])) ? $data['excluding_tax'] : null;
         $this->tax_regime = (isset($data['tax_regime'])) ? $data['tax_regime'] : null;
+        $this->tax_1_amount = (isset($data['tax_1_amount'])) ? $data['tax_1_amount'] : null;
+        $this->tax_2_amount = (isset($data['tax_2_amount'])) ? $data['tax_2_amount'] : null;
+        $this->tax_3_amount = (isset($data['tax_3_amount'])) ? $data['tax_3_amount'] : null;
         $this->tax_amount = (isset($data['tax_amount'])) ? $data['tax_amount'] : null;
         $this->tax_inclusive = (isset($data['tax_inclusive'])) ? $data['tax_inclusive'] : null;
         $this->commitment_message_id = (isset($data['commitment_message_id'])) ? $data['commitment_message_id'] : null;
@@ -238,6 +252,9 @@ class Commitment implements InputFilterAwareInterface
     	$data['taxable_3_amount'] = $this->taxable_3_amount;
     	$data['options'] = json_encode($this->options);
     	$data['including_options_amount'] = $this->including_options_amount;
+    	$data['taxable_1_total'] = $this->taxable_1_total;
+    	$data['taxable_2_total'] = $this->taxable_2_total;
+    	$data['taxable_3_total'] = $this->taxable_3_total;
     	$data['cgv'] = $this->cgv;
     	$data['identifier'] = $this->identifier;
     	$data['quotation_identifier'] = $this->quotation_identifier;
@@ -278,7 +295,11 @@ class Commitment implements InputFilterAwareInterface
     	$data['property_19'] = $this->property_19;
     	$data['property_20'] = $this->property_20;
     	$data['audit'] = json_encode($this->audit);
+    	$data['excluding_tax'] = $this->excluding_tax;
     	$data['tax_regime'] = $this->tax_regime;
+    	$data['tax_1_amount'] = $this->tax_1_amount;
+    	$data['tax_2_amount'] = $this->tax_2_amount;
+    	$data['tax_3_amount'] = $this->tax_3_amount;
     	$data['tax_amount'] = $this->tax_amount;
     	$data['tax_inclusive'] = $this->tax_inclusive;
     	$data['commitment_message_id'] = $this->commitment_message_id;
@@ -298,7 +319,7 @@ class Commitment implements InputFilterAwareInterface
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
     		->join('commitment_account', 'commitment.account_id = commitment_account.id', array(), 'left')
-    		->join('contact_community', 'commitment_account.customer_community_id = contact_community.id', array('customer_name' => 'name'), 'left')
+    		->join('core_community', 'commitment_account.customer_community_id = core_community.id', array('customer_name' => 'name'), 'left')
     		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
     	
     	$where = new Where();
@@ -327,7 +348,7 @@ class Commitment implements InputFilterAwareInterface
 			foreach ($params as $propertyId => $property) {
 				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
-				elseif ($propertyId == 'customer_name') $where->like('contact_community.name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'customer_name') $where->like('core_community.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -369,6 +390,26 @@ class Commitment implements InputFilterAwareInterface
     	foreach ($commitment->terms as $term) $commitment->termSum += $term->amount;
 
     	return $commitment;
+    }
+
+    public static function getArray($id, $column = 'id')
+    {
+    	$commitment = Commitment::getTable()->get($id, $column);
+    	$commitment->terms = Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search');
+    	$commitment->termSum = 0;
+    	foreach ($commitment->terms as $term) $commitment->termSum += $term->amount;
+    	$data = $commitment->toarray();
+        if ($commitment->account_id) {
+	    	$data['account'] = Account::getArray($commitment->account_id);
+	    	$community = Community::get($data['account']['customer_community_id']);
+	    	$data['customer_name'] = $community->name;
+    	}
+/*    	if ($commitment->account->contact_1) $data['account']['contact_1'] = $commitment->account->contact_1->toArray();
+    	if ($commitment->account->contact_2) $data['account']['contact_2'] = $commitment->account->contact_2->toArray();
+    	if ($commitment->account->contact_3) $data['account']['contact_3'] = $commitment->account->contact_3->toArray();
+    	if ($commitment->account->contact_4) $data['account']['contact_4'] = $commitment->account->contact_4->toArray();
+    	if ($commitment->account->contact_5) $data['account']['contact_5'] = $commitment->account->contact_5->toArray();*/
+    	return $data;
     }
 
     public function computeDeadlines()
@@ -450,6 +491,36 @@ class Commitment implements InputFilterAwareInterface
     	return $commitment;
     }
 
+    public function computeFooter() {
+    	$context = Context::getCurrent();
+    	$this->including_options_amount = $this->amount;
+    	$this->taxable_1_total = $this->taxable_1_amount;
+    	$this->taxable_2_total = $this->taxable_2_amount;
+    	$this->taxable_3_total = $this->taxable_3_amount;
+    	foreach($this->options as $option) {
+    		$this->including_options_amount += $option['amount'];
+    		if ($option['vat_id'] == 1) $this->taxable_1_total += $option['amount'];
+    		if ($option['vat_id'] == 2) $this->taxable_2_total += $option['amount'];
+    		if ($option['vat_id'] == 3) $this->taxable_3_total += $option['amount'];
+    	}
+    	if ($context->getConfig('commitment/'.$this->type)['tax'] == 'excluding') {
+    		$this->excluding_tax = $this->including_options_amount;
+    		$this->tax_1_amount = round($this->taxable_1_total * 0.2, 2);
+    		$this->tax_2_amount = round($this->taxable_2_total * 0.1, 2);
+    		$this->tax_3_amount = round($this->taxable_3_total * 0.055, 2);
+    		$this->tax_amount = $this->tax_1_amount + $this->tax_2_amount + $this->tax_3_amount;
+    		$this->tax_inclusive = $this->excluding_tax + $this->tax_amount;
+    	}
+    	else {
+    		$this->tax_inclusive = $this->including_options_amount;
+    		$this->tax_1_amount = $this->taxable_1_total - round($this->taxable_1_total / 1.2, 2);
+    		$this->tax_2_amount = $this->taxable_2_total - round($this->taxable_2_total / 1.1, 2);
+    		$this->tax_3_amount = $this->taxable_3_total - round($this->taxable_3_total / 1.055, 2);
+    		$this->tax_amount = $this->tax_1_amount + $this->tax_2_amount + $this->tax_3_amount;
+    		$this->excluding_tax = $this->tax_inclusive - $this->tax_amount;
+    	}
+    }
+    
     public function loadData($data, $files = null) 
     {
     	$context = Context::getCurrent();
@@ -535,8 +606,8 @@ class Commitment implements InputFilterAwareInterface
     			}
     		}
 		}
-		$this->including_options_amount = $this->amount;
-		foreach($this->options as $option) $this->including_options_amount += $option['amount'];
+		
+		$this->computeFooter();
 		
 		if (array_key_exists('cgv', $data)) {
 			$this->cgv = trim(strip_tags($data['cgv']));
@@ -1138,7 +1209,7 @@ class Commitment implements InputFilterAwareInterface
     		elseif ($credit->quantity >= 0 && $credit->quantity - $counter7 < 0) {
     
     			// Log
-    			$logText = 'ALERT : Risk of credits lacking for P-PIT Communities on instance '.$credit->instance_id.'. Available='.$credit->quantity.', 7 days estimation='.$counter7;
+    			$logText = 'ALERT : Risk of credits lacking for P-PIT Commitments on instance '.$credit->instance_id.'. Available='.$credit->quantity.', 7 days estimation='.$counter7;
     			if ($live) $logger->info($logText);
     			else print_r($logText."\n");
     

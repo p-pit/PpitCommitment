@@ -1,4 +1,4 @@
-<?php if ($commitment->id) : ?>
+<?php if ($commitment->id && !$message) : ?>
 		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>
@@ -63,10 +63,15 @@ if ($commitment->id && $action != 'update' || $message == 'OK') $isDisabled = tr
 
 <?php foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) : ?>
 	<?php 
-	$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
+		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	}
+	else {
+		$property = $context->getConfig('commitment')['properties'][$propertyId];
+	}
 	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	?>
-		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+		<div class="form-group" id="commitment-<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 

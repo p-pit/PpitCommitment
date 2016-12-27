@@ -1,4 +1,12 @@
 <table class="table table-striped ppit_index">
+
+	<tr class="to-mask"><td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) +1 ?>">&nbsp;</td></tr>	
+	<tr style="font-weight: bold">
+		<td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) - 1 ?>">&nbsp;</td>
+		<td style="text-align: right"><?php echo $this->translate('Turnover', 'ppit-commitment', $context->getLocale()) ?></td>
+		<td style="text-align: right"><?php echo $context->formatFloat($turnover, 2) ?></td>
+	</tr>
+
 	<tr>
 		<th>&nbsp;</th>
 
@@ -20,7 +28,7 @@
 	<?php if ($context->isAllowed('commitment/detail')) : ?>
 	
 	<tr <?php if ($commitment->credit_status == 'blocked') echo 'style="font-style: italic"' ?>>
-		<td colspan="6">
+		<td colspan="<?php echo 1 + count($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')))?>">
 			<strong><?php echo $commitment->customer_name ?></strong> -
 			<?php echo $commitment->caption ?>
 			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate('blocked', 'ppit-commitment', $context->getLocale()).')' ?>

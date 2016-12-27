@@ -3,7 +3,7 @@ namespace PpitCommitment\Model;
 
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
-use PpitContact\Model\Community;
+use PpitCore\Model\Community;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use Zend\Db\Sql\Where;
@@ -97,7 +97,7 @@ class Term implements InputFilterAwareInterface
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
     		->join('commitment_account', 'commitment_account.id = commitment.account_id', array(), 'left')
-    		->join('contact_community', 'contact_community.id = commitment_account.customer_community_id', array('name'), 'left')
+    		->join('core_community', 'core_community.id = commitment_account.customer_community_id', array('name'), 'left')
 			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
 		$where->notEqualTo('commitment_term.status', 'deleted');
@@ -110,7 +110,7 @@ class Term implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'name') $where->like('contact_community.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'name') $where->like('core_community.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');

@@ -1,12 +1,10 @@
 <?php
 namespace PpitCommitment\Model;
 
-use PpitContact\Model\Community;
-use PpitContact\Model\Vcard;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
+use PpitCore\Model\Place;
 use PpitDocument\Model\Document;
-use PpitMasterData\Model\Place;
 use PpitUser\Model\User;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;

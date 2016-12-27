@@ -15,7 +15,7 @@
 <?php $route = $context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['addRoute']?>
 		<td colspan="<?php echo $colspan ?>">
 			<button type="button" class="btn btn-default action-btn btn-xs commitment-add-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-add">
-				<span class="glyphicon glyphicon-plus" id="<?php echo $commitment->id ?>-newadd-glyphicon"></span>
+				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url('commitment/index', array('type' => $type)) ?>?account_id=<?php echo $params['account_id'] ?>">
 				<?php echo $this->translate('Invoices', 'ppit-commitment', $context->getLocale()) ?>
@@ -51,7 +51,7 @@
 	<?php foreach ($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors'] as $route => $params) : ?>
 		<td>
 		<?php if ($params['type'] == 'btn') : ?>
-			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->identifier)) ?>">
+			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" id="<?php echo $this->url($route, array('id' => $commitment->id)) ?>" <?php if (!$context->isAllowed($route)) echo 'disabled="disabled"' ?>>
 				<?php echo $params['labels'][$context->getLocale()] ?> Old
 			</button>
 		<?php elseif ($params['type'] == 'nav') : ?>
@@ -60,7 +60,9 @@
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><?php echo $params['labels'][$context->getLocale()] ?> <span class="caret"></span></a>
 		          <ul class="dropdown-menu">
 			<?php foreach ($params['entries'] as $childRoute => $childParams) : ?>
-		          	<li class="dropdown-item"><a class="account-list-anchor" id="<?php echo $this->url($childRoute, array('id' => $commitment->identifier)) ?>" href="#"><?php echo $childParams['labels'][$context->getLocale()] ?></a></li>
+				 <?php if ($context->isAllowed($childRoute)) : ?>
+		          	<li class="dropdown-item"><a class="account-list-anchor" id="<?php echo $this->url($childRoute, array('id' => $commitment->id)) ?>" href="#"><?php echo $childParams['labels'][$context->getLocale()] ?></a></li>
+		         <?php endif;?>
 		    <?php endforeach;?>
 		          </ul>
 		        </li>

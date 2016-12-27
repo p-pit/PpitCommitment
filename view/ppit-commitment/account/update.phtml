@@ -78,9 +78,23 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 	<?php elseif ($propertyId == 'email') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
+	<?php elseif ($propertyId == 'tel_work') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->tel_work ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
+	<?php elseif ($propertyId == 'tel_cell') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->tel_cell ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			
 	<?php elseif ($propertyId == 'birth_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->contact_1->birth_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
+	<?php elseif ($propertyId == 'place_id') : ?>
+				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+	    			<option />
+		<?php foreach ($places as $place) : ?>
+	    			<option value="<?php echo $place->id ?>" <?php if ($account->properties[$propertyId] == $place->id) echo 'selected="selected"' ?>><?php echo $place->caption ?></option>
+		<?php endforeach;?>
+				</select>
 
 	<?php elseif ($propertyId == 'closing_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />

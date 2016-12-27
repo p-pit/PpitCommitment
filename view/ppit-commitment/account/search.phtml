@@ -9,7 +9,7 @@
 		</strong>
 	
 <?php if ($context->isDemoModeActive()) : ?>
-			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/index'.(($type) ? '/'.$type : '').'/title'][$context->getLocale()] ?>">
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/search'.(($type) ? '/'.$type : '').'/title'][$context->getLocale()] ?>">
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 <?php endif;?>
@@ -19,7 +19,14 @@
 <!-- Filters -->
 
 		<div class="form-group">
-			<label class="col-sm-5 control-label"><span class="glyphicon glyphicon-search"></span></label>
+			<label class="col-sm-4 control-label"><span class="glyphicon glyphicon-search"></span></label>
+			<div class="col-sm-1 control-label">
+<?php if ($context->isDemoModeActive()) : ?>
+				<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/search/x'][$context->getLocale()] ?>">
+				    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+				</a>
+<?php endif;?>
+			</div>
 			<div class="col-sm-7">
 	    		<button type="button" class="form-control btn btn-default btn-xs" title="<?php echo $this->translate('Erase', 'ppit-core', $context->getLocale()) ?>" id="erase-button">
 					<span class="glyphicon glyphicon-remove"></span>
@@ -64,7 +71,10 @@
 		$modalities = array();
 		
 		if ($property['type'] == 'select') {
-			foreach ($property['modalities'] as $modalityId => $modality) {
+			if ($propertyId == 'place_id') foreach ($places as $place) {
+				$modalities[$place->id] = $place->caption;
+			} 
+			else foreach ($property['modalities'] as $modalityId => $modality) {
 				$modalities[$modalityId] = $modality[$context->getLocale()];
 			}
 		}
@@ -156,6 +166,11 @@
 					<span class="glyphicon glyphicon-cloud-download"></span>
 					<span><?php echo $this->translate('Export', 'ppit-core', $context->getLocale())?></span>
 				</button>
+<?php if ($context->isDemoModeActive()) : ?>
+				<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/search/export'][$context->getLocale()] ?>">
+				    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+				</a>
+<?php endif;?>
 	    </div>
 	    
 		<div>&nbsp;</div>

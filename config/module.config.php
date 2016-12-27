@@ -431,9 +431,18 @@ return array(
         				'notify' => array(
         						'type' => 'segment',
         						'options' => array(
-        									'route' => '/notify',
+        								'route' => '/notify',
         								'defaults' => array(
         										'action' => 'notify',
+        								),
+        						),
+        				),
+        				'rephase' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/rephase',
+        								'defaults' => array(
+        										'action' => 'rephase',
         								),
         						),
         				),
@@ -531,6 +540,18 @@ return array(
             								),
 	        								'defaults' => array(
 	        										'action' => 'paymentAutoresponse',
+	        								),
+	        						),
+	        				),
+	        				'invoiceGet' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/invoice-get[/:id]',
+            								'constraints' => array(
+            										'id'     => '[0-9]*',
+            								),
+	        								'defaults' => array(
+	        										'action' => 'invoiceGet',
 	        								),
 	        						),
 	        				),
@@ -737,6 +758,7 @@ return array(
             	array('route' => 'commitment/paymentResponse', 'roles' => array('accountant')),
             	array('route' => 'commitment/delete', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
+            	array('route' => 'commitment/rephase', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/download', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/index', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/search', 'roles' => array('admin')),
@@ -745,6 +767,7 @@ return array(
             	array('route' => 'commitmentMessage/commitmentGet', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/commitmentPost', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/paymentAutoresponse', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/invoiceGet', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/addPhotograph', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
@@ -883,6 +906,10 @@ return array(
 	),
 	
 	'currentApplication' => 'ppitCommitment',
+
+	'ppitCoreDependencies' => array(
+			'commitment_account' => new \PpitCommitment\Model\Account,
+	),
 		
 	'ppitCommitmentDependencies' => array(
 	),
@@ -1021,16 +1048,17 @@ return array(
 	),
 	'commitmentAccount/update' => array(
 			'status' => array('mandatory' => true),
-			'n_first' => array('mandatory' => true),
+			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
-			'email' => array('mandatory' => true),
+			'email' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
 			'opening_date' => array('mandatory' => true),
 			'closing_date' => array('mandatory' => false),
 	),
 	'commitmentAccount/updateContact' => array(
 			'n_title' => array('mandatory' => false),
-			'n_first' => array('mandatory' => true),
-			'n_last' => array('mandatory' => true),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
 			'tel_cell' => array('mandatory' => false),
 			'email' => array('mandatory' => false),
@@ -1083,11 +1111,10 @@ return array(
 							),
 					),
 					'caption' => array(
-							'type' => 'repository',
-							'definition' => 'student/property/school_year',
+							'type' => 'input',
 							'labels' => array(
-									'en_US' => 'School year',
-									'fr_FR' => 'Année scolaire',
+									'en_US' => 'Caption',
+									'fr_FR' => 'Libellé',
 							),
 					),
 					'description' => array(
@@ -1166,8 +1193,8 @@ return array(
 	),
 
 	'commitment/list' => array(
-			'including_options_amount' => 'number',
 			'status' => 'select',
+			'including_options_amount' => 'number',
 	),
 
 	'commitment/update' => array(
@@ -1200,6 +1227,32 @@ return array(
 					),
 			),
 	),
+
+	'commitment/proforma' => array(
+			'header' => array(
+					array(
+							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('customer_name'),
+					),
+			),
+			'description' => array(
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
+					),
+					array(
+							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Situation date', 'fr_FR' => 'Date de situation'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('date'),
+					),
+			),
+	),
 		
 	'commitment/try' => array(
 			'caption' => array('mandatory' => true),
@@ -1223,8 +1276,8 @@ return array(
 	),
 		
 	'commitment/update/rental' => array(
-//			'caption' => array('mandatory' => true),
-//			'description' => array('mandatory' => false),
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
 	),
 
 	'commitment/service' => array(
@@ -1284,423 +1337,7 @@ return array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
-/*		
-	'commitment' => array(
-			'types' => array(
-					'rental' => array(
-							'labels' => array(
-									'en_US' => 'Rental',
-									'fr_FR' => 'Location',
-							)
-					),
-					'service' => array(
-							'labels' => array(
-									'en_US' => 'Service offer',
-									'fr_FR' => 'Prestation de service',
-							)
-					),
-			),
-			'messageTemplates' => array(
-					'addTitle' => array(
-							'en_US' => 'New order(s) %s',
-							'fr_FR' => 'Nouvelle(s) commande(s) %s',
-					),
-					'addText' => array(
-							'en_US' => 'Hello,
-We inform you that orders listed below have been submitted and requires your confirmation. To proceed, please follow this links: %s.
-New orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été émises et doivent recevoir votre confirmation. Pour ce faire, veuillez suivre ce lien: %s.
-Nouvelles commandes %s : %s
-',
-					),
-					'confirmTitle' => array(
-							'en_US' => 'Order(s) accepted %s',
-							'fr_FR' => 'Commande(s) acceptée(s) %s',
-					),
-					'confirmText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been accepted. For more details, please follow this links: %s.
-Accepted orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été acceptées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes acceptées %s : %s
-',
-					),
-					'rejectTitle' => array(
-							'en_US' => 'Order(s) rejected %s',
-							'fr_FR' => 'Commande(s) rejetée(s) %s',
-					),
-					'rejectText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been rejected. For more details, please follow this links: %s.
-Rejected orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été rejetées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes rejetées %s : %s
-',
-					),
-					'registerTitle' => array(
-							'en_US' => 'Order(s) registered %s',
-							'fr_FR' => 'Commande(s) enregistrée(s) %s',
-					),
-					'registerText' => array(
-							'en_US' => 'Hello,
-We inform you that the orders listed below have been registered. For more details, please follow this links: %s.
-Registered orders %s: %s
-',
-							'fr_FR' => 'Bonjour,
-Nous vous informons que les commandes dont la liste suit ont été enregistrées. Pour plus de détails, veuillez suivre ce lien: %s.
-Commandes enregistrées %s : %s
-',
-					),
-			),
-	),
 
-	'commitment' => array(
-			'statuses' => array(
-					'new' => array(
-							'labels' => array(
-									'en_US' => 'To be approved',
-									'fr_FR' => 'A valider',
-							)
-					),
-					'approved' => array(
-							'labels' => array(
-									'en_US' => 'Approved',
-									'fr_FR' => 'Validé',
-							)
-					),
-					'settled' => array(
-							'labels' => array(
-									'en_US' => 'Settled',
-									'fr_FR' => 'Réglé',
-							)
-					),
-					'commissioned' => array(
-							'labels' => array(
-									'en_US' => 'Commissioned',
-									'fr_FR' => 'En service',
-							)
-					),
-			),
-			'todo' => array(
-					'sales_manager' => array(
-							'status' => array('selector' => 'in', 'value' => array('new')),
-					),
-			),
-			'properties' => array(
-					'status' => array(
-							'type' => 'select',
-							'modalities' => array(
-								'new' => array('en_US' => 'To be confirmed', 'fr_FR' => 'A confirmer'),
-								'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
-								'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
-							),
-							'labels' => array(
-									'en_US' => 'Status',
-									'fr_FR' => 'Statut',
-							),
-					),
-					'customer_name' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Name',
-									'fr_FR' => 'Nom',
-							),
-					),
-					'caption' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'School year',
-									'fr_FR' => 'Année scolaire',
-							),
-					),
-					'description' => array(
-							'type' => 'textarea',
-							'labels' => array(
-									'en_US' => 'Description',
-									'fr_FR' => 'Description',
-							),
-					),
-					'including_options_amount' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Amount',
-									'fr_FR' => 'Montant',
-							),
-					),
-			),
-			'order' => 'school_year DESC',
-			'actions' => array(
-					'' => array(
-						'currentStatuses' => array(),
-						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
-						'properties' => array(
-								'account_id' => 'update',
-//								'subscription_id' => 'update',
-								'caption' => 'update',
-								'description' => 'update',
-								'quantity' => 'update',
-								'unit_price' => 'update',
-								'amount' => 'update',
-								'identifier' => 'update',
-								'comment' => 'update',
-								'product_identifier' => 'update',
-						),
-					),
-					'update' => array(
-						'currentStatuses' => array('new' => null),
-						'glyphicon' => 'glyphicon-edit',
-						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
-						'properties' => array(
-								'status' => 'display',
-								'account_id' => 'update',
-//								'subscription_id' => 'update',
-								'caption' => 'update',
-								'description' => 'update',
-								'quantity' => 'update',
-								'unit_price' => 'update',
-								'amount' => 'update',
-								'identifier' => 'update',
-								'comment' => 'update',
-								'product_identifier' => 'update',
-						),
-					),
-					'delete' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'deleted',
-						'glyphicon' => 'glyphicon-trash',
-						'label' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
-						'properties' => array(
-						),
-					),
-					'approve' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'approved',
-						'label' => array('en_US' => 'Approve', 'fr_FR' => 'Valider'),
-						'properties' => array(
-						),
-					),
-					'reject' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'rejected',
-						'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
-						'properties' => array(
-						),
-					),
-					'settle' => array(
-						'currentStatuses' => array('approved' => null),
-						'targetStatus' => 'settled',
-						'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
-						'properties' => array(
-						),
-					),
-					'commission' => array(
-						'currentStatuses' => array('settled' => null),
-						'targetStatus' => 'commissioned',
-						'label' => array('en_US' => 'Commission', 'fr_FR' => 'Mettre en service'),
-						'properties' => array(
-						),
-					),
-			),
-	),
-
-	'commitment/index' => array(
-			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
-	),
-
-	'commitment/search' => array(
-			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
-			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
-			'main' => array(
-					'status' => 'select',
-					'including_options_amount' => 'range',
-					'customer_name' => 'contains',
-			),
-	),
-
-	'commitment/list' => array(
-			'including_options_amount' => 'number',
-			'status' => 'select',
-	),
-		
-	'commitment/update' => array(
-			'caption' => array('mandatory' => true),
-			'description' => array('mandatory' => false),
-	),
-	
-	'commitment/service' => array(
-			'properties' => array(
-					'type' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Product',
-									'fr_FR' => 'Produit',
-							),
-					),
-					'due_date' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Due date',
-									'fr_FR' => 'Echéance',
-							),
-					),
-			),
-			'statuses' => array(
-					'new' => array(
-							'labels' => array(
-									'en_US' => 'To be confirmed',
-									'fr_FR' => 'A confirmer',
-							)
-					),
-					'confirmed' => array(
-							'labels' => array(
-									'en_US' => 'Confirmed',
-									'fr_FR' => 'Confirmé',
-							)
-					),
-					'rejected' => array(
-							'labels' => array(
-									'en_US' => 'Rejected',
-									'fr_FR' => 'Rejeté',
-							)
-					),
-					'delivered' => array(
-							'labels' => array(
-									'en_US' => 'Delivered',
-									'fr_FR' => 'Livré',
-							)
-					),
-					'commissioned' => array(
-							'labels' => array(
-									'en_US' => 'To invoice',
-									'fr_FR' => 'A facturer',
-							)
-					),
-					'invoiced' => array(
-							'labels' => array(
-									'en_US' => 'Invoiced',
-									'fr_FR' => 'Facturé',
-							)
-					),
-					'settled' => array(
-							'labels' => array(
-									'en_US' => 'Settled',
-									'fr_FR' => 'Réglé',
-							)
-					),
-			),
-			'deadlines' => array(
-					'retraction' => array('status' => 'new', 'period' => 5, 'unit' => 'day'),
-					'shipment' => array('status' => 'new', 'period' => 10, 'unit' => 'day'),
-					'delivery' => array('status' => 'new', 'period' => 13, 'unit' => 'day'),
-					'commissioning' => array('status' => 'new', 'period' => 15, 'unit' => 'day'),
-					'invoice' => array('status' => 'commissioned', 'period' => 0),
-					'settlement' => array('status' => 'commissioned', 'period' => 0),
-			),
-			'todo' => array(
-					'sales_manager' => array(
-							'status' => array('selector' => 'in', 'value' => array('new')),
-					),
-					'business_owner' => array(
-							'status' => array('selector' => 'in', 'value' => array('new', 'registered', 'delivered', 'commissioned')),
-					),
-			),
-			'actions' => array(
-					'' => array(
-						'currentStatuses' => array(),
-						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
-						'properties' => array(
-								'status' => 'display',
-								'account_id' => 'update',
-								'subscription_id' => 'update',
-								'caption' => 'update',
-								'description' => 'update',
-								'amount' => 'update',
-								'identifier' => 'update',
-								'quotation_identifier' => 'update',
-								'commitment_date' => 'update',
-								'expected_delivery_date' => 'update',
-								'due_date' => 'update',
-								'expected_settlement_date' => 'update',
-								'comment' => 'update',
-						),
-					),
-					'update' => array(
-						'currentStatuses' => array('new' => null),
-						'glyphicon' => 'glyphicon-edit',
-						'label' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
-						'properties' => array(
-								'status' => 'display',
-								'account_id' => 'update',
-								'subscription_id' => 'update',
-								'caption' => 'update',
-								'description' => 'update',
-								'amount' => 'update',
-								'identifier' => 'update',
-								'quotation_identifier' => 'update',
-								'commitment_date' => 'update',
-								'requested_delivery_date' => 'update',
-								'comment' => 'update',
-						),
-					),
-					'delete' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'deleted',
-						'glyphicon' => 'glyphicon-trash',
-						'label' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
-						'properties' => array(
-						),
-					),
-					'confirm' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'confirmed',
-						'label' => array('en_US' => 'Confirm', 'fr_FR' => 'Confirmer'),
-						'properties' => array(
-						),
-					),
-					'reject' => array(
-						'currentStatuses' => array('new' => null),
-						'targetStatus' => 'rejected',
-						'label' => array('en_US' => 'Reject', 'fr_FR' => 'Rejeter'),
-						'properties' => array(
-						),
-					),
-					'deliver' => array(
-						'currentStatuses' => array('confirmed' => null),
-						'targetStatus' => 'delivered',
-						'label' => array('en_US' => 'Deliver', 'fr_FR' => 'Livrer'),
-						'properties' => array(
-						),
-					),
-					'settle' => array(
-						'currentStatuses' => array('delivered' => null),
-						'targetStatus' => 'settled',
-						'label' => array('en_US' => 'Settle', 'fr_FR' => 'Régler'),
-						'properties' => array(
-						),
-					),
-					'invoice' => array(
-						'currentStatuses' => array('settled' => null),
-						'targetStatus' => 'invoiced',
-						'label' => array('en_US' => 'Invoice', 'fr_FR' => 'Facturer'),
-						'properties' => array(
-						),
-					),
-					'renew' => array(
-						'currentStatuses' => array('invoiced' => null),
-						'targetStatus' => 'renewed',
-						'label' => array('en_US' => 'Renew', 'fr_FR' => 'Renouveller'),
-						'properties' => array(
-						),
-					),
-			),
-	),*/
-		
 	'commitmentTerm' => array(
 			'statuses' => array(),
 			'properties' => array(
@@ -1895,8 +1532,6 @@ Commandes enregistrées %s : %s
 Your available P-PIT Commitments credits reserve for %s is almost out of stock (*). 
 In order to avoid the risk of suffering use restrictions, you can right now renew your subscription, for the desired period of time.
 Our tip : Have peace of mind by renewing for a 1-year period of time.
-							
-Link to P-PIT order site : https://www.p-pit.fr/public/product/%s
 					
 (*) Your current P-PIT Commitments reserve rises %s units. Your next monthly consumption is estimated up to now to %s units, estimation based on the current active subscriptions.
 
@@ -1912,8 +1547,6 @@ Votre réserve de crédits P-PIT Engagements disponibles pour %s est bientôt é
 Pour ne pas risquer de subir des restrictions à l\'utilisation, vous pouvez dès à présent renouveller en ligne votre souscription pour la durée que vous souhaitez.
 Notre conseil : Ayez l\'esprit tranquille en renouvelant pour un an.
 
-Lien vers le site de commande P-PIT : https://www.p-pit.fr/public/product/%s
-
 (*) Votre réserve actuelle P-PIT Engagements est de %s unités. Votre prochain décompte mensuel est estimé à ce jour à %s unités, estimation basée sur le nombre de dossiers actifs à ce jour.
 
 Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
@@ -1923,32 +1556,6 @@ Bien cordialement,
 L\'équipe P-PIT
 ',
 					),
-/*					'consumeCreditTitle' => array(
-							'en_US' => 'Monthly P-PIT Commitments credits consumption report',
-							'fr_FR' => 'Rapport mensuel de consommation de crédits P-PIT Engagements',
-					),
-					'consumeCreditText' => array(
-							'en_US' => 'Hello %s,
-							
-Please note that the monthly count of P-PIT Commitments credits has occurred on %s. Given the current %s active subscriptions, %s units have been consumed. Your new P-PIT Commitments reserve rises %s units.
-
-We hope that our services are giving you full satisfaction. Plesase send your requests or questions to the P-PIT support: support@p-pit.fr or 06 29 87 90 02.
-					
-Best regards,
-
-The P-PIT staff
-',
-							'fr_FR' => 'Bonjour %s,
-							
-Veuillez noter que le décompte mensuel de crédits P-PIT Engagements a été effectué en date du %s. Compte tenu du nombre de dossiers %s actifs à ce jour, %s unités ont été décomptées. Votre nouvelle réserve P-PIT Engagements est de %s unités.
-
-Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-PIT : support@p-pit.fr ou 06 29 87 90 02.
-					
-Bien cordialement,
-
-L\'équipe P-PIT
-',
-					),*/
 					'suspendedServiceTitle' => array(
 							'en_US' => 'P-Pit Commitments records suspended',
 							'fr_FR' => 'Dossiers P-Pit Engagements suspendus',
@@ -1995,5 +1602,49 @@ L\'équipe P-Pit
 	),
 	'commitmentMessage/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	'demo' => array(
+			'commitmentAccount/search/title' => array(
+					'en_US' => '
+<h4>Account list</h4>
+<p>As a default, all the currently active accounts are presented in the list.</p>
+<p>As soon as a criterion below is specified, the list switch in search mode.</p>
+',
+					'fr_FR' => '
+<h4>Liste des comptes</h4>
+<p>Par défaut, tous les comptes actuellement actifs sont présentés dans la liste.</p>
+<p>Dès lors qu\'un des critères ci-dessous est spécifié, le mode de recherche est automatiquement activé.</p>
+',
+			),
+			'commitmentAccount/search/x' => array(
+					'en_US' => '
+<h4>Return in default mode</h4>
+<p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered on active accounts.</p>
+',
+					'fr_FR' => '
+<h4>Retour au mode par défaut</h4>
+<p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée sur les comptes actifs.</p>
+',
+			),
+			'commitmentAccount/search/export' => array(
+					'en_US' => '
+<h4>List export</h4>
+<p>The list can be exported to Excel as it is presented: defaulting list or list resulting of a multi-criteria search.</p>
+',
+					'fr_FR' => '
+<h4>Export de la liste</h4>
+<p>La liste peut être exportée sous Excel telle que présentée : liste par défaut ou liste résultant d\'une recherche multi-critère.</p>
+',
+			),
+			'commitmentAccount/list/ordering' => array(
+					'en_US' => '
+<h4>Ordering</h4>
+<p>The list can be sorted according to each column in ascending or descending order.</p>
+',
+					'fr_FR' => '
+<h4>Classement</h4>
+<p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
+',
+			),
 	),
 );

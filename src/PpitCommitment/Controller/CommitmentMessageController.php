@@ -4,7 +4,10 @@ namespace PpitCommitment\Controller;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
-use PpitContact\Model\Community;
+use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
+use PpitCommitment\ViewHelper\PpitPDF;
+use PpitDocument\Model\Document;
+use PpitCore\Model\Community;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
@@ -237,13 +240,8 @@ class CommitmentMessageController extends AbstractActionController
     		$this->getResponse()->setStatusCode('401');
     	}
     	else {
-/*	    	$community = Community::get($username, 'name');
-	    	if (!$community) $this->getResponse()->setStatusCode('400');
-	    	else {
-		    	$account = Account::get($community->id, 'customer_community_id');
-	    		if (!$account) $this->getResponse()->setStatusCode('400');
-	    		else */$this->getResponse()->setContent(json_encode(Commitment::get($id)));
-//	    	}
+    		$commitment = Commitment::getArray($id);
+    		$this->getResponse()->setContent(json_encode($commitment));
     	}
     	return $this->getResponse();
     }
@@ -518,7 +516,59 @@ class CommitmentMessageController extends AbstractActionController
 	    	return $this->getResponse();
     	}
 	}
-    
+
+	public function invoiceGetAction()
+	{
+		// Retrieve the context
+		$context = Context::getCurrent();
+		$safe = $context->getConfig()['ppitUserSettings']['safe'];
+		$username = null;
+		$password = null;
+		
+		$this->getResponse()->getHeaders()->addHeaderLine('Content-Type', 'application/pdf');
+
+		$id = $this->params()->fromRoute('id');
+    	$commitment = Commitment::get($id);
+		$proforma = $this->params()->fromQuery('proforma', null);
+
+		// Check basic authentication
+		if (isset($_SERVER['PHP_AUTH_USER'])) {
+			$username = $_SERVER['PHP_AUTH_USER'];
+			$password = $_SERVER['PHP_AUTH_PW'];
+		} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+			if (strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']),'basic')===0)
+				list($username,$password) = explode(':',base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+		}
+		if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
+			 
+			// Write to the log
+			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+				$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
+				$logger = new \Zend\Log\Logger();
+				$logger->addWriter($writer);
+				$logger->info('ppit-get;401;'.$username.';'.$password);
+			}
+			$this->getResponse()->setStatusCode('401');
+		}
+		else {
+		
+			// create new PDF document
+			$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		
+			PdfInvoiceViewHelper::render($pdf, $commitment, $proforma);
+			 
+			// Close and output PDF document
+			// This method has several options, check the source code documentation for more information.
+/*			$document = Document::instanciate(0);
+			$document->type = 'application/pdf';
+			$document->add();
+	    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'I');*/
+	    	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$commitment->invoice_identifier.'.pdf', 'I');
+			$this->getResponse()->setContent(json_encode($commitment));
+    	}
+    	return $this->getResponse();
+	}
+
     public function ppitSubscribeAction()
     {
     	// Retrieve the context

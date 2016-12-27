@@ -494,6 +494,7 @@ function getUserUpdate(id, action) {
 
 <?php 
 $properties = array();
+$properties['contact_status'] = array('type' => 'select', 'mandatory' => false);
 
 foreach ($context->getConfig('commitmentAccount/updateContact'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
 	$property = $context->getConfig('vcard/properties')[$propertyId];
@@ -505,7 +506,7 @@ $properties['update_time'] = array('type' => 'hidden');
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Contact', 'context' => $context, 'properties' => $properties)) 
 ?>
 
-<?php foreach ($context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['tabs'] as $contactNumber => $tab) : ?>
+<?php foreach (array('contact_1', 'user', 'contact_2', 'contact_3', 'contact_4') as $contactNumber) : ?>
 
 function connect<?php echo $contactNumber ?>UpdateForm(id, action)
 {
@@ -681,7 +682,7 @@ function getAccountDetail(id) {
 			getAccountUpdate(id, '');
 			$('#contact_1-tab').addClass('active');
 
-<?php foreach ($context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['tabs'] as $tabId => $tab) : ?>
+<?php foreach (array('contact_1', 'user', 'contact_2', 'contact_3', 'contact_4') as $tabId) : ?>
 			$('#<?php echo $tabId ?>-tab').click(function () {
 				$('.account-tab').removeClass('active');
 				$('#<?php echo $tabId ?>-tab').addClass('active');
@@ -748,7 +749,6 @@ function activateAccount() {
 /////////////////////////////
 
 <?php
-$type = 'p-pit-studies';
 $properties = array();
 
 foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {

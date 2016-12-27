@@ -48,6 +48,16 @@
 <?php 
 if ($contact->id && $action != 'update' || $message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
+		<div class="form-group" id="contact_status_group">
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Type', 'ppit-core', $context->getLocale()) ?></label>
+			<div class="col-sm-7">
+				<select class="form-control" id="contact_status" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+	    			<option />
+	    			<option value="invoice" <?php if ($contact_status == 'invoice') echo 'selected="selected"' ?>><?php echo $this->translate('Invoicing', 'ppit-commitment', $context->getLocale()) ?></option>
+				</select>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="contact_status_error"></p></div>
+		</div>
 
 <?php foreach ($context->getConfig('commitmentAccount/updateContact'.(($type) ? '/'.$type : '')) as $propertyId => $options) : ?>
 	<?php $property = $context->getConfig('vcard/properties')[$propertyId] ?>

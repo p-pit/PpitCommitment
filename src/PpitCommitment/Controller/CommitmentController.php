@@ -11,12 +11,14 @@ use PpitCommitment\Model\CommitmentTerm;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
-use PpitContact\Model\Vcard;
+use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
+use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
+use PpitCore\Model\Vcard;
 use PpitDocument\Model\Document;
 use PpitDocument\Model\DocumentPart;
 use PpitMasterData\Model\Product;
@@ -32,21 +34,6 @@ use Zend\Log\Writer;
 use Zend\Mvc\Controller\AbstractActionController;
 
 require_once('vendor/TCPDF-master/tcpdf.php');
-
-class PpitPDF extends \TCPDF {
-	public $footer;
-	public function Footer() {
-		$context = Context::getCurrent();
-		parent::Footer();
-		$this->SetY(-10);
-		$this->SetFont('helvetica', 'N', 8);
-		if ($context->getConfig('headerParams')['footer']['type'] == 'text') $this->Cell(0, 5, $this->footer, 0, false, 'C', 0, '', 0, false, 'T', 'M');
-		else {
-			$img = file_get_contents('http://localhost/~bruno/p-pit.fr/public/img/FM%20Sports/bas-page.jpg');
-			$this->Image('@' . $img, 20, 270, '', '', 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-		}
-	}
-}
 
 class CommitmentController extends AbstractActionController
 {	
@@ -220,7 +207,9 @@ class CommitmentController extends AbstractActionController
 		if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
 
 		// Retrieve the list
+		$turnover = 0;
 		$commitments = Commitment::getList($type, $params, $major, $dir, $mode);
+		foreach ($commitments as $commitment) $turnover += $commitment->including_options_amount;
 
 		// Retrieve the credits
 		$credit = Credit::getTable()->get('p-pit-engagements', 'type'); 
@@ -233,6 +222,7 @@ class CommitmentController extends AbstractActionController
 //   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
 //   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'commitments' => $commitments,
+   				'turnover' => $turnover,
    				'mode' => $mode,
    				'params' => $params,
    				'major' => $major,
@@ -342,7 +332,7 @@ class CommitmentController extends AbstractActionController
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['attributed_credits'] = array('p-pit-engagements' => true, 'p-pit-studies' => true);
+    			$data['applications'] = array('p-pit-engagements' => true, 'p-pit-studies' => true);
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
@@ -377,6 +367,8 @@ class CommitmentController extends AbstractActionController
 						$userContact->instance_id = $instance->id;
 						$userContact->user_id = $user->user_id;
 						$userContact->contact_id = $contact->id;
+						mkdir('public/img/'.$instance->caption);
+						mkdir('public/img/logos/'.$instance->caption);
 						$credit->instance_id = $instance->id;
 						$credit->type = 'p-pit-engagements';
 						$credit->quantity = 0;
@@ -524,7 +516,7 @@ class CommitmentController extends AbstractActionController
     			'error' => $error,
     			'message' => $message
     	));
-		if ($context->isSpaMode()) $view->setTerminal(true);
+		$view->setTerminal(true);
        	return $view;
     }
 
@@ -610,7 +602,7 @@ class CommitmentController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
-    			'type' => $type,
+    			'type' => $commitment->type,
     			'id' => $id,
     			'action' => $action,
     			'accounts' => Account::getList(null, array(), 'customer_name', 'ASC'),
@@ -620,10 +612,10 @@ class CommitmentController extends AbstractActionController
     			'error' => $error,
     			'message' => $message
     	));
-    	if ($context->isSpaMode()) $view->setTerminal(true);
+    	$view->setTerminal(true);
     	return $view;
     }
-
+    
     public function updateProductAction()
     {
     	// Retrieve the context
@@ -1091,402 +1083,29 @@ class CommitmentController extends AbstractActionController
     	}
     }
 
-    public function invoiceAction(/*$commitment*/)
+    public function invoiceAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
     	 
     	$id = $this->params()->fromRoute('id', null);
     	if (!$id) return $this->redirect()->toRoute('index');
+    	$commitment = Commitment::get($id);
 
     	$proforma = $this->params()->fromQuery('proforma', null);
-    	
-    	$commitment = Commitment::get($id);
-    	$account = Account::get($commitment->account_id);
-    	
+
     	// create new PDF document
     	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-    	$pdf->footer = $context->getConfig('headerParams')['footer']['value'];
-    	
-    	// set document information
-    	$pdf->SetCreator(PDF_CREATOR);
-    	$pdf->SetAuthor('P-PIT');
-    	$pdf->SetTitle('Invoice');
-    	$pdf->SetSubject('TCPDF Tutorial');
-    	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
-    	
-    	// set default header data
-    	$pdf->SetHeaderData('logos/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
-    	// set header and footer fonts
-    	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-    	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-		
-    	// set default monospaced font
-    	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-    	
-    	// set margins
-    	$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-    	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-    	$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-    	 
-    	// set auto page breaks
-    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-    	
-    	// set image scale factor
-    	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-    	
-    	// set some language-dependent strings (optional)
-    	if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-    		require_once(dirname(__FILE__).'/lang/eng.php');
-    		$pdf->setLanguageArray($l);
-    	}
-    	
-    	// ---------------------------------------------------------
-    	
-    	/*
-    	 NOTES:
-    	 - To create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
-    	 - To export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
-    	 - To convert pfx certificate to pem: openssl pkcs12 -in tcpdf.pfx -out tcpdf.crt -nodes
-    	 */
-    	
-    	// set certificate file
-    	$certificate = 'file://vendor/TCPDF-master/examples/data/cert/tcpdf.crt';
-    	
-    	// set additional information
-    	$info = array(
-    			'Name' => 'Invoice',
-    			'Location' => 'Office',
-    			'Reason' => 'Invoice',
-    			'ContactInfo' => 'https://www.p-pit.fr',
-    	);
-    	
-    	// set document signature
-//    	$pdf->setSignature($certificate, $certificate, 'tcpdfdemo', '', 2, $info);
-    	
-    	// set font
-    	$pdf->SetFont('helvetica', '', 12);
-    	
-    	// add a page
-    	$pdf->AddPage();
-    	 
-    	// Invoice header
-    	$pdf->MultiCell(100, 5, '', 0, 'L', 0, 0, '', '', true);
-    	$pdf->SetTextColor(0);
-    	$pdf->SetFont('', '', 12);
-    	
-    	$addressee = "\n"."\n";
 
-    	$type = $commitment->type;
-    	foreach($context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''))['header'] as $line) {
-    		$arguments = array();
-    		foreach($line['params'] as $propertyId) {
-    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
-    			else {
-    				$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-    				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-    				if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
-    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
-    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-    				elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
-    				else $arguments[] = $commitment->properties[$propertyId];
-    			}
-    		}
-    		$addressee .= vsprintf($line['format'][$context->getLocale()], $arguments)."\n";
-    	}
-    	 
-    	$invoicingContact = ($account->contact_2) ? $account->contact_2 : $account->contact_1;
-    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
-    		$addressee .= $invoicingContact->n_title.' ';
-    		$addressee .= $invoicingContact->n_last.' ';
-    		$addressee .= $invoicingContact->n_first."\n";
-    	}
-    	if ($invoicingContact->adr_street) $addressee .= $invoicingContact->adr_street."\n";
-    	if ($invoicingContact->adr_extended) $addressee .= $invoicingContact->adr_extended."\n";
-    	if ($invoicingContact->adr_post_office_box) $addressee .= $invoicingContact->adr_post_office_box."\n";
-    	if ($invoicingContact->adr_zip || $invoicingContact->adr_city) {
-    		if ($invoicingContact->adr_zip) $addressee .= $invoicingContact->adr_zip." ";
-    		$addressee .= $invoicingContact->adr_city."\n";
-    	}
-    	if ($invoicingContact->adr_state) $addressee .= $invoicingContact->adr_state."\n";
-    	if ($invoicingContact->adr_country) $addressee .= $invoicingContact->adr_country."\n";
-    	$pdf->MultiCell(80, 5, $addressee, 0, 'L', 0, 1, '', '', true);
-    	$pdf->Ln(10);
-
-    	// Title
-    	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma '.$commitment->invoice_identifier.'</strong></div>';
-    	else $text = '<div style="text-align: center"><strong>Facture n° '.(($commitment->invoice_identifier) ? $commitment->invoice_identifier : $commitment->identifier).'</strong></div>';
-    	$pdf->writeHTML($text, true, 0, true, 0);
-    	$pdf->Ln(10);
-    	 
-    	// Invoice references
-		$pdf->SetFillColor(255, 255, 255);
-//    	$pdf->SetTextColor(255);
-    	$pdf->SetDrawColor(255, 255, 255);
-//    	$pdf->SetDrawColor(128, 0, 0);
-    	$pdf->SetLineWidth(0.2);
-    	$pdf->SetFont('', '', 9);
-    	foreach($context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''))['description'] as $line) {
-    		$arguments = array();
-    		foreach($line['params'] as $propertyId) {
-    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
-    			else {
-	    			$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	    			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-	    			if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
-	    			elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
-	    			elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-	    			elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
-	    			else $arguments[] = $commitment->properties[$propertyId];
-    			}
-    		}
-    		$pdf->MultiCell(30, 5, '<strong>'.$line['left'][$context->getLocale()].'</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
-    		$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
-    		$pdf->MultiCell(145, 5, vsprintf($line['right'][$context->getLocale()], $arguments), 1, 'L', 0, 1, '' ,'', true);
-    	}
-    	 
-    	// Invoice lines
-    	$pdf->Ln(10);
-    	$pdf->SetDrawColor(0, 0, 0);
-    	$pdf->SetFillColor(0, 97, 105);
-    	$pdf->SetFont('', '', 8);
-//    	$pdf->SetFillColor(196, 196, 196);
-    	$pdf->SetTextColor(255);
-    	$currencySymbol = $context->getConfig('commitment/'.$type)['currencySymbol'];
-    	$taxComputing = (($context->getConfig('commitment/'.$type)['tax'] == 'excluding') ? 'HT' : 'TTC');
-    	$pdf->Cell(105, 7, 'Libellé', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'PU ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Quantité', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
-    	// Color and font restoration
-    	$pdf->SetFillColor(239, 239, 239);
-    	$pdf->SetTextColor(0);
-    	// Data
-    	$product = Product::get($commitment->product_identifier, 'reference');
-    	$taxable1Amount = $commitment->taxable_1_amount;
-    	$taxable2Amount = $commitment->taxable_2_amount;
-    	$taxable3Amount = $commitment->taxable_3_amount;
-    	$taxExemptAmount = $commitment->amount - $commitment->taxable_1_amount - $commitment->taxable_2_amount - $commitment->taxable_3_amount;
-    	$color = 0;
-    	if ($proforma) {
-    		$pdf->Ln();
-    		$pdf->Cell(105, 6, $commitment->product_caption, 'LR', 0, 'L', $color);
-    		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount, 2), 'LR', 0, 'R', $color);
-    		$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
-    		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
-    		$color = ($color+1)%2;
-    	}
-    	else {
-	    	if ($commitment->taxable_1_amount != 0) {
-	    		$pdf->Ln();
-	    		$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable1Amount, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable1Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
-	    		$color = ($color+1)%2;
-	    	}
-	        if ($commitment->taxable_2_amount != 0) {
-	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable2Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
-	    		$color = ($color+1)%2;
-	    	}
-	        if ($commitment->taxable_3_amount != 0) {
-	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxable3Amount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
-	    		$color = ($color+1)%2;
-	    	}
-	        if ($taxExemptAmount != 0) {
-	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (exonéré)', 'LR', 0, 'L', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
-	    		$color = ($color+1)%2;
-	    	}
-    	}
-    	
-    	foreach ($commitment->options as $option) {
-    		$pdf->Ln();
-    		$productOption = ProductOption::get($option['identifier'], 'reference');
-    		$caption = $productOption->caption;
-    		if (!$proforma) {
-	    		if ($option['vat_id'] == 0) $taxCaption = ' (exonéré)';
-	    		elseif ($option['vat_id'] == 1) $taxCaption = ' (TVA 20%)';
-	    		elseif ($option['vat_id'] == 2) $taxCaption = ' (TVA 10%)';
-	    		elseif ($option['vat_id'] == 3) $taxCaption = ' (TV 5,5%)';
-	    		$caption .= $taxCaption;
-    		}
-    		$pdf->Cell(105, 6, $caption, 'LR', 0, 'L', $color);
-    		$pdf->Cell(25, 6, $context->formatFloat($option['unit_price'], 2), 'LR', 0, 'R', $color);    		
-    		$pdf->Cell(25, 6, $option['quantity'], 'LR', 0, 'C', $color);    		
-    		$pdf->Cell(25, 6, $context->formatFloat($option['amount'], 2), 'LR', 0, 'R', $color);
-    		$color = ($color+1)%2;
-    		if ($option['vat_id'] == 1) $taxable1Amount += $option['amount'];
-    		elseif ($option['vat_id'] == 2) $taxable2Amount += $option['amount'];
-    		elseif ($option['vat_id'] == 3) $taxable3Amount += $option['amount'];
-    	}
-
-    	if ($taxComputing == 'including') {
-    		$excludingTaxAmount = $commitment->including_options_amount;
-    		$tax1Amount = round($taxable1Amount * 0.2, 2);
-    		$tax2Amount = round($taxable2Amount * 0.1, 2);
-    		$tax3Amount = round($taxable3Amount * 0.055, 2);
-    		$taxAmount = $tax1Amount + $tax2Amount + $tax3Amount;
-    		$includingTaxAmount = $excludingTaxAmount + $taxAmount;
-    	}
-    	else {
-    		$includingTaxAmount = $commitment->including_options_amount;
-    		$tax1Amount = $taxable1Amount - round($taxable1Amount / 1.2, 2);
-    		$tax2Amount = $taxable2Amount - round($taxable2Amount / 1.1, 2);
-    		$tax3Amount = $taxable3Amount - round($taxable3Amount / 1.055, 2);
-    		$taxAmount = $tax1Amount + $tax2Amount + $tax3Amount;
-    		$excludingTaxAmount = $includingTaxAmount - $taxAmount;
-    	}
-
-    	$pdf->Ln();
-    	$pdf->Cell(180, 0, '', 'T');
-    	$pdf->SetDrawColor(255, 255, 255);
-    	if (!$proforma) {
-    		$pdf->Ln();
-    		$pdf->Cell(155, 6, 'Total HT :', 'LR', 0, 'R', false);
-	    	$pdf->Cell(25, 6, $context->formatFloat($excludingTaxAmount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-	    	if ($tax1Amount != 0) {
-		    	$pdf->Ln();
-		    	$pdf->Cell(155, 6, 'TVA 20% sur '.$context->formatFloat($taxable1Amount, 2).' :', 'LR', 0, 'R', false);
-		    	$pdf->Cell(25, 6, $context->formatFloat($tax1Amount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-	    	}
-	        if ($tax2Amount != 0) {
-		    	$pdf->Ln();
-		    	$pdf->Cell(155, 6, 'TVA 10% sur '.$context->formatFloat($taxable2Amount, 2).' :', 'LR', 0, 'R', false);
-		    	$pdf->Cell(25, 6, $context->formatFloat($tax2Amount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-	    	}
-	        if ($tax3Amount != 0) {
-		    	$pdf->Ln();
-		    	$pdf->Cell(155, 6, 'TVA 5,5% sur '.$context->formatFloat($taxable3Amount, 2).' :', 'LR', 0, 'R', false);
-		    	$pdf->Cell(25, 6, $context->formatFloat($tax3Amount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-	    	}
-    	}
-    	$pdf->Ln();
-    	$pdf->SetFont('', 'B');
-    	$pdf->Cell(155, 6, 'Total TTC :', 'LR', 0, 'R', false);
-    	$pdf->Cell(25, 6, $context->formatFloat($includingTaxAmount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-
-    	// Terms
-	    $pdf->Ln(10);
-	    $text = '<strong>Echéancier</strong>';
-	    $pdf->writeHTML($text, true, 0, true, 0);
-    	$pdf->Ln();
-    	$pdf->SetDrawColor(0, 0, 0);
-    	$pdf->SetFillColor(0, 97, 105);
-    	$pdf->SetFont('', '', 8);
-    	$pdf->SetTextColor(255);
-    	$pdf->Cell(60, 7, 'Echéance', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Prévue le', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Statut', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Réglée le', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
-    	// Color and font restoration
-    	$pdf->SetFillColor(239, 239, 239);
-    	$pdf->SetTextColor(0);
-    	// Data
-    	$terms = Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search');
-    	$settledAmount = 0;
-    	$color = 0;
-    	foreach($terms as $term) {
-    		if ($term->status == 'settled') $settledAmount += $term->amount;
-    		if ($term->status == 'expected' && $term->due_date < date('Y-m-d')) $pdf->SetTextColor(255, 0, 0); else $pdf->SetTextColor(0);
-    		$meansOfPayment = ($term->means_of_payment) ? $context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term->means_of_payment][$context->getLocale()] : '';
-	    	$pdf->Ln();
-	    	$pdf->Cell(60, 6, $term->caption, 'LR', 0, 'L', $color);
-	    	$pdf->Cell(30, 6, $context->decodeDate($term->due_date), 'LR', 0, 'C', $color);
-	    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term->status][$context->getLocale()];
-	    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
-	    	$pdf->Cell(30, 6, $context->decodeDate($term->settlement_date).(($meansOfPayment) ? ' ('.$meansOfPayment.')' : ''), 'LR', 0, 'L', $color);
-	    	$pdf->Cell(30, 6, $context->formatFloat($term->amount, 2), 'LR', 0, 'R', $color);
-	    	$color = ($color+1)%2;
-    	}
-    	$pdf->Ln();
-    	$pdf->Cell(180, 0, '', 'T');
-
-    	$pdf->SetTextColor(0);
-    	$pdf->SetFont('', 'B');
-
-    	$pdf->Ln();
-    	$pdf->SetDrawColor(255, 255, 255);
-    	$pdf->Cell(155, 6, 'Total réglé :', 'LR', 0, 'R', false);
-    	$pdf->Cell(25, 6, $context->formatFloat($settledAmount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-
-    	$pdf->Ln();
-    	$pdf->SetDrawColor(255, 255, 255);
-    	$pdf->Cell(155, 6, 'Restant dû :', 'LR', 0, 'R', false);
-    	$pdf->Cell(25, 6, $context->formatFloat($includingTaxAmount - $settledAmount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-/*
-    	if ($commitment->settlement_date) {
-	    	$pdf->Ln(20);
-    		$text = '<strong>Réglé le : '.$context->decodeDate($commitment->settlement_date, 2).'</strong>';
-	    	$pdf->writeHTML($text, true, 0, true, 0);
-	    	$pdf->Ln();
-    		$text = '<strong>Vous n\'avez rien à payer</strong>';
-	    	$pdf->writeHTML($text, true, 0, true, 0);
-	    	$pdf->Ln();
-    	}
-    	else {
-	    	// Bank account
-	    	$pdf->Ln(20);
-	    	$text = '<strong>Valeur en votre obligeant règlement : '.$context->formatFloat($commitment->tax_inclusive, 2).' €'.'</strong>';
-	    	$pdf->writeHTML($text, true, 0, true, 0);
-	    	$pdf->Ln();
-	    	$text = '<strong>Par carte ou virement auprès de : Société Marseillaise de Crédit'.'</strong>';
-	    	$pdf->writeHTML($text, true, 0, true, 0);
-	    	$pdf->Ln();
-	    	 
-	    	$pdf->SetFont('', '', 8);
-	    	$pdf->SetFillColor(196, 196, 196);
-	    	$pdf->Cell(20, 7, 'Code banque', 1, 0, 'C', 1);
-	    	$pdf->Cell(20, 7, 'Code agence', 1, 0, 'C', 1);
-	    	$pdf->Cell(40, 7, 'Numéro de compte', 1, 0, 'C', 1);
-	    	$pdf->Cell(15, 7, 'Clé RIB', 1, 0, 'C', 1);
-	    	$pdf->Cell(30, 7, 'Domiciliation', 1, 0, 'C', 1);
-	    	$pdf->Ln();
-	    	$pdf->Cell(20, 6, '30077', 'LR', 0, 'L', false);
-	    	$pdf->Cell(20, 6, '04193', 'LR', 0, 'L', false);
-	    	$pdf->Cell(40, 6, '18222100200', 'LR', 0, 'L', false);
-	    	$pdf->Cell(15, 6, '87', 'LR', 0, 'L', false);
-	    	$pdf->Cell(30, 6, 'AVIGNON CRILLON', 'LR', 0, 'L', false);
-	    	$pdf->Ln(10);
-	    	$text = '<strong>IBAN : </strong>FR76 3007 7041 9318 2221 0020 087    <strong>Code BIC : </strong>SMCTFR2A';
-	    	$pdf->writeHTML($text, true, 0, true, 0);
-    	}*/
-/*
-    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    	// *** set signature appearance ***
-    	
-    	// create content for signature (image and/or text)
-    	$pdf->Image('vendor/TCPDF-master/examples/images/tcpdf_signature.png', 180, 60, 15, 15, 'PNG');
-    	
-    	// define active area for signature appearance
-    	$pdf->setSignatureAppearance(180, 60, 15, 15);
-    	
-    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    	
-    	// *** set an empty signature appearance ***
-    	$pdf->addEmptySignatureAppearance(180, 80, 15, 15);*/
-    	    	 
-    	// ---------------------------------------------------------
+    	PdfInvoiceViewHelper::render($pdf, $commitment, $proforma);
     	
     	// Close and output PDF document
     	// This method has several options, check the source code documentation for more information.
-    	$document = Document::instanciate(0);
+/*    	$document = Document::instanciate(0);
     	$document->type = 'application/pdf';
     	$document->add();
-//    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'I');
-    	$content = $pdf->Output('data/documents/'.$document->id.'.pdf', 'I');
+    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'I');*/
+    	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$commitment->invoice_identifier.'.pdf', 'I');
     	return $this->response;
     }
     
@@ -1689,5 +1308,16 @@ class CommitmentController extends AbstractActionController
     		'message' => $message,
     		'error' => $error,
     	);
+    }
+    
+    public function rephaseAction()
+    {
+    	$select = Commitment::getTable()->getSelect()->where(array('commitment.id > ?' => 0));
+    	$cursor = Commitment::getTable()->selectWith($select);
+    	foreach ($cursor as $commitment) {
+    		$commitment->computeFooter();
+    		$commitment->update(null);
+    		echo $commitment->id.'<br>';
+    	}
     }
 }

@@ -43,7 +43,7 @@ class SsmlAccountViewHelper
 			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				$i++;
 				if ($propertyId == 'customer_name') $sheet->setCellValue($colNames[$i].$j, $account->customer_name);
-				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, (array_key_exists($account->properties[$propertyId], $context->getConfig('student/property/place')['modalities'])) ? $context->getConfig('student/property/place')['modalities'][$account->place_id][$context->getLocale()] : $account->place_id);
+				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $account->place_caption);
 				elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $account->n_first);
 				elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $account->n_last);
 				elseif ($propertyId == 'tel_work') $sheet->setCellValue($colNames[$i].$j, $account->tel_work);
