@@ -364,6 +364,14 @@ function getAccountUpdate(id, action) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
 
 			if (id) {
 				$('#account-update-anchor').click(function () { getAccountUpdate(id, 'update'); });
@@ -621,6 +629,14 @@ function getCommitmentAccountList(params, major, dir) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
 			
 			// Connect the add anchors
 			$('#commitment-add').click(function () {

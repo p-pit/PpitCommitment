@@ -1,4 +1,11 @@
-<h4 style="text-align: center"><strong><?php echo $context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] ?></strong></h4>
+<h4 style="text-align: center">
+	<strong><?php echo $context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] ?></strong>
+	<?php if ($account->id && $context->isDemoModeActive()) : ?>
+		<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/update'.(($type) ? '/'.$type : '')][$context->getLocale()] ?>">
+		    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+		</a>
+	<?php endif;?>
+</h4>
 
 <?php if ($account->id) : ?>
 		<button type="button" class="btn btn-default action-btn" id="account-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
@@ -36,6 +43,11 @@
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
 					<input name="submit" type="submit" id="up-submit-button" class="btn btn-warning" value="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>">
+<?php if ($context->isDemoModeActive()) : ?>
+					<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/add'.(($type) ? '/'.$type : '')][$context->getLocale()] ?>">
+					    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+					</a>
+<?php endif;?>
 				</div>
 			</div>
 

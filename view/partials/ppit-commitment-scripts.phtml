@@ -147,6 +147,15 @@ function getCommitmentList(params, major, dir) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
+
 			$('.to-mask').hide();
 			
 			// Connect the sort anchors
@@ -306,6 +315,15 @@ function getCommitmentUpdate(id, action) {
 			if (xhttp.status == 200) {
 <?php endif;?>
 			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
+
 			$('#commitment-update-anchor').click(function () { getCommitmentUpdate(id, 'update'); });
 			$('#commitment-delete-anchor').click(function () { getCommitmentUpdate(id, 'delete'); });
 			

@@ -1607,12 +1607,12 @@ L\'équipe P-Pit
 			'commitmentAccount/search/title' => array(
 					'en_US' => '
 <h4>Account list</h4>
-<p>As a default, all the currently active accounts are presented in the list.</p>
+<p>As a default, all the accounts with a <em>Active</em> status are presented in the list.</p>
 <p>As soon as a criterion below is specified, the list switch in search mode.</p>
 ',
 					'fr_FR' => '
 <h4>Liste des comptes</h4>
-<p>Par défaut, tous les comptes actuellement actifs sont présentés dans la liste.</p>
+<p>Par défaut, tous les comptes dont le statut est <em>Actif</em> sont présentés dans la liste.</p>
 <p>Dès lors qu\'un des critères ci-dessous est spécifié, le mode de recherche est automatiquement activé.</p>
 ',
 			),
@@ -1645,6 +1645,179 @@ L\'équipe P-Pit
 <h4>Classement</h4>
 <p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
 ',
+			),
+			'commitmentAccount/list/add' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Ajout d\'un compte</h4>
+<p>Le bouton + permet l\'ajout d\un nouveau compte.</p>
+<p>Les engagements liés à ce compte seront créés dans un second temps.</p>
+<p>On peut ainsi gérer un regroupement des engagements par compte.</p>
+					',
+			),
+			'commitmentAccount/add' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Ajout d\'un compte</h4>
+<p>Lors de la création d\'un compte les données principales sont renseignées.</p>
+	<ul>
+		<li>Identification</li>
+		<li>Données de contact</li>
+		<li>période de validité du compte (seule la date d\'ouverture est obligatoire)</li>
+		<li>Le statut (pour mémoire, le statut <em>Actif</em> conditionne la sélection du compte dans la liste par défaut)</li>
+	</ul>
+					',
+			),
+			'commitmentAccount/list/detail' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Détail d\'un compte</h4>
+<p>Le bouton zoom permet d\'accéder au détail d\'un compte et aux engagements associés.</p>
+					',
+			),
+			'commitmentAccount/update' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Gestion des données du compte</h4>
+<p>L\'accès au détail d\'un compte permet de consulter et éventuellement en rectifier les données.</p>
+<p>Il donne également accès à l\'onglet de gestion du contact de facturation.</p>
+<p>Il donne enfin un accès centralisé, en ajout ou modification, aux engagements associés à ce compte.</p>
+					',
+			),
+			'commitment/accountList/add' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Ajout d\'un engagement</h4>
+<p>Le bouton + permet l\'ajout d\un nouvel engagement pour ce compte.</p>
+					',
+			),
+
+			'commitment/search/title' => array(
+					'en_US' => '
+<h4>Commitment list</h4>
+<p>As a default, all the active commitments are presented in the list.</p>
+<p>As soon as a criterion below is specified, the list switch in search mode.</p>
+',
+					'fr_FR' => '
+<h4>Liste des engagements</h4>
+<p>Par défaut, tous les engagements actifs sont présentés dans la liste.</p>
+<p>Dès lors qu\'un des critères ci-dessous est spécifié, le mode de recherche est automatiquement activé.</p>
+',
+			),
+			'commitment/search/x' => array(
+					'en_US' => '
+<h4>Return in default mode</h4>
+<p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered on active commitments.</p>
+',
+					'fr_FR' => '
+<h4>Retour au mode par défaut</h4>
+<p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée sur les engagements actifs.</p>
+',
+			),
+			'commitment/search/export' => array(
+					'en_US' => '
+<h4>List export</h4>
+<p>The list can be exported to Excel as it is presented: defaulting list or list resulting of a multi-criteria search.</p>
+',
+					'fr_FR' => '
+<h4>Export de la liste</h4>
+<p>La liste peut être exportée sous Excel telle que présentée : liste par défaut ou liste résultant d\'une recherche multi-critère.</p>
+',
+			),
+			'commitment/list/ordering' => array(
+					'en_US' => '
+<h4>Ordering</h4>
+<p>The list can be sorted according to each column in ascending or descending order.</p>
+',
+					'fr_FR' => '
+<h4>Classement</h4>
+<p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
+',
+			),
+			'commitment/list/detail' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Détail d\'un engagement</h4>
+<p>Le bouton zoom permet d\'accéder au détail d\'un engagement et aux données de facturation et d\'échéancier associées.</p>
+					',
+			),
+			'commitment/update' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Gestion des données de l\'engagement</h4>
+<p>L\'accès au détail d\'un engagement permet de consulter et éventuellement en rectifier les données.</p>
+<p>Il donne également accès au détail de facturation :</p>
+	<ul>
+		<li>Le produit souscrit</li>
+		<li>Les différentes options souscrites</li>
+	</ul>
+<p>Il donne enfin accès à l\'échéancier associé à cet engagement.</p>
+					',
+			),
+			'commitment/invoice' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Facture</h4>
+<p>Une facture comptable est disponible en téléchargement, ainsi qu\'une facture simplifiée, dite proforma (TTC sans données de TVA).</p>
+					',
+			),
+
+			'commitmentTerm/search/title' => array(
+					'en_US' => '
+<h4>Term list</h4>
+<p>As a default, all the current terms (to be settled or collected) are presented in the list.</p>
+<p>As soon as a criterion below is specified, the list switch in search mode.</p>
+',
+					'fr_FR' => '
+<h4>Liste des échéances</h4>
+<p>Par défaut, toutes les échéances en cours (à régler ou encaisser) sont présentées dans la liste.</p>
+<p>Dès lors qu\'un des critères ci-dessous est spécifié, le mode de recherche est automatiquement activé.</p>
+',
+			),
+			'commitmentTerm/search/x' => array(
+					'en_US' => '
+<h4>Return in default mode</h4>
+<p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered on current terms.</p>
+',
+					'fr_FR' => '
+<h4>Retour au mode par défaut</h4>
+<p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée sur les échéances en cours.</p>
+',
+			),
+			'commitmentTerm/search/export' => array(
+					'en_US' => '
+<h4>List export</h4>
+<p>The list can be exported to Excel as it is presented: defaulting list or list resulting of a multi-criteria search.</p>
+',
+					'fr_FR' => '
+<h4>Export de la liste</h4>
+<p>La liste peut être exportée sous Excel telle que présentée : liste par défaut ou liste résultant d\'une recherche multi-critère.</p>
+',
+			),
+			'commitmentTerm/list/ordering' => array(
+					'en_US' => '
+<h4>Ordering</h4>
+<p>The list can be sorted according to each column in ascending or descending order.</p>
+',
+					'fr_FR' => '
+<h4>Classement</h4>
+<p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
+',
+			),
+			'commitmentTerm/list/detail' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Détail d\'une échéance</h4>
+<p>Le bouton zoom permet d\'accéder au détail d\'une échéance.</p>
+					',
+			),
+			'commitmentTerm/update' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Gestion du statut et des attributs de l\'échéance</h4>
+<p>L\'accès au détail d\'une échéance permet de consulter et éventuellement en rectifier les données.</p>
+<p>Il permet également d\'en actualiser la statut et y associer une pièce jointe (ex. scan de chèque).</p>
+					',
 			),
 	),
 );

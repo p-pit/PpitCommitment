@@ -251,7 +251,7 @@ class CommitmentController extends AbstractActionController
    		include 'public/PHPExcel_1/Classes/PHPExcel/Writer/Excel2007.php';
 
 		$workbook = new \PHPExcel;
-		(new SsmlTermViewHelper)->formatXls($workbook, $view);		
+		(new SsmlCommitmentViewHelper)->formatXls($workbook, $view);		
 		$writer = new \PHPExcel_Writer_Excel2007($workbook);
 
 		header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

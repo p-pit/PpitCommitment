@@ -1,3 +1,9 @@
+<?php if ($context->isDemoModeActive()) : ?>
+		<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentTerm/update'][$context->getLocale()] ?>">
+		    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+		</a>
+<?php endif;?>
+
 <?php if ($term->id && !$action && !$message) : ?>
 		<button type="button" class="btn btn-default action-btn" id="term-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>">
 			<span class="glyphicon glyphicon-edit"></span>

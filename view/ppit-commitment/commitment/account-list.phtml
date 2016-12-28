@@ -17,13 +17,18 @@
 			<button type="button" class="btn btn-default action-btn btn-xs commitment-add-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-add">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
+<?php if ($context->isDemoModeActive()) : ?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/accountList'.(($type) ? '/'.$type : '').'/add'][$context->getLocale()] ?>">
+			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+			</a>
+<?php endif;?>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url('commitment/index', array('type' => $type)) ?>?account_id=<?php echo $params['account_id'] ?>">
 				<?php echo $this->translate('Invoices', 'ppit-commitment', $context->getLocale()) ?>
 			</button>
 		</td>
 	</tr>
 
-<?php foreach ($commitments as $commitment) : ?>
+<?php $i = 0; foreach ($commitments as $commitment) : ?>
 
 	<tr class="commitment">
 		
@@ -66,13 +71,18 @@
 		    <?php endforeach;?>
 		          </ul>
 		        </li>
+<?php if ($i == 0 && $context->isDemoModeActive()) : ?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/accountList'.(($type) ? '/'.$type : '').'/documents'][$context->getLocale()] ?>">
+			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+			</a>
+<?php endif;?>
 		    </ul>
 		<?php endif;?>
 		</td>
 	<?php endforeach;?>	
 	</tr>
 
-<?php endforeach; ?>
+<?php $i++; endforeach; ?>
 
 </table>
 

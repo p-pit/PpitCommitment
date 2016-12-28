@@ -2,7 +2,7 @@
 	<tr>
 		<th>&nbsp;</th>
 
-<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
+<?php $first = true; foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
 		<th align="center">
 	<?php $label = $context->getConfig('commitmentTerm')['properties'][$propertyId]['labels'][$context->getLocale()] ?>
 	<?php if ($label) : ?>
@@ -12,6 +12,11 @@
 				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
 <?php endif ?>
 			</button>
+		<?php if ($first && $context->isDemoModeActive()) : ?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentTerm/list/ordering'][$context->getLocale()] ?>">
+			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+			</a>
+		<?php $first=false; endif;?>
 	<?php endif;?>
 		</th>
 <?php endforeach;?>
@@ -35,6 +40,11 @@
 			<button type="button" class="btn btn-default index-btn term-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="term-detail-anchor_<?php echo $term->id ?>">
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $term->id ?>-glyphicon"></span>
 			</button>
+<?php if ($i == 0 && $context->isDemoModeActive()) : ?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentTerm/list/detail'][$context->getLocale()] ?>">
+			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+			</a>
+<?php endif;?>
 		</td>
 
 	<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>

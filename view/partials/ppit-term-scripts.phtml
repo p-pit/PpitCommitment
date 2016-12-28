@@ -348,6 +348,14 @@ function getTermUpdate(commitment_id, id, action, target) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById(target).innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
 
 			if (id) {
 				$('#term-update-anchor').click(function () { getTermUpdate(commitment_id, id, 'update', target); });
