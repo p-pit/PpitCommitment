@@ -237,6 +237,16 @@
 				<td colspan="6" style="text-align: right"><?php echo $this->translate('Sum', 'ppit-commitment', $context->getLocale()) ?></td>
 				<td style="text-align: right"><?php echo $context->formatFloat($commitment->including_options_amount, 2) ?></td>
 			</tr>
+
+	<?php if ($context->getConfig('commitment'.(($commitment->type) ? '/'.$commitment->type : ''))['tax'] == 'excluding') : ?>
+			<?php $settlementTotal = $commitment->tax_inclusive ?>
+			<tr class="row" style="font-weight: bold;">
+				<td colspan="6" style="text-align: right"><?php echo $this->translate('Tax incl.', 'ppit-commitment', $context->getLocale()) ?></td>
+				<td style="text-align: right"><?php echo $context->formatFloat($commitment->tax_inclusive, 2) ?></td>
+			</tr>
+	<?php else : ?>
+			<?php $settlementTotal = $commitment->including_options_amount ?>
+	<?php endif;?>
 		</table>
 		<input type="hidden" id="optionCount" value="<?php echo ++$i ?>" />
 	</div>
@@ -326,7 +336,7 @@
 
 			<tr class="term" style="font-weight: bold;">
 				<td colspan="6" style="text-align: right"><?php echo $this->translate('Rest to be planned', 'ppit-commitment', $context->getLocale()) ?></td>
-		<?php $rest = $commitment->including_options_amount - $commitment->termSum ?>
+		<?php $rest = $settlementTotal - $commitment->termSum ?>
 				<td style="text-align: right; <?php if ($rest != 0) echo 'color: red' ?>"><?php echo $context->formatFloat($rest, 2) ?></td>
 				<td>&nbsp;</td>
 			</tr>
@@ -339,7 +349,7 @@
 
 			<tr class="term" style="font-weight: bold;">
 				<td colspan="6" style="text-align: right"><?php echo $this->translate('Rest to be settled', 'ppit-commitment', $context->getLocale()) ?></td>
-				<td style="text-align: right;"><?php echo $context->formatFloat($commitment->including_options_amount - $totalSettled, 2) ?></td>
+				<td style="text-align: right;"><?php echo $context->formatFloat($settlementTotal - $totalSettled, 2) ?></td>
 				<td>&nbsp;</td>
 			</tr>
 

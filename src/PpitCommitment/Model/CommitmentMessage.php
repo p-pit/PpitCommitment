@@ -129,18 +129,6 @@ class CommitmentMessage implements InputFilterAwareInterface
 		return 'OK';
 	}
 
-	public function loadDataFromRequest($request)
-	{
-		$context = Context::getCurrent();
-		
-		// Retrieve the data from the request
-		$data = array();
-		$data['type'] = $request->getPost('type');
-		$files = $request->getFiles()->toArray();
-		$return = $this->loadData($data, $files);
-		if ($return != 'OK') throw new \Exception('View error');
-	}
-
 	public function add()
 	{
 		$context = Context::getCurrent();
@@ -162,30 +150,36 @@ class CommitmentMessage implements InputFilterAwareInterface
     	return ('OK');
 	}
 
-	public function import($document_id, $ignoreFirst = true)
+	public function import($document_id)
 	{
 		$context = Context::getCurrent();
-		$config = $context->getConfig();
-		$maxRows = $config['ppitOrderSettings']['orderImportMaxRows'];
-		$properties = $context->getConfig('commitment')['importTypes'][$this->type]['description'];
+		$maxRows = $context->getConfig('commitmentMessage')['importMaxRows'];
 		$filePath = 'data/documents/'.$document_id;
-	
+		
 		ini_set('auto_detect_line_endings', true);
 		$file = new SplFileObject($filePath, 'r');
 		$file->setFlags(SplFileObject::READ_CSV);
 		$file->setCsvControl(';');
 		$rows = array(); $first = TRUE;
 		foreach($file as $row) {
-			if ((!$first || !$ignoreFirst) && count($row) > 0) {
+			if ($first && count($row) > 0) {
+				$properties = array();
+				foreach ($row as $cell) {
+					$cell = utf8_encode($cell);
+					if (!array_key_exists($cell, $context->getConfig('commitment')['properties'])) $properties[$cell] = null;
+					else $properties[$cell] = $context->getConfig('commitment')['properties'][$cell];
+				}
+			}
+			else {
 				$content = false;
 				foreach ($row as $cell) if ($cell) $content = true;
 				if ($content) $rows[] = $row;
 			}
 			$first = FALSE;
 		}
-	
+		
 		// Number of rows limitation
-		$nbRows = ($ignoreFirst) ? count($rows) -1 : count($rows);
+		$nbRows = count($rows);
 		if ($nbRows > $maxRows) {
 			$errors[] = array('line' => NULL, 'column' => NULL, 'type' => 'nb_rows', 'caption' => 'A maximum of '.$maxRows.' lines can be imported at a time');
 			$this->http_status = 'Integrity errors';
@@ -204,28 +198,33 @@ class CommitmentMessage implements InputFilterAwareInterface
 				foreach ($rows as $row) {
 					$contentRow = array();
 					$i = 0;
-					foreach ($properties as $property) {
-						$value = utf8_encode($row[$i]);
-						if ($property['type'] == 'date') $value = $context->encodeDate($value);
-						elseif ($property['type'] == 'number') {
-							$dotPos = strrpos($value, '.');
-							$commaPos = strrpos($value, ',');
-							$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
-							((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
-							if (!$sep) $value =  floatval(preg_replace("/[^0-9]/", "", $value));
-							else {
-								$value = floatval(
-										preg_replace("/[^0-9]/", "", substr($value, 0, $sep)) . '.' .
-										preg_replace("/[^0-9]/", "", substr($value, $sep+1, strlen($value)))
-								);
+					foreach ($properties as $propertyId => $property) {
+						$value = $row[$i];
+						$value = utf8_encode($value);
+						$lineBreak = strpos($value, "\n");
+						if ($lineBreak) $value = (substr($value, 0, $lineBreak));
+						if ($property) {
+							if ($property['type'] == 'date') $value = $context->encodeDate($value);
+							elseif ($property['type'] == 'number') {
+								$dotPos = strrpos($value, '.');
+								$commaPos = strrpos($value, ',');
+								$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+								((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+								if (!$sep) $value =  floatval(preg_replace("/[^0-9]/", "", $value));
+								else {
+									$value = floatval(
+											preg_replace("/[^0-9]/", "", substr($value, 0, $sep)) . '.' .
+											preg_replace("/[^0-9]/", "", substr($value, $sep+1, strlen($value)))
+									);
+								}
 							}
 						}
-						$contentRow[] = $value;
+						$contentRow[$propertyId] = $value;
 						$i++;
 					}
 					$content[] = $contentRow;
 				}
-				$this->content = json_encode($content);
+				$this->content = json_encode($content, JSON_UNESCAPED_UNICODE);
 			}
 		}
 	}

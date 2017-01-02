@@ -216,22 +216,18 @@ class AccountController extends AbstractActionController
 					foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 						$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 						if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
-						else $data[$propertyId] =  $request->getPost($propertyId);
+						else $data[$propertyId] = $request->getPost($propertyId);
 					}
 					if ($type) $data['credits'] = array($type => true);
-	
-					if (!$account->id) {
-						
-						// Add the community
-						$account->customer_community = Community::instanciate();
-						$communityData = array('name' => $data['n_last'].', '.$data['n_first']);
-    					$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
-						if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
-	
-						// Add the main contact
-						$account->contact_1 = Vcard::instanciate();
-						if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
-					}
+
+					$communityData = array('name' => ($account->customer_name) ? $account->customer_name : $account->n_last.', '.$account->n_first);
+    				$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
+					if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
+
+					// Add the main contact
+					$account->contact_1 = Vcard::instanciate();
+					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
+
 					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
     			}
 				if (!$error) {
@@ -255,11 +251,15 @@ class AccountController extends AbstractActionController
 	    				elseif ($action == 'delete') $return = $account->delete($request->getPost('update_time'));
 	    				else {
 	    					// Save the contact
-	    					$return = $account->contact_1->update($account->contact_1->update_time);
+	    					$return = $account->customer_community->update(null);
 	    					if ($return != 'OK') $error = $return;
 	    					else {
-	    						$return = $account->update($request->getPost('update_time'));
-	    						if ($return != 'OK') $error = $return;
+		    					$return = $account->contact_1->update($account->contact_1->update_time);
+		    					if ($return != 'OK') $error = $return;
+		    					else {
+		    						$return = $account->update($request->getPost('update_time'));
+		    						if ($return != 'OK') $error = $return;
+		    					}
 	    					}
 	    				}
 	    				if ($error) $connection->rollback();

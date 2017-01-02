@@ -65,6 +65,7 @@
 			'Orders in progress' => 'Commandes en cours',
 			'Please accept the conditions' => "Veuillez accepter les conditions",
 			'Positioning' => 'Positionnement',
+			'Integrate a CSV file' => 'Intégrer un fichier CSV',
 			'Quantity' => 'Quantité',
 			'Quotation identifier' => 'Référence de devis',
 			'Re-initialize' => 'Ré-initialiser',

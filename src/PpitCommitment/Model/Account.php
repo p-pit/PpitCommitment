@@ -362,7 +362,7 @@ class Account implements InputFilterAwareInterface
     		if (array_key_exists('customer_community_id', $data)) $this->customer_community_id = (int) $data['customer_community_id'];
 			if (array_key_exists('n_first', $data)) {
 		    	$this->n_first = trim(strip_tags($data['n_first']));
-		    	if (!$this->n_first || strlen($this->n_first) > 255) return 'Integrity';
+		    	if (strlen($this->n_first) > 255) return 'Integrity';
 			}
 			if (array_key_exists('n_last', $data)) {
 				$this->n_last = trim(strip_tags($data['n_last']));

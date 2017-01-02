@@ -3,11 +3,15 @@ if (array_key_exists($xmlMessage->type, $context->getConfig('commitmentMessage')
 	header('Content-Type: text/csv; charset=utf-8');
 	header("Content-disposition: filename=osi-".$xmlMessage->id.".csv");
 	echo "\xEF\xBB\xBF";
-	foreach ($context->getConfig('commitment')['importTypes'][$xmlMessage->type]['description'] as $property) {
-		echo $property['name'].';';
-	}
-	echo "\n";
+	$first = true;
 	foreach (json_decode($xmlMessage->content, true) as $row) {
+		if ($first) {
+			$first = false;
+			foreach ($row as $id => $unused) {
+				echo $id.';';
+			}
+			echo "\n";
+		}
 		foreach ($row as $id => $propertyValue) {
 			echo $propertyValue.';';
 		}

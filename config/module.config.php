@@ -934,7 +934,7 @@ return array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
-									'fr_FR' => 'Nom',
+									'fr_FR' => 'Dénomination',
 							),
 					),
 					'n_title' => array(
@@ -1048,6 +1048,7 @@ return array(
 	),
 	'commitmentAccount/update' => array(
 			'status' => array('mandatory' => true),
+			'customer_name' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
@@ -1124,6 +1125,27 @@ return array(
 									'fr_FR' => 'Description',
 							),
 					),
+					'quantity' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Quantity',
+									'fr_FR' => 'Quantité',
+							),
+					),
+					'unit_price' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Unit price',
+									'fr_FR' => 'Prix unitaire',
+							),
+					),
+					'amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
 					'including_options_amount' => array(
 							'type' => 'number',
 							'labels' => array(
@@ -1131,11 +1153,32 @@ return array(
 									'fr_FR' => 'Montant',
 							),
 					),
+					'invoice_identifier' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Invoice identifier',
+									'fr_FR' => 'Numéro de facture',
+							),
+					),
 					'invoice_date' => array(
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Invoice date',
 									'fr_FR' => 'Date de facture',
+							),
+					),
+					'tax_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Tax amount',
+									'fr_FR' => 'Montant TVA',
+							),
+					),
+					'tax_inclusive' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Tax inclusive',
+									'fr_FR' => 'TTC',
 							),
 					),
 			),
@@ -1305,11 +1348,10 @@ return array(
 							),
 					),
 					'caption' => array(
-							'type' => 'repository',
-							'definition' => 'student/property/school_year',
+							'type' => 'input',
 							'labels' => array(
-									'en_US' => 'School year',
-									'fr_FR' => 'Année scolaire',
+									'en_US' => 'Caption',
+									'fr_FR' => 'Libellé',
 							),
 					),
 					'description' => array(
@@ -1457,6 +1499,8 @@ return array(
 			'document' => array('mandatory' => false),
 	),
 	'commitmentMessage' => array(
+			'importMaxRows' => 100,
+			'importTypes' => array('csv' => array('en_US' => 'CSV file', 'fr_FR' => 'Fichier CSV')),
 			'inputMessages' => array(
 					'order' => array(
 							'action' => '',
@@ -1492,7 +1536,6 @@ return array(
 							)
 					),
 			),
-			'importTypes' => array(),
 	),
 	'commitment/accountList' => array(
 			'title' => array('en_US' => 'Subscriptions', 'fr_FR' => 'Souscriptions'),

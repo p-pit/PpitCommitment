@@ -332,7 +332,7 @@ class CommitmentController extends AbstractActionController
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['applications'] = array('p-pit-engagements' => true, 'p-pit-studies' => true);
+    			$data['applications'] = array('p-pit-admin' => false, 'p-pit-engagements' => true, 'p-pit-studies' => false);
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
@@ -341,6 +341,7 @@ class CommitmentController extends AbstractActionController
     			$data['tel_cell'] = null;
     			$data['roles'] = array('admin' => true, 'sales_manager' => true, 'manager' => true);
     			$data['is_notified'] = 1;
+    			$data['is_demo_mode_active'] = 1;
     			$rc = $contact->loadData($data);
     			if ($rc != 'OK') throw new \Exception('View error');
     			$rc = $user->loadData($request, $contact, $instance->id);
@@ -367,9 +368,10 @@ class CommitmentController extends AbstractActionController
 						$userContact->instance_id = $instance->id;
 						$userContact->user_id = $user->user_id;
 						$userContact->contact_id = $contact->id;
-						mkdir('public/img/'.$instance->caption);
-						mkdir('public/img/logos/'.$instance->caption);
+						UserContact::getTable()->transSave($userContact);
+
 						$credit->instance_id = $instance->id;
+						$credit->status = 'active';
 						$credit->type = 'p-pit-engagements';
 						$credit->quantity = 0;
 						$credit->activation_date = date('Y-m-d');
@@ -377,14 +379,15 @@ class CommitmentController extends AbstractActionController
 						$credit->id = 0;
 						$credit->type = 'p-pit-studies';
 						Credit::getTable()->transSave($credit);
-						
+
     					if ($rc != 'OK') {
     						if ($rc == 'Duplicate') $error = 'Duplicate identifier';
     						else $error = $rc;
     						$connection->rollback();
     					}
     					else {
-		    				mkdir('./public/img/'.$instance->caption);
+							mkdir('public/logos/'.$instance->caption);
+    						mkdir('./public/img/'.$instance->caption);
     						$connection->commit();
 		    				$message = 'OK';
 	    				}
@@ -645,7 +648,7 @@ class CommitmentController extends AbstractActionController
     			$data['product_caption'] = $request->getPost('product_caption');
     			$data['quantity'] = $request->getPost('quantity');
     			$data['unit_price'] = $request->getPost('unit_price');
-    			$data['amount'] = $data['quantity'] * $data['unit_price'];
+    			$data['amount'] = round($data['quantity'] * $data['unit_price'], 2);
     			$product = Product::get($data['product_identifier'], 'reference');
     			if ($product->tax_1_share) $data['taxable_1_amount'] = round($data['amount'] * $product->tax_1_share, 2);
     			if ($product->tax_2_share) $data['taxable_2_amount'] = round($data['amount'] * $product->tax_2_share, 2);

@@ -36,6 +36,16 @@ class Commitment implements InputFilterAwareInterface
 	public $status;
 	public $caption;
 	public $description;
+	public $customer_identifier;
+//	public $customer_name;
+	public $customer_n_fn;
+	public $customer_adr_street;
+	public $customer_adr_extended;
+	public $customer_adr_post_office_box;
+	public $customer_adr_zip;
+	public $customer_adr_city;
+	public $customer_adr_state;
+	public $customer_adr_country;
 	public $product_identifier;
 	public $product_brand;
 	public $product_caption;
@@ -148,11 +158,21 @@ class Commitment implements InputFilterAwareInterface
         $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->description = (isset($data['description'])) ? $data['description'] : null;
-        $this->quantity = (isset($data['quantity'])) ? $data['quantity'] : null;
-        $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
+        $this->customer_identifier = (isset($data['customer_identifier'])) ? $data['customer_identifier'] : null;
+//        $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->customer_n_fn = (isset($data['customer_n_fn'])) ? $data['customer_n_fn'] : null;
+        $this->customer_adr_street = (isset($data['customer_adr_street'])) ? $data['customer_adr_street'] : null;
+        $this->customer_adr_extended = (isset($data['customer_adr_extended'])) ? $data['customer_adr_extended'] : null;
+        $this->customer_adr_post_office_box = (isset($data['customer_adr_post_office_box'])) ? $data['customer_adr_post_office_box'] : null;
+        $this->customer_adr_zip = (isset($data['customer_adr_zip'])) ? $data['customer_adr_zip'] : null;
+        $this->customer_adr_city = (isset($data['customer_adr_city'])) ? $data['customer_adr_city'] : null;
+        $this->customer_adr_state = (isset($data['customer_adr_state'])) ? $data['customer_adr_state'] : null;
+        $this->customer_adr_country = (isset($data['customer_adr_country'])) ? $data['customer_adr_country'] : null;
         $this->product_identifier = (isset($data['product_identifier'])) ? $data['product_identifier'] : null;
         $this->product_brand = (isset($data['product_brand'])) ? $data['product_brand'] : null;
         $this->product_caption = (isset($data['product_caption'])) ? $data['product_caption'] : null;
+        $this->quantity = (isset($data['quantity'])) ? $data['quantity'] : null;
+        $this->unit_price = (isset($data['unit_price'])) ? $data['unit_price'] : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->taxable_1_amount = (isset($data['taxable_1_amount'])) ? $data['taxable_1_amount'] : null;
         $this->taxable_2_amount = (isset($data['taxable_2_amount'])) ? $data['taxable_2_amount'] : null;
@@ -241,6 +261,16 @@ class Commitment implements InputFilterAwareInterface
     	$data['status'] = $this->status;
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
+    	$data['customer_identifier'] = $this->customer_identifier;
+//    	$data['customer_name'] = $this->customer_name;
+    	$data['customer_n_fn'] = $this->customer_n_fn;
+    	$data['customer_adr_street'] = $this->customer_adr_street;
+    	$data['customer_adr_extended'] = $this->customer_adr_extended;
+    	$data['customer_adr_post_office_box'] = $this->customer_adr_post_office_box;
+    	$data['customer_adr_zip'] = $this->customer_adr_zip;
+    	$data['customer_adr_city'] = $this->customer_adr_city;
+    	$data['customer_adr_state'] = $this->customer_adr_state;
+    	$data['customer_adr_country'] = $this->customer_adr_country;
     	$data['product_identifier'] = $this->product_identifier;
     	$data['product_brand'] = $this->product_brand;
     	$data['product_caption'] = $this->product_caption;
@@ -547,6 +577,56 @@ class Commitment implements InputFilterAwareInterface
 		if (array_key_exists('description', $data)) {
 			$this->description = trim(strip_tags($data['description']));
 		    if (strlen($this->description) > 2047) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_identifier', $data)) {
+			$this->customer_identifier = trim(strip_tags($data['customer_identifier']));
+			if (strlen($this->customer_identifier) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_name', $data)) {
+			$this->customer_name = trim(strip_tags($data['customer_name']));
+			if (strlen($this->customer_name) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_n_fn', $data)) {
+			$this->customer_n_fn = trim(strip_tags($data['customer_n_fn']));
+			if (!$this->customer_identifier || strlen($this->customer_n_fn) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_street', $data)) {
+			$this->customer_adr_street = trim(strip_tags($data['customer_adr_street']));
+			if (strlen($this->customer_adr_street) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_extended', $data)) {
+			$this->customer_adr_extended = trim(strip_tags($data['customer_adr_extended']));
+			if (strlen($this->customer_adr_extended) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_post_office_box', $data)) {
+			$this->customer_adr_post_office_box = trim(strip_tags($data['customer_adr_post_office_box']));
+			if (strlen($this->customer_adr_post_office_box) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_zip', $data)) {
+			$this->customer_adr_zip = trim(strip_tags($data['customer_adr_zip']));
+			if (strlen($this->customer_adr_zip) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_city', $data)) {
+			$this->customer_adr_city = trim(strip_tags($data['customer_adr_city']));
+			if (strlen($this->customer_adr_city) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_state', $data)) {
+			$this->customer_adr_state = trim(strip_tags($data['customer_adr_state']));
+			if (strlen($this->customer_adr_state) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('customer_adr_country', $data)) {
+			$this->customer_adr_country = trim(strip_tags($data['customer_adr_country']));
+			if (strlen($this->customer_adr_country) > 255) return 'Integrity';
 		}
 
 		if (array_key_exists('product_caption', $data)) {

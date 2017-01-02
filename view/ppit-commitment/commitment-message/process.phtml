@@ -1,6 +1,8 @@
+<?php header('Content-Type: text/html; charset=utf-8') ?>
+<meta charset="utf-8">
 <div class="panel panel-default">
-	<div class="panel-heading">
-		<?php echo $this->translate('Traiter un fichier OSI', 'ppit-commitment', $context->getLocale()) ?>
+	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+		<?php echo $this->translate('Process a CSV file', 'ppit-commitment', $context->getLocale()) ?>
  		<div class="btn-group pull-right">
 			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Close', 'ppit-core', $context->getLocale()) ?>" id="<?php echo 'remove-anchor' ?>">
 				<span class="glyphicon glyphicon-remove"></span>
