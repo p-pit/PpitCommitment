@@ -756,18 +756,42 @@ class CommitmentMessageController extends AbstractActionController
     			    	$error = 'Consistency';
     			    }
 
-    			    if (array_key_exists('amount', $row)) $data['amount'] = $row['amount'];
+    			    $tax_regime = $context()->getConfig('corePlace')['properties']['tax_regime']['default'];
+    			    if ($tax_regime == 1) {
+    			    	$taxableAmountProperty = 'taxable_1_amount';
+    			    	$taxAmountProperty = 'tax_1_amount';
+    			    }
+    			    else if ($tax_regime == 2) {
+    			    	$taxableAmountProperty = 'taxable_2_amount';
+    			    	$taxAmountProperty = 'tax_2_amount';
+    			    }
+    			    elseif ($tax_regime == 3) {
+    			    	$taxableAmountProperty = 'taxable_3_amount';
+    			    	$taxAmountProperty = 'tax_3_amount';
+    			    }
+    			    else {
+    			    	$taxableAmountProperty = null;
+    			    	$taxAmountProperty = null;
+    			    }
+
+    			    if (array_key_exists('amount', $row)) {
+    			    	$data['amount'] = $row['amount'];
+    			    	$data[$taxableAmountProperty] = $row['amount'];
+    			    }
     			    else {
     			    	$resultStatus[] = 'amount?';
     			    	$error = 'Consistency';
     			    }
-
-    			    if (array_key_exists('tax_amount', $row)) $data['tax_amount'] = $row['tax_amount'];
+    			    
+    			    if (array_key_exists('tax_amount', $row)) {
+    			    	$data['tax_amount'] = $row['tax_amount'];
+    			    	$data[$taxAmountProperty] = $row['tax_amount'];
+    			    }
     			    else {
     			    	$resultStatus[] = 'tax_amount?';
     			    	$error = 'Consistency';
     			    }
-
+    			    	
     			    if (array_key_exists('tax_inclusive', $row)) $data['tax_inclusive'] = $row['tax_inclusive'];
     			    else {
     			    	$resultStatus[] = 'tax_inclusive?';

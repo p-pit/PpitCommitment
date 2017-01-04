@@ -209,9 +209,11 @@ class PdfInvoiceViewHelper
     	$product = Product::get($commitment->product_identifier, 'reference');
     	$taxExemptAmount = $commitment->amount - $commitment->taxable_1_amount - $commitment->taxable_2_amount - $commitment->taxable_3_amount;
     	$color = 0;
+    	if ($commitment->product_caption) $product_caption = $commitment->product_caption;
+    	else $product_caption = $commitment->description;
     	if ($proforma) {
     		$pdf->Ln();
-    		$pdf->Cell(105, 6, $commitment->product_caption, 'LR', 0, 'L', $color);
+    		$pdf->Cell(105, 6, $product_caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->unit_price, 2), 'LR', 0, 'R', $color);
     		$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount, 2), 'LR', 0, 'R', $color);
@@ -220,7 +222,7 @@ class PdfInvoiceViewHelper
     	else {
 	    	if ($commitment->taxable_1_amount != 0) {
 	    		$pdf->Ln();
-	    		$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
+	    		$pdf->Cell(105, 6, $product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_1_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_1_amount, 2), 'LR', 0, 'R', $color);
@@ -228,7 +230,7 @@ class PdfInvoiceViewHelper
 	    	}
 	        if ($commitment->taxable_2_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_2_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_2_amount, 2), 'LR', 0, 'R', $color);
@@ -236,7 +238,7 @@ class PdfInvoiceViewHelper
 	    	}
 	        if ($commitment->taxable_3_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_3_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_3_amount, 2), 'LR', 0, 'R', $color);
@@ -244,7 +246,7 @@ class PdfInvoiceViewHelper
 	    	}
 	        if ($taxExemptAmount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $commitment->product_caption.' (exonéré)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(105, 6, $product_caption.' (exonéré)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount, 2), 'LR', 0, 'R', $color);
 		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount * $commitment->quantity, 2), 'LR', 0, 'R', $color);

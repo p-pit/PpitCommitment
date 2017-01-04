@@ -520,8 +520,9 @@ class Commitment implements InputFilterAwareInterface
     
     	return $commitment;
     }
-
-    public function computeFooter() {
+    
+    public function computeFooter() 
+    {
     	$context = Context::getCurrent();
     	$this->including_options_amount = $this->amount;
     	$this->taxable_1_total = $this->taxable_1_amount;
