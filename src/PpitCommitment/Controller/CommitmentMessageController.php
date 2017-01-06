@@ -756,7 +756,7 @@ class CommitmentMessageController extends AbstractActionController
     			    	$error = 'Consistency';
     			    }
 
-    			    $tax_regime = $context()->getConfig('corePlace')['properties']['tax_regime']['default'];
+    			    $tax_regime = $context->getConfig('corePlace')['properties']['tax_regime']['default'];
     			    if ($tax_regime == 1) {
     			    	$taxableAmountProperty = 'taxable_1_amount';
     			    	$taxAmountProperty = 'tax_1_amount';
