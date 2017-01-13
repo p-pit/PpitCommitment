@@ -18,8 +18,11 @@ class PdfInvoiceViewHelper
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    	
-    	$account = Account::get($commitment->account_id);
+    	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
+    	$type = $commitment->type;
+    	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
+    	else $invoiceSpecs = $context->getConfig($specsId);
+
     	if (!$commitment->invoice_date) $commitment->properties['invoice_date'] = date('Y-m-d');
     	
     	// create new PDF document
@@ -93,68 +96,25 @@ class PdfInvoiceViewHelper
     	$pdf->SetFont('', '', 12);
     	
     	$addressee = "\n"."\n";
-
-    	$type = $commitment->type;
-    	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
-    	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
-    	else $invoiceSpecs = $context->getConfig($specsId);
-    	foreach($invoiceSpecs['header'] as $line) {
-    		$arguments = array();
-    		foreach($line['params'] as $propertyId) {
-    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
-    			else {
-    				if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
-						$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-					}
-					else {
-						$property = $context->getConfig('commitment')['properties'][$propertyId];
-					}
-    				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-    				if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
-    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
-    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-    				elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
-    				else $arguments[] = $commitment->properties[$propertyId];
-    			}
-    		}
-    		$addressee .= vsprintf($line['format'][$context->getLocale()], $arguments)."\n";
+		if ($proforma) $commitment->computeHeader($proforma);
+    	if ($commitment->customer_invoice_name) $addressee .= $commitment->customer_invoice_name."\n";
+    	if ($commitment->customer_n_fn) $addressee .= $commitment->customer_n_fn."\n";
+    	if ($commitment->customer_adr_street) $addressee .= $commitment->customer_adr_street."\n";
+    	if ($commitment->customer_adr_extended) $addressee .= $commitment->customer_adr_extended."\n";
+    	if ($commitment->customer_adr_post_office_box) $addressee .= $commitment->customer_adr_post_office_box."\n";
+    	if ($commitment->customer_adr_zip || $commitment->customer_adr_city) {
+    		if ($commitment->customer_adr_zip) $addressee .= $commitment->customer_adr_zip." ";
+	    	if ($commitment->customer_adr_city) $addressee .= $commitment->customer_adr_city;
+    		$addressee .= "\n";
     	}
-    	 
-    	$invoicingContact = null;
-		if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
-		elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
-		elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
-		elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
-		elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
-
-		if (!$invoicingContact) {
-			if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
-			elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
-			elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
-			elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
-			elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
-		}
-		
-		if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
-    		if ($invoicingContact->n_title) $addressee .= $invoicingContact->n_title.' ';
-    		$addressee .= $invoicingContact->n_last.' ';
-    		$addressee .= $invoicingContact->n_first."\n";
-    	}
-    	if ($invoicingContact->adr_street) $addressee .= $invoicingContact->adr_street."\n";
-    	if ($invoicingContact->adr_extended) $addressee .= $invoicingContact->adr_extended."\n";
-    	if ($invoicingContact->adr_post_office_box) $addressee .= $invoicingContact->adr_post_office_box."\n";
-    	if ($invoicingContact->adr_zip || $invoicingContact->adr_city) {
-    		if ($invoicingContact->adr_zip) $addressee .= $invoicingContact->adr_zip." ";
-    		$addressee .= $invoicingContact->adr_city."\n";
-    	}
-    	if ($invoicingContact->adr_state) $addressee .= $invoicingContact->adr_state."\n";
-    	if ($invoicingContact->adr_country) $addressee .= $invoicingContact->adr_country."\n";
+    	if ($commitment->customer_adr_state) $addressee .= $commitment->customer_adr_state."\n";
+    	if ($commitment->customer_adr_country) $addressee .= $commitment->customer_adr_country."\n";
     	$pdf->MultiCell(80, 5, $addressee, 0, 'L', 0, 1, '', '', true);
     	$pdf->Ln(10);
 
     	// Title
     	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma'.'</strong></div>';
-    	else $text = '<div style="text-align: center"><strong>Facture n° '.(($commitment->invoice_identifier) ? $commitment->invoice_identifier : $commitment->identifier).'</strong></div>';
+    	else $text = '<div style="text-align: center"><strong>Facture n° '.$commitment->invoice_identifier.'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(10);
     	 
@@ -180,13 +140,16 @@ class PdfInvoiceViewHelper
 	    			if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
 	    			elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
 	    			elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-	    			elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
+	    			elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
 	    			else $arguments[] = $commitment->properties[$propertyId];
     			}
     		}
-    		$pdf->MultiCell(30, 5, '<strong>'.$line['left'][$context->getLocale()].'</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
-    		$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
-    		$pdf->MultiCell(145, 5, vsprintf($line['right'][$context->getLocale()], $arguments), 1, 'L', 0, 1, '' ,'', true);
+    		$value = vsprintf($line['right'][$context->getLocale()], $arguments);
+    		if ($value) {
+	    		$pdf->MultiCell(30, 5, '<strong>'.$line['left'][$context->getLocale()].'</strong>', 1, 'L', 1, 0, '', '', true, 0, true);
+	    		$pdf->MultiCell(5, 5, ':', 1, 'L', 1, 0, '', '', true);
+	    		$pdf->MultiCell(145, 5, $value, 1, 'L', 0, 1, '' ,'', true);
+    		}
     	}
     	 
     	// Invoice lines
@@ -256,8 +219,7 @@ class PdfInvoiceViewHelper
     	
     	if (is_array($commitment->options)) foreach ($commitment->options as $option) {
     		$pdf->Ln();
-    		$productOption = ProductOption::get($option['identifier'], 'reference');
-    		$caption = $productOption->caption;
+    		$caption = $option['caption'];
     		if (!$proforma) {
 	    		if ($option['vat_id'] == 0) $taxCaption = ' (exonéré)';
 	    		elseif ($option['vat_id'] == 1) $taxCaption = ' (TVA 20%)';
@@ -322,12 +284,13 @@ class PdfInvoiceViewHelper
     	$settledAmount = 0;
     	$color = 0;
     	foreach($terms as $term) {
-    		if ($term->status == 'settled') $settledAmount += $term->amount;
+    		if ($term->status == 'settled' || $term->status == 'collected') $settledAmount += $term->amount;
     		if ($term->status == 'expected' && $term->due_date < date('Y-m-d')) $pdf->SetTextColor(255, 0, 0); else $pdf->SetTextColor(0);
     		$meansOfPayment = ($term->means_of_payment) ? $context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term->means_of_payment][$context->getLocale()] : '';
 	    	$pdf->Ln();
 	    	$pdf->Cell(60, 6, $term->caption, 'LR', 0, 'L', $color);
 	    	$pdf->Cell(30, 6, $context->decodeDate($term->due_date), 'LR', 0, 'C', $color);
+	    	if ($term->status == 'collected') $term->status = 'settled';
 	    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term->status][$context->getLocale()];
 	    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
 	    	$pdf->Cell(30, 6, $context->decodeDate($term->settlement_date).(($meansOfPayment) ? ' ('.$meansOfPayment.')' : ''), 'LR', 0, 'L', $color);

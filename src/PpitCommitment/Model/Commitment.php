@@ -1,6 +1,7 @@
 <?php
 namespace PpitCommitment\Model;
 
+use PpitAccounting\Model\Journal;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
@@ -37,7 +38,7 @@ class Commitment implements InputFilterAwareInterface
 	public $caption;
 	public $description;
 	public $customer_identifier;
-//	public $customer_name;
+	public $customer_invoice_name;
 	public $customer_n_fn;
 	public $customer_adr_street;
 	public $customer_adr_extended;
@@ -159,7 +160,7 @@ class Commitment implements InputFilterAwareInterface
         $this->caption = (isset($data['caption'])) ? $data['caption'] : null;
         $this->description = (isset($data['description'])) ? $data['description'] : null;
         $this->customer_identifier = (isset($data['customer_identifier'])) ? $data['customer_identifier'] : null;
-//        $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->customer_invoice_name = (isset($data['customer_invoice_name'])) ? $data['customer_invoice_name'] : null;
         $this->customer_n_fn = (isset($data['customer_n_fn'])) ? $data['customer_n_fn'] : null;
         $this->customer_adr_street = (isset($data['customer_adr_street'])) ? $data['customer_adr_street'] : null;
         $this->customer_adr_extended = (isset($data['customer_adr_extended'])) ? $data['customer_adr_extended'] : null;
@@ -262,7 +263,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['caption'] = $this->caption;
     	$data['description'] = $this->description;
     	$data['customer_identifier'] = $this->customer_identifier;
-//    	$data['customer_name'] = $this->customer_name;
+    	$data['customer_invoice_name'] = $this->customer_invoice_name;
     	$data['customer_n_fn'] = $this->customer_n_fn;
     	$data['customer_adr_street'] = $this->customer_adr_street;
     	$data['customer_adr_extended'] = $this->customer_adr_extended;
@@ -519,6 +520,70 @@ class Commitment implements InputFilterAwareInterface
     	if ($commitment->type == 'unknown') return null;
     
     	return $commitment;
+    }
+    
+    public function computeHeader($proforma = false)
+    {
+    	$context = Context::getCurrent();
+    	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
+    	$type = $this->type;
+    	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
+    	else $invoiceSpecs = $context->getConfig($specsId);
+    	$this->customer_invoice_name = '';
+    	$first = true;
+    	foreach($invoiceSpecs['header'] as $line) {
+    		$arguments = array();
+    		foreach($line['params'] as $propertyId) {
+    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
+    			else {
+    				if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
+    					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+    				}
+    				else {
+    					$property = $context->getConfig('commitment')['properties'][$propertyId];
+    				}
+    				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+    				if ($propertyId == 'customer_name') $arguments[] = $this->customer_name;
+    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($this->properties[$propertyId]);
+    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($this->properties[$propertyId], 2);
+    				elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$this->properties[$propertyId]][$context->getLocale()];
+    				else $arguments[] = $this->properties[$propertyId];
+    			}
+    		}
+    		if (!$first) $this->customer_invoice_name .= "\n";
+    		$first = false;
+    		$this->customer_invoice_name .= vsprintf($line['format'][$context->getLocale()], $arguments);
+    	}
+    	$account = $this->account;
+    	$invoicingContact = null;
+    	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
+    	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
+    	elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
+    	elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
+    	elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
+    		
+    	if (!$invoicingContact) {
+    		if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
+    		elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
+    		elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
+    		elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
+    		elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
+    	}
+    	if (!$invoicingContact) $invoicingContact = $account->contact_1;
+    		 
+    	$this->customer_n_fn = '';
+    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
+    		if ($invoicingContact->n_title) $this->customer_n_fn .= $invoicingContact->n_title.' ';
+    		$this->customer_n_fn .= $invoicingContact->n_last.' ';
+    		$this->customer_n_fn .= $invoicingContact->n_first;
+    	}
+    	$this->customer_adr_street = $invoicingContact->adr_street;
+    	$this->customer_adr_extended = $invoicingContact->adr_extended;
+    	$this->customer_adr_post_office_box = $invoicingContact->adr_post_office_box;
+    	$this->customer_adr_zip = $invoicingContact->adr_zip;
+    	$this->customer_adr_city = $invoicingContact->adr_city;
+    	$this->customer_adr_state = $invoicingContact->adr_state;
+    	$this->customer_adr_country = $invoicingContact->adr_country;
     }
     
     public function computeFooter() 
@@ -959,6 +1024,34 @@ class Commitment implements InputFilterAwareInterface
     	return 'OK';
     }
 
+    public function record($step)
+    {
+    	$context = Context::getCurrent();
+    	$accountingChart = $context->getConfig('journal/accountingChart/sale')[$this->type];
+    	if (array_key_exists($step, $accountingChart)) {
+    		$step = $accountingChart[$step];
+	    	$journalEntry = Journal::instanciate();
+	    	$data = array();
+	    	$data['operation_date'] = $this->invoice_date;
+	    	$data['reference'] = $this->invoice_identifier;
+	    	$data['caption'] = $this->caption;
+	    	$data['commitment_id'] = $this->id;
+	    	$data['rows'] = array();
+	    	foreach ($step as $account => $rule) {
+	    		$amount = $this->properties[$rule['source']];
+	    		if ($amount > 0) {
+	    			$row = array();
+	    			$row['account'] = $account;
+	    			$row['direction'] = $rule['direction'];
+	    			$row['amount'] = $amount;
+	    			$data['rows'][] = $row;
+	    		}
+	    	}
+	    	$journalEntry->loadData($data);
+	    	$journalEntry->add();
+    	}
+    }
+    
     public function invoice($invoiceProperties, $request)
     {
     	// Retrieve the context
@@ -1178,9 +1271,11 @@ class Commitment implements InputFilterAwareInterface
     	 
     	// Retrieve commitments and count
     	$select = Commitment::getTable()->getSelect()
-    		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left');
+    		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left')
+    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array(), 'left')
+    		->join('core_community', 'commitment_account.customer_community_id = core_community.id', array('customer_name' => 'name'), 'left');
     	$where = new Where();
-    	$where->in('instance_id', $instanceIds);
+    	$where->in('commitment.instance_id', $instanceIds);
 		$where->notEqualTo('commitment.credit_status', 'closed');
 		$where->notEqualTo('commitment.credit_status', 'suspended');
 		$select->where($where);
@@ -1209,7 +1304,7 @@ class Commitment implements InputFilterAwareInterface
 			$creditModified = false;
 			$blocked = array();
 			foreach($credit->consumers as $commitment) {
-				if ($commitment->credit_status == 'blocked') $blocked[] = $commitment->identifier;
+				if ($commitment->credit_status == 'blocked') $blocked[] = $commitment->customer_name.' - '.$commitment->caption;
     			else {
 					if ($commitment->next_credit_consumption_date <= date('Y-m-d', strtotime(date('Y-m-d').' + 7 days'))) $counter7++;
 	    			if ($commitment->next_credit_consumption_date <= date('Y-m-d')) $counter0++;
@@ -1224,7 +1319,7 @@ class Commitment implements InputFilterAwareInterface
 		    						'period' => date('Y-m'),
 			    					'quantity' => -1,
 			    					'status' => 'used',
-			    					'reference' => $commitment->identifier,
+			    					'reference' => $commitment->customer_name.' - '.$commitment->caption,
 			    					'time' => Date('Y-m-d G:i:s'),
 			    					'n_fn' => 'P-PIT',
 			    					'comment' => 'Utilisation mensuelle pour la période du '.$context->decodeDate($commitment->last_credit_consumption_date).' au '.$context->decodeDate($commitment->next_credit_consumption_date),
@@ -1244,7 +1339,7 @@ class Commitment implements InputFilterAwareInterface
 		    						'period' => date('Y-m'),
 			    					'quantity' => 0,
 			    					'status' => 'blocked',
-			    					'reference' => $commitment->identifier,
+			    					'reference' => $commitment->customer_name.' - '.$commitment->caption,
 			    					'time' => Date('Y-m-d G:i:s'),
 			    					'n_fn' => 'P-PIT',
 			    					'comment' => array(
@@ -1279,7 +1374,7 @@ class Commitment implements InputFilterAwareInterface
     								$config['commitment/consumeCredit']['messages']['suspendedServiceText'][$contact->locale],
     								$contact->n_first,
     								$instance->caption,
-    								implode(' ; ', $blocked),
+    								implode("\n", $blocked),
     								$credit->quantity
     						);
     						ContactMessage::sendMail($contact->email, $text, $title);

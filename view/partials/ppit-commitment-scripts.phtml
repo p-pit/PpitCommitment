@@ -233,6 +233,58 @@ $properties['update_time'] = array('type' => 'hidden');
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
 ?>
 
+function connectCommitmentInvoiceForm(id)
+{			
+		$('#commitment-invoice-anchor').removeClass('btn-default').addClass('btn-warning');
+
+		// Create a new FormData object.
+		var formData = new FormData();
+		formData.append('update_time', $('#update_time').val());
+
+		var xhttp = new XMLHttpRequest();
+		var route, target;
+		route = '<?php echo $this->url('commitment/invoice') ?>/' + id;
+		xhttp.open('POST', route, true);
+		xhttp.onload = function () {
+			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				getCommitmentDetail(id);
+			}
+		};
+		xhttp.send(formData);
+}
+
+function getCommitmentInvoiceForm(id) {
+	$('#commitment-invoice-anchor').removeClass('btn-default').addClass('btn-danger');
+	$('#commitment-invoice-alert').show();
+	$('#commitment-invoice-anchor').click(function () { connectCommitmentInvoiceForm(id); });
+}
+
+function connectCommitmentSettleForm(id)
+{			
+		$('#commitment-settle-anchor').removeClass('btn-default').addClass('btn-warning');
+
+		// Create a new FormData object.
+		var formData = new FormData();
+		formData.append('update_time', $('#update_time').val());
+
+		var xhttp = new XMLHttpRequest();
+		var route, target;
+		route = '<?php echo $this->url('commitment/settle') ?>/' + id;
+		xhttp.open('POST', route, true);
+		xhttp.onload = function () {
+			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				getCommitmentDetail(id);
+			}
+		};
+		xhttp.send(formData);
+}
+
+function getCommitmentSettleForm(id) {
+	$('#commitment-settle-anchor').removeClass('btn-default').addClass('btn-danger');
+	$('#commitment-settle-alert').show();
+	$('#commitment-settle-anchor').click(function () { connectCommitmentSettleForm(id); });
+}
+
 function connectCommitmentUpdateForm(id, action)
 {
 	if (action == 'update') $('#commitment-update-anchor').removeClass('btn-default').addClass('btn-primary');
@@ -303,7 +355,6 @@ function connectCommitmentUpdateForm(id, action)
 }
 
 function getCommitmentUpdate(id, action) {
-
 	var xhttp = new XMLHttpRequest();
 	var route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
 	if (action) route += '/' + action;
@@ -326,6 +377,10 @@ function getCommitmentUpdate(id, action) {
 
 			$('#commitment-update-anchor').click(function () { getCommitmentUpdate(id, 'update'); });
 			$('#commitment-delete-anchor').click(function () { getCommitmentUpdate(id, 'delete'); });
+			$('#commitment-invoice-anchor').click(function () { getCommitmentInvoiceForm(id); });
+			$('#commitment-invoice-alert').hide();
+			$('#commitment-settle-anchor').click(function () { getCommitmentSettleForm(id); });
+			$('#commitment-settle-alert').hide();
 			
 			connectCommitmentUpdateForm(id, action);
 <?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
@@ -444,7 +499,6 @@ function connectCommitmentUpdateProductForm(id)
 			xhttp.open('POST', route, true);
 			xhttp.onload = function () {
 				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-//					document.getElementById('commitment-options-panel').innerHTML = xhttp.responseText;
 					getCommitmentDetail(id);
 				}
 			};
@@ -526,7 +580,6 @@ function connectCommitmentUpdateOptionForm(id)
 		xhttp.open('POST', route, true);
 		xhttp.onload = function () {
 			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-//				document.getElementById('commitment-options-panel').innerHTML = xhttp.responseText;
 				getCommitmentDetail(id);
 			}
 		};
@@ -694,12 +747,36 @@ function connectCommitmentUpdateTermForm(id)
 		xhttp.open('POST', route, true);
 		xhttp.onload = function () {
 			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
-//				document.getElementById('commitment-options-panel').innerHTML = xhttp.responseText;
 				getCommitmentDetail(id);
 			}
 		};
 		xhttp.send(formData);
 	}
+}
+
+function connectCommitmentCreditStatusForm(id)
+{
+	// Create a new FormData object.
+	var formData = new FormData();
+
+	var xhttp = new XMLHttpRequest();
+	var route, target;
+	route = '<?php echo $this->url('commitment/suspend') ?>/' + id;
+	xhttp.open('POST', route, true);
+	// Set up a handler for when the request finishes.
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('ppitUser/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			getCommitmentDetail(id);
+	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send(formData);
 }
 
 // Load the detail panel
@@ -730,6 +807,10 @@ function getCommitmentDetail(id) {
 			getCommitmentUpdate(id, '');
 			
 			$('.detail-remove-anchor').click(function () { getCommitmentDetail(id); });
+
+			$('#credit_status-action').click(function () {
+				connectCommitmentCreditStatusForm(id);
+			});
 
 			$('#row-anchor').click(function () {
 				$('.row-tr').hide();
@@ -773,6 +854,22 @@ function getCommitmentDetail(id) {
 			$('.term-action').click(function() {
 				connectCommitmentUpdateTermForm(id);
 			});
+
+			$('.part-button').hide();
+/*			$('.part-button').click(function() { 
+				id = $(this).attr('id').split('_')[1];
+				if ($('#is-part-open_' + id).val() == 1) {
+					$('#part-panel_' + id).hide(); 
+					$('#part-button_' + id).removeClass('glyphicon-triangle-bottom').addClass('glyphicon-triangle-right');
+					$('#is-part-open_' + id).val(0);
+				}
+				else {
+					$('#part-panel_' + id).show(); 
+					$('#part-button_' + id).removeClass('glyphicon-triangle-right').addClass('glyphicon-triangle-bottom');
+					$('#is-part-open_' + id).val(1);
+				}
+			});*/
+
 	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
 			}
 	<?php endif;?>

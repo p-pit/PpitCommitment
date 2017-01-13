@@ -3,11 +3,11 @@ namespace PpitCommitment\Controller;
 
 use DateInterval;
 use Date;
-use Zend\View\Model\ViewModel;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentTerm;
+use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
@@ -32,6 +32,7 @@ use Zend\Http\Request;
 use Zend\Log\Logger;
 use Zend\Log\Writer;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
 
 require_once('vendor/TCPDF-master/tcpdf.php');
 
@@ -618,7 +619,7 @@ class CommitmentController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
-    
+
     public function updateProductAction()
     {
     	// Retrieve the context
@@ -633,7 +634,7 @@ class CommitmentController extends AbstractActionController
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
     	$error = null;
-		$message = null;
+    	$message = null;
     	$request = $this->getRequest();
     	if ($request->isPost()) {
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
@@ -655,7 +656,7 @@ class CommitmentController extends AbstractActionController
     			if ($product->tax_3_share) $data['taxable_3_amount'] = round($data['amount'] * $product->tax_3_share, 2);
     			$rc = $commitment->loadData($data, $request->getFiles()->toArray());
     			if ($rc != 'OK') throw new \Exception('View error');
-
+    
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
@@ -691,7 +692,114 @@ class CommitmentController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
+    
+    public function invoiceAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the commitment
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	$commitment = Commitment::get($id);
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+		$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    			
+		    	$type = $commitment->type;
+		    	$commitment->computeHeader();
+		    	$commitment->status = 'invoiced';
 
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$year = CommitmentYear::getcurrent();
+    				if (!$year) $year = CommitmentYear::instanciate();
+    				$commitment->invoice_identifier = $context->getConfig('commitment/invoice_identifier_mask').sprintf("%'.05d", $year->next_value);
+    				$year->increment();
+    				$rc = $commitment->update($request->getPost('update_time'));
+    
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$commitment->record('registration');
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    	return $this->response;
+    }
+
+    public function settleAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the commitment
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	$commitment = Commitment::get($id);
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    			 
+    			$type = $commitment->type;
+    			$commitment->status = 'settled';
+    
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$rc = $commitment->update($request->getPost('update_time'));
+    
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$commitment->record('settlement');
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    	return $this->response;
+    }
+    
     public function updateOptionAction()
     {
     	// Retrieve the context
@@ -826,6 +934,56 @@ class CommitmentController extends AbstractActionController
     	return $this->response;
     }
 
+    public function suspendAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the commitment
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	$commitment = Commitment::get($id);
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    
+    			if ($commitment->credit_status == 'active') $commitment->credit_status = 'suspended';
+    			elseif ($commitment->credit_status == 'suspended') $commitment->credit_status = 'active';
+
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$rc = $commitment->update($request->getPost('update_time'));
+    
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    	return $this->response;
+    }
+    
     public function acceptAction()
     {
     	// Retrieve the context
@@ -1086,7 +1244,7 @@ class CommitmentController extends AbstractActionController
     	}
     }
 
-    public function invoiceAction()
+    public function downloadInvoiceAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
@@ -1112,7 +1270,7 @@ class CommitmentController extends AbstractActionController
     	return $this->response;
     }
     
-    public function settleAction()
+    public function serviceSettleAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();

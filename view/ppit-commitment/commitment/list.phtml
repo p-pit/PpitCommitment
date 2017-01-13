@@ -32,15 +32,15 @@
 <?php $i = 0; foreach ($commitments as $commitment) : ?>
 	<?php if ($context->isAllowed('commitment/detail')) : ?>
 	
-	<tr <?php if ($commitment->credit_status == 'blocked') echo 'style="font-style: italic"' ?>>
+	<tr <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
 		<td colspan="<?php echo 1 + count($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')))?>">
 			<strong><?php echo $commitment->customer_name ?></strong> -
 			<?php echo $commitment->caption ?>
-			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate('blocked', 'ppit-commitment', $context->getLocale()).')' ?>
+			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate($commitment->credit_status, 'ppit-core', $context->getLocale()).')' ?>
 		</td>
 	</tr>
 	
-	<tr class="commitment" <?php if ($commitment->credit_status == 'blocked') echo 'style="font-style: italic"' ?>>
+	<tr class="commitment" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
 		<td >
 			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_<?php echo $commitment->id ?>">
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $commitment->id ?>-glyphicon"></span>

@@ -5,6 +5,7 @@ use PpitCore\Model\GenericTable;
 use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
+use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Event;
 use PpitCommitment\Model\Notification;
 use PpitCommitment\Model\Subscription;
@@ -77,7 +78,18 @@ class Module
                 	$resultSetPrototype->setArrayObjectPrototype(new CommitmentMessage());
                 	return new TableGateway('commitment_message', $dbAdapter, null, $resultSetPrototype);
                 },
-            	'PpitCommitment\Model\EventTable' =>  function($sm) {
+                'PpitCommitment\Model\CommitmentYearTable' =>  function($sm) {
+                	$tableGateway = $sm->get('CommitmentYearTableGateway');
+                	$table = new GenericTable($tableGateway);
+                	return $table;
+                },
+                'CommitmentYearTableGateway' => function ($sm) {
+                	$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                	$resultSetPrototype = new ResultSet();
+                	$resultSetPrototype->setArrayObjectPrototype(new CommitmentYear());
+                	return new TableGateway('commitment_year', $dbAdapter, null, $resultSetPrototype);
+                },
+                'PpitCommitment\Model\EventTable' =>  function($sm) {
                 	$tableGateway = $sm->get('EventTableGateway');
                 	$table = new GenericTable($tableGateway);
                 	return $table;

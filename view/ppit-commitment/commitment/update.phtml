@@ -5,13 +5,35 @@
 <?php endif;?>
 
 <?php if ($commitment->id && !$message) : ?>
-		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if ($commitment->credit_status == 'blocked') echo 'disabled="disabled"' ?>>
+		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || $commitment->status == 'invoiced') echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>
 
 		<button type="button" class="btn btn-default action-btn" id="commitment-delete-anchor" title="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>" <?php if (!$commitment->isDeletable()) echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-trash"></span>
 		</button>
+
+	<?php if ($commitment->status != 'invoiced' && $commitment->status != 'settled') : ?>
+		<button type="button" class="btn btn-default action-btn" id="commitment-invoice-anchor" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'disabled="disabled"' ?>>
+			<?php echo $this->translate('Generate invoice', 'ppit-commitment', $context->getLocale()) ?>
+		</button>
+		<div class="form-group">
+			<div class="alert alert-danger" id="commitment-invoice-alert" style="text-align: center">
+				<strong><?php echo $this->translate('This action is irreversible. Please confirm.', 'ppit-core', $context->getLocale()) ?></strong>
+			</div>
+		</div>
+	<?php endif;?>
+
+	<?php if ($commitment->status == 'invoiced') : ?>
+		<button type="button" class="btn btn-default action-btn" id="commitment-settle-anchor" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'disabled="disabled"' ?>>
+			<?php echo $this->translate('Register settlement', 'ppit-commitment', $context->getLocale()) ?>
+		</button>
+		<div class="form-group">
+			<div class="alert alert-danger" id="commitment-settle-alert" style="text-align: center">
+				<strong><?php echo $this->translate('This action is irreversible. Please confirm.', 'ppit-core', $context->getLocale()) ?></strong>
+			</div>
+		</div>
+	<?php endif;?>
 <?php endif;?>
 
 <!-- Form header -->

@@ -161,7 +161,7 @@ return array(
 		        								),
 		        						),
 		        				),
-	       				'register' => array(
+			       				'register' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/register[/:type]',
@@ -300,6 +300,30 @@ return array(
         								),
         						),
         				),
+        				'invoice' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/invoice[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'invoice',
+        								),
+        						),
+        				),
+        				'settle' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/settle[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'settle',
+        								),
+        						),
+        				),
         				'updateProduct' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -335,6 +359,18 @@ return array(
         								),
         								'defaults' => array(
         										'action' => 'updateTerm',
+        								),
+        						),
+        				),
+        				'suspend' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/suspend[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'suspend',
         								),
         						),
         				),
@@ -380,27 +416,27 @@ return array(
         								),
         						),
         				),
-        				'settle' => array(
+        				'serviceSettle' => array(
         						'type' => 'segment',
         						'options' => array(
-        								'route' => '/settle[/:id]',
+        								'route' => '/service-settle[/:id]',
         								'constraints' => array(
         										'id'     => '[0-9]*',
         								),
         								'defaults' => array(
-        										'action' => 'settle',
+        										'action' => 'serviceSettle',
         								),
         						),
         				),
-        				'invoice' => array(
+        				'downloadInvoice' => array(
         						'type' => 'segment',
         						'options' => array(
-        								'route' => '/invoice[/:type][/:id]',
+        								'route' => '/download-invoice[/:type][/:id]',
         								'constraints' => array(
         										'id'     => '[0-9]*',
         								),
         								'defaults' => array(
-        										'action' => 'invoice',
+        										'action' => 'downloadInvoice',
         								),
         						),
         				),
@@ -746,15 +782,18 @@ return array(
             	array('route' => 'commitment/message', 'roles' => array('guest')),
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
+            	array('route' => 'commitment/invoice', 'roles' => array('sales_manager', 'accountant')),
+            	array('route' => 'commitment/settle', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/update', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateProduct', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateOption', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateTerm', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/suspend', 'roles' => array('admin')),
             	array('route' => 'commitment/serviceAdd', 'roles' => array('guest')),
             	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accept', 'roles' => array('accountant')),
-            	array('route' => 'commitment/settle', 'roles' => array('accountant')),
-            	array('route' => 'commitment/invoice', 'roles' => array('sales_manager', 'accountant')),
+            	array('route' => 'commitment/serviceSettle', 'roles' => array('accountant')),
+            	array('route' => 'commitment/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/paymentResponse', 'roles' => array('accountant')),
             	array('route' => 'commitment/delete', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
@@ -1245,6 +1284,7 @@ return array(
 			'description' => array('mandatory' => false),
 	),
 
+	'commitment/invoice_identifier_mask' => date('Y-'),
 	'commitment/invoice' => array(
 			'header' => array(
 					array(
@@ -1555,12 +1595,12 @@ return array(
 				'property_1' => 'text',
 			),
 			'anchors' => array(
-				'document' => array(
+/*				'document' => array(
 						'type' => 'nav',
 						'labels' => array('en_US' => 'Documents', 'fr_FR' => 'Documents'),
 						'entries' => array(
 						),
-				),
+				),*/
 			),
 	),
 	'commitment/consumeCredit' => array(
@@ -1609,6 +1649,7 @@ L\'équipe P-PIT
 Your available P-Pit Commitments credits reserve for %s is out of stock (*). 
 Please note that the access has been automatically suspended for the records listed below until a new subscription of credits occurs:
 %s
+							
 Our tip : Have peace of mind by renewing for a record average life-time (for example 6 monthly credits per the yearly average number of records).
 					
 (*) Your current P-Pit Commitments solde rises %s units.
@@ -1624,6 +1665,7 @@ The P-Pit staff
 Votre réserve de crédits P-Pit Engagements pour %s est épuisée (*). 
 Veuillez noter que l\'accès a été automatiquement suspendu pour les dossiers listées ci-après jusqu\'à la souscription de nouveaux crédits :
 %s
+							
 Notre conseil : Ayez l\'esprit tranquille en souscrivant le nombre de crédits pour la durée de vie moyenne de vos dossiers (par exemple 6 crédits mensuels par le nombre moyen de dossiers par an).
 
 (*) Votre solde actuel P-Pit Engagements est de %s unités.
@@ -1646,6 +1688,60 @@ L\'équipe P-Pit
 	'commitmentMessage/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
+
+	'journal/accountingChart/sale' => array(
+			'rental' => array(
+					'settlement' => array(
+							'512' => array(
+									'direction' => -1,
+									'source' => 'tax_inclusive',
+							),
+							'44571' => array(
+									'direction' => 1,
+									'source' => 'tax_amount',
+							),
+							'706' => array(
+									'direction' => 1,
+									'source' => 'excluding_tax',
+							),
+					),
+			),
+			'service' => array(
+					'registration' => array(
+							'411' => array(
+									'direction' => -1,
+									'source' => 'tax_inclusive',
+							),
+							'44587' => array(
+									'direction' => 1,
+									'source' => 'tax_amount',
+							),
+							'706' => array(
+									'direction' => 1,
+									'source' => 'excluding_tax',
+							),
+					),
+					'settlement' => array(
+							'411' => array(
+									'direction' => 1,
+									'source' => 'tax_inclusive',
+							),
+							'512' => array(
+									'direction' => -1,
+									'source' => 'tax_inclusive',
+							),
+							'44587' => array(
+									'direction' => -1,
+									'source' => 'tax_amount',
+							),
+							'44571' => array(
+									'direction' => 1,
+									'source' => 'tax_amount',
+							),
+					),
+			),
+	),
+		
 	'demo' => array(
 			'commitmentAccount/search/title' => array(
 					'en_US' => '
@@ -1733,6 +1829,20 @@ L\'équipe P-Pit
 <h4>Ajout d\'un engagement</h4>
 <p>Le bouton + permet l\'ajout d\un nouvel engagement pour ce compte.</p>
 					',
+			),
+			'commitment/accountList/documents' => array(
+					'en_US' => '',
+					'fr_FR' => '
+<h4>Documents</h4>
+<p>Quatre documents pré-formatés sont disponibles au niveau du dossier d\'inscription annuelle :</p>
+	<ul>
+		<li>L\'accusé de réception</li>
+		<li>La confirmation d\'inscription</li>
+		<li>L\'engagement de prise en charge</li>
+		<li>L\'attestation scolaire</li>
+	</ul>
+<p>Ces documents sont générés au format Word et peuvent être complétés manuellement après téléchargement, par exemple si besoin d\'ajouter une mention spécifique.</p>
+',
 			),
 
 			'commitment/search/title' => array(
