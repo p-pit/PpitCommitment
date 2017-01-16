@@ -5,7 +5,7 @@ use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use PpitCore\Model\Place;
 use PpitDocument\Model\Document;
-use PpitUser\Model\User;
+use PpitCore\Model\User;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;

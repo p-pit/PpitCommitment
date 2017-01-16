@@ -275,7 +275,7 @@ class PdfInvoiceViewHelper
     	$pdf->Cell(30, 7, 'Prévue le', 1, 0, 'C', 1);
     	$pdf->Cell(30, 7, 'Statut', 1, 0, 'C', 1);
     	$pdf->Cell(30, 7, 'Réglée le', 1, 0, 'C', 1);
-    	$pdf->Cell(30, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
+    	$pdf->Cell(30, 7, 'Montant', 1, 0, 'R', 1);
     	// Color and font restoration
     	$pdf->SetFillColor(239, 239, 239);
     	$pdf->SetTextColor(0);
@@ -312,7 +312,33 @@ class PdfInvoiceViewHelper
     	$pdf->SetDrawColor(255, 255, 255);
     	$pdf->Cell(155, 6, 'Restant dû :', 'LR', 0, 'R', false);
     	$pdf->Cell(25, 6, $context->formatFloat($commitment->tax_inclusive - $settledAmount, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
-   	
+
+    	$pdf->Ln();
+
+    	$pdf->SetFont('', 'B', 10);
+    	$text = $context->getConfig('commitment/invoice_tax_mention');
+    	$pdf->Ln();
+    	$pdf->writeHTML($text, true, 0, true, 0);
+
+    	$pdf->SetFont('', '', 8);
+    	$pdf->Ln();
+    	$pdf->SetDrawColor(0, 0, 0);
+    	$text = $context->getConfig('commitment/invoice_bank_details');
+    	$pdf->writeHTML($text, true, 0, true, 0);
+
+    	$pdf->SetFont('', '', 10);
+    	$text = $context->getConfig('commitment/invoice_footer_mention_1');
+    	$pdf->Ln();
+    	$pdf->writeHTML($text, true, 0, true, 0);
+
+    	$text = $context->getConfig('commitment/invoice_footer_mention_2');
+    	$pdf->Ln();
+    	$pdf->writeHTML($text, true, 0, true, 0);
+
+    	$text = $context->getConfig('commitment/invoice_footer_mention_3');
+    	$pdf->Ln();
+    	$pdf->writeHTML($text, true, 0, true, 0);
+    	 
     	// Close and output PDF document
     	// This method has several options, check the source code documentation for more information.
     	return $pdf;

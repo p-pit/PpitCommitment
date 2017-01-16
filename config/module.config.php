@@ -1285,6 +1285,11 @@ return array(
 	),
 
 	'commitment/invoice_identifier_mask' => date('Y-'),
+	'commitment/invoice_tax_mention' => null,
+	'commitment/invoice_bank_details' => null,
+	'commitment/invoice_footer_mention_1' => null,
+	'commitment/invoice_footer_mention_2' => null,
+	'commitment/invoice_footer_mention_3' => null,
 	'commitment/invoice' => array(
 			'header' => array(
 					array(
@@ -1578,7 +1583,7 @@ return array(
 			),
 	),
 	'commitment/accountList' => array(
-			'title' => array('en_US' => 'Subscriptions', 'fr_FR' => 'Souscriptions'),
+			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'addRoute' => 'commitment/update',
 			'glyphicons' => array(
 				'commitment/update' => array(
