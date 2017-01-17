@@ -320,24 +320,34 @@ class PdfInvoiceViewHelper
     	$pdf->Ln();
     	$pdf->writeHTML($text, true, 0, true, 0);
 
-    	$pdf->SetFont('', '', 8);
-    	$pdf->Ln();
-    	$pdf->SetDrawColor(0, 0, 0);
-    	$text = $context->getConfig('commitment/invoice_bank_details');
-    	$pdf->writeHTML($text, true, 0, true, 0);
+    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
+	    	$pdf->SetFont('', '', 8);
+	    	$pdf->Ln();
+	    	$pdf->SetDrawColor(0, 0, 0);
+	    	$text = $context->getConfig('commitment/invoice_bank_details');
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+    	}
 
-    	$pdf->SetFont('', '', 10);
-    	$text = $context->getConfig('commitment/invoice_footer_mention_1');
-    	$pdf->Ln();
-    	$pdf->writeHTML($text, true, 0, true, 0);
+    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_footer_mention_1')) {
+	    	$pdf->SetFont('', '', 10);
+	    	$text = $context->getConfig('commitment/invoice_footer_mention_1');
+	    	$pdf->Ln();
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+    	}
 
-    	$text = $context->getConfig('commitment/invoice_footer_mention_2');
-    	$pdf->Ln();
-    	$pdf->writeHTML($text, true, 0, true, 0);
+    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_footer_mention_2')) {
+	    	$pdf->SetFont('', '', 10);
+    		$text = $context->getConfig('commitment/invoice_footer_mention_2');
+	    	$pdf->Ln();
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+    	}
 
-    	$text = $context->getConfig('commitment/invoice_footer_mention_3');
-    	$pdf->Ln();
-    	$pdf->writeHTML($text, true, 0, true, 0);
+		if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_footer_mention_3')) {
+	    	$pdf->SetFont('', '', 10);
+			$text = $context->getConfig('commitment/invoice_footer_mention_3');
+	    	$pdf->Ln();
+	    	$pdf->writeHTML($text, true, 0, true, 0);
+		}
     	 
     	// Close and output PDF document
     	// This method has several options, check the source code documentation for more information.

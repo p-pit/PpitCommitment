@@ -557,6 +557,7 @@ class CommitmentController extends AbstractActionController
     			// Retrieve the data from the request
     			$data = array();
     			if (!$commitment->id) $data['account_id'] = $account_id;
+				$data['type'] = $request->getPost('commitment-type');
     			foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 					if ($property['type'] == 'file' && array_key_exists($propertyId, $request->getFiles()->toArray())) $files = $request->getFiles()->toArray()[$propertyId];

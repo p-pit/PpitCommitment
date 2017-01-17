@@ -767,6 +767,7 @@ function activateAccount() {
 <?php
 $properties = array();
 
+$properties['commitment-type'] = array('type' => 'select', 'mandatory' => 'true', 'maxSize' => 255);
 foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
 	$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 	$properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);

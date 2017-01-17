@@ -628,6 +628,11 @@ class Commitment implements InputFilterAwareInterface
 			$this->status = trim(strip_tags($data['status']));
 			if (strlen($this->status) > 255) return 'Integrity';
 		}
+
+		if (array_key_exists('type', $data)) {
+			$this->type = trim(strip_tags($data['type']));
+			if (strlen($this->type) > 255) return 'Integrity';
+		}
 		
 		if (array_key_exists('next_credit_consumption_date', $data)) $this->next_credit_consumption_date = $data['next_credit_consumption_date'];
 		
