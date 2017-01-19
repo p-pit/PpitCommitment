@@ -381,7 +381,7 @@ class CommitmentMessageController extends AbstractActionController
     	    }
     	}
     }
-
+    
     public function paymentAutoresponseAction()
     {
     	// Retrieve the context

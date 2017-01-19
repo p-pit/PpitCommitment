@@ -109,6 +109,7 @@ class Commitment implements InputFilterAwareInterface
 	public $tax_amount;
 	public $tax_inclusive;
 	public $commitment_message_id;
+	public $change_message_id;
 	public $confirmation_message_id;
 	public $shipment_message_id;
 	public $delivery_message_id;
@@ -231,6 +232,7 @@ class Commitment implements InputFilterAwareInterface
         $this->tax_amount = (isset($data['tax_amount'])) ? $data['tax_amount'] : null;
         $this->tax_inclusive = (isset($data['tax_inclusive'])) ? $data['tax_inclusive'] : null;
         $this->commitment_message_id = (isset($data['commitment_message_id'])) ? $data['commitment_message_id'] : null;
+        $this->change_message_id = (isset($data['change_message_id'])) ? $data['change_message_id'] : null;
         $this->confirmation_message_id = (isset($data['confirmation_message_id'])) ? $data['confirmation_message_id'] : null;
         $this->shipment_message_id = (isset($data['shipment_message_id'])) ? $data['shipment_message_id'] : null;
         $this->delivery_message_id = (isset($data['delivery_message_id'])) ? $data['delivery_message_id'] : null;
@@ -334,6 +336,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['tax_amount'] = $this->tax_amount;
     	$data['tax_inclusive'] = $this->tax_inclusive;
     	$data['commitment_message_id'] = $this->commitment_message_id;
+    	$data['change_message_id'] = $this->change_message_id;
     	$data['confirmation_message_id'] = $this->confirmation_message_id;
     	$data['shipment_message_id'] = $this->shipment_message_id;
     	$data['delivery_message_id'] = $this->delivery_message_id;

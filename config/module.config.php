@@ -312,6 +312,18 @@ return array(
         								),
         						),
         				),
+        				'xmlUblInvoice' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/xml-ubl-invoice[/:id]',
+        								'constraints' => array(
+        										'id'     => '[0-9]*',
+        								),
+        								'defaults' => array(
+        										'action' => 'xmlUblInvoice',
+        								),
+        						),
+        				),
         				'settle' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -783,6 +795,7 @@ return array(
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
             	array('route' => 'commitment/invoice', 'roles' => array('sales_manager', 'accountant')),
+            	array('route' => 'commitment/xmlUblInvoice', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/settle', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/update', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateProduct', 'roles' => array('sales_manager')),
@@ -1285,7 +1298,7 @@ return array(
 	),
 
 	'commitment/invoice_identifier_mask' => date('Y-'),
-	'commitment/invoice_tax_mention' => null,
+	'commitment/invoice_tax_mention' => '',
 	'commitment/invoice_bank_details' => null,
 	'commitment/invoice_footer_mention_1' => null,
 	'commitment/invoice_footer_mention_2' => null,
@@ -1305,7 +1318,7 @@ return array(
 					),
 					array(
 							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
-							'right' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('caption'),
 					),
 					array(
@@ -1331,7 +1344,7 @@ return array(
 					),
 					array(
 							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
-							'right' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('caption'),
 					),
 					array(
@@ -1340,6 +1353,39 @@ return array(
 							'params' => array('date'),
 					),
 			),
+	),
+		
+	'commitment/supplierIdentificationSheet' => array(
+			'ID' => '',
+			'Name' => '',
+			'CityName' => '',
+			'PostalZone' => '',
+			'AddressLine1' => '',
+			'AddressLine2' => '',
+			'Country' => '',
+			'TaxSchemeID' => '',
+			'TaxSchemeName' => '',
+			'RegistrationName' => '',
+			'LegalEntityID' => '',
+			'LegalEntityCityName' => '',
+			'LegalEntityPostalZone' => '',
+			'LegalEntityAddressLine1' => '',
+			'LegalEntityAddressLine2' => '',
+			'LegalEntityCountry' => '',
+			'CorporateRegistrationScheme' => '',
+			'ContactID' => '',
+			'ContactName' => '',
+			'ContactTelephone' => '',
+			'ContactTelefax' => '',
+			'ContactElectronicMail' => '',
+			'PaymentMeansCodelistID' => '',
+			'PaymentMeansCodelistAgencyID' => '',
+			'PaymentMeansCodelistAgencyName' => '',
+			'PaymentMeansCode' => '',
+			'PaymentChannelCode' => '',
+			'InstructionNote' => '',
+			'PayeeFinancialAccount' => '',
+			'PaymentTerms' => 'taux d\'intérêt légal x 1,5 sur montant impayé',
 	),
 		
 	'commitment/try' => array(

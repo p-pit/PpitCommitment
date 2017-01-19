@@ -237,14 +237,6 @@ class Account implements InputFilterAwareInterface
 	    		$account->contact_1_id = $account->customer_community->contact_1_id;
 	    		$account->contact_1_status = $account->customer_community->contact_1_status;
 	    		$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
-		    	$account->n_first = $account->contact_1->n_first;
-		    	$account->n_last = $account->contact_1->n_last;
-		    	$account->email = $account->contact_1->email;
-		    	$account->birth_date = $account->contact_1->birth_date;
-		    	$account->tel_work = $account->contact_1->tel_work;
-		    	$account->tel_cell = $account->contact_1->tel_cell;
-		    	$account->is_notified = $account->contact_1->is_notified;
-		    	$account->locale = $account->contact_1->locale;
 		    	
 		    	$userContact = UserContact::get($account->contact_1_id, 'contact_id');
 		    	if ($userContact) {
@@ -256,7 +248,18 @@ class Account implements InputFilterAwareInterface
 		    	if (!$account->user) $account->user = User::instanciate();
 		    	$account->username = $account->user->username;
 	    	}
-	        if ($account->customer_community->contact_2_id) {
+	    	else $account->contact_1 = Vcard::instanciate();
+
+	    	$account->n_first = $account->contact_1->n_first;
+	    	$account->n_last = $account->contact_1->n_last;
+	    	$account->email = $account->contact_1->email;
+	    	$account->birth_date = $account->contact_1->birth_date;
+	    	$account->tel_work = $account->contact_1->tel_work;
+	    	$account->tel_cell = $account->contact_1->tel_cell;
+	    	$account->is_notified = $account->contact_1->is_notified;
+	    	$account->locale = $account->contact_1->locale;
+	    	
+	    	if ($account->customer_community->contact_2_id) {
 	        	$account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
 	    		$account->contact_2_status = $account->customer_community->contact_2_status;
 	        }

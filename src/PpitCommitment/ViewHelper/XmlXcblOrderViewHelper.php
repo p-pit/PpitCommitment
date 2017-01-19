@@ -1,7 +1,7 @@
 <?php
-namespace PpitOrder\Model;
+namespace PpitCommitment\ViewHelper;
 
-class XmlOrder
+class XmlXcblOrderViewHelper
 {
 	public $content;
 
@@ -20,26 +20,49 @@ class XmlOrder
 		return $this->content->asXML();
 	}
 
-	public function getType($commitmentTypes)
+	public function getPurpose()
+	{
+		$purpose = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->Purpose;
+		$namespaces = $purpose->getNameSpaces(true);
+		$core = $purpose->children($namespaces['core']);
+		return (string)$core->PurposeCoded;
+	}
+	
+	public function getType()
 	{
 		$itemIdentifiers = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[0]->BaseItemDetail[0]->ItemIdentifiers;
 		$namespaces = $itemIdentifiers->getNameSpaces(true);
 		$core = $itemIdentifiers->children($namespaces['core']);
 		$codedType = (string)$core->PartNumbers[0]->BuyerPartNumber[0]->PartID;
-		return (array_key_exists($codedType, $commitmentTypes)) ? (string) XmlOrder::$types[$codedType] : 'unknown';
+		return (array_key_exists($codedType, XmlXcblOrderViewHelper::$types)) ? (string) XmlXcblOrderViewHelper::$types[$codedType] : 'part_1';
+	}
+
+	public function getLineItemType()
+	{
+		$result = null;
+		$itemDetail = $this->content->ListOfOrder[0]->Order[0]->OrderDetail->ListOfItemDetail->ItemDetail;
+		$numberOfItemDetail = count($itemDetail);
+		for ($i = 0; $i < $numberOfItemDetail; $i++) {
+			$lineItemType = $itemDetail[$i]->BaseItemDetail->LineItemType;
+			$namespaces = $lineItemType->getNameSpaces(true);
+			$core = $lineItemType->children($namespaces['core']);
+			if (!$result) $result = (string)$core->LineItemTypeCodedOther;
+			elseif ((string)$core->LineItemTypeCodedOther != $result) return null;
+		}
+		return $result;
 	}
 	
-	public function getOrderIssueDate()
+	public function getOrderDate()
 	{
 		return (string) $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderIssueDate;
 	}
 
-	public function getBuyerOrderNumber()
+	public function getIdentifier()
 	{
 		return (string) $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderNumber[0]->BuyerOrderNumber;
 	}
 
-	public function getReference($code)
+	public function getCommercialOperationNumber()
 	{
 		$otherOrderReferences = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderReferences[0]->OtherOrderReferences;
 		$namespaces = $otherOrderReferences->getNameSpaces(true);
@@ -47,13 +70,13 @@ class XmlOrder
 	
 		$numberOfReferences = count($core->ReferenceCoded);
 		for ($i = 0; $i < $numberOfReferences; $i++) {
-			if ($core->ReferenceCoded[$i]->ReferenceTypeCoded == $code) {
+			if ($core->ReferenceCoded[$i]->ReferenceTypeCoded == 'OperationNumber') {
 				return (string) $core->ReferenceCoded[$i]->PrimaryReference[0]->RefNum;
 			}
 		}
 	}
 
-	public function getDate($qualifier)
+	public function getLateChargeStartDate()
 	{
 		$listOfDateCoded = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderDates[0]->ListOfDateCoded;
 		$namespaces = $listOfDateCoded->getNameSpaces(true);
@@ -61,13 +84,13 @@ class XmlOrder
 	
 		$numberOfDates = count($core->DateCoded);
 		for ($i = 0; $i < $numberOfDates; $i++) {
-			if ($core->DateCoded[$i]->DateQualifier[0]->DateQualifierCoded == $qualifier) {
+			if ($core->DateCoded[$i]->DateQualifier[0]->DateQualifierCoded == 'ContractualDeliveryDate') {
 				return (string) $core->DateCoded[$i]->Date;
 			}
 		}
 	}
 	
-	public function getBuyerIdent()
+	public function getBuyerIdentifier()
 	{
 		$buyerParty = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderParty[0]->BuyerParty;
 		$namespaces = $buyerParty->getNameSpaces(true);
@@ -75,7 +98,7 @@ class XmlOrder
 		return (string) $core->PartyID[0]->Ident;
 	}
 
-	public function getSellerIdent()
+	public function getSellerIdentifier()
 	{
 		$sellerParty = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderParty[0]->SellerParty;
 		$namespaces = $sellerParty->getNameSpaces(true);
@@ -83,20 +106,20 @@ class XmlOrder
 		return (string) $core->PartyID[0]->Ident;
 	}
 	
-	public function getRequestedDeliverByDate()
+	public function getHopedDeliveryDate()
 	{
 		return (string) $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderDates[0]->RequestedDeliverByDate;
 	}
 
-	public function getItemDescription($i) // UGAP : libellé produit
+	public function getItemDescription()
 	{
-		$itemIdentifiers = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[$i]->BaseItemDetail[0]->ItemIdentifiers;
+		$itemIdentifiers = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[0]->BaseItemDetail[0]->ItemIdentifiers;
 		$namespaces = $itemIdentifiers->getNameSpaces(true);
 		$core = $itemIdentifiers->children($namespaces['core']);
 		return (string) $core->ItemDescription;
 	}
 	
-	public function getShipToName() // UGAP : Raison sociale installation
+	public function getNameAddressName()
 	{
 		$shipToParty = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderParty[0]->ShipToParty;
 		$namespaces = $shipToParty->getNameSpaces(true);
@@ -104,7 +127,7 @@ class XmlOrder
 		return ((string) $core->NameAddress[0]->Name1).' - '.((string) $core->NameAddress[0]->Name2);
 	}
 
-	public function getShipToCity() // UGAP : Ville installation
+	public function getNameAddressCity()
 	{
 		$shipToParty = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderParty[0]->ShipToParty;
 		$namespaces = $shipToParty->getNameSpaces(true);
@@ -119,10 +142,36 @@ class XmlOrder
 		$core = $shipToParty->children($namespaces['core']);
 		return (string) $core->NameAddress[0]->PostalCode;
 	}
-	
-	public function getMonetaryAmount($i)
+
+	public function getStartOfScheduleLineDate()
 	{
-		$pricingDetail = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[$i]->PricingDetail;
+		$listOfStructuredNote = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->ListOfStructuredNote;
+		$namespaces = $listOfStructuredNote->getNameSpaces(true);
+		$core = $listOfStructuredNote->children($namespaces['core']);
+		foreach ($core->StructuredNote as $structuredNote) {
+			if ($structuredNote->TextTypeCodedOther == 'StartOfScheduleLineDate') {
+				$date = $structuredNote->GeneralNote;
+				return '20'.substr($date, 6, 2).'-'.substr($date, 3, 2).'-'.substr($date, 0, 2);
+			}
+		}
+	}
+
+	public function getEndOfScheduleLineDate()
+	{
+		$listOfStructuredNote = $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->ListOfStructuredNote;
+		$namespaces = $listOfStructuredNote->getNameSpaces(true);
+		$core = $listOfStructuredNote->children($namespaces['core']);
+		foreach ($core->StructuredNote as $structuredNote) {
+			if ($structuredNote->TextTypeCodedOther == 'EndOfScheduleLineDate') {
+				$date = $structuredNote->GeneralNote;
+				return '20'.substr($date, 6, 2).'-'.substr($date, 3, 2).'-'.substr($date, 0, 2);
+			}
+		}
+	}
+	
+	public function getPrice()
+	{
+		$pricingDetail = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[0]->PricingDetail;
 		$namespaces = $pricingDetail->getNameSpaces(true);
 		$core = $pricingDetail->children($namespaces['core']);
 		return (string) $core->LineItemTotal[0]->MonetaryAmount;
@@ -130,7 +179,7 @@ class XmlOrder
 	
 	public function getNumberOfLines()
 	{
-		return (string) $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->NumberOfLines;
+		return count($this->content->ListOfOrder->Order->OrderDetail->ListOfItemDetail->ItemDetail); //(string) $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->NumberOfLines;
 	}
 
 	public function getBuyerLineItemNum($i)
@@ -164,6 +213,17 @@ class XmlOrder
 		$core = $node->children($namespaces['core']);
 		return $core->PartNumbers->OtherItemIdentifiers->ProductIdentifierCoded[0]->ProductIdentifier;
 	}
+
+	public function getLineSerialNumber($i)
+	{
+		$node = $this->content->ListOfOrder->Order->OrderDetail->ListOfItemDetail->ItemDetail[$i]->BaseItemDetail->ItemIdentifiers;
+		$namespaces = $node->getNameSpaces(true);
+		$core = $node->children($namespaces['core']);
+		foreach ($core->ListOfItemCharacteristic->ItemCharacteristic as $itemCharacteristic) {
+			if ($itemCharacteristic->ItemCharacteristicCodedOther == 'LC4_NUM_SERIE') return $itemCharacteristic->ItemCharacteristicValue;
+		}
+		return null;
+	}
 	
 	public function getLineTotalQuantity($i)
 	{
@@ -172,7 +232,7 @@ class XmlOrder
 		$core = $node->children($namespaces['core']);
 		return $core->QuantityValue;
 	}
-	
+
 	public function getLineUnitPrice($i)
 	{
 		$node = $this->content->ListOfOrder->Order->OrderDetail->ListOfItemDetail->ItemDetail[$i]->PricingDetail;
@@ -180,7 +240,7 @@ class XmlOrder
 		$core = $node->children($namespaces['core']);
 		return $core->ListOfPrice->Price->UnitPrice->UnitPriceValue;
 	}
-	
+
 	public function getLineCalculatedPriceBasisQuantity($i)
 	{
 		$node = $this->content->ListOfOrder->Order->OrderDetail->ListOfItemDetail->ItemDetail[$i]->PricingDetail;
@@ -188,7 +248,7 @@ class XmlOrder
 		$core = $node->children($namespaces['core']);
 		return $core->ListOfPrice->Price->CalculatedPriceBasisQuantity->QuantityValue;
 	}
-	
+
 	public function getLineItemTotal($i)
 	{
 		$node = $this->content->ListOfOrder->Order->OrderDetail->ListOfItemDetail->ItemDetail[$i]->PricingDetail;
@@ -199,26 +259,30 @@ class XmlOrder
 	
 	public function getTaxRows()
 	{
-		$listOfTaxSummary = $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->ListOfTaxSummary;
-		$namespaces = $listOfTaxSummary->getNameSpaces(true);
-		$core = $listOfTaxSummary->children($namespaces['core']);
-	
 		$tax_rows = array();
-		$numberOfRows = count($core->TaxSummary);
-		for ($i = 0; $i < $numberOfRows; $i++) {
-			$tax_rows[] = array(
-					'rate' => (string) $core->TaxSummary[$i]->TaxFunctionQualifierCodedOther,
-					'amount' => (string) $core->TaxSummary[$i]->TaxAmount,
-			);
+		$listOfTaxSummary = $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->ListOfTaxSummary;
+		if ($listOfTaxSummary) {
+			$namespaces = $listOfTaxSummary->getNameSpaces(true);
+			$core = $listOfTaxSummary->children($namespaces['core']);
+			$numberOfRows = count($core->TaxSummary);
+			for ($i = 0; $i < $numberOfRows; $i++) {
+				$tax_rows[] = array(
+						'rate' => (string) $core->TaxSummary[$i]->TaxFunctionQualifierCodedOther,
+						'amount' => (string) $core->TaxSummary[$i]->TaxAmount,
+				);
+			}
 		}
 		return $tax_rows;
 	}
 	
-	public function getTaxInclusive()
+	public function getTaxExclusive()
 	{
 		$orderTotal = $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->OrderTotal;
-		$namespaces = $orderTotal->getNameSpaces(true);
-		$core = $orderTotal->children($namespaces['core']);
-		return (string) $core->MonetaryAmount;
+		if ($orderTotal) {
+			$namespaces = $orderTotal->getNameSpaces(true);
+			$core = $orderTotal->children($namespaces['core']);
+			return (string) $core->MonetaryAmount;
+		}
+		else return 0;
 	}
 }

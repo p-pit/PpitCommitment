@@ -13,6 +13,8 @@ use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
 use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
+use PpitCommitment\ViewHelper\XmlUblInvoiceViewHelper;
+use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
@@ -750,6 +752,121 @@ class CommitmentController extends AbstractActionController
     	return $this->response;
     }
 
+    public function xmlUblInvoiceAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Retrieve the commitment
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	$commitment = Commitment::get($id);
+    
+    	$commitmentMessage = CommitmentMessage::get($commitment->commitment_message_id);
+    	$xmlXcbl = new XmlXcblOrderViewHelper(new \SimpleXMLElement($commitmentMessage->content));
+
+    	if ($commitment->change_message_id) {
+    		$changeCommitmentMessage = Message::get($commitment->change_message_id);
+    		$changeXmlXcbl = new XmlXcbl(new \SimpleXMLElement($changeCommitmentMessage->content));
+    	}
+    			 
+    			$type = $commitment->type;
+    			$commitment->computeHeader();
+    			$commitment->status = 'invoiced';
+    	
+    			// Atomically save
+    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+			    				 
+			    	// Format the XML UBL message
+			    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
+			    	$credentials = $context->getConfig()['ppitCommitment/P-Pit']['xmlUblInvoiceMessage'];
+			    	$client = new Client(
+			    			$credentials['url'],
+			    			array(
+			    					'adapter' => 'Zend\Http\Client\Adapter\Curl',
+			    					'maxredirects' => 0,
+			    					'timeout'      => 30,
+			    			)
+			   		);
+			    	$client->setAuth($credentials['user'], $safe[$credentials['edi']][$credentials['user']], Client::AUTH_BASIC);
+			    	$client->setEncType('text/xml');
+			    	$client->setMethod('POST');
+			    
+			    	$supplyerSheet = $context->getConfig('commitment/supplierIdentificationSheet');
+			    
+			    	$viewHelper = new XmlUblInvoiceViewHelper();
+			    	$viewHelper->setID($commitment->invoice_identifier);
+			    	$viewHelper->setIssueDate($commitment->invoice_date);
+			    	if ($commitment->status == 'invoicing' || $commitment->status == 'invoiced') $viewHelper->setInvoiceTypeCode('Facture', 380);
+			    	elseif ($commitment->status == 'credit-issued') $viewHelper->setInvoiceTypeCode('Avoir', 381);
+			    	$viewHelper->setNote('N° de contrat: '.$commitment->identifier);
+			    	$viewHelper->setLineCountNumeric($xmlXcbl->getNumberOfLines());
+			    	if ($commitment->type == 'part_2') {
+			    		$startDate = ($commitment->change_message_id && $changeXmlXcbl->getStartOfScheduleLineDate()) ? $changeXmlXcbl->getStartOfScheduleLineDate() : $xmlXcbl->getStartOfScheduleLineDate();
+			    		$endDate = ($commitment->change_message_id && $changeXmlXcbl->getEndOfScheduleLineDate()) ? $changeXmlXcbl->getEndOfScheduleLineDate() : $xmlXcbl->getEndOfScheduleLineDate();
+			    		$viewHelper->setInvoicePeriod($startDate, $endDate);
+			    	}
+			    	if ($commitment->status == 'credit-issued') $viewHelper->setBillingReference($commitment->invoice_identifier);
+			    	$viewHelper->setContractDocumentReference(($commitment->change_message_id) ? $changeXmlXcbl->getIdentifier() : $xmlXcbl->getIdentifier(), 'Bon de commande');
+			    	$viewHelper->setAccountingSupplierParty();
+			    	$viewHelper->setAccountingCustomerParty($commitment);
+			    	if ($commitment->change_message_id) {
+				    	$viewHelper->setDelivery(null, $changeXmlXcbl->getNameAddressName, $changeXmlXcbl->getNameAddressCity, $changeXmlOrder->getShipToPartyPostalCode());
+			    	}
+			    	else {
+			    		$viewHelper->setDelivery(null, $xmlXcbl->getNameAddressName(), $xmlXcbl->getNameAddressCity(), $xmlXcbl->getShipToPartyPostalCode());
+			    	}
+			    	$viewHelper->setPaymentMeans($commitment->settlement_date, null, $supplyerSheet['PayeeFinancialAccount']);
+			    	$viewHelper->setPaymentTerms($supplyerSheet['PaymentTerms']);
+			    	$viewHelper->setTaxTotal($commitment->tax_amount, $commitment->excluding_tax, 20, 'EUR');
+			    	$viewHelper->setLegalMonetaryTotal($commitment->excluding_tax, ($commitment->change_message_id) ? $changeXmlXcbl->getTaxExclusive() : $xmlXcbl->getTaxExclusive(), $commitment->tax_inclusive, $commitment->tax_inclusive, 'EUR');
+			    
+			    	for ($i = 0; $i < $xmlXcbl->getNumberOfLines(); $i++) {
+			    		$viewHelper->addInvoiceLine(
+			    				$i+1,
+			    				$xmlXcbl->getLineTotalQuantity($i),
+			    				$xmlXcbl->getLineItemTotal($i),
+			    				'EUR',
+			    				($commitment->type == ('part_2')) ? $endDate : $commitment->commissioning_date,
+			    				round($xmlXcbl->getLineItemTotal($i) * 20 / 100, 2),
+			    				$xmlXcbl->getLineItemTotal($i),
+			    				'TVA',
+			    				$xmlXcbl->getLineItemTotal($i),
+			    				$xmlXcbl->getLineCalculatedPriceBasisQuantity($i),
+			    				'N° série : '.$commitment->product_identifier,
+			    				'N° contrat : '.$commitment->identifier,
+			    				'N° sales order : ',
+			    				'Libellé produit : '.$commitment->product_caption,
+			    				null,
+			    				$xmlXcbl->getLineProductIdentifier($i),
+			    				20,
+			    				'VAT'
+			    				);
+			    	}
+			    	// Save the message
+			    	$invoiceMessage = CommitmentMessage::instanciate('INVOICE', $viewHelper->asXML());
+			    	$invoiceMessage->identifier = $commitment->identifier;
+			    	$invoiceMessage->add();
+			    
+			    	// Add the message id to the order
+			    	$commitment->invoice_message_id = $invoiceMessage->id;
+			    
+			    	$viewHelper->setUUID($invoiceMessage->id);
+			    	$invoiceMessage->content = $viewHelper->asXML();
+			    	// Save the XBL Invoice and the commitment
+			    	$invoiceMessage->update(null);
+			    	$commitment->update(null);
+			    	$connection->commit();
+			    }
+		    	catch (\Exception $e) {
+		    		$connection->rollback();
+		    		throw $e;
+		    	}
+    	return $this->response;
+    }
+    
     public function settleAction()
     {
     	// Retrieve the context

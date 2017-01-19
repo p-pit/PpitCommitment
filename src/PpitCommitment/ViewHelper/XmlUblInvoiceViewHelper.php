@@ -1,7 +1,9 @@
 <?php
-namespace Ugap\Model;
+namespace PpitCommitment\ViewHelper;
 
-class XmlUblInvoice
+use PpitCore\Model\Context;
+
+class XmlUblInvoiceViewHelper
 {
 	public $content;
 
@@ -13,101 +15,16 @@ class XmlUblInvoice
 	<cbc:CopyIndicator>false</cbc:CopyIndicator>
 	<cbc:UUID>[3]</cbc:UUID>	
 	<cbc:IssueDate>[4]</cbc:IssueDate>
-	<cbc:InvoiceTypeCode name="Facture">380</cbc:InvoiceTypeCode>
+	<cbc:InvoiceTypeCode></cbc:InvoiceTypeCode>
 	<cbc:Note>[6]</cbc:Note>
 	<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
 	<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
-	<cac:ContractDocumentReference>
-		<cbc:ID>[13]</cbc:ID>
-		<cbc:DocumentTypeCode>Bon de commande</cbc:DocumentTypeCode>
-	</cac:ContractDocumentReference>
-	<cac:AccountingSupplierParty>
-		<cac:Party>
-			<cac:PartyIdentification>
-				<cbc:ID schemeName="SIRET">602 055 311 02533</cbc:ID>
-			</cac:PartyIdentification>
-			<cac:PartyName>
-				<cbc:Name>XEROX S.A.S.</cbc:Name>
-			</cac:PartyName>
-			<cac:PostalAddress>
-				<cbc:CityName>Roissy Charles de Gaulle Cedex</cbc:CityName>
-				<cbc:PostalZone>95926</cbc:PostalZone>
-				<cac:AddressLine>
-					<cbc:Line>immeuble "Exelmans" – 33, rue des Vanesses</cbc:Line>
-				</cac:AddressLine>
-				<cac:AddressLine>
-					<cbc:Line>CS30026 – Villepinte</cbc:Line>
-				</cac:AddressLine>
-				<cac:Country>
-					<cbc:IdentificationCode>FR</cbc:IdentificationCode>
-				</cac:Country>
-			</cac:PostalAddress>
-			<cac:PartyTaxScheme>
-				<cbc:CompanyID schemeName="Num TVA intra-communautaire">FR46 602 055 311</cbc:CompanyID>
-				<cac:TaxScheme>
-					<cbc:TaxTypeCode>TVA DEBIT</cbc:TaxTypeCode>
-				</cac:TaxScheme>
-			</cac:PartyTaxScheme>
-			<cac:PartyLegalEntity>
-				<cbc:RegistrationName>XEROX S.A.S.</cbc:RegistrationName>
-				<cbc:CompanyID>Bobigny B 602 055 311</cbc:CompanyID>
-				<cac:RegistrationAddress>
-					<cbc:CityName></cbc:CityName>
-					<cbc:PostalZone></cbc:PostalZone>
-					<cac:AddressLine>
-						<cbc:Line></cbc:Line>
-					</cac:AddressLine>					
-					<cac:AddressLine>
-						<cbc:Line></cbc:Line>
-					</cac:AddressLine>				
-					<cac:Country>
-						<cbc:IdentificationCode>FR</cbc:IdentificationCode>
-					</cac:Country>
-				</cac:RegistrationAddress>
-				<cac:CorporateRegistrationScheme>
-					<cbc:ID>143.524.185 €</cbc:ID>
-				</cac:CorporateRegistrationScheme>
-			</cac:PartyLegalEntity>
-			<cac:Contact>
-				<cbc:ID></cbc:ID>
-				<cbc:Name></cbc:Name>
-				<cbc:Telephone></cbc:Telephone>
-				<cbc:ElectronicMail></cbc:ElectronicMail>
-			</cac:Contact>
-		</cac:Party>
-	</cac:AccountingSupplierParty>
-	<cac:AccountingCustomerParty>
-		<cac:Party>
-			<cac:PartyIdentification>
-				<cbc:ID schemeName="SIREN">77605646700587</cbc:ID>
-			</cac:PartyIdentification>
-			<cac:PartyName>
-				<cbc:Name>UGAP</cbc:Name>
-			</cac:PartyName>
-			<cac:PostalAddress>
-				<cbc:CityName>CHAMPS SUR MARNE</cbc:CityName>
-				<cbc:PostalZone>77420</cbc:PostalZone>
-				<cac:AddressLine>
-					<cbc:Line>1 BOULEVARD ARCHIMEDE</cbc:Line>
-				</cac:AddressLine>
-				<cac:Country>
-					<cbc:IdentificationCode>FR</cbc:IdentificationCode>
-				</cac:Country>
-			</cac:PostalAddress>
-			<cac:PartyTaxScheme>
-				<cbc:CompanyID schemeName="Num TVA intra-communautaire">FR51776056467</cbc:CompanyID>
-				<cac:TaxScheme>
-					<cbc:Name>DIRECTION FINANCIERE ET COMPTABLE - DEPARTEMENT FOURNISSEURS</cbc:Name>
-				</cac:TaxScheme>
-			</cac:PartyTaxScheme>
-		</cac:Party>
-	</cac:AccountingCustomerParty>
 </Invoice>
 XML;
 	
 	public function __construct()
 	{
-		$this->content = new \SimpleXMLElement(XmlUblInvoice::$template);
+		$this->content = new \SimpleXMLElement(XmlUblInvoiceViewHelper::$template);
 	}
 	
 	public function asXML(){
@@ -138,6 +55,15 @@ XML;
 		$cbc->IssueDate = $value;
 	}
 
+	public function setInvoiceTypeCode($name, $value) // [4]
+	{
+		$global = $this->content;
+		$namespaces = $global->getNameSpaces(true);
+		$cbc = $global->children($namespaces['cbc']);
+		$cbc->InvoiceTypeCode['name'] = $name;
+		$cbc->InvoiceTypeCode = $value;
+	}
+	
 	public function setNote($value) // [4]
 	{
 		$global = $this->content;
@@ -145,17 +71,128 @@ XML;
 		$cbc = $global->children($namespaces['cbc']);
 		$cbc->Note = $value;
 	}
-	
-	public function setContractDocumentReference($value) // [13]
+
+	public function setLineCountNumeric($value) // [4]
 	{
 		$global = $this->content;
 		$namespaces = $global->getNameSpaces(true);
-		$cac = $global->children($namespaces['cac']);
-		$namespaces = $cac->ContractDocumentReference->getNameSpaces(true);
-		$cbc = $cac->ContractDocumentReference->children($namespaces['cbc']);
-		$cbc->ID = $value;
+		$cbc = $global->children($namespaces['cbc']);
+		$cbc->LineCountNumeric = $value;
 	}
 
+	public function setInvoicePeriod($beginDate, $endDate, $description)
+	{
+		$global = $this->content;
+		$invoicePeriod = $global->addChild('xmlns:cac:InvoicePeriod');
+		$invoicePeriod->addChild('xmlns:cbc:StartDate', $beginDate); // [9]
+		$invoicePeriod->addChild('xmlns:cbc:EndDate', $endDate); // [10]
+		$invoicePeriod->addChild('xmlns:cbc:Description', $description); // [11]
+	}
+	
+	public function setBillingReference($value) // [12]
+	{
+		$global = $this->content;
+		$billingReference = $global->addChild('xmlns:cac:BillingReference');
+		$invoiceDocumentReference = $billingReference->addChild('xmlns:cac:InvoiceDocumentReference');
+		$invoiceDocumentReference->addChild('xmlns:cbc:Id', $value);
+	}
+
+	public function setContractDocumentReference($value, $documentTypeCode) // [13]
+	{
+		$global = $this->content;
+		$contractDocumentReference = $global->addChild('xmlns:cac:ContractDocumentReference');
+		$contractDocumentReference->addChild('xmlns:cbc:ID', $value);
+		$contractDocumentReference->addChild('xmlns:cbc:DocumentTypeCode', $documentTypeCode);
+	}
+	
+	public function setAccountingSupplierParty() {
+		$context = Context::getCurrent();
+		$supplier = $context->getConfig('commitment/supplierIdentificationSheet');
+		$global = $this->content;
+		$accountingSupplierParty = $global->addChild('xmlns:cac:AccountingSupplierParty');
+		$party = $accountingSupplierParty->addChild('xmlns:cac:Party');
+		$partyIdentification = $party->addChild('xmlns:cac:PartyIdentification');
+		$id = $partyIdentification->addChild('xmlns:cbc:ID', $supplier['ID']);
+		$id->addAttribute('schemeName', 'SIRET');
+
+		$partyName = $party->addChild('xmlns:cac:PartyName');
+		$partyName->addChild('xmlns:cbc:Name', $supplier['Name']);
+
+		$postalAddress = $party->addChild('xmlns:cac:PostalAddress');
+		$postalAddress->addChild('xmlns:cbc:CityName', $supplier['CityName']);
+		$postalAddress->addChild('xmlns:cbc:PostalZone', $supplier['PostalZone']);
+		$addressLine = $postalAddress->addChild('xmlns:cac:AddressLine');
+		$addressLine->addChild('xmlns:cbc:Line', $supplier['AddressLine1']);
+		$addressLine = $postalAddress->addChild('xmlns:cac:AddressLine');
+		$addressLine->addChild('xmlns:cbc:Line', $supplier['AddressLine2']);
+		$country = $postalAddress->addChild('xmlns:cac:Country');
+		$country->addChild('xmlns:cbc:IdentificationCode', $supplier['Country']);
+
+		$partyTaxScheme = $party->addChild('xmlns:cac:PartyTaxScheme');
+		$companyID = $partyTaxScheme->addChild('xmlns:cbc:CompanyID', $supplier['TaxSchemeID']);
+		$companyID->addAttribute('schemeName', $supplier['TaxSchemeName']);
+		$taxScheme = $partyTaxScheme->addChild('xmlns:cac:TaxScheme');
+		$taxScheme->addChild('xmlns:cbc:TaxTypeCode', $context->getConfig('commitment/invoice_tax_mention'));
+
+		$partyLegalEntity = $party->addChild('xmlns:cac:PartyLegalEntity');
+		$partyLegalEntity->addChild('xmlns:cbc:RegistrationName', $supplier['RegistrationName']);
+		$partyLegalEntity->addChild('xmlns:cbc:CompanyID', $supplier['LegalEntityID']);
+		$registrationAddress = $partyLegalEntity->addChild('xmlns:cac:RegistrationAddress');
+		$registrationAddress->addChild('xmlns:cbc:CityName', $supplier['LegalEntityCityName']);
+		$registrationAddress->addChild('xmlns:cbc:PostalZone', $supplier['LegalEntityPostalZone']);
+		$addressLine = $registrationAddress->addChild('xmlns:cac:AddressLine');
+		$addressLine->addChild('xmlns:cbc:Line', $supplier['LegalEntityAddressLine1']);
+		if ($supplier['LegalEntityAddressLine2']) {
+			$addressLine = $registrationAddress->addChild('xmlns:cac:AddressLine');
+			$addressLine->addChild('xmlns:cbc:Line', $supplier['LegalEntityAddressLine2']);
+		}
+		$country = $registrationAddress->addChild('xmlns:cac:Country');
+		$country->addChild('xmlns:cbc:IdentificationCode', $supplier['LegalEntityCountry']);
+		$corporateRegistrationScheme = $partyLegalEntity->addChild('xmlns:cac:CorporateRegistrationScheme');
+		$corporateRegistrationScheme->addChild('xmlns:cbc:ID', $supplier['CorporateRegistrationScheme']);
+
+		$contact = $party->addChild('xmlns:cac:Contact');
+		if ($supplier['ContactID']) $contact->addChild('xmlns:cbc:ID', $supplier['ContactID']);
+		if ($supplier['ContactName']) $contact->addChild('xmlns:cbc:Name', $supplier['ContactName']);
+		if ($supplier['ContactTelephone']) $contact->addChild('xmlns:cbc:Telephone', $supplier['ContactTelephone']);
+		if ($supplier['ContactElectronicMail']) $contact->addChild('xmlns:cbc:ElectronicMail', $supplier['ContactElectronicMail']);
+	}
+
+	public function setAccountingCustomerParty($commitment) {
+		$context = Context::getCurrent();
+		$global = $this->content;
+		$accountingCustomerParty = $global->addChild('xmlns:cac:AccountingCustomerParty');
+		$party = $accountingCustomerParty->addChild('xmlns:cac:Party');
+		$partyIdentification = $party->addChild('xmlns:cac:PartyIdentification');
+		$id = $partyIdentification->addChild('xmlns:cbc:ID', $commitment->customer_identifier);
+		$id->addAttribute('schemeName', 'SIREN');
+	
+		$partyName = $party->addChild('xmlns:cac:PartyName');
+		$partyName->addChild('xmlns:cbc:Name', $commitment->customer_invoice_name);
+	
+		$postalAddress = $party->addChild('xmlns:cac:PostalAddress');
+		$postalAddress->addChild('xmlns:cbc:CityName', $commitment->customer_adr_city);
+		$postalAddress->addChild('xmlns:cbc:PostalZone', $commitment->customer_adr_zip);
+		$addressLine = $postalAddress->addChild('xmlns:cac:AddressLine');
+		$addressLine->addChild('xmlns:cbc:Line', $commitment->customer_adr_street);
+		if ($commitment->customer_adr_extended) {
+			$addressLine = $postalAddress->addChild('xmlns:cac:AddressLine');
+			$addressLine->addChild('xmlns:cbc:Line', $commitment->customer_adr_extended);
+		}
+		elseif ($commitment->customer_adr_post_office_box) {
+			$addressLine = $postalAddress->addChild('xmlns:cac:AddressLine');
+			$addressLine->addChild('xmlns:cbc:Line', $commitment->customer_adr_post_office_box);
+		}
+		$country = $postalAddress->addChild('xmlns:cac:Country');
+		$country->addChild('xmlns:cbc:IdentificationCode', $commitment->customer_adr_country);
+/*	
+		$partyTaxScheme = $party->addChild('xmlns:cac:PartyTaxScheme');
+		$companyId = $partyTaxScheme->addChild('xmlns:cbc:CompanyID', $customer['TaxSchemeCompanyID']);
+		$companyId->addAttribute('schemeName', 'Num TVA intra-communautaire');
+		$taxScheme = $partyTaxScheme->addChild('xmlns:cac:TaxScheme');
+		$taxScheme->addChild('xmlns:cbc:Name', $customer['TaxSchemeName']);*/
+	}
+	
 	public function setDelivery($id, $description, $cityName, $postalZone, $addressLine1 = null, $addressLine2 = null, $addressLine3 = null, $country = null) // [13]
 	{
 		$global = $this->content;		
@@ -202,8 +239,8 @@ XML;
 		$paymentMeans->addChild('xmlns:cbc:PaymentDueDate', $paymentDueDate);
 		$paymentMeans->addChild('xmlns:cbc:PaymentChannelCode', 'IBAN');
 		$paymentMeans->addChild('xmlns:cbc:InstructionNote', $instructionNote);
-		$payeeFinancialAccount = $paymentMeans->addChild('xmlns:cac:PayeeFinancialAccount');
-		$payeeFinancialAccount->addChild('xmlns:cbc:ID', $payeeFinancialAccount);
+		$financialAccount = $paymentMeans->addChild('xmlns:cac:PayeeFinancialAccount');
+		$financialAccount->addChild('xmlns:cbc:ID', $payeeFinancialAccount);
 	}
 
 	public function setPaymentTerms($note)
@@ -220,7 +257,7 @@ XML;
 		$taxAmount = $taxTotal->addChild('xmlns:cbc:TaxAmount', $taxAmount);
 		$taxAmount->addAttribute('currencyID', $currencyId);
 		$taxSubtotal = $taxTotal->addChild('xmlns:cac:TaxSubtotal');
-		$taxableAmount = $taxSubtotal->addChild('xmlns:cac:TaxableAmount', $taxAmount);
+		$taxableAmount = $taxSubtotal->addChild('xmlns:cbc:TaxableAmount', $taxableAmount);
 		$taxableAmount->addAttribute('currencyID', $currencyId);
 		$taxAmount = $taxSubtotal->addChild('xmlns:cbc:TaxAmount', $taxAmount);
 		$taxAmount->addAttribute('currencyID', $currencyId);
@@ -236,11 +273,11 @@ XML;
 		$legalMonetaryTotal = $global->addChild('xmlns:cac:LegalMonetaryTotal');
 		$lineExtensionAmount = $legalMonetaryTotal->addChild('xmlns:cbc:LineExtensionAmount', $lineExtensionAmount);
 		$lineExtensionAmount->addAttribute('currencyID', $currencyId);
-		$taxExclusiveAmount = $legalMonetaryTotal->addChild('xmlns:cbc:taxExclusiveAmount', $taxExclusiveAmount);
+		$taxExclusiveAmount = $legalMonetaryTotal->addChild('xmlns:cbc:TaxExclusiveAmount', $taxExclusiveAmount);
 		$taxExclusiveAmount->addAttribute('currencyID', $currencyId);
-		$taxInclusiveAmount = $legalMonetaryTotal->addChild('xmlns:cbc:taxInclusiveAmount', $taxInclusiveAmount);
+		$taxInclusiveAmount = $legalMonetaryTotal->addChild('xmlns:cbc:TaxInclusiveAmount', $taxInclusiveAmount);
 		$taxInclusiveAmount->addAttribute('currencyID', $currencyId);
-		$payableAmount = $legalMonetaryTotal->addChild('xmlns:cbc:payableAmount', $payableAmount);
+		$payableAmount = $legalMonetaryTotal->addChild('xmlns:cbc:PayableAmount', $payableAmount);
 		$payableAmount->addAttribute('currencyID', $currencyId);
 	}
 
@@ -271,7 +308,7 @@ XML;
 		$taxAmount->addAttribute('currencyID', $currency);
 		$taxCategory = $taxSubtotal->addChild('xmlns:cac:TaxCategory');
 		$taxScheme = $taxCategory->addChild('xmlns:cac:TaxScheme');
-		$taxTypeCode = $taxScheme->addChild('xmlns:cac:TaxTypeCode', $taxTypeCode);
+		$taxTypeCode = $taxScheme->addChild('xmlns:cbc:TaxTypeCode', $taxTypeCode);
 		
 		if ($description1 || $description2 || $description3 || $description4 || $description5 || $name || $classifiedTaxCategoryPercent) {
 			$item = $invoiceLine->addChild('xmlns:cac:Item');
@@ -284,12 +321,12 @@ XML;
 	
 			if ($name) $item->addChild('xmlns:cbc:Name', $name);
 			
-			if ($classifiedTaxCategoryPercent) {
+//			if ($classifiedTaxCategoryPercent) {
 				$classifiedTaxCategory = $item->addChild('xmlns:cac:ClassifiedTaxCategory');
-				$classifiedTaxCategory->addChild('xmlns:cbc:ClassifiedTaxCategoryPercent', $classifiedTaxCategoryPercent);
-				$classifiedTaxCategoryScheme = $classifiedTaxCategory->addChild('xmlns:cac:ClassifiedTaxCategoryScheme');
-				$classifiedTaxCategoryScheme->addChild('xmlns:cbc:ID', $classifiedTaxCategoryScheme);
-			}
+				$classifiedTaxCategory->addChild('xmlns:cbc:Percent', $classifiedTaxCategoryPercent);
+				$taxCategoryScheme = $classifiedTaxCategory->addChild('xmlns:cac:TaxScheme');
+				$taxCategoryScheme->addChild('xmlns:cbc:ID', $classifiedTaxCategoryScheme);
+//			}
 		}
 		
 		$price = $invoiceLine->addChild('xmlns:cac:Price');

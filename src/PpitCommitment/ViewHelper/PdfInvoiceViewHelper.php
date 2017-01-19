@@ -36,7 +36,7 @@ class PdfInvoiceViewHelper
     	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
     	
     	// set default header data
-    	$pdf->SetHeaderData('logos/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
+    	$pdf->SetHeaderData('logos/'.$context->getInstance()->caption.'/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
     	// set header and footer fonts
     	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
     	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
@@ -117,7 +117,7 @@ class PdfInvoiceViewHelper
     	else $text = '<div style="text-align: center"><strong>Facture n° '.$commitment->invoice_identifier.'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(10);
-    	 
+
     	// Invoice references
 		$pdf->SetFillColor(255, 255, 255);
 //    	$pdf->SetTextColor(255);
@@ -138,6 +138,7 @@ class PdfInvoiceViewHelper
 					}
     				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	    			if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
+	    			elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;
 	    			elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
 	    			elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
 	    			elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
