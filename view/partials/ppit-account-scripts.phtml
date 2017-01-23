@@ -297,7 +297,7 @@ function connectAccountUpdateForm(id, action)
 		else {
 			validity = checkAccountUpdateProperties(id);
 			if ($('#new_password').val() != $('#new_password2').val()) {
-				renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
+				renderElement("new_password", "<?php echo $this->translate('Both new passwords should be identical', 'ppit-core', $context->getLocale()) ?>");
 				validity = false;
 			}
 		}
@@ -423,7 +423,7 @@ function connectUserUpdateForm(id, action)
 		// Check validity
 		var validity = checkUserUpdateProperties(id);
 		if ($('#new_password').val() != $('#new_password2').val()) {
-			renderElement("new_password", "<?php echo $this->translate('Both passwords should be the same one', 'ppit-user', $context->getLocale()) ?>");
+			renderElement("new_password", "<?php echo $this->translate('Both new passwords should be identical', 'ppit-core', $context->getLocale()) ?>");
 			validity = false;
 		}
 

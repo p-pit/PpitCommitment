@@ -26,7 +26,9 @@ class Term implements InputFilterAwareInterface
     public $collection_date;
     public $amount;
 	public $means_of_payment;
-    public $document;
+	public $reference;
+	public $comment;
+	public $document;
     public $invoice_id;
     public $audit;
     public $update_time;
@@ -61,6 +63,8 @@ class Term implements InputFilterAwareInterface
         $this->collection_date = (isset($data['collection_date'])) ? (($data['collection_date'] == '9999-12-31') ? null : $data['collection_date']) : null;
         $this->amount = (isset($data['amount'])) ? $data['amount'] : null;
         $this->means_of_payment = (isset($data['means_of_payment'])) ? $data['means_of_payment'] : null;
+        $this->reference = (isset($data['reference'])) ? $data['reference'] : null;
+        $this->comment = (isset($data['comment'])) ? $data['comment'] : null;
         $this->document = (isset($data['document'])) ? $data['document'] : null;
         $this->invoice_id = (isset($data['invoice_id'])) ? $data['invoice_id'] : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
@@ -84,6 +88,8 @@ class Term implements InputFilterAwareInterface
     	$data['collection_date'] = ($this->collection_date) ? $this->collection_date : (($flat) ? null : '9999-12-31');
     	$data['amount'] = $this->amount;
     	$data['means_of_payment'] = $this->means_of_payment;
+    	$data['reference'] = $this->reference;
+    	$data['comment'] = $this->comment;
     	$data['document'] = $this->document;
     	$data['invoice_id'] = (int) $this->invoice_id;
     	$data['audit'] = json_encode($this->audit);
@@ -187,7 +193,15 @@ class Term implements InputFilterAwareInterface
 				$this->means_of_payment = trim(strip_tags($data['means_of_payment']));
 				if (strlen($this->means_of_payment) > 255) return 'Integrity';
 			}
-    		if (array_key_exists('document', $data)) {
+    		if (array_key_exists('reference', $data)) {
+				$this->reference = trim(strip_tags($data['reference']));
+				if (strlen($this->reference) > 255) return 'Integrity';
+			}
+        	if (array_key_exists('comment', $data)) {
+				$this->comment = trim(strip_tags($data['comment']));
+				if (strlen($this->comment) > 2047) return 'Integrity';
+			}
+			if (array_key_exists('document', $data)) {
     			$this->document = trim(strip_tags($data['document']));
 				if (strlen($this->document) > 255) return 'Integrity';
     		}

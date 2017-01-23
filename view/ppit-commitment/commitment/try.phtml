@@ -37,7 +37,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-7">
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $instance->caption ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"><?php if ($captionError) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></p></div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo $propertyId ?>_error"><?php if ($captionError) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-core', $context->getLocale()) ?></p></div>
 		</div>
 
 	<?php elseif ($propertyId == 'n_title') : ?>
@@ -95,11 +95,11 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 
 <?php if ($error == 'Duplicate identifier') $identifierError = true; else $identifierError = false; ?>
 		<div class="form-group <?php if ($error) echo 'has-error' ?>" id="username_group">
-			<label class="col-sm-5 control-label">* <?php echo $this->translate('Identifier', 'ppit-user', $context->getLocale()) ?></label>
+			<label class="col-sm-5 control-label">* <?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
 				<input class="form-control" id="username" value="<?php echo $user->username ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($identifierError) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-user', $context->getLocale()) ?></div>
+			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($identifierError) echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-core', $context->getLocale()) ?></div>
 		</div>
 
 		<input type="hidden" id="requires_notifications" value="1" />

@@ -1543,6 +1543,20 @@ return array(
 									'fr_FR' => 'Mode de règlement',
 							),
 					),
+					'reference' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Reference',
+									'fr_FR' => 'Référence',
+							),
+					),
+					'comment' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Comment',
+									'fr_FR' => 'Commentaire',
+							),
+					),
 					'document' => array(
 							'type' => 'dropbox',
 							'labels' => array(
@@ -1563,6 +1577,8 @@ return array(
 				'status' => 'select',
 				'collection_date' => 'range',
 				'amount' => 'range',
+				'reference' => 'contains',
+				'comment' => 'contains',
 			),
 			'more' => array(
 				'caption' => 'contains',
@@ -1587,6 +1603,8 @@ return array(
 			'collection_date' => array('mandatory' => false),
 			'amount' => array('mandatory' => true),
 			'means_of_payment' => array('mandatory' => false),
+			'reference' => array('mandatory' => false),
+			'comment' => array('mandatory' => false),
 			'document' => array('mandatory' => false),
 	),
 	'commitmentMessage' => array(
