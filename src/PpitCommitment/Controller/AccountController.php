@@ -371,7 +371,7 @@ class AccountController extends AbstractActionController
 	    					if ($data['new_password']) {
 	    						$account->user->new_password = $data['new_password'];
 	    						if ($rc != 'OK') $error = $rc;
-	    						else $account->user->changePassword(false);
+	    						else $context->getSecurityAgent()->changePassword($user, $user->username, $user->password, $user->new_password, null);
 	    					}
     					}
     					if ($error) $connection->rollback();
