@@ -106,7 +106,7 @@ class XmlXcblOrderViewHelper
 		return (string) $core->PartyID[0]->Ident;
 	}
 	
-	public function getHopedDeliveryDate()
+	public function getRequestedDeliveryDate()
 	{
 		return (string) $this->content->ListOfOrder[0]->Order[0]->OrderHeader[0]->OrderDates[0]->RequestedDeliverByDate;
 	}
@@ -167,14 +167,6 @@ class XmlXcblOrderViewHelper
 				return '20'.substr($date, 6, 2).'-'.substr($date, 3, 2).'-'.substr($date, 0, 2);
 			}
 		}
-	}
-	
-	public function getPrice()
-	{
-		$pricingDetail = $this->content->ListOfOrder[0]->Order[0]->OrderDetail[0]->ListOfItemDetail[0]->ItemDetail[0]->PricingDetail;
-		$namespaces = $pricingDetail->getNameSpaces(true);
-		$core = $pricingDetail->children($namespaces['core']);
-		return (string) $core->LineItemTotal[0]->MonetaryAmount;
 	}
 	
 	public function getNumberOfLines()
@@ -275,7 +267,7 @@ class XmlXcblOrderViewHelper
 		return $tax_rows;
 	}
 	
-	public function getTaxExclusive()
+	public function getOrderTotal()
 	{
 		$orderTotal = $this->content->ListOfOrder[0]->Order[0]->OrderSummary[0]->OrderTotal;
 		if ($orderTotal) {

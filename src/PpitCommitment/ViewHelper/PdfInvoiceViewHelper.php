@@ -6,6 +6,7 @@ use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\Term;
 use PpitCore\Model\Context;
+use PpitCore\Model\Place;
 use PpitCore\Model\Vcard;
 use PpitMasterData\Model\Product;
 use PpitMasterData\Model\ProductOption;
@@ -36,7 +37,9 @@ class PdfInvoiceViewHelper
     	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
     	
     	// set default header data
-    	$pdf->SetHeaderData('logos/'.$context->getInstance()->caption.'/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
+		$place = Place::get($commitment->account->place_id);
+		if ($place && $place->logo_src) $pdf->SetHeaderData($place->logo_src, $context->getConfig('headerParams')['advert-width']);
+		else $pdf->SetHeaderData('logos/'.$context->getInstance()->caption.'/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
     	// set header and footer fonts
     	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
     	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));

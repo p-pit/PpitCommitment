@@ -5,6 +5,7 @@ use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
+use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
 use PpitDocument\Model\Document;
 use PpitCore\Model\Community;
@@ -379,6 +380,175 @@ class CommitmentMessageController extends AbstractActionController
     			$this->getResponse()->setStatusCode('500');
     			return $this->getResponse();
     	    }
+    	}
+    }
+
+    public function xmlXcblOrderAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the XML content and save the message
+    	$request = $this->getRequest();
+    	$content = new \SimpleXMLElement($request->getContent());
+    
+    	$message = CommitmentMessage::instanciate('ORDER', $content->asXML());
+    	$xcblOrder = new XmlXcblOrderViewHelper($content);
+    	$purpose = $xcblOrder->getPurpose();
+    
+    	// New order
+    	if ($purpose == 'Original' || $purpose == '900') {
+    		$commitment = Commitment::instanciate($xcblOrder->getType());
+    
+    		// Load from an XML web service
+    		$commitment->commitment_date = $xcblOrder->getOrderDate();
+    		$commitment->identifier = $xcblOrder->getIdentifier();
+        	$commitment->expected_delivery_date = $xmlOrder->getRequestedDeliveryDate();
+    		$commitment->due_date = $xcblOrder->getLateChargeStartDate();
+    		$commitment->product_identifier = $xcblOrder->getLineProductIdentifier(0);
+    		$commitment->quantity = $xcblOrder->getLineTotalQuantity(0);
+    		$commitment->unit_price = $xcblOrder->getLineUnitPrice(0);
+    		$commitment->amount = $xcblOrder->getLineItemTotal(0);
+    		$commitment->property_1 = $xcblOrder->getLineSerialNumber(0);
+    		
+    		if (!in_array($order->type, array('part_1', 'part_2', 'part_3'))) {
+    			// Write to the log
+    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
+    				$logger = new \Zend\Log\Logger();
+    				$logger->addWriter($writer);
+    				$logger->info('501;'.$order->type);
+    			}
+    			$this->getResponse()->setStatusCode(501);
+    			return $this->getResponse();
+    		}
+    
+    		// Atomically save
+    		$connection = Order::getTable()->getAdapter()->getDriver()->getConnection();
+    		$connection->beginTransaction();
+    		try {
+		    	$message->add();
+    			$commitment->order_message_id = $message->id;
+    			
+    			// Set the part_2 order date in the part_1 order
+    			if ($commitment->type == 'part_2') {
+    				$select = Commitment::getTable()->getSelect();
+    				$select->where(array('type' => 'part_1', 'property_1' => $commitment->property_1));
+    				$cursor = Commitment::getTable()->selectWith($select);
+    				foreach ($cursor as $part1Order) {
+    					// Cache the part_1 order commissioning date in the part_2 order
+    					$order->commissioning_date = $part1Order->commissioning_date;
+    					$order->property_2 = $part1Order->property_2;
+    					$order->property_3 = $part1Order->property_3;
+    					$order->property_4 = $part1Order->property_4;
+    					$order->property_5 = $part1Order->property_5;
+    					$order->property_6 = $part1Order->property_6;
+    					$order->property_7 = $part1Order->property_7;
+    					$order->property_8 = $part1Order->property_8;
+    					$order->property_9 = $part1Order->property_9;
+    					$order->property_10 = $part1Order->property_10;
+    					$order->property_11 = $part1Order->property_11;
+    					$order->property_12 = $part1Order->property_12;
+    					$order->property_13 = $part1Order->property_13;
+    					$order->property_14 = $part1Order->property_14;
+    					$order->property_15 = $part1Order->property_15;
+    					$order->property_16 = $part1Order->property_16;
+    					$order->property_17 = $part1Order->property_17;
+    					$order->property_18 = $part1Order->property_18;
+    					$order->property_19 = $part1Order->property_19;
+    					$order->property_20 = $part1Order->property_20;
+    						
+    					// Invoice the part_1 order with null amount
+    					if ($part1Order->amount == 0) {
+    						$part1Order->status = 'invoiced';
+    						$part1Order->update(null);
+    					}
+    				}
+    			}
+    			if ($commitment->add() != 'OK') {
+    				$connection->rollback();
+    				// Write to the log
+    				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    					$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
+    					$logger = new \Zend\Log\Logger();
+    					$logger->addWriter($writer);
+    					$logger->info('422;'.$commitment->identifier);
+    				}
+    				$this->getResponse()->setStatusCode(422);
+    				return $this->getResponse();
+    			}
+    			$connection->commit();
+    		}
+    		catch (\Exception $e) {
+    				
+    			// Write to the log
+    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
+    				$logger = new \Zend\Log\Logger();
+    				$logger->addWriter($writer);
+    				$logger->info('500;'.$commitment->identifier);
+    			}
+    			$connection->rollback();
+    			throw $e;
+    		}
+    		$this->getResponse()->setStatusCode(200);
+    		return $this->getResponse();
+    	}
+    
+    	// Change
+    	else {
+    		// Retrieve the existing commitment
+    		$commitment = Commitment::get($xcblOrder->getIdentifier(), 'identifier');
+    		if (!$commitment) {
+    			// Bad request
+    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
+    				$logger = new \Zend\Log\Logger();
+    				$logger->addWriter($writer);
+    				$logger->info('400;Commande inexistante :'.$xcblOrder->getIdentifier().';');
+    			}
+    			$this->getResponse()->setStatusCode(400);
+    			return $this->getResponse();
+    		}
+    		 
+    		$commitment->change_message_id = $message->id;
+    		if ($purpose == 'Change' || $purpose == '902') {
+    				
+    			// Header and footer change only on part_2 orders
+    			if ($commitment->type == 'part_2') {
+    				$commitment->status = 'updated';
+    
+    				// Load from an XML web service
+    				$commitment->commitment_date = $xcblOrder->getOrderDate();
+    				$commitment->due_date = $xcblOrder->getLateChargeStartDate();
+    				$commitment->expected_delivery_date = $xcbOrder->getRequestedDeliveryDate();
+    				$commitment->change_notification_time = date('Y-m-d H:i:s');
+    			}
+    		}
+    		$lineItemType = $xcblOrder->getLineItemType();
+    		if ($commitment->type == 'part_2' && $lineItemType == '002') { // Modification
+    			$commitment->product_identifier = $xcbOrder->getLineItemDescription();
+	    		$commitment->quantity = $xcblOrder->getLineTotalQuantity(0);
+	    		$commitment->unit_price = $xcblOrder->getLineUnitPrice(0);
+	    		$commitment->amount = $xcblOrder->getLineItemTotal(0);
+	    		$commitment->property_1 = $xcblOrder->getLineSerialNumber(0);
+    		}
+    		elseif ($lineItemType == '003') { // Annulation
+    			$commitment->status = 'canceled';
+    			$commitment->notification_time = null;
+    			$commitment->change_notification_time = date('Y-m-d H:i:s');
+    		}
+    		// Information
+    		elseif ($purpose == 'InformationOnly' || $purpose == '901') {
+    			$commitment->change_notification_time = null;
+    		}
+    		 
+    		// Save the order
+    		Commitment::getTable()->save($commitment);
+    		$message->identifier = $commitment->identifier;
+    		$message->update($message->update_time);
+
+    		return $this->getResponse();
     	}
     }
     
