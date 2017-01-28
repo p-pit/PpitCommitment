@@ -23,6 +23,7 @@ class Account implements InputFilterAwareInterface
     public $status;
     public $type;
     public $place_id;
+    public $identifier;
     public $customer_community_id;
 	public $customer_bill_contact_id;
     public $supplier_community_id;
@@ -100,6 +101,7 @@ class Account implements InputFilterAwareInterface
         $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
+        $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
         $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
         $this->customer_bill_contact_id = (isset($data['customer_bill_contact_id'])) ? $data['customer_bill_contact_id'] : null;
         $this->supplier_community_id = (isset($data['supplier_community_id'])) ? $data['supplier_community_id'] : null;
@@ -144,6 +146,7 @@ class Account implements InputFilterAwareInterface
     	$data['status'] = $this->status;
     	$data['type'] =  ($this->type) ? $this->type : null;
     	$data['place_id'] = (int) $this->place_id;
+    	$data['identifier'] = $this->identifier;
     	$data['customer_community_id'] =  (int) $this->customer_community_id;
     	$data['customer_bill_contact_id'] =  (int) $this->customer_bill_contact_id;
     	$data['supplier_community_id'] =  (int) $this->supplier_community_id;
@@ -358,6 +361,10 @@ class Account implements InputFilterAwareInterface
 		    	if (strlen($this->type) > 255) return 'Integrity';
 			}
     		if (array_key_exists('place_id', $data)) $this->place_id = (int) $data['place_id'];
+        	if (array_key_exists('identifier', $data)) {
+		    	$this->identifier = trim(strip_tags($data['identifier']));
+		    	if (strlen($this->identifier) > 255) return 'Integrity';
+			}
     		if (array_key_exists('customer_name', $data)) {
 		    	$this->customer_name = trim(strip_tags($data['customer_name']));
 		    	if (!$this->customer_name || strlen($this->customer_name) > 255) return 'Integrity';

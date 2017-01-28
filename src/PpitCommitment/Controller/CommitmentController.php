@@ -1480,7 +1480,6 @@ class CommitmentController extends AbstractActionController
     			$logger->info("payment-autoresponse/$id;$code;$error");
 	    	}
     	}
-
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),

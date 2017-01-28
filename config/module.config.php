@@ -579,7 +579,16 @@ return array(
 	        								),
 	        						),
 	        				),
-	        				'paymentAutoresponse' => array(
+	        				'xmlXcblOrder' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/xml-xcbl-order',
+	        								'defaults' => array(
+	        										'action' => 'xmlXcblOrder',
+	        								),
+	        						),
+	        				),
+            				'paymentAutoresponse' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
 	        								'route' => '/payment-autoresponse[/:id]',
@@ -818,6 +827,7 @@ return array(
             	array('route' => 'commitmentMessage/commitmentList', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/commitmentGet', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/commitmentPost', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/xmlXcblOrder', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/paymentAutoresponse', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/invoiceGet', 'roles' => array('guest')),
             	array('route' => 'commitmentMessage/ppitSubscribe', 'roles' => array('guest')),
@@ -982,6 +992,13 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 					),
+					'identifier' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Identifier',
+									'fr_FR' => 'Identifiant',
+							),
+					),
 					'customer_name' => array(
 							'type' => 'input',
 							'labels' => array(
@@ -1100,7 +1117,8 @@ return array(
 	),
 	'commitmentAccount/update' => array(
 			'status' => array('mandatory' => true),
-			'customer_name' => array('mandatory' => false),
+			'identifier' => array('mandatory' => false),
+			'customer_name' => array('mandatory' => true),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),

@@ -227,7 +227,6 @@ class AccountController extends AbstractActionController
 					// Add the main contact
 					$account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
-
 					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
     			}
 				if (!$error) {
@@ -237,6 +236,7 @@ class AccountController extends AbstractActionController
 	    			try {
 	    				if (!$account->id) {
 	    					$return = $account->customer_community->add();
+var_dump($return);
 			        		if ($return != 'OK') $error = 'Duplicate';
 			        		else {
 			        			$account->customer_community_id = $account->customer_community->id;

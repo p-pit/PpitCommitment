@@ -862,6 +862,14 @@ function getCommitmentUpdate(id, action, params) {
 			if (xhttp.status == 200) {
 <?php endif;?>
 			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
 
 			if (id) {
 				$('#commitment-update-anchor').click(function () { getCommitmentUpdate(id, 'update'); });
