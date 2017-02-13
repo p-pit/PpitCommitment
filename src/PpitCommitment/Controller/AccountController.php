@@ -29,7 +29,7 @@ class AccountController extends AbstractActionController
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 		
 		$community_id = (int) $context->getCommunityId();
-		$contact = Vcard::getNew($community_id);
+		$contact = Vcard::instanciate($community_id);
 
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
@@ -225,7 +225,7 @@ class AccountController extends AbstractActionController
 					if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
 
 					// Add the main contact
-					$account->contact_1 = Vcard::instanciate();
+					if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
 					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
     			}
@@ -236,7 +236,6 @@ class AccountController extends AbstractActionController
 	    			try {
 	    				if (!$account->id) {
 	    					$return = $account->customer_community->add();
-var_dump($return);
 			        		if ($return != 'OK') $error = 'Duplicate';
 			        		else {
 			        			$account->customer_community_id = $account->customer_community->id;
@@ -259,6 +258,9 @@ var_dump($return);
 		    					else {
 		    						$return = $account->update($request->getPost('update_time'));
 		    						if ($return != 'OK') $error = $return;
+									else {
+										if (array_key_exists('file', $data)) $account->contact_1->savePhoto($data['file']);
+									}
 		    					}
 	    					}
 	    				}

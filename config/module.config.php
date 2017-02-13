@@ -1666,17 +1666,6 @@ return array(
 	),
 	'commitment/accountList' => array(
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
-			'addRoute' => 'commitment/update',
-			'glyphicons' => array(
-				'commitment/update' => array(
-						'labels' => array('en_US' => 'Update', 'fr_FR' => 'Modifier'),
-						'glyphicon' => 'glyphicon-edit',
-				),
-				'commitment/delete' => array(
-						'labels' => array('en_US' => 'Delete', 'fr_FR' => 'Supprimer'),
-						'glyphicon' => 'glyphicon-trash',
-				),
-			),
 			'properties' => array(
 				'caption' => 'text',
 				'property_1' => 'text',

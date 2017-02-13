@@ -59,6 +59,7 @@ class Account implements InputFilterAwareInterface
     public $birth_date;
     public $tel_work;
     public $tel_cell;
+    public $photo_link_id;
     
     // Transient properties
     public $place;
@@ -137,6 +138,7 @@ class Account implements InputFilterAwareInterface
         $this->birth_date = (isset($data['birth_date'])) ? $data['birth_date'] : null;
         $this->tel_work = (isset($data['tel_work'])) ? $data['tel_work'] : null;
         $this->tel_cell = (isset($data['tel_cell'])) ? $data['tel_cell'] : null;
+        $this->photo_link_id = (isset($data['photo_link_id'])) ? $data['photo_link_id'] : null;
     }
     
     public function toArray()
@@ -177,7 +179,7 @@ class Account implements InputFilterAwareInterface
 			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
 			->join(array('supplier' => 'core_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
 			->join(array('customer' => 'core_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id'), 'left')
-			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell'), 'left')
+			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
@@ -495,7 +497,6 @@ class Account implements InputFilterAwareInterface
     	if ($account->update_time > $update_time) return 'Isolation';
 		$this->customer_community->update($this->customer_community->update_time);
     	$this->contact_1->update($this->contact_1->update_time);
-    	if ($this->files) foreach ($this->files as $file) $this->contact_1->saveFile($file);
     	Account::getTable()->save($this);
     	return 'OK';
     }

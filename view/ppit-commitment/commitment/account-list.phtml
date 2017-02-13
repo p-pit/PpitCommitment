@@ -1,7 +1,7 @@
 <h4 style="text-align: center"></h4>
 
 <?php $colspan = count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['properties'])
-	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'])
+//	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'])
 	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors']) 
 			   + 2 ?>
 
@@ -12,7 +12,6 @@
 		</th>
 	</tr>
 	<tr>
-<?php $route = $context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['addRoute']?>
 		<td colspan="<?php echo $colspan ?>">
 			<button type="button" class="btn btn-default action-btn btn-xs commitment-add-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-add">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>

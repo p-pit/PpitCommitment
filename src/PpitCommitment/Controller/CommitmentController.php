@@ -737,7 +737,7 @@ class CommitmentController extends AbstractActionController
     					$error = $rc;
     				}
     				else {
-    					$commitment->record('registration');
+    					if (array_key_exists('p-pit-finance', $context->getApplications())) $commitment->record('registration');
     					$connection->commit();
     					$message = 'OK';
     				}

@@ -100,6 +100,16 @@ class Commitment implements InputFilterAwareInterface
 	public $property_18;
 	public $property_19;
 	public $property_20;
+	public $property_21;
+	public $property_22;
+	public $property_23;
+	public $property_24;
+	public $property_25;
+	public $property_26;
+	public $property_27;
+	public $property_28;
+	public $property_29;
+	public $property_30;
 	public $audit = array();
 	public $excluding_tax;
 	public $tax_regime;
@@ -223,6 +233,16 @@ class Commitment implements InputFilterAwareInterface
         $this->property_18 = (isset($data['property_18'])) ? $data['property_18'] : null;
         $this->property_19 = (isset($data['property_19'])) ? $data['property_19'] : null;
         $this->property_20 = (isset($data['property_20'])) ? $data['property_20'] : null;
+        $this->property_21 = (isset($data['property_21'])) ? $data['property_21'] : null;
+        $this->property_22 = (isset($data['property_22'])) ? $data['property_22'] : null;
+        $this->property_23 = (isset($data['property_23'])) ? $data['property_23'] : null;
+        $this->property_24 = (isset($data['property_24'])) ? $data['property_24'] : null;
+        $this->property_25 = (isset($data['property_25'])) ? $data['property_25'] : null;
+        $this->property_26 = (isset($data['property_26'])) ? $data['property_26'] : null;
+        $this->property_27 = (isset($data['property_27'])) ? $data['property_27'] : null;
+        $this->property_28 = (isset($data['property_28'])) ? $data['property_28'] : null;
+        $this->property_29 = (isset($data['property_29'])) ? $data['property_29'] : null;
+        $this->property_30 = (isset($data['property_30'])) ? $data['property_30'] : null;
         $this->audit = (isset($data['audit'])) ? ((is_array($data['audit'])) ? $data['audit'] : json_decode($data['audit'], true)) : array();
         $this->excluding_tax = (isset($data['excluding_tax'])) ? $data['excluding_tax'] : null;
         $this->tax_regime = (isset($data['tax_regime'])) ? $data['tax_regime'] : null;
@@ -327,6 +347,16 @@ class Commitment implements InputFilterAwareInterface
     	$data['property_18'] = $this->property_18;
     	$data['property_19'] = $this->property_19;
     	$data['property_20'] = $this->property_20;
+    	$data['property_21'] = $this->property_21;
+    	$data['property_22'] = $this->property_22;
+    	$data['property_23'] = $this->property_23;
+    	$data['property_24'] = $this->property_24;
+    	$data['property_25'] = $this->property_25;
+    	$data['property_26'] = $this->property_26;
+    	$data['property_27'] = $this->property_27;
+    	$data['property_28'] = $this->property_28;
+    	$data['property_29'] = $this->property_29;
+    	$data['property_30'] = $this->property_30;
     	$data['audit'] = json_encode($this->audit);
     	$data['excluding_tax'] = $this->excluding_tax;
     	$data['tax_regime'] = $this->tax_regime;
@@ -946,6 +976,56 @@ class Commitment implements InputFilterAwareInterface
 		if (array_key_exists('property_20', $data)) {
 			$this->property_20 = $data['property_20'];
 			if (strlen($this->property_20) > 255) return 'Integrity';
+		}
+
+		if (array_key_exists('property_21', $data)) {
+			$this->property_11 = $data['property_21'];
+			if (strlen($this->property_21) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_22', $data)) {
+			$this->property_12 = $data['property_22'];
+			if (strlen($this->property_22) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_23', $data)) {
+			$this->property_14 = $data['property_23'];
+			if (strlen($this->property_23) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_24', $data)) {
+			$this->property_14 = $data['property_24'];
+			if (strlen($this->property_24) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_25', $data)) {
+			$this->property_15 = $data['property_25'];
+			if (strlen($this->property_25) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_26', $data)) {
+			$this->property_16 = $data['property_26'];
+			if (strlen($this->property_26) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_27', $data)) {
+			$this->property_17 = $data['property_27'];
+			if (strlen($this->property_27) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_28', $data)) {
+			$this->property_18 = $data['property_28'];
+			if (strlen($this->property_28) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_29', $data)) {
+			$this->property_19 = $data['property_29'];
+			if (strlen($this->property_29) > 255) return 'Integrity';
+		}
+		
+		if (array_key_exists('property_30', $data)) {
+			$this->property_20 = $data['property_30'];
+			if (strlen($this->property_30) > 255) return 'Integrity';
 		}
 		
 		if (array_key_exists('comment', $data)) {
