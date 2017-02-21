@@ -29,6 +29,7 @@ class Account implements InputFilterAwareInterface
     public $supplier_community_id;
     public $opening_date;
     public $closing_date;
+    public $contact_history;
     public $terms_of_sales;
     public $property_1;
     public $property_2;
@@ -108,6 +109,7 @@ class Account implements InputFilterAwareInterface
         $this->supplier_community_id = (isset($data['supplier_community_id'])) ? $data['supplier_community_id'] : null;
         $this->opening_date = (isset($data['opening_date'])) ? $data['opening_date'] : null;
         $this->closing_date = (isset($data['closing_date']) && $data['closing_date'] != '9999-12-31') ? $data['closing_date'] : null;
+        $this->contact_history = (isset($data['contact_history'])) ? json_decode($data['contact_history'], true) : null;
         $this->terms_of_sales = (isset($data['terms_of_sale'])) ? json_decode($data['terms_of_sale'], true) : null;
         $this->property_1 = (isset($data['property_1'])) ? $data['property_1'] : null;
         $this->property_2 = (isset($data['property_2'])) ? $data['property_2'] : null;
@@ -154,6 +156,7 @@ class Account implements InputFilterAwareInterface
     	$data['supplier_community_id'] =  (int) $this->supplier_community_id;
     	$data['opening_date'] =  ($this->opening_date) ? $this->opening_date : null;
     	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : '9999-12-31';
+    	$data['contact_history'] = json_encode($this->contact_history);
     	$data['terms_of_sales'] =  ($this->terms_of_sales) ? json_encode($this->terms_of_sales) : null;
     	$data['property_1'] =  ($this->property_1) ? $this->property_1 : null;
     	$data['property_2'] =  ($this->property_2) ? $this->property_2 : null;
@@ -340,6 +343,7 @@ class Account implements InputFilterAwareInterface
 		$account = new Account;
 		$account->status = 'new';
 		$account->type = $type;
+		$account->contact_history = array();
 		$account->audit = array();
 		$account->customer_community = Community::instanciate();
 		$account->contact_1 = Vcard::instanciate();
@@ -405,6 +409,13 @@ class Account implements InputFilterAwareInterface
 		    	$this->closing_date = trim(strip_tags($data['closing_date']));
 		    	if ($this->closing_date && !checkdate(substr($this->closing_date, 5, 2), substr($this->closing_date, 8, 2), substr($this->closing_date, 0, 4))) return 'Integrity';
 			}
+			if (array_key_exists('contact_history', $data)) {
+				$this->contact_history[] = array(
+						'time' => Date('Y-m-d G:i:s'),
+						'n_fn' => $context->getFormatedName(),
+						'comment' => $data['contact_history'],
+				);
+			}
 			if (array_key_exists('property_1', $data)) {
 				$this->property_1 = trim(strip_tags($data['property_1']));
 				if (strlen($this->property_1) > 255) return 'Integrity';
@@ -467,7 +478,7 @@ class Account implements InputFilterAwareInterface
 			$this->contact_1->tel_work = $this->tel_work;
 			$this->contact_1->tel_cell = $this->tel_cell;
 			$this->contact_1->n_fn = $this->n_last.', '.$this->n_first;
-    		$this->properties = $this->toArray();
+    		$this->properties = $this->toArray(); // Deprecated
     		$this->files = $files;
 
     	// Update the audit

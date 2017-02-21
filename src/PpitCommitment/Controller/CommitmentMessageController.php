@@ -202,7 +202,7 @@ class CommitmentMessageController extends AbstractActionController
     		else {
     			$account = Account::get($community->id, 'customer_community_id');
     			if (!$account) $this->getResponse()->setStatusCode('400');
-    			else $this->getResponse()->setContent(json_encode(Commitment::getList(null, array('account_id' => $account->id), 'caption', 'ASC', 'search')));
+    			else $this->getResponse()->setContent(json_encode(Commitment::getList(null, array('account_id' => $account->id), 'commitment_date', 'DESC', 'search')));
     		}
     	}
     	return $this->getResponse();

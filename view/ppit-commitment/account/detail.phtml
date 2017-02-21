@@ -9,6 +9,8 @@
 	</div>
 	<div class="panel-body">
 
+		<input type="hidden" id="customer_community_id" value="<?php echo $customer_community_id ?>" />
+
 <?php if ($context->hasRole('admin') && $account->id) : ?>
 <!-- Display the audit -->
 		<?php echo $this->translate('History', 'ppit-core', $context->getLocale()) ?> (<a id="audit-label" href="#"><?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?></a>)
@@ -46,5 +48,7 @@
 		</div>
 
 		<div id="commitment-list-panel"></div>
+
+		<div id="community-send-message-panel"></div>
 	</div>
 	

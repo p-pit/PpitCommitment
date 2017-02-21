@@ -5,7 +5,7 @@
 <?php endif;?>
 
 <?php if ($commitment->id && !$message) : ?>
-		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || $commitment->status == 'invoiced') echo 'disabled="disabled"' ?>>
+		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || in_array($commitment->status, array('invoiced', 'settled'))) echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>
 

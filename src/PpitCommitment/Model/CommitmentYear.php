@@ -58,13 +58,13 @@ class CommitmentYear implements InputFilterAwareInterface
     
     public static function instanciate($year)
     {
-    	$year = new CommitmentYear;
-    	$year->status = 'current';
-    	$year->year = $year;
-    	$year->digits = 5;
-    	$year->next_value = 1;
-    	CommitmentYear::getTable()->save($year);
-    	return $year;
+    	$commitmentYear = new CommitmentYear;
+    	$commitmentYear->status = 'current';
+    	$commitmentYear->year = $year;
+    	$commitmentYear->digits = 5;
+    	$commitmentYear->next_value = 1;
+    	CommitmentYear::getTable()->save($commitmentYear);
+    	return $commitmentYear;
     }
 
     public function increment()

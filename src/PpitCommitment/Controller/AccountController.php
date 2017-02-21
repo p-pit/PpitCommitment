@@ -159,6 +159,14 @@ class AccountController extends AbstractActionController
     	return $view;
     }
 
+    public function getAccountProperties($account)
+    {
+    	$data = $account->toArray();
+    	$data['contact_history'] = $account->contact_history;
+    	$data['photo_link_id'] = $account->contact_1->photo_link_id;
+    	$account->properties = $data;
+    }
+    
     public function detailAction()
     {
     	// Retrieve the context
@@ -169,6 +177,7 @@ class AccountController extends AbstractActionController
     	$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $account = Account::get($id);
     	else $account = Account::instanciate($type);
+    	$this->getAccountProperties($account);
     	if (!$type) $type = $account->type;
 
     	$view = new ViewModel(array(
@@ -177,6 +186,7 @@ class AccountController extends AbstractActionController
     			'type' => $type,
     			'id' => $account->id,
     			'account' => $account,
+    			'customer_community_id' => $account->customer_community_id,
     	));
     	$view->setTerminal(true);
     	return $view;
@@ -194,6 +204,7 @@ class AccountController extends AbstractActionController
     	$action = $this->params()->fromRoute('act', null);
     	if ($id) $account = Account::get($id);
     	else $account = Account::instanciate($type);
+    	$this->getAccountProperties($account);
 
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
@@ -268,6 +279,7 @@ class AccountController extends AbstractActionController
 	    				else {
 	    					$connection->commit();
 	    					$message = 'OK';
+    						$this->getAccountProperties($account);
 	    				}
 	    			}
 	    			catch (\Exception $e) {
@@ -278,7 +290,7 @@ class AccountController extends AbstractActionController
 				}
     		}
     	}
-    
+
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
@@ -575,7 +587,7 @@ class AccountController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
-   
+
     public function registerAction()
     {
     	// Retrieve the context

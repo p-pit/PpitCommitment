@@ -137,7 +137,7 @@ return array(
 		        								),
 		        						),
 		        				),
-		        				'updateUser' => array(
+	       						'updateUser' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/update-user[/:type][/:id][/:act]',
@@ -789,7 +789,7 @@ return array(
 				array('route' => 'commitmentAccount/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/update', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
             	array('route' => 'commitment', 'roles' => array('sales_manager', 'business_owner')),
@@ -1077,6 +1077,13 @@ return array(
 									'fr_FR' => 'Date de fermeture',
 							),
 					),
+					'contact_history' => array(
+							'type' => 'log',
+							'labels' => array(
+									'en_US' => 'Comment',
+									'fr_FR' => 'Commentaire',
+							),
+					),
 			),
 			'order' => 'customer_name',
 	),
@@ -1125,6 +1132,7 @@ return array(
 			'tel_work' => array('mandatory' => false),
 			'opening_date' => array('mandatory' => true),
 			'closing_date' => array('mandatory' => false),
+			'contact_history' => array('mandatory' => false),
 	),
 	'commitmentAccount/updateContact' => array(
 			'n_title' => array('mandatory' => false),
@@ -1148,6 +1156,8 @@ return array(
 			'modalities' => array(
 					'rental' => array('en_US' => 'Rental', 'fr_FR' => 'Location'),
 					'service' => array('en_US' => 'Service', 'fr_FR' => 'Prestation'),
+					'p-pit-studies' => array('en_US' => 'Subscription', 'fr_FR' => 'Inscription'),
+					'p-pit-stays' => array('en_US' => 'Stay', 'fr_FR' => 'Séjour'),
 			),
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),

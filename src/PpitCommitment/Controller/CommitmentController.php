@@ -727,7 +727,7 @@ class CommitmentController extends AbstractActionController
     			$connection->beginTransaction();
     			try {
     				$year = CommitmentYear::getcurrent();
-    				if (!$year) $year = CommitmentYear::instanciate();
+    				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
     				$commitment->invoice_identifier = $context->getConfig('commitment/invoice_identifier_mask').sprintf("%'.05d", $year->next_value);
     				$year->increment();
     				$rc = $commitment->update($request->getPost('update_time'));
@@ -891,7 +891,8 @@ class CommitmentController extends AbstractActionController
     			 
     			$type = $commitment->type;
     			$commitment->status = 'settled';
-    
+    			$commitment->credit_status = 'closed';
+    			 
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
