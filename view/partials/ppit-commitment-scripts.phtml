@@ -12,7 +12,7 @@ function getParams() {
 	// Create a new FormData object.
 	var params = '?', todo = true;
 
-<?php foreach ($context->getConfig('commitment/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	
@@ -56,7 +56,7 @@ function exportCommitmentList() {
 
 function eraseCommitmentSearch() {
 
-<?php foreach ($context->getConfig('commitment/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').val('');
@@ -98,7 +98,6 @@ function filterCommitmentList() {
 
 function connectCommitmentSearchInputs() {
 
-
 	$('#export-button').click(function () { exportCommitmentList(); });
 	
 	$('#erase-button').unbind();
@@ -106,7 +105,12 @@ function connectCommitmentSearchInputs() {
 
 <?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
-	<?php if ($rendering == 'range') : ?>
+	<?php if ($propertyId == 'type') : ?>
+		$('#search_<?php echo $propertyId ?>').change(function () { 
+			document.location.href = '<?php echo $this->url('commitment/index') ?>/' + $('#search_type').val(); 
+		});
+
+	<?php elseif ($rendering == 'range') : ?>
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterCommitmentList(); });
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterCommitmentList(); });
 
@@ -135,7 +139,6 @@ function connectCommitmentSearchInputs() {
 
 // Load the list
 function getCommitmentList(params, major, dir) {		
-
 	// Execute the ajax request
 	route = '<?php echo $this->url('commitment/list', array('type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
@@ -209,30 +212,6 @@ function connectCgvPanel()
 	});
 }
 
-/////////////////////////////
-// Commitment update panel //
-/////////////////////////////
-
-<?php foreach ($context->getConfig('commitment/types')['modalities'] as $type => $typeDef) : ?>
-
-<?php 
-$properties = array();
-
-foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $def) {
-	if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
-		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	}
-	else {
-		$property = $context->getConfig('commitment')['properties'][$propertyId];
-	}
-	$properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $def['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
-}
-
-$properties['update_time'] = array('type' => 'hidden');
-
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
-?>
-
 function connectCommitmentInvoiceForm(id)
 {			
 		$('#commitment-invoice-anchor').removeClass('btn-default').addClass('btn-warning');
@@ -285,6 +264,28 @@ function getCommitmentSettleForm(id) {
 	$('#commitment-settle-anchor').click(function () { connectCommitmentSettleForm(id); });
 }
 
+/////////////////////////////
+// Commitment update panel //
+/////////////////////////////
+
+<?php 
+$properties = array();
+
+foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $def) {
+	if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
+		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	}
+	else {
+		$property = $context->getConfig('commitment')['properties'][$propertyId];
+	}
+	$properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $def['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
+?>
+
 function connectCommitmentUpdateForm(id, action)
 {
 	if (action == 'update') $('#commitment-update-anchor').removeClass('btn-default').addClass('btn-primary');
@@ -311,10 +312,7 @@ function connectCommitmentUpdateForm(id, action)
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
 
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
-				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
-
-	<?php elseif ($property['type'] == 'checkbox') : ?>
+	<?php if ($property['type'] == 'checkbox') : ?>
 				formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
 
 	<?php elseif ($property['type'] == 'file') : ?>
@@ -326,6 +324,9 @@ function connectCommitmentUpdateForm(id, action)
 						formData.append('order_form', file, file.name);
 					}
 				}
+
+	<?php else : ?>
+				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php endif ?>
 
@@ -882,12 +883,9 @@ function getCommitmentDetail(id) {
 	$('#commitment-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
 }
 
-<?php endforeach;?>
-
 function activateCommitment() {
-
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitment/search') ?>');
+	loadPanel('index_action', '<?php echo $this->url('commitment/search', array('type' => $type)) ?>');
 	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
 	$('#commitment-anchor').removeClass("btn-default").addClass("btn-primary");
 	

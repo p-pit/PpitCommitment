@@ -1,10 +1,15 @@
 <table class="table table-striped ppit_index">
 
-	<tr class="to-mask"><td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) +1 ?>">&nbsp;</td></tr>	
+	<tr class="to-mask"><td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) + 1 ?>">&nbsp;</td></tr>	
 	<tr style="font-weight: bold">
-		<td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) - 1 ?>">&nbsp;</td>
-		<td style="text-align: right"><?php echo $this->translate('Turnover', 'ppit-commitment', $context->getLocale()) ?></td>
-		<td style="text-align: right"><?php echo $context->formatFloat($turnover, 2) ?></td>
+		<td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) + 1 ?>" style="text-align: right">
+			<?php echo $this->translate(($type == 'learning' ? 'Interns' : 'Nbr'), 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
+			<?php echo count($commitments) ?>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<?php echo $this->translate(($type == 'learning' ? 'Hours' : 'Quantity'), 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
+			<?php echo $quantity ?>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<?php echo $this->translate('Sales', 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
+			<?php echo $context->formatFloat($turnover, 2) ?>
+		</td>
 	</tr>
 
 	<tr>

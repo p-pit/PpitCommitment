@@ -409,7 +409,7 @@ class Account implements InputFilterAwareInterface
 		    	$this->closing_date = trim(strip_tags($data['closing_date']));
 		    	if ($this->closing_date && !checkdate(substr($this->closing_date, 5, 2), substr($this->closing_date, 8, 2), substr($this->closing_date, 0, 4))) return 'Integrity';
 			}
-			if (array_key_exists('contact_history', $data)) {
+			if (array_key_exists('contact_history', $data) && $data['contact_history']) {
 				$this->contact_history[] = array(
 						'time' => Date('Y-m-d G:i:s'),
 						'n_fn' => $context->getFormatedName(),

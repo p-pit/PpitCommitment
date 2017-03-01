@@ -442,10 +442,10 @@ class Commitment implements InputFilterAwareInterface
 	    	$community = Community::get($commitment->account->customer_community_id);
 	    	$commitment->customer_name = $community->name;
     	}
-    	if ($commitment->subscription_id) {
+/*    	if ($commitment->subscription_id) {
 	    	$subscription = Subscription::get($commitment->subscription_id);
     		$commitment->product_identifier = $subscription->product_identifier;
-    	}
+    	}*/
     	$commitment->properties = $commitment->toArray();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 

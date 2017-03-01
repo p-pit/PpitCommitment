@@ -1156,8 +1156,9 @@ return array(
 			'modalities' => array(
 					'rental' => array('en_US' => 'Rental', 'fr_FR' => 'Location'),
 					'service' => array('en_US' => 'Service', 'fr_FR' => 'Prestation'),
+					'learning' => array('en_US' => 'Learning', 'fr_FR' => 'Formation'),
 					'p-pit-studies' => array('en_US' => 'Subscription', 'fr_FR' => 'Inscription'),
-					'p-pit-stays' => array('en_US' => 'Stay', 'fr_FR' => 'Séjour'),
+//					'p-pit-stays' => array('en_US' => 'Stay', 'fr_FR' => 'Séjour'),
 			),
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),
@@ -1425,27 +1426,17 @@ return array(
 			'tel_work' => array('mandatory' => false),
 			'tel_cell' => array('mandatory' => false),
 	),
-	
+
+	// Rental
+		
 	'commitment/rental' => array(
 			'currencySymbol' => '€',
 			'tax' => 'excluding',
 			'properties' => array(
-			),
-	),
-
-	'commitment/detail/rental' => array(
-			'title' => array('en_US' => 'Commitment detail', 'fr_FR' => 'Détail de l\'engagement'),
-	),
-		
-	'commitment/update/rental' => array(
-			'caption' => array('mandatory' => true),
-			'description' => array('mandatory' => false),
-	),
-
-	'commitment/service' => array(
-			'currencySymbol' => '€',
-			'tax' => 'excluding',
-			'properties' => array(
+					'type' => array(
+							'type' => 'repository',
+							'definition' => 'commitment/types',
+					),
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
@@ -1488,10 +1479,117 @@ return array(
 							),
 					),
 			),
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
 	),
 
-	'commitment/detail/service' => array(
-			'title' => array('en_US' => 'Commitment detail', 'fr_FR' => 'Détail de l\'engagement'),
+	'commitment/index/rental' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/rental' => array(
+			'title' => array('en_US' => 'Rental', 'fr_FR' => 'Location'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+					'type' => 'select',
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+			),
+	),
+	
+	'commitment/list/rental' => array(
+			'caption' => 'input',
+			'including_options_amount' => 'number',
+			'status' => 'select',
+	),
+		
+	'commitment/update/rental' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+
+	// Service
+	
+	'commitment/service' => array(
+			'currencySymbol' => '€',
+			'tax' => 'excluding',
+			'properties' => array(
+					'type' => array(
+							'type' => 'repository',
+							'definition' => 'commitment/types',
+					),
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+									'invoiced' => array('en_US' => 'Invoiced', 'fr_FR' => 'Facturé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
+					'caption' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Caption',
+									'fr_FR' => 'Libellé',
+							),
+					),
+					'description' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Description',
+									'fr_FR' => 'Description',
+							),
+					),
+					'including_options_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
+			),
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
+	),
+
+	'commitment/index/service' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/service' => array(
+			'title' => array('en_US' => 'Learning', 'fr_FR' => 'Formations'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+					'type' => 'select',
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+			),
+	),
+		
+	'commitment/list/service' => array(
+			'caption' => 'input',
+			'including_options_amount' => 'number',
+			'status' => 'select',
 	),
 		
 	'commitment/update/service' => array(
@@ -1499,6 +1597,216 @@ return array(
 			'description' => array('mandatory' => false),
 	),
 
+	// Learning
+
+	'commitment/property_10/learning' => array(
+			'type' => 'select',
+			'modalities' => array(),
+			'labels' => array('en_US' => 'Generic 1', 'fr_FR' => 'Générique 1'),
+	),
+
+	'commitment/property_11/learning' => array(
+			'type' => 'input',
+			'labels' => array('en_US' => 'Generic 2', 'fr_FR' => 'Générique 2'),
+	),
+
+	'commitment/property_12/learning' => array(
+			'type' => 'input',
+			'labels' => array('en_US' => 'Generic 3', 'fr_FR' => 'Générique 3'),
+	),
+
+	'commitment/property_13/learning' => array(
+			'type' => 'input',
+			'labels' => array('en_US' => 'Generic 4', 'fr_FR' => 'Générique 4'),
+	),
+
+	'commitment/property_14/learning' => array(
+			'type' => 'input',
+			'labels' => array('en_US' => 'Generic 5', 'fr_FR' => 'Générique 5'),
+	),
+		
+	'commitment/learning' => array(
+			'tax' => 'excluding',
+			'currencySymbol' => '€',
+			'properties' => array(
+					'type' => array(
+							'type' => 'repository',
+							'definition' => 'commitment/types',
+					),
+					'status' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'new' => array('en_US' => 'To be confirmed', 'fr_FR' => 'A confirmer'),
+									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+									'closed' => array('en_US' => 'Closed', 'fr_FR' => 'Clôturé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'customer_name' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
+					'caption' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Caption',
+									'fr_FR' => 'Libellé',
+							),
+					),
+					'description' => array(
+							'type' => 'textarea',
+							'labels' => array(
+									'en_US' => 'Description',
+									'fr_FR' => 'Description',
+							),
+					),
+					'property_1' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'A1' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1 - Entreprise - Formation salarié hors professionalisation'),
+									'A1p' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1\' - Entreprise - Formation salarié professionalisation'),
+									'A2a' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2a - Collecteur paritaire agréé - Plan de formation'),
+									'A2b' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2b - Collecteur paritaire agréé - Professionnalisation'),
+									'A2c' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2c - Collecteur paritaire agréé - Compte personnel de formation'),
+									'A2d' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2d - Collecteur paritaire agréé - Congé individuel de formation'),
+									'A2e' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2e - Fonds assurance formation de non-salariés'),
+									'A3a' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3a - Pouvoirs publics - Agents'),
+									'A3b' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3b - Pouvoirs publics - Spécifique instances européennes'),
+									'A3c' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3c - Pouvoirs publics - Spécifique états'),
+									'A3d' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3d - Pouvoirs publics - Spécifique conseils régionaux'),
+									'A3e' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3e - Pouvoirs publics - Spécifique Pôle emploi'),
+									'A3f' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3f - Pouvoirs publics - Spécifique Autres ressources publiques'),
+									'A4' => array('en_US' => 'Non applicable', 'fr_FR' => 'A4 - Contrat conclus avec particuliers'),
+									'A5' => array('en_US' => 'Non applicable', 'fr_FR' => 'A4 - Contrat conclus avec autres organismes de formation'),
+							),
+							'labels' => array(
+									'en_US' => 'Non applicable',
+									'fr_FR' => 'Origine produits (BF)',
+							),
+					),
+					'property_2' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'A1a' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1a - Salariés financement employeur hors professionnalisation'),
+									'A1b' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1b - Salariés financement employeur professionnalisation'),
+									'A2' => array('en_US' => 'Non applicable', 'fr_FR' => 'A2 - Demandeurs d\'emploi financement public'),
+									'A3' => array('en_US' => 'Non applicable', 'fr_FR' => 'A3 - Particuliers à leurs propres frais'),
+									'A4' => array('en_US' => 'Non applicable', 'fr_FR' => 'A4 - Autres stagiaires'),
+							),
+							'labels' => array(
+									'en_US' => 'Non applicable',
+									'fr_FR' => 'A - Type stagiaires',
+							),
+					),
+					'property_3' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'B1' => array('en_US' => 'Non applicable', 'fr_FR' => 'B1 - Formés par votre organisme pour son propre compte'),
+									'B2' => array('en_US' => 'Non applicable', 'fr_FR' => 'B1 - Formés par votre organisme pour le compte d\'un autre organisme'),
+									'B3' => array('en_US' => 'Non applicable', 'fr_FR' => 'B1 - Confiés par votre organisme à un autre organisme de formation'),
+							),
+							'labels' => array(
+									'en_US' => 'Non applicable',
+									'fr_FR' => 'B - Activité propre',
+							),
+					),
+					'property_4' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'C1a' => array('en_US' => 'Non applicable', 'fr_FR' => 'C1a - Certification enregistrée au RNCP - Niveau I et II'),
+									'C1b' => array('en_US' => 'Non applicable', 'fr_FR' => 'C1b - Certification enregistrée au RNCP - Niveau III'),
+									'C1c' => array('en_US' => 'Non applicable', 'fr_FR' => 'C1c - Certification enregistrée au RNCP - Niveau IV'),
+									'C1d' => array('en_US' => 'Non applicable', 'fr_FR' => 'C1d - Certification enregistrée au RNCP - Niveau V'),
+									'C2' => array('en_US' => 'Non applicable', 'fr_FR' => 'C2 - Autres formations professionnelles continues'),
+									'C3a' => array('en_US' => 'Non applicable', 'fr_FR' => 'C3 - Prestations d\'orientation et d\'accompagnement - Hors bilan'),
+									'C3b' => array('en_US' => 'Non applicable', 'fr_FR' => 'C3 - Prestations d\'orientation et d\'accompagnement - Bilan'),
+							),
+							'labels' => array(
+									'en_US' => 'Non applicable',
+									'fr_FR' => 'C - Objectif formation',
+							),
+					),
+					'property_5' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Non applicable',
+									'fr_FR' => 'Spécialités formation',
+							),
+					),
+					'property_10' => array('type' => 'repository', 'definition' => 'commitment/property_10/learning'),
+					'property_11' => array('type' => 'repository', 'definition' => 'commitment/property_11/learning'),
+					'property_12' => array('type' => 'repository', 'definition' => 'commitment/property_12/learning'),
+					'property_13' => array('type' => 'repository', 'definition' => 'commitment/property_13/learning'),
+					'property_14' => array('type' => 'repository', 'definition' => 'commitment/property_14/learning'),
+					'including_options_amount' => array(
+							'type' => 'number',
+							'labels' => array(
+									'en_US' => 'Amount',
+									'fr_FR' => 'Montant',
+							),
+					),
+					'invoice_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Invoice date',
+									'fr_FR' => 'Date de facture',
+							),
+					),
+			),
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
+	),
+
+	'commitment/index/learning' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/learning' => array(
+			'title' => array('en_US' => 'Learning', 'fr_FR' => 'Formations'),
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+					'type' => 'select',
+					'status' => 'select',
+					'including_options_amount' => 'range',
+					'customer_name' => 'contains',
+					'property_1' => 'select',
+					'property_2' => 'select',
+					'property_3' => 'select',
+					'property_4' => 'select',
+					'property_5' => 'contains',
+					'property_10' => 'select',
+					'property_11' => 'contains',
+			),
+	),
+	
+	'commitment/list/learning' => array(
+			'caption' => 'input',
+			'including_options_amount' => 'number',
+			'status' => 'select',
+	),
+	
+	'commitment/update/learning' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+			'property_1' => array('mandatory' => false),
+			'property_2' => array('mandatory' => false),
+			'property_3' => array('mandatory' => false),
+			'property_4' => array('mandatory' => false),
+			'property_5' => array('mandatory' => false),
+			'property_10' => array('mandatory' => false),
+			'property_11' => array('mandatory' => false),
+	),
+		
 	'commitmentTerm' => array(
 			'statuses' => array(),
 			'properties' => array(

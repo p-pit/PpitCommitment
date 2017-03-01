@@ -210,9 +210,12 @@ class CommitmentController extends AbstractActionController
 		if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
 
 		// Retrieve the list
-		$turnover = 0;
+		$turnover = $quantity = 0;
 		$commitments = Commitment::getList($type, $params, $major, $dir, $mode);
-		foreach ($commitments as $commitment) $turnover += $commitment->including_options_amount;
+		foreach ($commitments as $commitment) {
+			$quantity += $commitment->quantity;
+			$turnover += $commitment->including_options_amount;
+		}
 
 		// Retrieve the credits
 		$credit = Credit::getTable()->get('p-pit-engagements', 'type'); 
@@ -225,6 +228,7 @@ class CommitmentController extends AbstractActionController
 //   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
 //   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'commitments' => $commitments,
+   				'quantity' => $quantity,
    				'turnover' => $turnover,
    				'mode' => $mode,
    				'params' => $params,
@@ -270,7 +274,7 @@ class CommitmentController extends AbstractActionController
     	
     	// Retrieve the type
 		$type = $this->params()->fromRoute('type', 0);
-    	
+
 		$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
@@ -533,7 +537,7 @@ class CommitmentController extends AbstractActionController
     
     	// Retrieve the type
     	$type = $this->params()->fromRoute('type', null);
-
+    	 
     	// Retrieve the account
     	$account_id = $this->params()->fromQuery('account_id', null);
     	$id = (int) $this->params()->fromRoute('id', 0);
@@ -559,13 +563,12 @@ class CommitmentController extends AbstractActionController
     			// Retrieve the data from the request
     			$data = array();
     			if (!$commitment->id) $data['account_id'] = $account_id;
-				$data['type'] = $request->getPost('commitment-type');
+				if (!$id) $data['type'] = $request->getPost('commitment-type');
     			foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 					if ($property['type'] == 'file' && array_key_exists($propertyId, $request->getFiles()->toArray())) $files = $request->getFiles()->toArray()[$propertyId];
 					else $data[$propertyId] = $request->getPost('commitment-'.$propertyId);
     			}
-    
     			$rc = $commitment->loadData($data, $request->getFiles()->toArray());
     			if ($rc != 'OK') throw new \Exception('View error');
 
@@ -605,7 +608,7 @@ class CommitmentController extends AbstractActionController
     			$action = null;
     		}
     	}
-    
+
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
