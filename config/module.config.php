@@ -924,7 +924,7 @@ return array(
 					),
 					'commitment' => array(
 							'route' => 'commitment/index',
-							'params' => array(),
+							'params' => array('type' => 'p-pit-studies'),
 							'glyphicon' => 'glyphicon-link',
 							'label' => array(
 									'en_US' => 'Commitments',

@@ -258,7 +258,14 @@ class AccountController extends AbstractActionController
 		    					$account->add();
 			        		}
 	    				}
-	    				elseif ($action == 'delete') $return = $account->delete($request->getPost('update_time'));
+	    				elseif ($action == 'delete') {
+	    					$return = $account->customer_community->delete($request->getPost('update_time'));
+	    					if ($return != 'OK') $error = $return;
+	    					else {
+	    						$return = $account->delete($request->getPost('update_time'));
+	    						if ($return != 'OK') $error = $return;
+	    					}
+	    				}
 	    				else {
 	    					// Save the contact
 	    					$return = $account->customer_community->update(null);
@@ -290,7 +297,7 @@ class AccountController extends AbstractActionController
 				}
     		}
     	}
-
+    	$account->properties = $account->getProperties();
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
@@ -365,7 +372,7 @@ class AccountController extends AbstractActionController
     						$user = User::getNew();
     						$account->user = $user;
     						$user->username = $data['username'];
-    						$user->contact_id = $account->contact_1_id;
+    						$user->vcard_id = $account->contact_1_id;
     						if ($account->is_notified && !$data['new_password']) {
     							$rc = $user->add(false, true);
     						}
@@ -373,7 +380,7 @@ class AccountController extends AbstractActionController
     						if ($rc != 'OK') $error = $rc;
     						$userContact = UserContact::instanciate();
     						$userContact->user_id = $user->user_id;
-    						$userContact->contact_id = $account->contact_1_id;
+    						$userContact->vcard_id = $account->contact_1_id;
     						$userContact->add();
     						$account->username = $user->username;
     					}
@@ -692,7 +699,7 @@ class AccountController extends AbstractActionController
     		}
     		$community = Community::get($contact->id, 'contact_1_id');
     	   	if (!$community) {
-    			$logger->info('account/get;'.$instance_caption.';404;'.'contact_id: '.$contact->id.';');
+    			$logger->info('account/get;'.$instance_caption.';404;'.'vcard_id: '.$contact->id.';');
     			$this->getResponse()->setStatusCode('404');
     			return $this->getResponse();
     		}

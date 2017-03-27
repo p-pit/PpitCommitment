@@ -142,10 +142,11 @@ class Account implements InputFilterAwareInterface
         $this->tel_cell = (isset($data['tel_cell'])) ? $data['tel_cell'] : null;
         $this->photo_link_id = (isset($data['photo_link_id'])) ? $data['photo_link_id'] : null;
     }
-    
-    public function toArray()
+
+    public function getProperties()
     {
     	$data = array();
+    	 
     	$data['id'] = (int) $this->id;
     	$data['status'] = $this->status;
     	$data['type'] =  ($this->type) ? $this->type : null;
@@ -155,9 +156,9 @@ class Account implements InputFilterAwareInterface
     	$data['customer_bill_contact_id'] =  (int) $this->customer_bill_contact_id;
     	$data['supplier_community_id'] =  (int) $this->supplier_community_id;
     	$data['opening_date'] =  ($this->opening_date) ? $this->opening_date : null;
-    	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : '9999-12-31';
-    	$data['contact_history'] = json_encode($this->contact_history);
-    	$data['terms_of_sales'] =  ($this->terms_of_sales) ? json_encode($this->terms_of_sales) : null;
+    	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : null;
+    	$data['contact_history'] = $this->contact_history;
+    	$data['terms_of_sales'] =  $this->terms_of_sales;
     	$data['property_1'] =  ($this->property_1) ? $this->property_1 : null;
     	$data['property_2'] =  ($this->property_2) ? $this->property_2 : null;
     	$data['property_3'] =  ($this->property_3) ? $this->property_3 : null;
@@ -168,9 +169,54 @@ class Account implements InputFilterAwareInterface
     	$data['property_8'] =  ($this->property_8) ? $this->property_8 : null;
     	$data['property_9'] =  ($this->property_9) ? $this->property_9 : null;
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
+    	$data['json_property_1'] = $this->json_property_1;
+    	$data['json_property_2'] = $this->json_property_2;
+    	$data['audit'] = $this->audit;
+
+    	// Joined properties
+    	$data['place_caption'] = $this->place_caption;
+    	$data['customer_name'] = $this->customer_name;
+    	$data['customer_status'] = $this->customer_status;
+    	$data['contact_1_id'] = $this->contact_1_id;
+    	$data['supplier_name'] = $this->supplier_name;
+    	$data['n_title'] = $this->n_title;
+    	$data['n_first'] = $this->n_first;
+    	$data['n_last'] = $this->n_last;
+    	$data['n_fn'] = $this->n_fn;
+    	$data['email'] = $this->email;
+    	$data['birth_date'] = $this->birth_date;
+    	$data['tel_work'] = $this->tel_work;
+    	$data['tel_cell'] = $this->tel_cell;
+    	$data['photo_link_id'] = $this->photo_link_id;
+    	 
+    	return $data;
+    }
+    
+    public function toArray()
+    {
+    	$data = $this->getProperties();
+    	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : '9999-12-31';
+    	$data['contact_history'] = json_encode($this->contact_history);
+    	$data['terms_of_sales'] =  ($this->terms_of_sales) ? json_encode($this->terms_of_sales) : null;
     	$data['json_property_1'] = json_encode($this->json_property_1);
     	$data['json_property_2'] = json_encode($this->json_property_2);
     	$data['audit'] = json_encode($this->audit);
+
+    	unset($data['place_caption']);
+    	unset($data['customer_name']);
+    	unset($data['customer_status']);
+    	unset($data['contact_1_id']);
+    	unset($data['supplier_name']);
+    	unset($data['n_title']);
+    	unset($data['n_first']);
+    	unset($data['n_last']);
+    	unset($data['n_fn']);
+    	unset($data['email']);
+    	unset($data['birth_date']);
+    	unset($data['tel_work']);
+    	unset($data['tel_cell']);
+    	unset($data['photo_link_id']);
+
     	return $data;
     }
     
@@ -246,7 +292,7 @@ class Account implements InputFilterAwareInterface
 	    		$account->contact_1_status = $account->customer_community->contact_1_status;
 	    		$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
 		    	
-		    	$userContact = UserContact::get($account->contact_1_id, 'contact_id');
+		    	$userContact = UserContact::get($account->contact_1_id, 'vcard_id');
 		    	if ($userContact) {
 		    		$account->userContact = $userContact;
 
@@ -284,7 +330,6 @@ class Account implements InputFilterAwareInterface
 	    		$account->contact_5_status = $account->customer_community->contact_5_status;
 	        }
     	}
-        $account->properties = $account->toArray();
 
     	return $account;
     }
@@ -543,7 +588,7 @@ class Account implements InputFilterAwareInterface
     
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
-    	$user = User::get($this->contact_1->id, 'contact_id');
+    	$user = User::get($this->contact_1->id, 'vcard_id');
     	if ($user) $user->delete($user->update_time);
 
     	$this->contact_1->delete($this->contact_1->update_time);

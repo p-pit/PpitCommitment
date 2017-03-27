@@ -334,7 +334,7 @@ function connectCommitmentUpdateForm(id, action)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+			route = '<?php echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 			if (action) route += '/' + action;
 			target = 'commitment-update-panel';
 			xhttp.open('POST', route, true);
@@ -357,7 +357,7 @@ function connectCommitmentUpdateForm(id, action)
 
 function getCommitmentUpdate(id, action) {
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+	var route = '<?php echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 	if (action) route += '/' + action;
 
 	xhttp.open('GET', route, true);
@@ -789,7 +789,7 @@ function getCommitmentDetail(id) {
 	// Anchor to the new panel
 	$(location).attr('hash', 'form_action');
 
-	var route = '<?php echo $this->url('commitment/detail', array('type' => $type)) ?>/' + id;
+	var route = '<?php echo $this->url('commitment/detail', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 
 	// Execute the ajax request
 	xhttp = new XMLHttpRequest();

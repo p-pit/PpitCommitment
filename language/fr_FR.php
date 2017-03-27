@@ -114,6 +114,9 @@
 			'Use of Dropbox in demo mode. Files are deleted each evening.' => 'Utilisation de Dropbox en mode démo. Les fichiers sont supprimés chaque soir.',
 			'Validate' => 'Valider',
 			'VAT' => 'TVA',
+			'VAT 1' => 'TVA standard',
+			'VAT 2' => 'TVA intermédiaire',
+			'VAT 3' => 'TVA réduite',
 			'Welcome on your fresh-installed version of P-Pit application. You have received a registering email. To start, please click on the link inside.' => "Bienvenue sur votre nouvelle application P-Pit. Vous avez reçu un email d'enregistrement. Pour démarrer, veuillez cliquer sur le lien inclus dans cet email.",
 			'Width in pixels' => 'Largeur en pixels',
 	);

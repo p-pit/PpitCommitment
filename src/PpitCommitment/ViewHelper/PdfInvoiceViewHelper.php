@@ -19,6 +19,7 @@ class PdfInvoiceViewHelper
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
+		$place = Place::get($commitment->account->place_id);
     	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
     	$type = $commitment->type;
     	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
@@ -27,7 +28,7 @@ class PdfInvoiceViewHelper
     	if (!$commitment->invoice_date) $commitment->properties['invoice_date'] = date('Y-m-d');
     	
     	// create new PDF document
-    	$pdf->footer = $context->getConfig('headerParams')['footer']['value'];
+    	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];
     	
     	// set document information
     	$pdf->SetCreator(PDF_CREATOR);
@@ -37,7 +38,6 @@ class PdfInvoiceViewHelper
     	$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
     	
     	// set default header data
-		$place = Place::get($commitment->account->place_id);
 		if ($place && $place->logo_src) $pdf->SetHeaderData($place->logo_src, $context->getConfig('headerParams')['advert-width']);
 		else $pdf->SetHeaderData('logos/'.$context->getInstance()->caption.'/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
     	// set header and footer fonts

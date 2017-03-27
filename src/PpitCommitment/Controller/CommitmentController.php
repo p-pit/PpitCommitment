@@ -368,13 +368,13 @@ class CommitmentController extends AbstractActionController
     					$contact->instance_id = $instance->id;
     					Vcard::getTable()->transSave($contact);
 		    			$user->instance_id = $instance->id;
-    					$user->contact_id = $contact->id;
+    					$user->vcard_id = $contact->id;
 		    			$user->email = $contact->email;
     					$rc = $user->add($contact->email, true);
 						$userContact = new UserContact;
 						$userContact->instance_id = $instance->id;
 						$userContact->user_id = $user->user_id;
-						$userContact->contact_id = $contact->id;
+						$userContact->vcard_id = $contact->id;
 						UserContact::getTable()->transSave($userContact);
 
 						$credit->instance_id = $instance->id;
@@ -542,7 +542,10 @@ class CommitmentController extends AbstractActionController
     	$account_id = $this->params()->fromQuery('account_id', null);
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
-    	if ($id) $commitment = Commitment::get($id);
+    	if ($id) {
+    		$commitment = Commitment::get($id);
+    		$type = $commitment->type;
+    	}
     	else $commitment = Commitment::instanciate($type);
 
     	// Instanciate the csrf form
