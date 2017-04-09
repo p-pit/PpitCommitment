@@ -223,7 +223,6 @@ class Account implements InputFilterAwareInterface
     public static function getList($type, $params, $major, $dir, $mode = 'todo')
     {
     	$context = Context::getCurrent();
-
     	$select = Account::getTable()->getSelect()
 			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
 			->join(array('supplier' => 'core_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
@@ -241,7 +240,8 @@ class Account implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'status') $where->equalTo('commitment_account.status', $params[$propertyId]);
+    			elseif ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
