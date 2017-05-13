@@ -24,6 +24,7 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+    	$place = Place::getTable()->transGet($context->getPlaceId());
 
 		$type = $this->params()->fromRoute('type', 0);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
@@ -38,6 +39,7 @@ class AccountController extends AbstractActionController
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'place' => $place,
     			'active' => 'application',
     			'applicationName' => $applicationName,
     			'applicationId' => $applicationId,

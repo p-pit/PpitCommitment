@@ -248,7 +248,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
 			 
 			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			if ($context->getConfig()['isTraceActive']) {
 				$writer = new \Zend\Log\Writer\Stream('data/log/ppit-subscription-message.txt');
 				$logger = new \Zend\Log\Logger();
 				$logger->addWriter($writer);
@@ -273,7 +273,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 
 		if ($rc != '200') {
 			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			if ($context->getConfig()['isTraceActive']) {
 				$writer = new \Zend\Log\Writer\Stream('data/log/ppit-subscription-message.txt');
 				$logger = new \Zend\Log\Logger();
 				$logger->addWriter($writer);
@@ -293,7 +293,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		if (!$commitment) {
 
 			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			if ($context->getConfig()['isTraceActive']) {
 				$writer = new \Zend\Log\Writer\Stream('data/log/ppit-subscription-message.txt');
 				$logger = new \Zend\Log\Logger();
 				$logger->addWriter($writer);
@@ -311,7 +311,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		if ($rc != 'OK') {
 
 			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			if ($context->getConfig()['isTraceActive']) {
 				$writer = new \Zend\Log\Writer\Stream('data/log/ppit-subscription-message.txt');
 				$logger = new \Zend\Log\Logger();
 				$logger->addWriter($writer);
@@ -321,7 +321,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		}
 	
 		// Write to the log
-		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+		if ($context->getConfig()['isTraceActive']) {
 			$writer = new \Zend\Log\Writer\Stream('data/log/ppit-subscription-message.txt');
 			$logger = new \Zend\Log\Logger();
 			$logger->addWriter($writer);

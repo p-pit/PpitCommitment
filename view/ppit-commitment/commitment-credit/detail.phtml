@@ -1,0 +1,101 @@
+<!-- 
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<style>
+table.note-report {
+	font-size: 0.83em;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+}
+table.note-report caption { 
+	font-size:1.5em; 
+	padding:1em 0 0.5em 1em;
+}
+table.note-report th {
+	color: #666;
+//    font-size:0.83em;
+	text-align: center;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+	background-color:#DDD;
+}
+
+table.note-report td {
+	color: #666;
+//	font-size: 0.83em;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+}
+
+table.note-report td.subject {
+	font-weight: bold;
+}
+
+table.note-report tr.period {
+	background-color:#DDD;
+}
+</style>
+
+<div class="panel panel-default">
+	<div class="panel-heading" style="background: #006179; color: #FFF">
+		<strong><?php echo $this->translate('Detail', 'ppit-core', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
+
+<!-- Display the reports -->
+<?php $sum = 0;?>
+<?php foreach ($credit->periods as $periodId => $period) : ?>
+		<h4><button class="glyphicon glyphicon-triangle-right btn btn-default btn-xs report-button" id="report-button_<?php echo $periodId ?>"></button>&nbsp;&nbsp;<?php echo $this->translate('Report', 'ppit-core', $context->getLocale()).' '.$periodId ?></h4>
+		<input type="hidden" id="is-report-open_<?php echo $periodId ?>" value="0" />
+		<div class="report-panel" id="report-panel_<?php echo $periodId ?>">
+			<table class="table note-report">
+				<tr>
+					<th><?php echo $this->translate('Date', 'ppit-core', $context->getLocale()) ?></th>
+					<th><?php echo $this->translate('Reference', 'ppit-core', $context->getLocale()) ?></th>
+					<th><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></th>
+					<th><?php echo $this->translate('Quantity', 'ppit-core', $context->getLocale()) ?></th>
+				</tr>
+				<tr style="font-weight: bold">
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><?php echo $this->translate('Balance at beginning of period', 'ppit-core', $context->getLocale()) ?></td>
+					<td align="right"><?php echo $sum ?>&nbsp;</td>
+				</tr>
+	<?php foreach ($period as $event) : ?>
+				<tr>
+					<td><strong><?php echo $context->decodeDate(substr($event['time'], 0, 10)) ?></strong></td>
+					<td><?php echo array_key_exists('reference', $event) ? $event['reference'] : '' ?></td>
+					<td><?php echo $event['comment'] ?></td>
+					<td align="right"><?php echo $event['quantity'] ?>&nbsp;</td>
+				</tr>
+	<?php $sum += $event['quantity']; endforeach;?>
+				<tr style="font-weight: bold">
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><?php echo $this->translate('Balance at end of period', 'ppit-core', $context->getLocale()) ?></td>
+					<td align="right"><?php echo $sum ?>&nbsp;</td>
+				</tr>
+			</table>
+		</div>
+<?php endforeach;?>
+		
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="credit-update-panel"></div>
+		</div>
+	</div>
+	

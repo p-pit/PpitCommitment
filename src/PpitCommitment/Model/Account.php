@@ -50,8 +50,10 @@ class Account implements InputFilterAwareInterface
     public $place_caption;
     public $customer_name;
     public $customer_status;
-    public $contact_1_id;
     public $supplier_name;
+
+    public $contact_1_id;
+    public $contact_1_status;
     public $n_title;
     public $n_first;
     public $n_last;
@@ -60,22 +62,96 @@ class Account implements InputFilterAwareInterface
     public $birth_date;
     public $tel_work;
     public $tel_cell;
+    public $adr_street;
+    public $adr_extended;
+    public $adr_post_office_box;
+    public $adr_zip;
+    public $adr_city;
+    public $adr_state;
+    public $adr_country;
     public $photo_link_id;
+    
+    public $contact_2_id;
+    public $contact_2_status;
+    public $n_title_2;
+    public $n_first_2;
+    public $n_last_2;
+    public $n_fn_2;
+    public $email_2;
+    public $birth_date_2;
+    public $tel_work_2;
+    public $tel_cell_2;
+    public $adr_street_2;
+    public $adr_extended_2;
+    public $adr_post_office_box_2;
+    public $adr_zip_2;
+    public $adr_city_2;
+    public $adr_state_2;
+    public $adr_country_2;
+    
+    public $contact_3_id;
+    public $contact_3_status;
+    public $n_title_3;
+    public $n_first_3;
+    public $n_last_3;
+    public $n_fn_3;
+    public $email_3;
+    public $birth_date_3;
+    public $tel_work_3;
+    public $tel_cell_3;
+    public $adr_street_3;
+    public $adr_extended_3;
+    public $adr_post_office_box_3;
+    public $adr_zip_3;
+    public $adr_city_3;
+    public $adr_state_3;
+    public $adr_country_3;
+    
+    public $contact_4_id;
+    public $contact_4_status;
+    public $n_title_4;
+    public $n_first_4;
+    public $n_last_4;
+    public $n_fn_4;
+    public $email_4;
+    public $birth_date_4;
+    public $tel_work_4;
+    public $tel_cell_4;
+    public $adr_street_4;
+    public $adr_extended_4;
+    public $adr_post_office_box_4;
+    public $adr_zip_4;
+    public $adr_city_4;
+    public $adr_state_4;
+    public $adr_country_4;
+    
+    public $contact_5_id;
+    public $contact_5_status;
+    public $n_title_5;
+    public $n_first_5;
+    public $n_last_5;
+    public $n_fn_5;
+    public $email_5;
+    public $birth_date_5;
+    public $tel_work_5;
+    public $tel_cell_5;
+    public $adr_street_5;
+    public $adr_extended_5;
+    public $adr_post_office_box_5;
+    public $adr_zip_5;
+    public $adr_city_5;
+    public $adr_state_5;
+    public $adr_country_5;
     
     // Transient properties
     public $place;
 	public $customer_community;
 	public $supplier_community;
     public $contact_1;
-    public $contact_1_status;
     public $contact_2;
-    public $contact_2_status;
     public $contact_3;
-    public $contact_3_status;
     public $contact_4;
-    public $contact_4_status;
     public $contact_5;
-    public $contact_5_status;
 	public $properties;
     public $files;
 	public $comment;
@@ -130,8 +206,10 @@ class Account implements InputFilterAwareInterface
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
         $this->customer_status = (isset($data['customer_status'])) ? $data['customer_status'] : null;
-        $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
         $this->supplier_name = (isset($data['supplier_name'])) ? $data['supplier_name'] : null;
+        
+        $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
+        $this->contact_1_status = (isset($data['contact_1_status'])) ? $data['contact_1_status'] : null;
         $this->n_title = (isset($data['n_title'])) ? $data['n_title'] : null;
         $this->n_first = (isset($data['n_first'])) ? $data['n_first'] : null;
         $this->n_last = (isset($data['n_last'])) ? $data['n_last'] : null;
@@ -140,7 +218,86 @@ class Account implements InputFilterAwareInterface
         $this->birth_date = (isset($data['birth_date'])) ? $data['birth_date'] : null;
         $this->tel_work = (isset($data['tel_work'])) ? $data['tel_work'] : null;
         $this->tel_cell = (isset($data['tel_cell'])) ? $data['tel_cell'] : null;
+        $this->adr_street = (isset($data['adr_street'])) ? $data['adr_street'] : null;
+        $this->adr_extended = (isset($data['adr_extended'])) ? $data['adr_extended'] : null;
+        $this->adr_post_office_box = (isset($data['adr_post_office_box'])) ? $data['adr_post_office_box'] : null;
+        $this->adr_zip = (isset($data['adr_zip'])) ? $data['adr_zip'] : null;
+        $this->adr_city = (isset($data['adr_city'])) ? $data['adr_city'] : null;
+        $this->adr_state = (isset($data['adr_state'])) ? $data['adr_state'] : null;
+        $this->adr_country = (isset($data['adr_country'])) ? $data['adr_country'] : null;
         $this->photo_link_id = (isset($data['photo_link_id'])) ? $data['photo_link_id'] : null;
+        
+        $this->contact_2_id = (isset($data['contact_2_id'])) ? $data['contact_2_id'] : null;
+        $this->contact_2_status = (isset($data['contact_2_status'])) ? $data['contact_2_status'] : null;
+        $this->n_title_2 = (isset($data['n_title_2'])) ? $data['n_title_2'] : null;
+        $this->n_first_2 = (isset($data['n_first_2'])) ? $data['n_first_2'] : null;
+        $this->n_last_2 = (isset($data['n_last_2'])) ? $data['n_last_2'] : null;
+        $this->n_fn_2 = (isset($data['n_fn_2'])) ? $data['n_fn_2'] : null;
+        $this->email_2 = (isset($data['email_2'])) ? $data['email_2'] : null;
+        $this->birth_date_2 = (isset($data['birth_date_2'])) ? $data['birth_date_2'] : null;
+        $this->tel_work_2 = (isset($data['tel_work_2'])) ? $data['tel_work_2'] : null;
+        $this->tel_cell_2 = (isset($data['tel_cell_2'])) ? $data['tel_cell_2'] : null;
+        $this->adr_street_2 = (isset($data['adr_street_2'])) ? $data['adr_street_2'] : null;
+        $this->adr_extended_2 = (isset($data['adr_extended_2'])) ? $data['adr_extended_2'] : null;
+        $this->adr_post_office_box_2 = (isset($data['adr_post_office_box_2'])) ? $data['adr_post_office_box_2'] : null;
+        $this->adr_zip_2 = (isset($data['adr_zip_2'])) ? $data['adr_zip_2'] : null;
+        $this->adr_city_2 = (isset($data['adr_city_2'])) ? $data['adr_city_2'] : null;
+        $this->adr_state_2 = (isset($data['adr_state_2'])) ? $data['adr_state_2'] : null;
+        $this->adr_country_2 = (isset($data['adr_country_2'])) ? $data['adr_country_2'] : null;
+        
+        $this->contact_3_id = (isset($data['contact_3_id'])) ? $data['contact_3_id'] : null;
+        $this->contact_3_status = (isset($data['contact_3_status'])) ? $data['contact_3_status'] : null;
+        $this->n_title_3 = (isset($data['n_title_3'])) ? $data['n_title_3'] : null;
+        $this->n_first_3 = (isset($data['n_first_3'])) ? $data['n_first_3'] : null;
+        $this->n_last_3 = (isset($data['n_last_3'])) ? $data['n_last_3'] : null;
+        $this->n_fn_3 = (isset($data['n_fn_3'])) ? $data['n_fn_3'] : null;
+        $this->email_3 = (isset($data['email_3'])) ? $data['email_3'] : null;
+        $this->birth_date_3 = (isset($data['birth_date_3'])) ? $data['birth_date_3'] : null;
+        $this->tel_work_3 = (isset($data['tel_work_3'])) ? $data['tel_work_3'] : null;
+        $this->tel_cell_3 = (isset($data['tel_cell_3'])) ? $data['tel_cell_3'] : null;
+        $this->adr_street_3 = (isset($data['adr_street_3'])) ? $data['adr_street_3'] : null;
+        $this->adr_extended_3 = (isset($data['adr_extended_3'])) ? $data['adr_extended_3'] : null;
+        $this->adr_post_office_box_3 = (isset($data['adr_post_office_box_3'])) ? $data['adr_post_office_box_3'] : null;
+        $this->adr_zip_3 = (isset($data['adr_zip_3'])) ? $data['adr_zip_3'] : null;
+        $this->adr_city_3 = (isset($data['adr_city_3'])) ? $data['adr_city_3'] : null;
+        $this->adr_state_3 = (isset($data['adr_state_3'])) ? $data['adr_state_3'] : null;
+        $this->adr_country_3 = (isset($data['adr_country_3'])) ? $data['adr_country_3'] : null;
+        
+        $this->contact_4_id = (isset($data['contact_4_id'])) ? $data['contact_4_id'] : null;
+        $this->contact_4_status = (isset($data['contact_4_status'])) ? $data['contact_4_status'] : null;
+        $this->n_title_4 = (isset($data['n_title_4'])) ? $data['n_title_4'] : null;
+        $this->n_first_4 = (isset($data['n_first_4'])) ? $data['n_first_4'] : null;
+        $this->n_last_4 = (isset($data['n_last_4'])) ? $data['n_last_4'] : null;
+        $this->n_fn_4 = (isset($data['n_fn_4'])) ? $data['n_fn_4'] : null;
+        $this->email_4 = (isset($data['email_4'])) ? $data['email_4'] : null;
+        $this->birth_date_4 = (isset($data['birth_date_4'])) ? $data['birth_date_4'] : null;
+        $this->tel_work_4 = (isset($data['tel_work_4'])) ? $data['tel_work_4'] : null;
+        $this->tel_cell_4 = (isset($data['tel_cell_4'])) ? $data['tel_cell_4'] : null;
+        $this->adr_street_4 = (isset($data['adr_street_4'])) ? $data['adr_street_4'] : null;
+        $this->adr_extended_4 = (isset($data['adr_extended_4'])) ? $data['adr_extended_4'] : null;
+        $this->adr_post_office_box_4 = (isset($data['adr_post_office_box_4'])) ? $data['adr_post_office_box_4'] : null;
+        $this->adr_zip_4 = (isset($data['adr_zip_4'])) ? $data['adr_zip_4'] : null;
+        $this->adr_city_4 = (isset($data['adr_city_4'])) ? $data['adr_city_4'] : null;
+        $this->adr_state_4 = (isset($data['adr_state_4'])) ? $data['adr_state_4'] : null;
+        $this->adr_country_4 = (isset($data['adr_country_4'])) ? $data['adr_country_4'] : null;
+        
+        $this->contact_5_id = (isset($data['contact_5_id'])) ? $data['contact_5_id'] : null;
+        $this->contact_5_status = (isset($data['contact_5_status'])) ? $data['contact_5_status'] : null;
+        $this->n_title_5 = (isset($data['n_title_5'])) ? $data['n_title_5'] : null;
+        $this->n_first_5 = (isset($data['n_first_5'])) ? $data['n_first_5'] : null;
+        $this->n_last_5 = (isset($data['n_last_5'])) ? $data['n_last_5'] : null;
+        $this->n_fn_5 = (isset($data['n_fn_5'])) ? $data['n_fn_5'] : null;
+        $this->email_5 = (isset($data['email_5'])) ? $data['email_5'] : null;
+        $this->birth_date_5 = (isset($data['birth_date_5'])) ? $data['birth_date_5'] : null;
+        $this->tel_work_5 = (isset($data['tel_work_5'])) ? $data['tel_work_5'] : null;
+        $this->tel_cell_5 = (isset($data['tel_cell_5'])) ? $data['tel_cell_5'] : null;
+        $this->adr_street_5 = (isset($data['adr_street_5'])) ? $data['adr_street_5'] : null;
+        $this->adr_extended_5 = (isset($data['adr_extended_5'])) ? $data['adr_extended_5'] : null;
+        $this->adr_post_office_box_5 = (isset($data['adr_post_office_box_5'])) ? $data['adr_post_office_box_5'] : null;
+        $this->adr_zip_5 = (isset($data['adr_zip_5'])) ? $data['adr_zip_5'] : null;
+        $this->adr_city_5 = (isset($data['adr_city_5'])) ? $data['adr_city_5'] : null;
+        $this->adr_state_5 = (isset($data['adr_state_5'])) ? $data['adr_state_5'] : null;
+        $this->adr_country_5 = (isset($data['adr_country_5'])) ? $data['adr_country_5'] : null;
     }
 
     public function getProperties()
@@ -177,8 +334,10 @@ class Account implements InputFilterAwareInterface
     	$data['place_caption'] = $this->place_caption;
     	$data['customer_name'] = $this->customer_name;
     	$data['customer_status'] = $this->customer_status;
-    	$data['contact_1_id'] = $this->contact_1_id;
     	$data['supplier_name'] = $this->supplier_name;
+
+    	$data['contact_1_id'] = $this->contact_1_id;
+    	$data['contact_1_status'] = $this->contact_1_status;
     	$data['n_title'] = $this->n_title;
     	$data['n_first'] = $this->n_first;
     	$data['n_last'] = $this->n_last;
@@ -187,7 +346,91 @@ class Account implements InputFilterAwareInterface
     	$data['birth_date'] = $this->birth_date;
     	$data['tel_work'] = $this->tel_work;
     	$data['tel_cell'] = $this->tel_cell;
+    	$data['address'] = '';
+    	if ($this->adr_street) $data['address'] .= $this->adr_street;
+    	if ($this->adr_extended) $data['address'] .= ' '.$this->adr_extended;
+    	if ($this->adr_post_office_box) $data['address'] .= ' - '.$this->adr_post_office_box;
+    	if ($this->adr_zip) $data['address'] .= ' - '.$this->adr_zip;
+    	if ($this->adr_city) $data['address'] .= ' '.$this->adr_city;
+    	if ($this->adr_state) $data['address'] .= ' - '.$this->adr_state;
+    	if ($this->adr_country) $data['address'] .= ' - '.$this->adr_country;
     	$data['photo_link_id'] = $this->photo_link_id;
+
+    	$data['contact_2_id'] = $this->contact_2_id;
+    	$data['contact_2_status'] = $this->contact_2_status;
+    	$data['n_title_2'] = $this->n_title_2;
+    	$data['n_first_2'] = $this->n_first_2;
+    	$data['n_last_2'] = $this->n_last_2;
+    	$data['n_fn_2'] = $this->n_fn_2;
+    	$data['email_2'] = $this->email_2;
+    	$data['birth_date_2'] = $this->birth_date_2;
+    	$data['tel_work_2'] = $this->tel_work_2;
+    	$data['tel_cell_2'] = $this->tel_cell_2;
+    	$data['address_2'] = '';
+    	if ($this->adr_street_2) $data['address_2'] .= $this->adr_street_2;
+    	if ($this->adr_extended_2) $data['address_2'] .= ' '.$this->adr_extended_2;
+    	if ($this->adr_post_office_box_2) $data['address_2'] .= ' - '.$this->adr_post_office_box_2;
+    	if ($this->adr_zip_2) $data['address_2'] .= ' - '.$this->adr_zip_2;
+    	if ($this->adr_city_2) $data['address_2'] .= ' '.$this->adr_city_2;
+    	if ($this->adr_state_2) $data['address_2'] .= ' - '.$this->adr_state_2;
+    	if ($this->adr_country_2) $data['address_2'] .= ' - '.$this->adr_country_2;
+    	 
+    	$data['contact_3_id'] = $this->contact_3_id;
+    	$data['contact_3_status'] = $this->contact_3_status;
+    	$data['n_title_3'] = $this->n_title_3;
+    	$data['n_first_3'] = $this->n_first_3;
+    	$data['n_last_3'] = $this->n_last_3;
+    	$data['n_fn_3'] = $this->n_fn_3;
+    	$data['email_3'] = $this->email_3;
+    	$data['birth_date_3'] = $this->birth_date_3;
+    	$data['tel_work_3'] = $this->tel_work_3;
+    	$data['tel_cell_3'] = $this->tel_cell_3;
+    	$data['address_3'] = '';
+    	if ($this->adr_street_3) $data['address_3'] .= $this->adr_street_3;
+    	if ($this->adr_extended_3) $data['address_3'] .= ' '.$this->adr_extended_3;
+    	if ($this->adr_post_office_box_3) $data['address_3'] .= ' - '.$this->adr_post_office_box_3;
+    	if ($this->adr_zip_3) $data['address_3'] .= ' - '.$this->adr_zip_3;
+    	if ($this->adr_city_3) $data['address_3'] .= ' '.$this->adr_city_3;
+    	if ($this->adr_state_3) $data['address_3'] .= ' - '.$this->adr_state_3;
+    	if ($this->adr_country_3) $data['address_3'] .= ' - '.$this->adr_country_3;
+    	 
+    	$data['contact_4_id'] = $this->contact_4_id;
+    	$data['contact_4_status'] = $this->contact_4_status;
+    	$data['n_title_4'] = $this->n_title_4;
+    	$data['n_first_4'] = $this->n_first_4;
+    	$data['n_last_4'] = $this->n_last_4;
+    	$data['n_fn_4'] = $this->n_fn_4;
+    	$data['email_4'] = $this->email_4;
+    	$data['birth_date_4'] = $this->birth_date_4;
+    	$data['tel_work_4'] = $this->tel_work_4;
+    	$data['tel_cell_4'] = $this->tel_cell_4;
+    	$data['address_4'] = '';
+    	if ($this->adr_street_4) $data['address_4'] .= $this->adr_street_4;
+    	if ($this->adr_extended_4) $data['address_4'] .= ' '.$this->adr_extended_4;
+    	if ($this->adr_post_office_box_4) $data['address_4'] .= ' - '.$this->adr_post_office_box_4;
+    	if ($this->adr_zip_4) $data['address_4'] .= ' - '.$this->adr_zip_4;
+    	if ($this->adr_city_4) $data['address_4'] .= ' '.$this->adr_city_4;
+    	if ($this->adr_state_4) $data['address_4'] .= ' - '.$this->adr_state_4;
+    	if ($this->adr_country_4) $data['address_4'] .= ' - '.$this->adr_country_4;
+    	 
+    	$data['contact_5_id'] = $this->contact_5_id;
+    	$data['contact_5_status'] = $this->contact_5_status;
+    	$data['n_title_5'] = $this->n_title_5;
+    	$data['n_first_5'] = $this->n_first_5;
+    	$data['n_last_5'] = $this->n_last_5;
+    	$data['n_fn_5'] = $this->n_fn_5;
+    	$data['email_5'] = $this->email_5;
+    	$data['birth_date_5'] = $this->birth_date_5;
+    	$data['tel_work_5'] = $this->tel_work_5;
+    	$data['tel_cell_5'] = $this->tel_cell_5;
+    	$data['address_5'] = '';
+    	if ($this->adr_street_5) $data['address_5'] .= $this->adr_street_5;
+    	if ($this->adr_extended_5) $data['address_5'] .= ' '.$this->adr_extended_5;
+    	if ($this->adr_post_office_box_5) $data['address_5'] .= ' - '.$this->adr_post_office_box_5;
+    	if ($this->adr_zip_5) $data['address_5'] .= ' - '.$this->adr_zip_5;
+    	if ($this->adr_city_5) $data['address_5'] .= ' '.$this->adr_city_5;
+    	if ($this->adr_state_5) $data['address_5'] .= ' - '.$this->adr_state_5;
+    	if ($this->adr_country_5) $data['address_5'] .= ' - '.$this->adr_country_5;
     	 
     	return $data;
     }
@@ -205,8 +448,10 @@ class Account implements InputFilterAwareInterface
     	unset($data['place_caption']);
     	unset($data['customer_name']);
     	unset($data['customer_status']);
-    	unset($data['contact_1_id']);
     	unset($data['supplier_name']);
+
+    	unset($data['contact_1_id']);
+    	unset($data['contact_1_status']);
     	unset($data['n_title']);
     	unset($data['n_first']);
     	unset($data['n_last']);
@@ -215,20 +460,72 @@ class Account implements InputFilterAwareInterface
     	unset($data['birth_date']);
     	unset($data['tel_work']);
     	unset($data['tel_cell']);
+    	unset($data['address']);
     	unset($data['photo_link_id']);
 
+    	unset($data['contact_2_id']);
+    	unset($data['contact_2_status']);
+    	unset($data['n_title_2']);
+    	unset($data['n_first_2']);
+    	unset($data['n_last_2']);
+    	unset($data['n_fn_2']);
+    	unset($data['email_2']);
+    	unset($data['birth_date_2']);
+    	unset($data['tel_work_2']);
+    	unset($data['tel_cell_2']);
+    	unset($data['address_2']);
+    	 
+    	unset($data['contact_3_id']);
+    	unset($data['contact_3_status']);
+    	unset($data['n_title_3']);
+    	unset($data['n_first_3']);
+    	unset($data['n_last_3']);
+    	unset($data['n_fn_3']);
+    	unset($data['email_3']);
+    	unset($data['birth_date_3']);
+    	unset($data['tel_work_3']);
+    	unset($data['tel_cell_3']);
+    	unset($data['address_3']);
+    	 
+    	unset($data['contact_4_id']);
+    	unset($data['contact_4_status']);
+    	unset($data['n_title_4']);
+    	unset($data['n_first_4']);
+    	unset($data['n_last_4']);
+    	unset($data['n_fn_4']);
+    	unset($data['email_4']);
+    	unset($data['birth_date_4']);
+    	unset($data['tel_work_4']);
+    	unset($data['tel_cell_4']);
+    	unset($data['address_4']);
+    	 
+    	unset($data['contact_5_id']);
+    	unset($data['contact_5_status']);
+    	unset($data['n_title_5']);
+    	unset($data['n_first_5']);
+    	unset($data['n_last_5']);
+    	unset($data['n_fn_5']);
+    	unset($data['email_5']);
+    	unset($data['birth_date_5']);
+    	unset($data['tel_work_5']);
+    	unset($data['tel_cell_5']);
+    	unset($data['address_5']);
+    	 
     	return $data;
     }
     
     public static function getList($type, $params, $major, $dir, $mode = 'todo')
     {
     	$context = Context::getCurrent();
-
     	$select = Account::getTable()->getSelect()
 			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
 			->join(array('supplier' => 'core_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'core_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id'), 'left')
-			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id'), 'left')
+			->join(array('customer' => 'core_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id', 'contact_1_status', 'contact_2_id', 'contact_2_status', 'contact_3_id', 'contact_3_status', 'contact_4_id', 'contact_4_status', 'contact_5_id', 'contact_5_status'), 'left')
+			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id', 'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country'), 'left')
+			->join(array('contact_2' => 'core_vcard'), 'customer.contact_2_id = contact_2.id', array('n_title_2' =>'n_title', 'n_first_2' => 'n_first', 'n_last_2' => 'n_last', 'n_fn_2' => 'n_fn', 'email_2' => 'email', 'birth_date_2' => 'birth_date', 'tel_work_2' => 'tel_work', 'tel_cell_2' => 'tel_cell', 'adr_street_2' => 'adr_street', 'adr_extended_2' => 'adr_extended', 'adr_post_office_box_2' => 'adr_post_office_box', 'adr_zip_2' => 'adr_zip', 'adr_city_2' => 'adr_city', 'adr_state_2' => 'adr_state', 'adr_country_2' => 'adr_country'), 'left')
+			->join(array('contact_3' => 'core_vcard'), 'customer.contact_3_id = contact_3.id', array('n_title_3' =>'n_title', 'n_first_3' => 'n_first', 'n_last_3' => 'n_last', 'n_fn_3' => 'n_fn', 'email_3' => 'email', 'birth_date_3' => 'birth_date', 'tel_work_3' => 'tel_work', 'tel_cell_3' => 'tel_cell', 'adr_street_3' => 'adr_street', 'adr_extended_3' => 'adr_extended', 'adr_post_office_box_3' => 'adr_post_office_box', 'adr_zip_3' => 'adr_zip', 'adr_city_3' => 'adr_city', 'adr_state_3' => 'adr_state', 'adr_country_3' => 'adr_country'), 'left')
+			->join(array('contact_4' => 'core_vcard'), 'customer.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
+			->join(array('contact_5' => 'core_vcard'), 'customer.contact_5_id = contact_5.id', array('n_title_5' =>'n_title', 'n_first_5' => 'n_first', 'n_last_5' => 'n_last', 'n_fn_5' => 'n_fn', 'email_5' => 'email', 'birth_date_5' => 'birth_date', 'tel_work_5' => 'tel_work', 'tel_cell_5' => 'tel_cell', 'adr_street_5' => 'adr_street', 'adr_extended_5' => 'adr_extended', 'adr_post_office_box_5' => 'adr_post_office_box', 'adr_zip_5' => 'adr_zip', 'adr_city_5' => 'adr_city', 'adr_state_5' => 'adr_state', 'adr_country_5' => 'adr_country'), 'left')
 			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
@@ -241,7 +538,8 @@ class Account implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'status') $where->equalTo('commitment_account.status', $params[$propertyId]);
+    			elseif ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
@@ -252,7 +550,7 @@ class Account implements InputFilterAwareInterface
 		$accounts = array();
 
 		foreach ($cursor as $account) {
-			$account->properties = $account->toArray();
+			$account->properties = $account->getProperties();
 
 			// Filter on authorized perimeter
 			if (array_key_exists($type, $context->getPerimeters())) {

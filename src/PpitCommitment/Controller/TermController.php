@@ -6,6 +6,7 @@ use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlTermViewHelper;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
+use PpitCore\Model\Place;
 use PpitCore\Form\CsrfForm;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -16,7 +17,8 @@ class TermController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-
+    	$place = Place::getTable()->transGet($context->getPlaceId());
+		
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
 		$currentEntry = $this->params()->fromQuery('entry', 'term');
@@ -25,6 +27,7 @@ class TermController extends AbstractActionController
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'place' => $place,
     			'active' => 'application',
     			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,

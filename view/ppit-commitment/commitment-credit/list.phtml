@@ -1,0 +1,105 @@
+<!-- 
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<h4><?php echo $this->translate('Credits', 'ppit-commitment', $context->getLocale()) ?></h4>
+
+<table class="table table-striped ppit_index">
+	<tr>
+		<th>&nbsp;</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="type-anchor">
+				<span><?php echo $this->translate('Name', 'ppit-core', $context->getLocale()) ?></span>
+<?php if ($major == 'type') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="quantity-anchor">
+				<span><?php echo $this->translate('Balance', 'ppit-core', $context->getLocale()) ?></span>
+<?php if ($major == 'quantity') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+		<th align="center">
+			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="activation_date-anchor">
+				<span><?php echo $this->translate('Activated', 'ppit-core', $context->getLocale()) ?></span>
+<?php if ($major == 'activation_date') : ?>
+				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
+<?php endif ?>
+			</button>
+		</th>
+
+<?php foreach ($credits as $credit) : ?>
+	
+	<tr class="credit">
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn credit-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="credit-detail-anchor_<?php echo $credit->id ?>">
+				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $credit->id ?>-glyphicon"></span>
+			</button>
+		</td>
+	
+		<td><?php echo $credit->type ?></td>
+	
+		<td style="text-align: right; <?php if ($credit->quantity < 0) echo 'color: red' ?>"><?php echo $credit->quantity ?></td>
+	
+		<td><?php echo $context->decodeDate($credit->activation_date) ?></td>			
+	</tr>
+	
+<?php endforeach;?>
+
+</table>
+
+<h4><?php echo $this->translate('Commitments', 'ppit-commitment', $context->getLocale()) ?></h4>
+
+<table class="table table-striped ppit_index">
+	<tr>
+		<th>&nbsp;</th>
+
+		<th><span><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></span></th>
+		<th><span><?php echo $this->translate('Caption', 'ppit-core', $context->getLocale()) ?></span></th>
+		<th><span><?php echo $this->translate('Date', 'ppit-core', $context->getLocale()) ?></span></th>
+		<th style="text-align: right"><span><?php echo $this->translate('Tax excl.', 'ppit-commitment', $context->getLocale()) ?></span></th>
+		<th>&nbsp;</th>
+		<th><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale())?></th>
+
+<?php foreach ($orders as $order) : ?>
+	<tr class="order">
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn order-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="order-detail-anchor_<?php echo $order->id ?>">
+				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $order->id ?>-glyphicon"></span>
+			</button>
+		</td>
+	
+		<td><?php echo $order->identifier ?></td>
+		<td><?php echo $order->caption ?></td>
+		<td><?php echo $context->decodeDate($order->commitment_date) ?></td>
+		<td style="text-align: right"><?php echo $context->formatFloat($order->amount, 2) ?></td>
+	<?php if ($order->status == 'new') : ?>
+		<td><button type="button" class="btn <?php echo ($context->hasRole('accountant')) ? 'btn-success' : 'btn-default' ?> btn-xs commitment-accept" id="commitment-accept_<?php echo $order->id ?>" <?php if (!$context->hasRole('accountant')) echo 'disabled="disabled"' ?>><?php echo $this->translate('Validate', 'ppit-commitment', $context->getLocale()) ?></button></td>
+	<?php elseif ($order->status == 'approved') : ?>
+		<td><button type="button" class="btn <?php echo ($context->hasRole('accountant')) ? 'btn-success' : 'btn-default' ?> btn-xs commitment-settle" id="commitment-settle_<?php echo $order->id ?>" <?php if (!$context->hasRole('accountant')) echo 'disabled="disabled"' ?>><?php echo $this->translate('Settle', 'ppit-commitment', $context->getLocale()) ?></button></td>
+	<?php else : ?>
+		<td><button type="button" class="btn btn-default btn-xs" id="order_action-<?php echo $order->id ?>" disabled="disabled"><?php echo $config['commitment']['properties']['status']['modalities'][$order->status][$context->getLocale()] ?></button></td>
+	<?php endif;?>
+		<td style="text-align: center">
+	<?php if ($order->status == 'invoiced' || $order->status == 'settled') $proforma = 0; else $proforma = 1; ?>
+			<a href="<?php echo $this->url('commitmentCredit/downloadInvoice', array('id' => $order->id)) ?>?proforma=<?php echo $proforma ?>" target="_blank"><span class="glyphicon glyphicon-cloud-download" title="<?php echo $this->translate('Download', 'ppit-core', $context->getLocale()) ?>" /></a>
+		</td>
+	</tr>
+	
+<?php endforeach;?>
+
+</table>
+

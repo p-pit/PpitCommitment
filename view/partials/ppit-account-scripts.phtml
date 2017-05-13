@@ -208,7 +208,7 @@ function getAccountList(params, major, dir) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-list-panel').innerHTML = xhttp.responseText;
@@ -241,7 +241,7 @@ function getAccountList(params, major, dir) {
 					getAccountDetail($(this).attr('id').split('_')[1]);
 				});
 			});
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -337,7 +337,7 @@ function connectAccountUpdateForm(id, action)
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					filterAccountList();
 					connectAccountUpdateForm(id, action);
@@ -360,7 +360,7 @@ function getAccountUpdate(id, action) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
@@ -381,7 +381,7 @@ function getAccountUpdate(id, action) {
 			
 			connectAccountUpdateForm(id, action);
 			
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -443,7 +443,7 @@ function connectCommunitySendMessageForm(id)
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					CKEDITOR.replace('body');
 					getCommunitySendMessageForm(id);
@@ -470,7 +470,7 @@ function getCommunitySendMessage(id) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('community-send-message-panel').innerHTML = xhttp.responseText;
@@ -488,7 +488,7 @@ function getCommunitySendMessage(id) {
 			$('#community-send-message-button').click(function () { getCommunitySendMessageForm(id); });
 			$('#community-send-message-alert').hide();
 			
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -554,7 +554,7 @@ function connectUserUpdateForm(id, action)
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 					connectUserUpdateForm(id, action);
 					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
@@ -576,7 +576,7 @@ function getUserUpdate(id, action) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
@@ -589,7 +589,7 @@ function getUserUpdate(id, action) {
 			
 			connectUserUpdateForm(id, action);
 			
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -669,7 +669,7 @@ function connect<?php echo $contactNumber ?>UpdateForm(id, action)
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
 				}
 			};
@@ -689,7 +689,7 @@ function get<?php echo $contactNumber ?>Update(id, action) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
@@ -701,7 +701,7 @@ function get<?php echo $contactNumber ?>Update(id, action) {
 			else $('#account-add-anchor').click(function () { get<?php echo $contactNumber ?>Update(id, 'add'); });
 
 			connect<?php echo $contactNumber ?>UpdateForm(id, action);
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -727,7 +727,7 @@ function getCommitmentAccountList(params, major, dir) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
@@ -764,7 +764,7 @@ function getCommitmentAccountList(params, major, dir) {
 					document.location.href = $(this).attr('id');
 				});
 			});
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -789,7 +789,7 @@ function getAccountDetail(id) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
@@ -821,7 +821,7 @@ function getAccountDetail(id) {
 			}
 <?php endif;?>
 
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -940,9 +940,9 @@ function connectCommitmentUpdateForm(id, action, params)
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
 			xhttp.onload = function () {
-				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 
-<?php if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if ($context->getConfig()['isTraceActive']) : ?>
 					console.log('post, route = ' + route);
 					console.log(xhttp.responseText);
 <?php endif;?>
@@ -964,7 +964,7 @@ function getCommitmentUpdate(id, action, params) {
 	xhttp.open('GET', route, true);
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4) {
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 <?php endif;?>
 			document.getElementById('commitment-update-panel').innerHTML = xhttp.responseText;
@@ -984,7 +984,7 @@ function getCommitmentUpdate(id, action, params) {
 			else $('#commitment-add-anchor').click(function () { getCommitmentUpdate(id, 'add'); });
 			
 			connectCommitmentUpdateForm(id, action, params);
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}

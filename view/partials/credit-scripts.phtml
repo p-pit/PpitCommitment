@@ -1,0 +1,242 @@
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+
+
+function connectRemoveIcon(id, target)
+{
+	$('#' + id).click(function () {
+		$('#' + target).hide();
+		filterCreditList();
+	});
+}
+
+function getParams() {
+
+	var params = '?';
+	return params;
+}
+
+// Export the list
+function exportCreditList() {
+
+	var params = getParams();
+	document.location.href = '<?php echo $this->url('commitmentCredit/export') ?>' + params;
+}
+
+function eraseCreditSearch() {
+
+	getCreditList(getParams(), 'type', 'ASC');
+}
+
+function sortCreditList(criterion) {
+
+	var dir;
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (criterion + '-anchor' == ascCriterion) dir = 'DESC'; else dir = 'ASC';
+	getCreditList(getParams(), criterion, dir);
+}
+
+function filterCreditList() {
+
+	ascCriterion = $('.glyphicon-triangle-top').first().parent().attr('id');
+	descCriterion = $('.glyphicon-triangle-bottom').first().parent().attr('id');
+	if (ascCriterion) {
+		criterion = ascCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	else {
+		criterion = descCriterion.split('-')[0];
+		dir = 'ASC';
+	}
+	getCreditList(getParams(), criterion, dir);
+}
+
+function connectCreditSearchInputs() {
+
+	$('#export-button').click(function () { exportCreditList(); });
+}
+
+// Load the list
+function getCreditList(params, major, dir) {		
+
+	// Execute the ajax request
+	route = '<?php echo $this->url('commitmentCredit/list') ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('credit-list-panel').innerHTML = xhttp.responseText;
+			
+			// Connect the sort anchors
+			$('.ppit-sort-anchor').each(function () {
+				$(this).click(function () {
+					sortCreditList($(this).attr('id').split('-')[0]);
+				});
+			});
+			
+			// Connect the credit detail anchors
+			$('.credit-detail-anchor').each(function () {
+				$(this).click(function () {
+					getCreditDetail($(this).attr('id').split('_')[1]);
+				});
+			});
+			
+			// Connect the order anchors
+			$('.commitment-accept').each(function () {
+				$(this).click(function () {
+					getCommitmentAccept($(this).attr('id').split('_')[1]);
+				});
+			});
+			$('.commitment-settle').each(function () {
+				$(this).click(function () {
+					location.href = '<?php echo $this->url('commitmentCredit/settle') ?>/' + $(this).attr('id').split('_')[1];
+				});
+			});
+
+<?php if (!$config['isTraceActive']) : ?>
+			}
+<?php endif;?>
+		}
+	}
+	xhttp.send();
+}
+
+function connectAuditPanel()
+{
+	$('#audit-panel').hide();
+	$('#audit-label').click(function () {
+		if ($('#audit-label').text() == '<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>') {
+			$('#audit-panel').show();
+			$('#audit-label').text('<?php echo $this->translate('Mask', 'ppit-core', $context->getLocale()) ?>');
+		}
+		else {
+			$('#audit-panel').hide();
+			$('#audit-label').text('<?php echo $this->translate('Show', 'ppit-core', $context->getLocale()) ?>');
+		}
+	});
+}
+
+// Load the detail panel
+function getCreditDetail(id) {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+
+	// Anchor to the new panel
+	$(location).attr('hash', 'form_action');
+
+	var route = '<?php echo $this->url('commitmentCredit/detail') ?>' + '/' + id;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			connectRemoveIcon('remove-anchor', 'form_action');
+			$('.report-panel').hide();
+			$('.report-button').click(function() { 
+				id = $(this).attr('id').split('_')[1];
+				if ($('#is-report-open_' + id).val() == 1) {
+					$('#report-panel_' + id).hide(); 
+					$('#report-button_' + id).removeClass('glyphicon-triangle-bottom').addClass('glyphicon-triangle-right');
+					$('#is-report-open_' + id).val(0);
+				}
+				else {
+					$('#report-panel_' + id).show(); 
+					$('#report-button_' + id).removeClass('glyphicon-triangle-right').addClass('glyphicon-triangle-bottom');
+					$('#is-report-open_' + id).val(1);
+				}
+			});
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#credit-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
+}
+
+function connectCommitmentAcceptForm(id)
+{
+	var form = document.getElementById('ppit-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+		var formData = new FormData();
+		formData.append('accept', ((document.getElementById('accept').checked) ? 1 : 0));
+
+		var xhttp = new XMLHttpRequest();
+		var route, target;
+		route = '<?php echo $this->url('commitmentCredit/accept') ?>/' + id;
+		target = 'form_action';
+		xhttp.open('POST', route, true);
+		xhttp.onload = function () {
+			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+				document.getElementById(target).innerHTML = xhttp.responseText;
+				connectRemoveIcon('remove-anchor', 'form_action');
+				filterCreditList();
+				connectCommitmentAcceptForm(id);
+			}
+		};
+		xhttp.send(formData);
+	}
+}
+
+// Load the detail panel
+function getCommitmentAccept(id) {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+
+	// Anchor to the new panel
+	$(location).attr('hash', 'form_action');
+
+	var route = '<?php echo $this->url('commitmentCredit/accept') ?>' + '/' + id;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			connectRemoveIcon('remove-anchor', 'form_action');
+			connectCommitmentAcceptForm(id);
+		}
+	}
+	xhttp.send();
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('#commitment-accept_' + id).removeClass("btn-success").addClass("btn-primary");
+}
+
+function activateCredit() {
+
+	// Load the search panel and highlight the menu entry
+	loadPanel('index_action', '<?php echo $this->url('commitmentCredit/search') ?>');
+	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
+		
+	// Connect the search inputs
+	connectCreditSearchInputs();
+	
+	getCreditList('?', 'type', 'ASC');
+}

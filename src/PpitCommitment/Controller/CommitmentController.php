@@ -20,6 +20,7 @@ use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
+use PpitCore\Model\Place;
 use PpitCore\Model\Vcard;
 use PpitDocument\Model\Document;
 use PpitDocument\Model\DocumentPart;
@@ -44,10 +45,28 @@ class CommitmentController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-
-		$type = $this->params()->fromRoute('type', null);
+    	$place = Place::getTable()->transGet($context->getPlaceId());
+    	$type = $this->params()->fromRoute('type', null);
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-PIT Engagements';
+		$instance = Instance::get($context->getInstanceId());
+
+    	$url = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['url'];
+    	$client = new Client(
+    			$url,
+    			array(
+    					'adapter' => 'Zend\Http\Client\Adapter\Curl',
+    					'maxredirects' => 0,
+    					'timeout'      => 30,
+    			)
+    	);
+    	 
+    	$username = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['user'];
+    	$client->setAuth($username, $context->getConfig()['ppitUserSettings']['safe'][$instance->caption][$username], Client::AUTH_BASIC);
+    	$client->setEncType('text/xml');
+    	$client->setMethod('GET');
+    	$response = $client->send();
+		$applications = json_decode($response->getContent(), true);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 
 		$params = $this->getFilters($this->params());
@@ -55,9 +74,11 @@ class CommitmentController extends AbstractActionController
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'place' => $place,
     			'active' => 'application',
     			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,
+    			'applications' => $applications,
     			'types' => $types,
     			'type' => $type,
     			'params' => $params,
@@ -1108,103 +1129,6 @@ class CommitmentController extends AbstractActionController
     	}
     	return $this->response;
     }
-    
-    public function acceptAction()
-    {
-    	// Retrieve the context
-    	$context = Context::getCurrent();
-
-    	// Initialize the logger
-    	$writer = new \Zend\Log\Writer\Stream('data/log/commitment.txt');
-    	$logger = new \Zend\Log\Logger();
-    	$logger->addWriter($writer);
-
-    	// Retrieve the commitment id
-    	$id = $this->params()->fromRoute('id', null);
-
-    	// Submit the commitmentGet message
-    	$safe = $context->getConfig()['ppitUserSettings']['safe'];
-    	$url = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['url'].'/'.$id;
-    	$client = new Client(
-    			$url,
-    			array(
-    					'adapter' => 'Zend\Http\Client\Adapter\Curl',
-    					'maxredirects' => 0,
-    					'timeout'      => 30,
-    			)
-    	);
-    	 
-    	$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentGetMessage']['user'];
-    	$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
-    	$client->setEncType('text/xml');
-    	$client->setMethod('GET');
-    	$response = $client->send();
-    	 
-    	$commitmentData = json_decode($response->getContent(), true);
-    	$commitment = new Commitment();
-    	$commitment->exchangeArray($commitmentData);
-    	if ($commitment->status == 'deleted' || $commitment->status == 'canceled') {
-    		return $this->redirect()->toRoute('home');
-    	}
-    	 
-    	// To be replaced by a call to a web service
-    	$content = DocumentPart::getTable()->transGet($context->getConfig('documentPart/currentTerms'))->content;
-    	 
-    	// Instanciate the csrf form
-    	$csrfForm = new CsrfForm();
-    	$csrfForm->addCsrfElement('csrf');
-    	$message = null;
-    	$error = null;
-    	$request = $this->getRequest();
-    	if ($request->isPost()) {
-    
-    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
-    		$csrfForm->setData($request->getPost());
-    
-    		if ($csrfForm->isValid()) { // CSRF check
-
-    			if ($request->getPost('accept')) {
-	    			// Submit the postCommitment message
-	    			$safe = $context->getConfig()['ppitUserSettings']['safe'];
-	    			$url = $context->getConfig()['ppitCommitment/P-Pit']['commitmentPostMessage']['url'].'/'.$context->getInstance()->caption.'/'.$id;
-	    			$client = new Client(
-	    					$url,
-	    					array(
-	    							'adapter' => 'Zend\Http\Client\Adapter\Curl',
-	    							'maxredirects' => 0,
-	    							'timeout'      => 30,
-	    					)
-	    			);
-	    			
-	    			$username = $context->getConfig()['ppitCommitment/P-Pit']['commitmentListMessage']['user'];
-	    			$client->setAuth($username, $safe['p-pit'][$username], Client::AUTH_BASIC);
-	    			$client->setEncType('application/json');
-	    			$client->setMethod('POST');
-					$client->setRawBody(json_encode(array('n_fn' => $context->getFormatedName(), 'status' => 'approved', 'cgv' => $content)));
-	    			$response = $client->send();
-	
-					// Write to the log
-			   		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
-			   			$logger->info('commitment/accept;'.$commitment->id.';'.$url.';'.$response->renderStatusLine());
-			   		}
-			   		if ($response->renderStatusLine() == 'HTTP/1.1 200 OK') $message = 'OK';
-			   		else $error = $response->renderStatusLine();
-    			}
-    			else $error = 'Unchecked';
-    		}
-    	}
-    	$view = new ViewModel(array(
-    			'context' => $context,
-    			'config' => $context->getconfig(),
-    			'commitment' => $commitment,
-    			'content' => $content,
-    			'csrfForm' => $csrfForm,
-    			'message' => $message,
-    			'error' => $error,
-    	));
-    	$view->setTerminal(true);
-    	return $view;
-    }
 
     public function serviceAddAction()
     {
@@ -1400,7 +1324,7 @@ class CommitmentController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
 
-    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    	if ($context->getConfig()['isTraceActive']) {
     		$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
     		$logger = new \Zend\Log\Logger();
     		$logger->addWriter($writer);
@@ -1434,15 +1358,15 @@ class CommitmentController extends AbstractActionController
 			return $this->redirect()->toRoute('home');
 		}
 	
-    	$parm="merchant_id=080419959400024";
-    	$parm="$parm merchant_country=fr";
+    	$parm="merchant_id=".$context->getConfig()['ppitUserSettings']['safe']['p-pit']['atos_merchant_id'];
+		$parm="$parm merchant_country=fr";
     	$parm="$parm advert=advert.png";
     	$parm="$parm amount=".($commitment->tax_inclusive * 100);
     	$parm="$parm currency_code=978";
 //    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
 //    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('commitment/paymentResponse', array('id' => $id), array('force_canonical' => true));
-    	$parm="$parm normal_return_url=".$this->url()->fromRoute('credit', array(), array('force_canonical' => true));
-    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('credit', array(), array('force_canonical' => true));
+    	$parm="$parm normal_return_url=".$this->url()->fromRoute('commitmentCredit', array(), array('force_canonical' => true));
+    	$parm="$parm cancel_return_url=".$this->url()->fromRoute('commitmentCredit', array(), array('force_canonical' => true));
     	$parm="$parm automatic_response_url=".$this->url()->fromRoute('commitmentMessage/paymentAutoresponse', array('id' => $id), array('force_canonical' => true));
 
     	// Initialisation du chemin du fichier pathfile
@@ -1475,7 +1399,7 @@ class CommitmentController extends AbstractActionController
     	//  analyse du code retour
     	if (( $code == "" ) && ( $error == "" ) )
     	{
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$logger->info("payment-autoresponse;;executable response non trouve $path_bin");
 	    	}
     	}
@@ -1483,7 +1407,7 @@ class CommitmentController extends AbstractActionController
     	//      Erreur, affiche le message d'erreur
     	
     	else if ($code != 0){
-    	   	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    	   	if ($context->getConfig()['isTraceActive']) {
     			$logger->info("payment-autoresponse/$id;$code;$error");
 	    	}
     	}

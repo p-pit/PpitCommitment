@@ -5,6 +5,7 @@ return array(
         'invokables' => array(
             'PpitCommitment\Controller\Account' => 'PpitCommitment\Controller\AccountController',
         	'PpitCommitment\Controller\Commitment' => 'PpitCommitment\Controller\CommitmentController',
+        	'PpitCommitment\Controller\CommitmentCredit' => 'PpitCommitment\Controller\CommitmentCreditController',
         	'PpitCommitment\Controller\CommitmentMessage' => 'PpitCommitment\Controller\CommitmentMessageController',
         	'PpitCommitment\Controller\OrderResponse' => 'PpitCommitment\Controller\OrderResponseController',
         	'PpitCommitment\Controller\OrderProduct' => 'PpitCommitment\Controller\OrderProductController',
@@ -416,18 +417,6 @@ return array(
         								),
         						),
         				),
-        				'accept' => array(
-        						'type' => 'segment',
-        						'options' => array(
-        								'route' => '/accept[/:id]',
-        								'constraints' => array(
-        										'id'     => '[0-9]*',
-        								),
-        								'defaults' => array(
-        										'action' => 'accept',
-        								),
-        						),
-        				),
         				'serviceSettle' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -496,6 +485,103 @@ return array(
         				),
         		),
         	),
+        	'commitmentCredit' => array(
+                'type'    => 'literal',
+                'options' => array(
+                    'route'    => '/commitment-credit',
+                    'defaults' => array(
+                        'controller' => 'PpitCommitment\Controller\CommitmentCredit',
+                        'action'     => 'index',
+                    ),
+                ),
+           		'may_terminate' => true,
+	       		'child_routes' => array(
+        						'index' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/index',
+        										'defaults' => array(
+        												'action' => 'index',
+        										),
+        								),
+        						),
+        						'search' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/search',
+        										'defaults' => array(
+        												'action' => 'search',
+        										),
+        								),
+        						),
+        						'list' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/list',
+        										'defaults' => array(
+        												'action' => 'list',
+        										),
+        								),
+        						),
+        						'export' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/export',
+        										'defaults' => array(
+        												'action' => 'export',
+        										),
+        								),
+        						),
+	       						'detail' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/detail[/:id]',
+        										'constraints' => array(
+        												'id' => '[0-9]*',
+        										),
+        										'defaults' => array(
+        												'action' => 'detail',
+        										),
+        								),
+        						),
+		        				'accept' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/accept[/:id]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'accept',
+		        								),
+		        						),
+		        				),
+		        				'settle' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/settle[/:id]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'settle',
+		        								),
+		        						),
+		        				),
+	       						'downloadInvoice' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/download-invoice[/:id]',
+        										'constraints' => array(
+        												'id' => '[0-9]*',
+        										),
+        										'defaults' => array(
+        												'action' => 'downloadInvoice',
+        										),
+        								),
+        						),
+	       		),
+            ),
         	'commitmentMessage' => array(
                 'type'    => 'literal',
                 'options' => array(
@@ -792,6 +878,7 @@ return array(
             	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
+
             	array('route' => 'commitment', 'roles' => array('sales_manager', 'business_owner')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'business_owner')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager', 'business_owner')),
@@ -813,13 +900,23 @@ return array(
             	array('route' => 'commitment/suspend', 'roles' => array('admin')),
             	array('route' => 'commitment/serviceAdd', 'roles' => array('guest')),
             	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
-            	array('route' => 'commitment/accept', 'roles' => array('accountant')),
             	array('route' => 'commitment/serviceSettle', 'roles' => array('accountant')),
             	array('route' => 'commitment/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/paymentResponse', 'roles' => array('accountant')),
             	array('route' => 'commitment/delete', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
             	array('route' => 'commitment/rephase', 'roles' => array('admin')),
+
+            	array('route' => 'commitmentCredit', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/index', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/search', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/list', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/export', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/detail', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/accept', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/settle', 'roles' => array('admin')),
+            	array('route' => 'commitmentCredit/downloadInvoice', 'roles' => array('admin')),
+	
             	array('route' => 'commitmentMessage/download', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/index', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/search', 'roles' => array('admin')),
@@ -885,27 +982,25 @@ return array(
  		),
 	),
 
-	'ppitRoles' => array(
-			'PpitCommitment' => array(
-					'accountant' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Accountant',
-									'fr_FR' => 'Comptable',
+	'ppitApplications' => array(
+    		'p-pit-engagements' => array(
+    				'labels' => array('fr_FR' => 'P-Pit Engagements', 'en_US' => 'Commitments by 2Pit'),
+    				'route' => 'commitmentAccount/index',
+    				'params' => array(),
+					'roles' => array(
+							'sales_manager' => array(
+									'show' => true,
+									'labels' => array(
+											'en_US' => 'Sales manager',
+											'fr_FR' => 'Gestion commerciale',
+									),
 							),
-					),
-					'sales_manager' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Sales manager',
-									'fr_FR' => 'Gestion commerciale',
-							),
-					),
-					'business_owner' => array(
-							'show' => true,
-							'labels' => array(
-									'en_US' => 'Business owner',
-									'fr_FR' => 'Gestion opérationnelle',
+							'business_owner' => array(
+									'show' => true,
+									'labels' => array(
+											'en_US' => 'Business owner',
+											'fr_FR' => 'Gestion opérationnelle',
+									),
 							),
 					),
 			),
@@ -961,9 +1056,13 @@ return array(
 					),
 			),
 	),
+
+	'creditConsumers' => array(
+			'\PpitCommitment\Model\Commitment::consumeCredits',
+	),
 		
-	'contact/perimeters' => array(
-			'ppitCommitment' => array(
+	'perimeters' => array(
+			'p-pit-engagements' => array(
 			),
 	),
 	
@@ -1130,6 +1229,7 @@ return array(
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
+			'place_id' => array('mandatory' => true),
 			'opening_date' => array('mandatory' => true),
 			'closing_date' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
@@ -1149,6 +1249,17 @@ return array(
 			'adr_state' => array('mandatory' => false),
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
+	),
+	'commitmentAccount/export' => array(
+			'status' => array('mandatory' => true),
+			'identifier' => array('mandatory' => false),
+			'customer_name' => array('mandatory' => true),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => true),
+			'email' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'opening_date' => array('mandatory' => true),
+			'closing_date' => array('mandatory' => false),
 	),
 
 	'commitment/types' => array(

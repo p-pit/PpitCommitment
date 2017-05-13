@@ -42,7 +42,7 @@ function connectAddPhotographForm()
 		route = '<?php echo $this->url('commitmentMessage/addPhotograph') ?>';
 		xhttp.open('POST', route, true);
 		xhttp.onload = function () {
-			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['ppitCoreSettings']['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 				$('#form_action').html(xhttp.responseText);
 				$('#remove-anchor').click(function () { 
 					$('#form_action').hide();
@@ -63,7 +63,7 @@ function getAddPhotograph() {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 <?php endif;?>
 			$('#form_action').show();
@@ -73,7 +73,7 @@ function getAddPhotograph() {
 				$('#add-photograph-anchor').removeClass("btn-primary").addClass("btn-default");
 			});
 			$('#submit-button').click(function () { connectAddPhotographForm(); });
-<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+<?php if (!$config['isTraceActive']) : ?>
 			}
 <?php endif;?>
 		}
@@ -95,7 +95,7 @@ function getCommitmentMessageList(type, major, dir) {
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('index_action').innerHTML = xhttp.responseText;
@@ -120,7 +120,7 @@ function getCommitmentMessageList(type, major, dir) {
 					showCommitmentMessageDetail(type, $(this).attr('id').split('_')[1], 'process');
 				});
 			});
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			}
 	<?php endif;?>
 		}
@@ -178,7 +178,7 @@ function showCommitmentMessageDetail(type, id, action)
 	xhttp.onreadystatechange = function() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4) {
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
@@ -189,7 +189,7 @@ function showCommitmentMessageDetail(type, id, action)
 			if (action =='import') connectimportForm(0);
 			else if (action =='submit') connectsubmitForm(id);
 			else if (action =='process') connectprocessForm(id);
-	<?php if (!$config['ppitCoreSettings']['isTraceActive']) : ?>
+	<?php if (!$config['isTraceActive']) : ?>
 			}
 	<?php endif;?>
 		}

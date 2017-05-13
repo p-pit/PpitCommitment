@@ -1,0 +1,30 @@
+<!-- Load the common form javascript functions -->
+<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
+
+<?php
+$title = $this->translate('P-Pit', 'ppit-core', $context->getLocale());
+$this->headTitle($title);
+echo $this->partial('/partials/header');
+?>
+
+<div class="container">
+
+<!-- Front product 1 -->
+<div class="row">
+
+    <div class="col-md-8 col-md-offset-2">
+        <div class="panel panel-default">
+            <div class="panel-heading front-page" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+                <div><?php echo $this->translate('Payment', 'ppit-commitment', $context->getLocale()) ?></div>
+            </div>
+            <div class="panel-body">
+       			<div>
+
+<!-- Form header -->
+					<div class="alert alert-danger" style="text-align: center; font-weight: bold"><?php echo $error ?></div>
+					<div style="text-align: center"><a href="<?php echo $this->url('credit/index') ?>"><?php echo $this->translate('Return to credits', 'ppit-core', $context->getLocale()) ?></a></div>
+				</div>
+             </div>
+        </div>
+	</div>
+</div>

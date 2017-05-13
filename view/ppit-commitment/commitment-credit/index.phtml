@@ -1,0 +1,46 @@
+<!-- 
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<!-- Load the common form javascript functions -->
+<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
+
+<?php
+$title = $this->translate('Credits', 'ppit-core', $context->getLocale());
+$this->headTitle($title);
+echo $this->partial('/partials/header');
+?>
+
+<div class="container">
+	
+	<div>&nbsp;</div>
+
+	<!-- Main panel -->
+	<div class="row">
+	    <div class="col-md-6 ppit-panel" id="index_action"></div>
+		<div class="col-md-6 ppit-panel" id="form_action"></div>
+	</div>
+	
+	<!-- Login -->
+	<div class="row">
+	    <div class="col-md-6 col-md-offset-3 ppit-panel" id="login-panel">
+		</div>
+	</div>
+</div>
+
+<script>
+
+<?php
+echo $this->partial('/partials/credit-scripts');
+echo $this->partial('/partials/ppit-controller') 
+?>
+
+activateCredit();
+
+</script>

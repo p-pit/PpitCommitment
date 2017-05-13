@@ -368,7 +368,7 @@ class OrderProduct implements InputFilterAwareInterface
     		$message->http_status = $response->renderStatusLine();
     
     		// Write to the log
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$writer = new \Zend\Log\Writer\Stream('data/log/orderResponse.txt');
     			$logger = new \Zend\Log\Logger();
     			$logger->addWriter($writer);

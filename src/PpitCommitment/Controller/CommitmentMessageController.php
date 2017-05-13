@@ -12,6 +12,7 @@ use PpitCore\Model\Community;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
+use PpitCore\Model\Place;
 use PpitDocument\Model\DocumentPart;
 use Zend\Http\Client;
 use Zend\View\Model\ViewModel;
@@ -24,6 +25,7 @@ class CommitmentMessageController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+    	$place = Place::getTable()->transGet($context->getPlaceId());
 
 		$type = $this->params()->fromRoute('type', null);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
@@ -31,6 +33,7 @@ class CommitmentMessageController extends AbstractActionController
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'place' => $place,
     			'types' => $types,
     			'type' => $type,
     	));
@@ -144,7 +147,7 @@ class CommitmentMessageController extends AbstractActionController
 	    		$connection->commit();
 	    		
 	    		// Write to the log
-	    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    		if ($context->getConfig()['isTraceActive']) {
 	    			$logger->info('accountPost/'.$instance_caption.';200;');
 	    		}
 	    		$this->getResponse()->setStatusCode('200');
@@ -186,7 +189,7 @@ class CommitmentMessageController extends AbstractActionController
     	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
     		 
     		// Write to the log
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
     			$logger = new \Zend\Log\Logger();
     			$logger->addWriter($writer);
@@ -232,7 +235,7 @@ class CommitmentMessageController extends AbstractActionController
     	if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
     	
     		// Write to the log
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
     			$logger = new \Zend\Log\Logger();
     			$logger->addWriter($writer);
@@ -366,7 +369,7 @@ class CommitmentMessageController extends AbstractActionController
 				$connection->commit();
 				
 				// Write to the log
-				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+				if ($context->getConfig()['isTraceActive']) {
 					$logger->info('commitmentPost/'.$id.';200;');
 				}
 		    	$this->getResponse()->setStatusCode('200');
@@ -446,7 +449,7 @@ class CommitmentMessageController extends AbstractActionController
 	    		
 	    		if (!in_array($commitment->type, array('part_1', 'part_2', 'part_3'))) {
 	    			// Write to the log
-	    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    			if ($context->getConfig()['isTraceActive']) {
 	    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
 	    				$logger = new \Zend\Log\Logger();
 	    				$logger->addWriter($writer);
@@ -501,7 +504,7 @@ class CommitmentMessageController extends AbstractActionController
 	    			if ($commitment->add() != 'OK') {
 	    				$connection->rollback();
 	    				// Write to the log
-	    				if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    				if ($context->getConfig()['isTraceActive']) {
 	    					$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
 	    					$logger = new \Zend\Log\Logger();
 	    					$logger->addWriter($writer);
@@ -515,7 +518,7 @@ class CommitmentMessageController extends AbstractActionController
 	    		catch (\Exception $e) {
 	    				
 	    			// Write to the log
-	    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    			if ($context->getConfig()['isTraceActive']) {
 	    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
 	    				$logger = new \Zend\Log\Logger();
 	    				$logger->addWriter($writer);
@@ -534,7 +537,7 @@ class CommitmentMessageController extends AbstractActionController
 	    		$commitment = Commitment::get($xcblOrder->getIdentifier(), 'identifier');
 	    		if (!$commitment) {
 	    			// Bad request
-	    			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    			if ($context->getConfig()['isTraceActive']) {
 	    				$writer = new \Zend\Log\Writer\Stream('data/log/order-message.txt');
 	    				$logger = new \Zend\Log\Logger();
 	    				$logger->addWriter($writer);
@@ -591,7 +594,7 @@ class CommitmentMessageController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
 
-    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    	if ($context->getConfig()['isTraceActive']) {
     		$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
     		$logger = new \Zend\Log\Logger();
     		$logger->addWriter($writer);
@@ -602,7 +605,7 @@ class CommitmentMessageController extends AbstractActionController
     	$commitment = Commitment::get($id);
     	if (!$commitment) {
     		// Write to the log
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$logger->info('payment-autoresponse;422');
     		}
     		$this->getResponse()->setStatusCode('422');
@@ -637,14 +640,14 @@ class CommitmentMessageController extends AbstractActionController
     	//  analyse du code retour
     	if (( $code == "" ) && ( $error == "" ) )
     	{
-	    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    	if ($context->getConfig()['isTraceActive']) {
     			$logger->info("payment-autoresponse;;executable response non trouve $path_bin");
 	    	}
     	}
 
     	//	Erreur, affiche le message d'erreur
     	else if ( $code != 0 ) {
-    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+    		if ($context->getConfig()['isTraceActive']) {
     			$logger->info("payment-autoresponse/$id;$code;$error");
 	    	}
     	}
@@ -713,7 +716,7 @@ class CommitmentMessageController extends AbstractActionController
 	    	}
 
 	    	// Write to the log
-	    	if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+	    	if ($context->getConfig()['isTraceActive']) {
 	    		$logger->info('payment-autoresponse;'.$tableau[11].';'.$id);
 	    	}
 	    	$this->getResponse()->setStatusCode('200');
@@ -746,7 +749,7 @@ class CommitmentMessageController extends AbstractActionController
 		if (!array_key_exists($username, $safe['p-pit']) || $password != $safe['p-pit'][$username]) {
 			 
 			// Write to the log
-			if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+			if ($context->getConfig()['isTraceActive']) {
 				$writer = new \Zend\Log\Writer\Stream('data/log/commitment-message.txt');
 				$logger = new \Zend\Log\Logger();
 				$logger->addWriter($writer);
@@ -1115,7 +1118,7 @@ class CommitmentMessageController extends AbstractActionController
 		    		$xmlMessage->http_status = $response->renderStatusLine();
 
 		    		// Write to the log
-		    		if ($context->getConfig()['ppitCoreSettings']['isTraceActive']) {
+		    		if ($context->getConfig()['isTraceActive']) {
 		    			$writer = new \Zend\Log\Writer\Stream('data/log/orderResponse.txt');
 		    			$logger = new \Zend\Log\Logger();
 		    			$logger->addWriter($writer);
