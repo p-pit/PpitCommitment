@@ -22,7 +22,7 @@ use PpitCore\Model\Csrf;
 use PpitCore\Model\Instance;
 use PpitCore\Model\Place;
 use PpitCore\Model\Vcard;
-use PpitDocument\Model\Document;
+use PpitCore\Model\Document;
 use PpitDocument\Model\DocumentPart;
 use PpitMasterData\Model\Product;
 use PpitMasterData\Model\ProductOption;
@@ -51,7 +51,7 @@ class CommitmentController extends AbstractActionController
 		$applicationName = 'P-PIT Engagements';
 		$instance = Instance::get($context->getInstanceId());
 
-    	$url = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['url'];
+/*    	$url = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['url'];
     	$client = new Client(
     			$url,
     			array(
@@ -66,7 +66,7 @@ class CommitmentController extends AbstractActionController
     	$client->setEncType('text/xml');
     	$client->setMethod('GET');
     	$response = $client->send();
-		$applications = json_decode($response->getContent(), true);
+		$applications = json_decode($response->getContent(), true);*/
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 
 		$params = $this->getFilters($this->params());
@@ -78,7 +78,7 @@ class CommitmentController extends AbstractActionController
     			'active' => 'application',
     			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,
-    			'applications' => $applications,
+//    			'applications' => $applications,
     			'types' => $types,
     			'type' => $type,
     			'params' => $params,

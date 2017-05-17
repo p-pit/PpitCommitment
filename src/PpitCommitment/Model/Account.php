@@ -6,7 +6,7 @@ use PpitCore\Model\Vcard;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use PpitCore\Model\Place;
-use PpitDocument\Model\Document;
+use PpitCore\Model\Document;
 use PpitCore\Model\User;
 use PpitCore\Model\UserContact;
 use Zend\Db\Sql\Where;

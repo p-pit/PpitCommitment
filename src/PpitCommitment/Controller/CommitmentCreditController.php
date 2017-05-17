@@ -17,6 +17,7 @@ use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Instance;
+use PpitCore\Model\Place;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Vcard;
 use PpitDocument\Model\DocumentPart;
@@ -32,12 +33,14 @@ class CommitmentCreditController extends AbstractActionController
     public function indexAction()
     {
     	$context = Context::getCurrent();
-		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+    	$place = Place::getTable()->transGet($context->getPlaceId());
+    	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 		$instance_id = $context->getInstanceId();
 
     	return new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'place' => $place,
     	));
     }
 

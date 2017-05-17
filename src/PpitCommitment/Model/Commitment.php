@@ -12,7 +12,7 @@ use PpitCore\Model\Context;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Instance;
 use PpitCore\Model\Place;
-use PpitDocument\Model\Document;
+use PpitCore\Model\Document;
 use PpitEquipment\Model\Area;
 use PpitMasterData\Model\ProductOption;
 use PpitMasterData\Model\OrgUnit;
@@ -1158,7 +1158,7 @@ class Commitment implements InputFilterAwareInterface
     			)
     	);
     
-    	$client->setAuth($credential['user'], $credential['password'], Client::AUTH_BASIC);
+    	$client->setAuth($credential['core_user'], $credential['password'], Client::AUTH_BASIC);
     	$client->setEncType('text/xml');
     	$client->setMethod('POST');
 

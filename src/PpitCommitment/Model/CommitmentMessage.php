@@ -6,7 +6,7 @@ use PpitCore\Model\Community;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use PpitCore\Model\Instance;
-use PpitDocument\Model\Document;
+use PpitCore\Model\Document;
 use PpitCommitment\Model\XmlCommitmentResponse;
 use SplFileObject;
 use Zend\Db\Sql\Where;
