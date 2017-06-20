@@ -63,13 +63,22 @@ return array(
         						'index' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/index[/:type]',
+        										'route' => '/index[/:entry][/:type]',
         										'defaults' => array(
         												'action' => 'index',
         										),
         								),
         						),
-        						'search' => array(
+        						'contactIndex' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/contact-index[/:entry][/:type]',
+        										'defaults' => array(
+        												'action' => 'contactIndex',
+        										),
+        								),
+        						),
+	       						'search' => array(
         								'type' => 'segment',
         								'options' => array(
         										'route' => '/search[/:type]',
@@ -81,7 +90,7 @@ return array(
         						'list' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/list[/:type]',
+        										'route' => '/list[/:entry][/:type]',
         										'defaults' => array(
         												'action' => 'list',
         										),
@@ -90,7 +99,7 @@ return array(
         						'export' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/export[/:type]',
+        										'route' => '/export[/:entry][/:type]',
         										'defaults' => array(
         												'action' => 'export',
         										),
@@ -166,9 +175,6 @@ return array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/register[/:type]',
-		        								'constraints' => array(
-		        										'id'     => '[0-9]*',
-		        								),
 		        								'defaults' => array(
 		        										'action' => 'register',
 		        								),
@@ -768,7 +774,7 @@ return array(
         						'index' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/index',
+        										'route' => '/index[/:type]',
         										'defaults' => array(
         												'action' => 'index',
         										),
@@ -867,7 +873,8 @@ return array(
             	// Orders
 				array('route' => 'commitmentAccount', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/index', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/search', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentAccount/contactIndex', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentAccount/search', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/put', 'roles' => array('guest')),
@@ -1007,7 +1014,7 @@ return array(
 	),
 
 	'menus' => array(
-			'p-pit-engagements' => array(
+/*			'p-pit-engagements' => array(
 					'account' => array(
 							'route' => 'commitmentAccount/index',
 							'params' => array(),
@@ -1054,7 +1061,7 @@ return array(
 									'fr_FR' => 'Interactions',
 							),
 					),
-			),
+			),*/
 	),
 
 	'creditConsumers' => array(
@@ -1075,13 +1082,30 @@ return array(
 	'ppitCommitmentDependencies' => array(
 	),
 
+	'commitmentAccount/property/origine' => array(
+			'type' => 'select',
+			'modalities' => array(
+					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
+					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
+					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
+					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
+					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
+			),
+			'labels' => array(
+					'en_US' => 'Origine',
+					'fr_FR' => 'Origine',
+			),
+	),
+		
 	'commitmentAccount' => array(
 			'statuses' => array(),
 			'properties' => array(
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
-									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'new' => array('en_US' => 'Hot', 'fr_FR' => 'Chaud'),
+									'warm' => array('en_US' => 'Warm', 'fr_FR' => 'Tiède'),
+									'cold' => array('en_US' => 'Cold', 'fr_FR' => 'Froid'),
 									'active' => array('en_US' => 'Active', 'fr_FR' => 'Actif'),
 									'inactive' => array('en_US' => 'Inactive', 'fr_FR' => 'Inactif'),
 									'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
@@ -1176,6 +1200,17 @@ return array(
 									'fr_FR' => 'Date de fermeture',
 							),
 					),
+					'callback_date' => array(
+							'type' => 'date',
+							'labels' => array(
+									'en_US' => 'Callback date',
+									'fr_FR' => 'Date de rappel',
+							),
+					),
+					'origine' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/property/origine',
+					),
 					'contact_history' => array(
 							'type' => 'log',
 							'labels' => array(
@@ -1186,20 +1221,73 @@ return array(
 			),
 			'order' => 'customer_name',
 	),
+		
+	// Contact
+/*	'commitmentAccount/contact/index' => array(
+			'title' => array('en_US' => 'P-Pit Contacts', 'fr_FR' => 'P-Pit Contacts'),
+	),
+	'commitmentAccount/contact/search' => array(
+			'title' => array('en_US' => 'Contacts', 'fr_FR' => 'Contacts'),
+			'todoTitle' => array('en_US' => 'to call back', 'fr_FR' => 'à rappeler'),
+			'main' => array(
+					'status' => 'select',
+					'place_id' => 'select',
+					'customer_name' => 'contains',
+					'callback_date' => 'range',
+					'origine' => 'contains',
+			),
+			'more' => array(
+			),
+	),
+	'commitmentAccount/contact/list' => array(
+			'property_1' => 'image',
+			'photo_link_id' => 'photo',
+			'n_fn' => 'text',
+			'property_2' => 'phone',
+	),
+	'commitmentAccount/contact/detail' => array(
+			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
+			'displayAudit' => true,
+			'tabs' => array(
+			),
+	),
+	'commitmentAccount/contact/update' => array(
+			'status' => array('mandatory' => true),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => true),
+			'email' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'place_id' => array('mandatory' => true),
+			'callback_date' => array('mandatory' => false),
+			'origine' => array('mandatory' => false),
+			'contact_history' => array('mandatory' => false),
+	),
+	'commitmentAccount/contact/export' => array(
+			'status' => array('mandatory' => true),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => true),
+			'email' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'place_id' => array('mandatory' => true),
+			'callback_date' => array('mandatory' => true),
+			'origine' => array('mandatory' => false),
+			'contact_history' => array('mandatory' => false),
+	),*/
+
+	// Account
 	'commitmentAccount/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 	'commitmentAccount/search' => array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
-			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
-				'status' => 'select',
 				'customer_name' => 'contains',
+				'callback_date' => 'range',
+				'origine' => 'contains',
+				'email' => 'contains',
 			),
 			'more' => array(
-				'email' => 'contains',
-				'opening_date' => 'range',
-				'closing_date' => 'range',
 			),
 	),
 	'commitmentAccount/list' => array(
@@ -1225,13 +1313,13 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'customer_name' => array('mandatory' => true),
+			'callback_date' => array('mandatory' => false),
+			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
 			'place_id' => array('mandatory' => true),
-			'opening_date' => array('mandatory' => true),
-			'closing_date' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
 	),
 	'commitmentAccount/updateContact' => array(
@@ -1254,12 +1342,14 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'customer_name' => array('mandatory' => true),
+			'callback_date' => array('mandatory' => false),
+			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
-			'opening_date' => array('mandatory' => true),
-			'closing_date' => array('mandatory' => false),
+			'place_id' => array('mandatory' => true),
+			'contact_history' => array('mandatory' => false),
 	),
 
 	'commitment/types' => array(

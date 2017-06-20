@@ -76,7 +76,7 @@ function getParams() {
 function exportAccountList() {
 
 	var params = getParams();
-	document.location.href = '<?php echo $this->url('commitmentAccount/export', array('type' => $type)) ?>' + params;
+	document.location.href = '<?php echo $this->url('commitmentAccount/export', array('entry' => $entry, 'type' => $type)) ?>' + params;
 }
 
 function eraseAccountSearch() {
@@ -202,7 +202,7 @@ function connectAccountSearchInputs() {
 function getAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitmentAccount/list', array('type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	route = '<?php echo $this->url('commitmentAccount/list', array('entry' => $entry, 'type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
@@ -240,6 +240,13 @@ function getAccountList(params, major, dir) {
 				$(this).click(function () {
 					getAccountDetail($(this).attr('id').split('_')[1]);
 				});
+			});
+			
+			// Connect the register anchor
+			$('#account-register-anchor').click(function () {
+				$('#iframe_action').show();
+				$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+				$('#account-register-anchor').removeClass("btn-default").addClass("btn-primary");
 			});
 <?php if (!$config['isTraceActive']) : ?>
 			}
@@ -777,6 +784,7 @@ function getAccountDetail(id) {
 
 	// Ensure the target is displayed
 	$('#form_action').show();
+	$('#iframe_action').hide();
 
 	// Anchor to the new panel
 	$(location).attr('hash', 'form_action');
@@ -817,7 +825,9 @@ function getAccountDetail(id) {
 <?php if (array_key_exists('p-pit-engagements', $context->getApplications())) : ?>
 			if (id != 0) {
 				getCommitmentAccountList('?account_id=' + id, 'identifier', 'DESC');
+	<?php if ($context->isAllowed('community/sendMessage')) : ?>
 				getCommunitySendMessage(id);
+	<?php endif;?>
 			}
 <?php endif;?>
 
@@ -836,11 +846,7 @@ function getAccountDetail(id) {
 function activateAccount() {
 
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search', array('type' => $type)) ?>');
-	$('.menu-btn').removeClass("btn-primary").addClass("btn-default");
-	var accountAnchor;
-	accountAnchor = '#account-anchor';
-	$(accountAnchor).removeClass("btn-default").addClass("btn-primary");
+	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search', array('type' => $type)) ?>?');
 
 	<?php
 	$todoTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));

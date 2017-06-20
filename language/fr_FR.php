@@ -76,6 +76,7 @@
 			'Quotation identifier' => 'Référence de devis',
 			'Re-initialize' => 'Ré-initialiser',
 			'Register' => 'S\'enregistrer',
+			'Register form' => 'Formulaire d\'enregistrement',
 			'Register settlement' => 'Enregistrer le règlement',
 			'Reject' => 'Rejeter',
 			'Resend' => 'Réémettre',

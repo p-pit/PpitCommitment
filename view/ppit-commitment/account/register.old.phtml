@@ -1,26 +1,13 @@
-
-<!-- Load the common form javascript functions -->
-<?php echo $this->partial('/partials/common-form-js.phtml'); ?>
-
-<div class="container" id="main">
-	<div>&nbsp;</div>
-	<section>
-        <div class="row">
-            <div class="col-md-12">
-		        <!--Card-->
-		        <div class="card">
-			            <!--Card content-->
-			            <div class="card-block">
-
-				        <!--Header-->
-				        <div class="text-center">
-				            <h3><i class="fa fa-pencil"></i> <?php echo $context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] ?></h3>
-				            <hr class="mt-2 mb-2">
-				        </div>
-
-				        <!--Body-->
-				        <p><?php echo $context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : ''))['text'][$context->getLocale()] ?></p>
-				        <br>
+<div class="panel panel-default">
+	<div class="panel-heading" style="background:  <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+		<strong><?php echo $this->translate('Register', 'ppit-commitment', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+ 		 </div>
+	</div>
+	<div class="panel-body">
 
 <!-- Form header -->
 <?php echo $this->partial('/partials/form-header', array(
@@ -31,17 +18,20 @@
 		'context' => $context,
 ));
 ?>
+	
+<?php if ($message == 'OK') : ?>
+		<p><?php echo $this->translate('An email including a validation link has be sent to you. Please, click on this link.', 'ppit-commitment', $context->getLocale()) ?>
+<?php else : ?>
+		<h4><?php echo $this->translate('Before starting the trial, we have to know you', 'ppit-commitment', $context->getLocale()) ?></h4>
+<?php endif;?>
 
 <?php 
 if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
 
-<?php foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $options) : ?>
-	<?php 
-	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-	?>
-	<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+<?php foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $options) : ?>
+	<?php $property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId] ?>
+		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
@@ -63,18 +53,6 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 	<?php elseif ($propertyId == 'tel_cell') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->tel_cell ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 				
-	<?php elseif ($propertyId == 'birth_date') : ?>
-				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
-				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->birth_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
-
-	<?php elseif ($propertyId == 'place_id') : ?>
-				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
-	    			<option />
-		<?php foreach ($places as $place) : ?>
-	    			<option value="<?php echo $place->id ?>" <?php if ($account->properties[$propertyId] == $place->id) echo 'selected="selected"' ?>><?php echo $place->caption ?></option>
-		<?php endforeach;?>
-				</select>
-				
 	<?php elseif ($property['type'] == 'date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
@@ -95,60 +73,29 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 	    			<option value="<?php echo $key ?>" <?php if ($account->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
 		<?php endforeach;?>
 				</select>
+
+	<?php elseif ($property['type'] == 'photo') : ?>
+
+<!-- Photo -->
+				<img height="150" src="<?php echo $this->url('vcard/photo', array('id' => $account->properties[$propertyId])) ?>"/>
 	
 	<?php else : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 	<?php endif;?>
 			</div>
-			<div class="col-sm-12"><p style="color: red" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
+			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
 		</div>
 
 <?php endforeach;?>
 
-<?php if (!$isDisabled) :?>
 		    <div class="form-group">
 				<div class="col-sm-5">&nbsp;</div>
 				<div class="col-sm-7">
 					<input name="submit" type="submit" id="submit-button" class="btn btn-success" value="<?php echo $this->translate('Register', 'ppit-commitment', $context->getLocale()) ?>">
 				</div>
 			</div>
-<?php endif;?>
 		
 		</form>
-				</div>
-				<!--/.Card content-->
-			</div>
-			<!--/.Card-->
-	    </div>
-	</section>
+	</div>
 </div>
-
-<script>
-
-<?php 
-$properties = array();
-
-foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $options) {
-	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea' || $property['type'] == 'log') ? 2047 : 255);
-}
-
-$properties['update_time'] = array('type' => 'hidden');
-
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Account', 'context' => $context, 'properties' => $properties)) 
-?>
-
-<?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'date') : ?>
-$('#input_<?php echo $propertyId ?>').datepicker();
-	<?php endif;?>
-<?php endforeach ?>
-
-var form = document.getElementById('ppit-form');
-form.onsubmit = function(event) {	
-	var validity = checkAccountUpdateProperties();
-	return validity;
-}
-
-</script>

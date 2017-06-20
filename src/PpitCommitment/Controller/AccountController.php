@@ -26,8 +26,12 @@ class AccountController extends AbstractActionController
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::getTable()->transGet($context->getPlaceId());
 
-		$type = $this->params()->fromRoute('type', 0);
+		$entry = $this->params()->fromRoute('entry');
+    	$type = $this->params()->fromRoute('type', null);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
+
+		if ($entry == 'contact') $status = 'new'; 
+		else $status = 'active';
 		
 		$community_id = (int) $context->getCommunityId();
 		$contact = Vcard::instanciate($community_id);
@@ -47,8 +51,15 @@ class AccountController extends AbstractActionController
     			'types' => $types,
     			'contact' => $contact,
     			'currentEntry' => $currentEntry,
+    			'entry' => $entry,
     			'type' => $type,
+    			'status' => $status,
     	));
+    }
+
+    public function contactIndexAction()
+    {
+    	return $this->indexAction();
     }
 
     public function getFilters($params, $type)
@@ -107,8 +118,10 @@ class AccountController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
 
-    	$type = $this->params()->fromRoute('type', null);
-    	 
+    	$entry = $this->params()->fromRoute('entry');
+    	$type = $this->params()->fromRoute('type');
+    	$status = $this->params()->fromQuery('status');
+
     	$params = $this->getFilters($this->params(), $type);
 //    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
 
@@ -118,7 +131,7 @@ class AccountController extends AbstractActionController
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
     
     	// Retrieve the list
-    	$accounts = Account::getList($type, $params, $major, $dir, $mode);
+    	$accounts = Account::getList($type, $entry, $params, $major, $dir, $mode);
 
     	// Return the link list
     	$view = new ViewModel(array(
@@ -126,6 +139,7 @@ class AccountController extends AbstractActionController
     			'config' => $context->getconfig(),
     			'accounts' => $accounts,
 				'places' => Place::getList(array()),
+    			'entry' => $entry,
     			'type' => $type,
     			'mode' => $mode,
     			'params' => $params,
@@ -199,8 +213,8 @@ class AccountController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
     	
-    	// Retrieve the type
-    	$type = $this->params()->fromRoute('type', null);
+    	// Retrieve the entry and type
+    	$type = $this->params()->fromRoute('type');
 
     	$id = (int) $this->params()->fromRoute('id', 0);
     	$action = $this->params()->fromRoute('act', null);
@@ -261,7 +275,7 @@ class AccountController extends AbstractActionController
 			        		}
 	    				}
 	    				elseif ($action == 'delete') {
-	    					$return = $account->customer_community->delete($request->getPost('update_time'));
+	    					$return = $account->customer_community->delete(null);
 	    					if ($return != 'OK') $error = $return;
 	    					else {
 	    						$return = $account->delete($request->getPost('update_time'));
@@ -604,7 +618,7 @@ class AccountController extends AbstractActionController
 
     	$type = $this->params()->fromRoute('type', null);
 
-    	$account = Account::instanciate();
+    	$account = Account::instanciate($type);
     
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
@@ -620,16 +634,32 @@ class AccountController extends AbstractActionController
 
     			// Load the input data
     			$data = array();
-				foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
+				foreach ($context->getConfig('commitmentAccount/register'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $unused) {
 			    	$data[$propertyId] =  $request->getPost($propertyId);
 				}
-		    	if ($account->loadData($data) != 'OK') throw new \Exception('View error');
+				$data['origine'] = 'web';
+
+				$communityData = array('name' => ($account->customer_name) ? $account->customer_name : $account->n_last.', '.$account->n_first);
+    			$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
+				if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
+
+				// Add the main contact
+				if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
+				if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
+				if ($account->loadData($data) != 'OK') throw new \Exception('View error');
 
     			// Atomically save
     			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				$return = $account->add(false /* Without creating the user */);
+    				$account->customer_community->add();
+		        	$account->customer_community_id = $account->customer_community->id;
+					$account->contact_1->community_id = $account->customer_community->id;
+	    			$account->contact_1 = Vcard::optimize($account->contact_1);
+	    			$account->customer_community->contact_1_id = $account->contact_1->id;
+	    			$account->customer_community->contact_1_status = 'main';
+	    			$account->customer_community->update($account->customer_community->update_time);
+    				$return = $account->add();
     
     				if ($return != 'OK') {
     					$connection->rollback();
@@ -647,17 +677,18 @@ class AccountController extends AbstractActionController
     			$action = null;
     		}
     	}
-    
+
+		$this->layout('/layout/widget-layout');
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
     			'type' => $type,
     			'account' => $account,
+				'places' => Place::getList(array()),
     			'csrfForm' => $csrfForm,
     			'error' => $error,
     			'message' => $message
     	));
-    	$view->setTerminal(true);
     	return $view;
     }
 

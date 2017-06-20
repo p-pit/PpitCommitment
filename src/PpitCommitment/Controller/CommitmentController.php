@@ -46,6 +46,7 @@ class CommitmentController extends AbstractActionController
     	$context = Context::getCurrent();
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::getTable()->transGet($context->getPlaceId());
+		
     	$type = $this->params()->fromRoute('type', null);
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-PIT Engagements';
@@ -79,8 +80,8 @@ class CommitmentController extends AbstractActionController
     			'applicationId' => $applicationId,
     			'applicationName' => $applicationName,
 //    			'applications' => $applications,
-    			'types' => $types,
     			'type' => $type,
+    			'types' => $types,
     			'params' => $params,
 	    		'products' => Product::getList(null, array()),
 	    		'options' => ProductOption::getList(null, array()),
@@ -206,7 +207,6 @@ class CommitmentController extends AbstractActionController
    		$view = new ViewModel(array(
    				'context' => $context,
 				'config' => $context->getconfig(),
-   				'accounts' => Account::getList(null, $params, 'customer_name', 'ASC'),
    				'subscriptions' => Subscription::getList(array(), 'product_identifier', 'ASC'),
 //   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'type' => $type,
@@ -356,18 +356,19 @@ class CommitmentController extends AbstractActionController
     			$data = array();
     			$data['caption'] = $request->getPost('caption');
     			$data['is_active'] = 1;
+    			$data['applications'] = array('p-pit-admin' => false, 'p-pit-engagements' => true);
     			$rc = $instance->loadData($data);
     			if ($rc != 'OK') throw new \Exception('View error');
 
     			$data = array();
-    			$data['applications'] = array('p-pit-admin' => false, 'p-pit-engagements' => true, 'p-pit-studies' => false);
+    			$data['applications'] = array('p-pit-admin' => false, 'p-pit-engagements' => true);
     			$data['n_title'] = $request->getPost('n_title');
     			$data['n_first'] = $request->getPost('n_first');
     			$data['n_last'] = $request->getPost('n_last');
     			$data['email'] = $request->getPost('email');
     			$data['tel_work'] = $request->getPost('tel_work');
     			$data['tel_cell'] = null;
-    			$data['roles'] = array('admin' => true, 'sales_manager' => true, 'manager' => true);
+    			$data['roles'] = array('admin' => 'admin', 'sales_manager' => 'sales_manager');
     			$data['is_notified'] = 1;
     			$data['is_demo_mode_active'] = 1;
     			$rc = $contact->loadData($data);
@@ -639,7 +640,7 @@ class CommitmentController extends AbstractActionController
     			'type' => $commitment->type,
     			'id' => $id,
     			'action' => $action,
-    			'accounts' => Account::getList(null, array(), 'customer_name', 'ASC'),
+    			'accounts' => Account::getList(null, 'account', array(), 'customer_name', 'ASC'),
     			'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,

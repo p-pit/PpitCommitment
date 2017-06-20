@@ -18,7 +18,9 @@ class TermController extends AbstractActionController
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::getTable()->transGet($context->getPlaceId());
-		
+
+    	$type = $this->params()->fromRoute('type', 0);
+
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
 		$currentEntry = $this->params()->fromQuery('entry', 'term');
@@ -33,6 +35,7 @@ class TermController extends AbstractActionController
     			'applicationName' => $applicationName,
     			'types' => $types,
     			'currentEntry' => $currentEntry,
+    			'type' => $type,
     	));
     }
 

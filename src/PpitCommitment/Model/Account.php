@@ -29,6 +29,8 @@ class Account implements InputFilterAwareInterface
     public $supplier_community_id;
     public $opening_date;
     public $closing_date;
+    public $callback_date;
+    public $origine;
     public $contact_history;
     public $terms_of_sales;
     public $property_1;
@@ -185,6 +187,8 @@ class Account implements InputFilterAwareInterface
         $this->supplier_community_id = (isset($data['supplier_community_id'])) ? $data['supplier_community_id'] : null;
         $this->opening_date = (isset($data['opening_date'])) ? $data['opening_date'] : null;
         $this->closing_date = (isset($data['closing_date']) && $data['closing_date'] != '9999-12-31') ? $data['closing_date'] : null;
+        $this->callback_date = (isset($data['callback_date']) && $data['callback_date'] != '9999-12-31') ? $data['callback_date'] : null;
+        $this->origine = (isset($data['origine'])) ? $data['origine'] : null;
         $this->contact_history = (isset($data['contact_history'])) ? json_decode($data['contact_history'], true) : null;
         $this->terms_of_sales = (isset($data['terms_of_sale'])) ? json_decode($data['terms_of_sale'], true) : null;
         $this->property_1 = (isset($data['property_1'])) ? $data['property_1'] : null;
@@ -314,6 +318,8 @@ class Account implements InputFilterAwareInterface
     	$data['supplier_community_id'] =  (int) $this->supplier_community_id;
     	$data['opening_date'] =  ($this->opening_date) ? $this->opening_date : null;
     	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : null;
+    	$data['callback_date'] =  ($this->callback_date) ? $this->callback_date : null;
+    	$data['origine'] =  ($this->origine) ? $this->origine : null;
     	$data['contact_history'] = $this->contact_history;
     	$data['terms_of_sales'] =  $this->terms_of_sales;
     	$data['property_1'] =  ($this->property_1) ? $this->property_1 : null;
@@ -439,6 +445,7 @@ class Account implements InputFilterAwareInterface
     {
     	$data = $this->getProperties();
     	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : '9999-12-31';
+    	$data['callback_date'] =  ($this->callback_date) ? $this->callback_date : '9999-12-31';
     	$data['contact_history'] = json_encode($this->contact_history);
     	$data['terms_of_sales'] =  ($this->terms_of_sales) ? json_encode($this->terms_of_sales) : null;
     	$data['json_property_1'] = json_encode($this->json_property_1);
@@ -514,7 +521,7 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($type, $params, $major, $dir, $mode = 'todo')
+    public static function getList($type, $entry, $params, $major, $dir, $mode = 'todo')
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
@@ -530,18 +537,20 @@ class Account implements InputFilterAwareInterface
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
 		$where->notEqualTo('commitment_account.status', 'deleted');
-
+		if ($entry == 'contact') $where->in('commitment_account.status', array('new', 'warm', 'cold'));
+		else $where->in('commitment_account.status', array('active', 'inactive', 'gone'));
+		
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-    		$where->equalTo('commitment_account.status', 'active');
+    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
     	}
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'status') $where->equalTo('commitment_account.status', $params[$propertyId]);
-    			elseif ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
+    			elseif (strpos($params[$propertyId], ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $params[$propertyId])));
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
     	}
@@ -752,6 +761,14 @@ class Account implements InputFilterAwareInterface
 		    	$this->closing_date = trim(strip_tags($data['closing_date']));
 		    	if ($this->closing_date && !checkdate(substr($this->closing_date, 5, 2), substr($this->closing_date, 8, 2), substr($this->closing_date, 0, 4))) return 'Integrity';
 			}
+    		if (array_key_exists('callback_date', $data)) {
+		    	$this->callback_date = trim(strip_tags($data['callback_date']));
+		    	if ($this->callback_date && !checkdate(substr($this->callback_date, 5, 2), substr($this->callback_date, 8, 2), substr($this->callback_date, 0, 4))) return 'Integrity';
+			}
+    		if (array_key_exists('origine', $data)) {
+				$this->origine = trim(strip_tags($data['origine']));
+				if (strlen($this->origine) > 255) return 'Integrity';
+			}
 			if (array_key_exists('contact_history', $data) && $data['contact_history']) {
 				$this->contact_history[] = array(
 						'time' => Date('Y-m-d G:i:s'),
@@ -881,16 +898,16 @@ class Account implements InputFilterAwareInterface
     
     public function delete($update_time)
     {
-		$context = Context::getCurrent();
-    	$account = Account::get($this->id);
+    	$context = Context::getCurrent();
+    	$account = Account::getTable()->get($this->id);
     
     	// Isolation check
-    	if ($account->update_time > $update_time) return 'Isolation';
+    	if ($update_time && $account->update_time > $update_time) return 'Isolation';
     	$user = User::get($this->contact_1->id, 'vcard_id');
     	if ($user) $user->delete($user->update_time);
 
-    	$this->contact_1->delete($this->contact_1->update_time);
-    	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->customer_community->update_time);
+/*    	$this->contact_1->delete($this->contact_1->update_time);
+    	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->customer_community->update_time);*/
     	 
     	$this->status = 'deleted';
     	Account::getTable()->save($this);

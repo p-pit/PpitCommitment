@@ -26,19 +26,30 @@
 			<button type="button" class="btn btn-default index-btn account-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="account-detail-anchor_0">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
-		</td>
-		
-		<td colspan="6">
 <?php if ($context->isDemoModeActive()) : ?>
 			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/list'.(($type) ? '/'.$type : '').'/add'][$context->getLocale()] ?>">
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 <?php endif;?>
-			&nbsp;
+		</td>
+		
+		<td colspan="6">
+<?php if ($entry == 'contact') : ?>
+			<button type="button" class="btn btn-default index-btn" title="<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale())?>" id="account-register-anchor">
+				<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale()) ?>
+			</button>
+<?php endif;?>
 		</td>
 	</tr>
 
 <?php $i = 0; foreach ($accounts as $account) : ?>
+	<?php 
+	$color = null;
+	if ($account->status == 'new') $backgroundColor = 'LightGreen';
+	elseif ($account->status == 'warm') $backgroundColor = 'LightSalmon';
+	elseif ($account->status == 'cold') { $backgroundColor = 'Red'; $color = 'white'; }
+	else $backgroundColor = null;
+	?>
 	
 	<tr class="account">
 	
@@ -56,10 +67,10 @@
 	<?php foreach ($context->getConfig('commitmentAccount/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
 	
 		<?php if ($propertyId == 'customer_name') : ?>
-		<td><?php echo $account->customer_name ?></td>
+		<td style=" <?php if ($backgroundColor) echo 'font-weight: bold; background-color: '.$backgroundColor.';' ?> <?php if ($color) echo 'color: '.$color.';' ?>"><?php echo $account->customer_name ?></td>
 	
 		<?php elseif ($propertyId == 'n_fn') : ?>
-		<td><?php echo $account->n_fn ?></td>
+		<td style="<?php if ($backgroundColor) echo 'font-weight: bold; background-color: '.$backgroundColor.';' ?> <?php if ($color) echo 'color: '.$color.';' ?>"><?php echo $account->n_fn ?></td>
 	
 		<?php elseif ($rendering == 'text') : ?>
 		<td><?php echo $account->properties[$propertyId] ?></td>
