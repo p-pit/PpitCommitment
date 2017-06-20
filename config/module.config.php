@@ -138,7 +138,7 @@ return array(
 	       						'update' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
-		        								'route' => '/update[/:type][/:id][/:act]',
+		        								'route' => '/update[/:id][/:type]',
 		        								'constraints' => array(
 		        										'id'     => '[0-9]*',
 		        								),

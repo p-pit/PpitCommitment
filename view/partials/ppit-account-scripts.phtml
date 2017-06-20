@@ -338,8 +338,8 @@ function connectAccountUpdateForm(id, action)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitmentAccount/update', array('type' => $type)) ?>/' + id;
-			if (action) route += '/' + action;
+			route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id + '<?php echo (($type) ? '/'.$type : '') ?>';
+			if (action) route += '?act=' + action;
 			target = 'account-update-panel';
 			xhttp.open('POST', route, true);
 			// Set up a handler for when the request finishes.
@@ -360,8 +360,8 @@ function connectAccountUpdateForm(id, action)
 function getAccountUpdate(id, action) {
 
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitmentAccount/update', array('type' => $type)) ?>/' + id;
-	if (action) route += '/' + action;
+	var route = '<?php echo $this->url('commitmentAccount/update') ?>/' + id + '<?php echo (($type) ? '/'.$type : '') ?>';
+	if (action) route += '?act=' + action;
 
 	xhttp.open('GET', route, true);
 	xhttp.onreadystatechange = function() {
