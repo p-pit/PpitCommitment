@@ -25,7 +25,6 @@ class Account implements InputFilterAwareInterface
     public $place_id;
     public $identifier;
     public $customer_community_id;
-	public $customer_bill_contact_id;
     public $supplier_community_id;
     public $opening_date;
     public $closing_date;
@@ -47,7 +46,10 @@ class Account implements InputFilterAwareInterface
     public $json_property_2;
     public $audit;
     public $update_time;
-        
+    
+    // Depreciated
+    public $customer_bill_contact_id;
+    
     // Joined properties
     public $place_caption;
     public $customer_name;

@@ -300,7 +300,7 @@ class CommitmentController extends AbstractActionController
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
 
-    	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+    	if ($context->getConfig('ppitDocument') && array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
     		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
     	}

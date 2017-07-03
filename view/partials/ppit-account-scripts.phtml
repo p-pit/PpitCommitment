@@ -846,7 +846,7 @@ function getAccountDetail(id) {
 function activateAccount() {
 
 	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search', array('type' => $type)) ?>?');
+	loadPanel('index_action', '<?php echo $this->url('commitmentAccount/search', array('entry' => $entry, 'type' => $type)) ?>?');
 
 	<?php
 	$todoTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['todoTitle'][$context->getLocale()] : $this->translate('active', 'ppit-core', $context->getLocale()));

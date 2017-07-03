@@ -100,6 +100,7 @@ class AccountController extends AbstractActionController
     	// Retrieve the context
     	$context = Context::getCurrent();
 
+    	$entry = $this->params()->fromRoute('entry');
     	$type = $this->params()->fromRoute('type', null);
 
     	// Return the link list
@@ -107,6 +108,7 @@ class AccountController extends AbstractActionController
     			'context' => $context,
     			'config' => $context->getconfig(),
 				'places' => Place::getList(array()),
+    			'entry' => $entry,
     			'type' => $type,
     	));
     	$view->setTerminal(true);

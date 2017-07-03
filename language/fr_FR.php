@@ -27,6 +27,7 @@
 			'Commitment date' => 'Date de l\'engagement',
 			'Confirm a commitment' => 'Confirmer un engagement',
 			'Coming events' => 'Evènements à venir',
+			'Contacts' => 'Contactes',
 			'Selected criteria' => 'Critères sélectionnés',
 			'Dates' => 'Dates',
 			'Deadline' => 'Echéance',

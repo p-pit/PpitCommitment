@@ -27,7 +27,11 @@
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 			</button>
 <?php if ($context->isDemoModeActive()) : ?>
-			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/list'.(($type) ? '/'.$type : '').'/add'][$context->getLocale()] ?>">
+	<?php
+	if ($entry == 'contact') $qualifier = 'commitmentAccount/list/contact/add';
+	else $qualifier = 'commitmentAccount/list'.(($type) ? '/'.$type : '').'/add';
+	?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')[$qualifier][$context->getLocale()] ?>">
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 <?php endif;?>
@@ -58,7 +62,11 @@
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $account->id ?>-glyphicon"></span>
 			</button>
 <?php if ($i == 0 && $context->isDemoModeActive()) : ?>
-			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/list'.(($type) ? '/'.$type : '').'/detail'][$context->getLocale()] ?>">
+	<?php
+	if ($entry == 'contact') $qualifier = 'commitmentAccount/list/contact/detail';
+	else $qualifier = 'commitmentAccount/list'.(($type) ? '/'.$type : '').'/detail';
+	?>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')[$qualifier][$context->getLocale()] ?>">
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 <?php endif;?>

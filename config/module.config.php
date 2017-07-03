@@ -81,7 +81,7 @@ return array(
 	       						'search' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/search[/:type]',
+        										'route' => '/search[/:entry][/:type]',
         										'defaults' => array(
         												'action' => 'search',
         										),
@@ -2353,11 +2353,11 @@ L\'équipe P-Pit
 			'commitmentAccount/search/x' => array(
 					'en_US' => '
 <h4>Return in default mode</h4>
-<p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered on active accounts.</p>
+<p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered in todo-list mode.</p>
 ',
 					'fr_FR' => '
 <h4>Retour au mode par défaut</h4>
-<p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée sur les comptes actifs.</p>
+<p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée en mode todo-list.</p>
 ',
 			),
 			'commitmentAccount/search/export' => array(
