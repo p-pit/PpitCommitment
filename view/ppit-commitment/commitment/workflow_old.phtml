@@ -38,7 +38,7 @@ $updatableProperties = $context->getConfig('commitment'.(($type) ? '/'.$type : '
 	    		<select class="form-control" id="account_id"  <?php if ($updatableProperties['account_id'] == 'display' || $isDisabled) echo 'disabled="disabled"'?>>
 	    			<option value=""><-- <?php echo $this->translate('Please choose', 'ppit-core', $context->getLocale()) ?> --></option>
 <?php foreach ($accounts as $account) : ?>
-	    			<option value="<?php echo $account->id ?>" <?php if ($commitment->account_id == $account->id) echo 'selected="selected"' ?>><?php echo $account->customer_name ?></option>
+	    			<option value="<?php echo $account->id ?>" <?php if ($commitment->account_id == $account->id) echo 'selected="selected"' ?>><?php echo $account->name ?></option>
 <?php endforeach;?>
 	    		</select>
 			</div>

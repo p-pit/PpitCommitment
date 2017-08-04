@@ -77,7 +77,7 @@ class SsmlCommitmentViewHelper
 				elseif ($property['type'] == 'select')  $sheet->setCellValue($colNames[$i].$j, (array_key_exists($commitment->properties[$propertyId], $property['modalities'])) ? $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()] : $commitment->properties[$propertyId]);
 				else $sheet->setCellValue($colNames[$i].$j, $commitment->properties[$propertyId]);
 			}
-			$sheet->setCellValue($colNames[$i++].$j, $commitment->customer_name);
+			$sheet->setCellValue($colNames[$i++].$j, $commitment->account_name);
 			$sheet->setCellValue($colNames[$i++].$j, $commitment->product_caption);
 			$sheet->setCellValue($colNames[$i++].$j, $commitment->unit_price);
 			$sheet->setCellValue($colNames[$i++].$j, $commitment->quantity);

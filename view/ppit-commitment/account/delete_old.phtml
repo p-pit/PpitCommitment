@@ -15,11 +15,7 @@ $anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
 <table class="table-condensed">
 	<tr>
 		<td class="ppit-header-caption"><?php echo $this->translate('Customer', 'ppit-contact', $context->getLocale())?></td>
-		<td><?php echo $account->customer_name ?>
-	</tr>
-	<tr>
-		<td class="ppit-header-caption"><?php echo $this->translate('Supplier', 'ppit-contact', $context->getLocale())?></td>
-		<td><?php echo $account->supplier_name ?>
+		<td><?php echo $account->name ?>
 	</tr>
 	<tr>
 		<td class="ppit-header-caption"><?php echo $this->translate('Opening date', 'ppit-core', $context->getLocale())?></td>

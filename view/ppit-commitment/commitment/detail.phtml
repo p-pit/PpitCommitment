@@ -1,6 +1,6 @@
 <div class="panel panel-default">
 	<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
-		<strong><?php echo ($commitment->id) ? $commitment->customer_name.' - '.$commitment->caption : $this->translate('Add a commitment', 'ppit-commitment', $context->getLocale()) ?></strong>
+		<strong><?php echo ($commitment->id) ? $commitment->account_name.' - '.$commitment->caption : $this->translate('Add a commitment', 'ppit-commitment', $context->getLocale()) ?></strong>
  		<div class="btn-group pull-right">
 			<button type="button" class="btn btn-default" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>" id="remove-anchor">
 				<span class="glyphicon glyphicon-remove"></span>

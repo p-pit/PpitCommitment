@@ -130,7 +130,7 @@ class Commitment implements InputFilterAwareInterface
 	public $update_time;
 
 	// Additional field from joined tables
-	public $customer_name;
+	public $account_name;
 	public $properties;
 	
 	// Transient properties
@@ -263,7 +263,7 @@ class Commitment implements InputFilterAwareInterface
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
         // Additional properties from joined tables
-        $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
+        $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
 
         // Denormalized properties
         $this->site_id = (isset($data['site_id'])) ? $data['site_id'] : null;
@@ -382,9 +382,8 @@ class Commitment implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
-    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array(), 'left')
-    		->join('core_community', 'commitment_account.customer_community_id = core_community.id', array('customer_name' => 'name'), 'left')
-    		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
+    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array('account_name' => 'name'), 'left');
+//    		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
     	
     	$where = new Where();
     	$where->notEqualTo('commitment.status', 'deleted');
@@ -412,7 +411,7 @@ class Commitment implements InputFilterAwareInterface
 			foreach ($params as $propertyId => $property) {
 				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
-				elseif ($propertyId == 'customer_name') $where->like('core_community.name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'account_name') $where->like('commitment_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -439,13 +438,8 @@ class Commitment implements InputFilterAwareInterface
     	if (!$commitment) return null;
         if ($commitment->account_id) {
 	    	$commitment->account = Account::get($commitment->account_id);
-	    	$community = Community::get($commitment->account->customer_community_id);
-	    	$commitment->customer_name = $community->name;
+	    	$commitment->account_name = $commitment->account->name;
     	}
-/*    	if ($commitment->subscription_id) {
-	    	$subscription = Subscription::get($commitment->subscription_id);
-    		$commitment->product_identifier = $subscription->product_identifier;
-    	}*/
     	$commitment->properties = $commitment->toArray();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 
@@ -464,15 +458,9 @@ class Commitment implements InputFilterAwareInterface
     	foreach ($commitment->terms as $term) $commitment->termSum += $term->amount;
     	$data = $commitment->toarray();
         if ($commitment->account_id) {
-	    	$data['account'] = Account::getArray($commitment->account_id);
-	    	$community = Community::get($data['account']['customer_community_id']);
-	    	$data['customer_name'] = $community->name;
+	    	$data['account'] = Account::get($commitment->account_id)->getProperties();
+	    	$data['account_name'] = $data['account']['name'];
     	}
-/*    	if ($commitment->account->contact_1) $data['account']['contact_1'] = $commitment->account->contact_1->toArray();
-    	if ($commitment->account->contact_2) $data['account']['contact_2'] = $commitment->account->contact_2->toArray();
-    	if ($commitment->account->contact_3) $data['account']['contact_3'] = $commitment->account->contact_3->toArray();
-    	if ($commitment->account->contact_4) $data['account']['contact_4'] = $commitment->account->contact_4->toArray();
-    	if ($commitment->account->contact_5) $data['account']['contact_5'] = $commitment->account->contact_5->toArray();*/
     	return $data;
     }
 
@@ -522,9 +510,7 @@ class Commitment implements InputFilterAwareInterface
     
     public static function instanciateFromJson($type, $content)
     {
-    	$customerCommunity = Community::get($content['buyer_party'], 'name');
-
-		$account = Account::get($customerCommunity->id, 'customer_community_id');
+		$account = Account::get($content['buyer_party'], 'name');
 		if (!$account) return null;
 
 		$commitment = Commitment::instanciate($type);
@@ -576,7 +562,7 @@ class Commitment implements InputFilterAwareInterface
     					$property = $context->getConfig('commitment')['properties'][$propertyId];
     				}
     				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-    				if ($propertyId == 'customer_name') $arguments[] = $this->customer_name;
+    				if ($propertyId == 'account_name') $arguments[] = $this->account_name;
     				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($this->properties[$propertyId]);
     				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($this->properties[$propertyId], 2);
     				elseif ($property['type'] == 'select') $arguments[] = $property['modalities'][$this->properties[$propertyId]][$context->getLocale()];
@@ -688,9 +674,9 @@ class Commitment implements InputFilterAwareInterface
 			if (strlen($this->customer_identifier) > 255) return 'Integrity';
 		}
 
-		if (array_key_exists('customer_name', $data)) {
-			$this->customer_name = trim(strip_tags($data['customer_name']));
-			if (strlen($this->customer_name) > 255) return 'Integrity';
+		if (array_key_exists('account_name', $data)) {
+			$this->account_name = trim(strip_tags($data['account_name']));
+			if (strlen($this->account_name) > 255) return 'Integrity';
 		}
 
 		if (array_key_exists('customer_n_fn', $data)) {
@@ -1086,11 +1072,7 @@ class Commitment implements InputFilterAwareInterface
 
     	// Save the order form and the commitment
     	if ($this->files) {
-    		if ($context->getCommunityId()) {
-    			$community = Community::get($context->getCommunityId());
-    			$root_id = $community->root_document_id;
-    		}
-    		else $root_id = Document::getTable()->get(0, 'parent_id')->id; 
+    		$root_id = Document::getTable()->get(0, 'parent_id')->id; 
     		$document = Document::instanciate($root_id);
     		$document->files = $this->files;
     		$document->saveFile();
@@ -1360,8 +1342,7 @@ class Commitment implements InputFilterAwareInterface
     	// Retrieve commitments and count
     	$select = Commitment::getTable()->getSelect()
     		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left')
-    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array(), 'left')
-    		->join('core_community', 'commitment_account.customer_community_id = core_community.id', array('customer_name' => 'name'), 'left');
+    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array('account_name' => 'name'), 'left');
     	$where = new Where();
     	$where->in('commitment.instance_id', $instanceIds);
 		$where->notEqualTo('commitment.credit_status', 'closed');
@@ -1392,7 +1373,7 @@ class Commitment implements InputFilterAwareInterface
 			$creditModified = false;
 			$blocked = array();
 			foreach($credit->consumers as $commitment) {
-				if ($commitment->credit_status == 'blocked') $blocked[] = $commitment->customer_name.' - '.$commitment->caption;
+				if ($commitment->credit_status == 'blocked') $blocked[] = $commitment->account_name.' - '.$commitment->caption;
     			else {
 					if ($commitment->next_credit_consumption_date <= date('Y-m-d', strtotime(date('Y-m-d').' + 7 days'))) $counter7++;
 	    			if ($commitment->next_credit_consumption_date <= date('Y-m-d')) $counter0++;
@@ -1407,7 +1388,7 @@ class Commitment implements InputFilterAwareInterface
 		    						'period' => date('Y-m'),
 			    					'quantity' => -1,
 			    					'status' => 'used',
-			    					'reference' => $commitment->customer_name.' - '.$commitment->caption,
+			    					'reference' => $commitment->account_name.' - '.$commitment->caption,
 			    					'time' => Date('Y-m-d G:i:s'),
 			    					'n_fn' => 'P-PIT',
 			    					'comment' => 'Utilisation mensuelle pour la période du '.$context->decodeDate($commitment->last_credit_consumption_date).' au '.$context->decodeDate($commitment->next_credit_consumption_date),
@@ -1427,7 +1408,7 @@ class Commitment implements InputFilterAwareInterface
 		    						'period' => date('Y-m'),
 			    					'quantity' => 0,
 			    					'status' => 'blocked',
-			    					'reference' => $commitment->customer_name.' - '.$commitment->caption,
+			    					'reference' => $commitment->account_name.' - '.$commitment->caption,
 			    					'time' => Date('Y-m-d G:i:s'),
 			    					'n_fn' => 'P-PIT',
 			    					'comment' => array(

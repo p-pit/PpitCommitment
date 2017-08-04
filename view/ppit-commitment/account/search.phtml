@@ -80,6 +80,12 @@
 			if ($propertyId == 'place_id') foreach ($places as $place) {
 				$modalities[$place->id] = $place->caption;
 			} 
+			elseif ($propertyId == 'status' && $entry == 'contact') {
+				$modalities['*'] = '*';
+				$modalities['new'] = $property['modalities']['new'][$context->getLocale()];
+				$modalities['warm'] = $property['modalities']['warm'][$context->getLocale()];
+				$modalities['cold'] = $property['modalities']['cold'][$context->getLocale()];
+			} 
 			else foreach ($property['modalities'] as $modalityId => $modality) {
 				$modalities[$modalityId] = $modality[$context->getLocale()];
 			}

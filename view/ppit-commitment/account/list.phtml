@@ -1,6 +1,7 @@
 <table class="table table-striped ppit_index">
 	<tr>
 		<th>&nbsp;</th>
+		<th>&nbsp;</th>
 
 <?php $first = true; foreach ($context->getConfig('commitmentAccount/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
 		<th align="center">
@@ -22,6 +23,29 @@
 <?php endforeach;?>
 
 	<tr>
+		<td>
+			<input type="checkbox" class="account-checkbox" id="account-checkbox" title="<?php echo $this->translate('Check all', 'ppit-core', $context->getLocale()) ?>"></input>
+<?php if ($context->isDemoModeActive()) : ?>
+			<br>
+			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/list/checkAll'][$context->getLocale()] ?>">
+			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+			</a>
+			<br>
+<?php endif;?>
+		</td>
+
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn account-group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="account-group-anchor">
+				<span class="glyphicon glyphicon-list-alt" id="group-glyphicon"></span>
+			</button>
+<?php if ($context->isDemoModeActive()) : ?>
+				<br>
+				<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/list/groupedActions'][$context->getLocale()] ?>">
+				    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+				</a>
+<?php endif;?>
+		</td>
+		
 		<td style="text-align: center">
 			<button type="button" class="btn btn-default index-btn account-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="account-detail-anchor_0">
 				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
@@ -37,7 +61,7 @@
 <?php endif;?>
 		</td>
 		
-		<td colspan="6">
+		<td colspan="5">
 <?php if ($entry == 'contact') : ?>
 			<button type="button" class="btn btn-default index-btn" title="<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale())?>" id="account-register-anchor">
 				<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale()) ?>
@@ -46,7 +70,12 @@
 		</td>
 	</tr>
 
+	<input type="hidden" id="account-number" value="<?php echo count($accounts) ?>" />
+
 <?php $i = 0; foreach ($accounts as $account) : ?>
+	
+	<input type="hidden"  id="account_<?php echo $i ?>" value="<?php echo $account->id ?>" />
+
 	<?php 
 	$color = null;
 	if ($account->status == 'new') $backgroundColor = 'LightGreen';
@@ -56,6 +85,9 @@
 	?>
 	
 	<tr class="account">
+		<td>
+			<input type="checkbox" class="account-checkbox" id="account-checkbox_<?php echo $i ?>"></input>
+		</td>
 	
 		<td style="text-align: center">
 			<button type="button" class="btn btn-default index-btn account-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="account-detail-anchor_<?php echo $account->id ?>">
@@ -74,8 +106,8 @@
 
 	<?php foreach ($context->getConfig('commitmentAccount/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
 	
-		<?php if ($propertyId == 'customer_name') : ?>
-		<td style=" <?php if ($backgroundColor) echo 'font-weight: bold; background-color: '.$backgroundColor.';' ?> <?php if ($color) echo 'color: '.$color.';' ?>"><?php echo $account->customer_name ?></td>
+		<?php if ($propertyId == 'name') : ?>
+		<td style=" <?php if ($backgroundColor) echo 'font-weight: bold; background-color: '.$backgroundColor.';' ?> <?php if ($color) echo 'color: '.$color.';' ?>"><?php echo $account->name ?></td>
 	
 		<?php elseif ($propertyId == 'n_fn') : ?>
 		<td style="<?php if ($backgroundColor) echo 'font-weight: bold; background-color: '.$backgroundColor.';' ?> <?php if ($color) echo 'color: '.$color.';' ?>"><?php echo $account->n_fn ?></td>
@@ -110,5 +142,19 @@
 	</tr>
 	
 <?php $i++; endforeach; ?>
+
+	<tr>
+		<td>
+			<input type="checkbox" class="account-checkbox" id="down-account-checkbox"></input>
+		</td>
+
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn account-group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="account-down-group-anchor">
+				<span class="glyphicon glyphicon-list-alt" id="down-group-glyphicon"></span>
+			</button>
+		</td>
+		
+		<td colspan="6">&nbsp;</td>
+	</tr>
 
 </table>

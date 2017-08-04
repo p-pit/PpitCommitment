@@ -113,13 +113,13 @@ class PdfInvoiceViewHelper
     	if ($commitment->customer_adr_state) $addressee .= $commitment->customer_adr_state."\n";
     	if ($commitment->customer_adr_country) $addressee .= $commitment->customer_adr_country."\n";
     	$pdf->MultiCell(80, 5, $addressee, 0, 'L', 0, 1, '', '', true);
-    	$pdf->Ln(10);
+    	$pdf->Ln(5);
 
     	// Title
     	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma'.'</strong></div>';
     	else $text = '<div style="text-align: center"><strong>Facture n° '.$commitment->invoice_identifier.'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
-    	$pdf->Ln(10);
+    	$pdf->Ln(5);
 
     	// Invoice references
 		$pdf->SetFillColor(255, 255, 255);
@@ -140,7 +140,7 @@ class PdfInvoiceViewHelper
 						$property = $context->getConfig('commitment')['properties'][$propertyId];
 					}
     				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-	    			if ($propertyId == 'customer_name') $arguments[] = $commitment->customer_name;
+	    			if ($propertyId == 'account_name') $arguments[] = $commitment->account_name;
 	    			elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;
 	    			elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
 	    			elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
@@ -157,7 +157,7 @@ class PdfInvoiceViewHelper
     	}
     	 
     	// Invoice lines
-    	$pdf->Ln(10);
+    	$pdf->Ln();
     	$pdf->SetDrawColor(0, 0, 0);
     	$pdf->SetFillColor(0, 97, 105);
     	$pdf->SetFont('', '', 8);
@@ -165,9 +165,9 @@ class PdfInvoiceViewHelper
     	$pdf->SetTextColor(255);
     	$currencySymbol = $context->getConfig('commitment/'.$type)['currencySymbol'];
     	$taxComputing = (($context->getConfig('commitment/'.$type)['tax'] == 'excluding') ? 'HT' : 'TTC');
-    	$pdf->Cell(105, 7, 'Libellé', 1, 0, 'C', 1);
+    	$pdf->Cell(110, 7, 'Libellé', 1, 0, 'C', 1);
     	$pdf->Cell(25, 7, 'PU ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Quantité', 1, 0, 'C', 1);
+    	$pdf->Cell(20, 7, 'Quantité', 1, 0, 'C', 1);
     	$pdf->Cell(25, 7, 'Montant ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'R', 1);
     	// Color and font restoration
     	$pdf->SetFillColor(239, 239, 239);
@@ -180,42 +180,42 @@ class PdfInvoiceViewHelper
     	else $product_caption = $commitment->description;
     	if ($proforma) {
     		$pdf->Ln();
-    		$pdf->Cell(105, 6, $product_caption, 'LR', 0, 'L', $color);
+    		$pdf->Cell(110, 6, $product_caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->unit_price, 2), 'LR', 0, 'R', $color);
-    		$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
+    		$pdf->Cell(20, 6, $commitment->quantity, 'LR', 0, 'C', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($commitment->amount, 2), 'LR', 0, 'R', $color);
     		$color = ($color+1)%2;
     	}
     	else {
 	    	if ($commitment->taxable_1_amount != 0) {
 	    		$pdf->Ln();
-	    		$pdf->Cell(105, 6, $product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
+	    		$pdf->Cell(110, 6, $product_caption.' (TVA 20%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_1_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
+		    	$pdf->Cell(20, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_1_amount, 2), 'LR', 0, 'R', $color);
 	    		$color = ($color+1)%2;
 	    	}
 	        if ($commitment->taxable_2_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(110, 6, $product_caption.' (TVA 10%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_2_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
+		    	$pdf->Cell(20, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_2_amount, 2), 'LR', 0, 'R', $color);
 	    		$color = ($color+1)%2;
 	    	}
 	        if ($commitment->taxable_3_amount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(110, 6, $product_caption.' (TVA 5,5%)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_3_amount / $commitment->quantity, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
+		    	$pdf->Cell(20, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($commitment->taxable_3_amount, 2), 'LR', 0, 'R', $color);
 	    		$color = ($color+1)%2;
 	    	}
 	        if ($taxExemptAmount != 0) {
 	    		$pdf->Ln();
-	        	$pdf->Cell(105, 6, $product_caption.' (exonéré)', 'LR', 0, 'L', $color);
+	        	$pdf->Cell(110, 6, $product_caption.' (exonéré)', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount, 2), 'LR', 0, 'R', $color);
-		    	$pdf->Cell(25, 6, $commitment->quantity, 'LR', 0, 'C', $color);
+		    	$pdf->Cell(20, 6, $commitment->quantity, 'LR', 0, 'C', $color);
 		    	$pdf->Cell(25, 6, $context->formatFloat($taxExemptAmount * $commitment->quantity, 2), 'LR', 0, 'R', $color);
 	    		$color = ($color+1)%2;
 	    	}
@@ -231,9 +231,9 @@ class PdfInvoiceViewHelper
 	    		elseif ($option['vat_id'] == 3) $taxCaption = ' (TV 5,5%)';
 	    		$caption .= $taxCaption;
     		}
-    		$pdf->Cell(105, 6, $caption, 'LR', 0, 'L', $color);
+    		$pdf->Cell(110, 6, $caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($option['unit_price'], 2), 'LR', 0, 'R', $color);    		
-    		$pdf->Cell(25, 6, $option['quantity'], 'LR', 0, 'C', $color);    		
+    		$pdf->Cell(20, 6, $option['quantity'], 'LR', 0, 'C', $color);    		
     		$pdf->Cell(25, 6, $context->formatFloat($option['amount'], 2), 'LR', 0, 'R', $color);
     		$color = ($color+1)%2;
     	}
@@ -267,7 +267,7 @@ class PdfInvoiceViewHelper
     	$pdf->Cell(25, 6, $context->formatFloat($commitment->tax_inclusive, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
 
     	// Terms
-	    $pdf->Ln(10);
+	    $pdf->Ln();
 	    $text = '<strong>Echéancier</strong>';
 	    $pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln();

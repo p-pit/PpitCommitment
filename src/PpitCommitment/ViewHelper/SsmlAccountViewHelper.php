@@ -42,7 +42,7 @@ class SsmlAccountViewHelper
 				$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
 				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				$i++;
-				if ($propertyId == 'customer_name') $sheet->setCellValue($colNames[$i].$j, $account->customer_name);
+				if ($propertyId == 'name') $sheet->setCellValue($colNames[$i].$j, $account->name);
 				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $account->place_caption);
 				elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $account->n_first);
 				elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $account->n_last);

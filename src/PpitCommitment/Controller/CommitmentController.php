@@ -120,8 +120,8 @@ class CommitmentController extends AbstractActionController
 		$max_including_options_amount = ($params()->fromQuery('max_including_options_amount', null));
 		if ($max_including_options_amount) $filters['max_including_options_amount'] = $max_including_options_amount;
 
-		$customer_name = ($params()->fromQuery('customer_name', null));
-		if ($customer_name) $filters['customer_name'] = $customer_name;
+		$account_name = ($params()->fromQuery('account_name', null));
+		if ($account_name) $filters['account_name'] = $account_name;
 		
 		$identifier = ($params()->fromQuery('identifier', null));
 		if ($identifier) $filters['identifier'] = $identifier;
@@ -442,7 +442,7 @@ class CommitmentController extends AbstractActionController
 		$view->setTerminal(true);
        	return $view;
     }
-    
+/*    
     public function workflowAction()
     {
 		// Retrieve the context
@@ -541,7 +541,7 @@ class CommitmentController extends AbstractActionController
     			'type' => $type,
     			'id' => $id,
     			'action' => $action,
-    			'accounts' => Account::getList(null, array(), 'customer_name', 'ASC'),
+//    			'accounts' => Account::getList(null, array(), 'name', 'ASC'),
    				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
@@ -550,7 +550,7 @@ class CommitmentController extends AbstractActionController
     	));
 		$view->setTerminal(true);
        	return $view;
-    }
+    }*/
 
     public function updateAction()
     {
@@ -640,7 +640,7 @@ class CommitmentController extends AbstractActionController
     			'type' => $commitment->type,
     			'id' => $id,
     			'action' => $action,
-    			'accounts' => Account::getList(null, 'account', array(), 'customer_name', 'ASC'),
+//    			'accounts' => Account::getList(null, 'account', array(), 'name', 'ASC'),
     			'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
@@ -1165,9 +1165,9 @@ class CommitmentController extends AbstractActionController
 
     		// Retrieve the data from the request
     		$data = array();
-    		$account_identifier = explode('-', $this->request->getPost('account_identifier'));
-    		$account = Account::get($account_identifier[0]);
-    		if (!$account || $account->customer_community_id != $account_identifier[1]) {
+    		$account_identifier = $this->request->getPost('account_identifier');
+    		$account = Account::get($account_identifier);
+    		if (!$account) {
     			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'account_identifier: '.$this->request->getPost('account_identifier').';');
     			$this->getResponse()->setStatusCode('400');
     			return $this->getResponse();

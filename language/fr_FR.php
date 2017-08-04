@@ -90,6 +90,7 @@
 			'Right' => 'A droite',
 			'Sales' => 'CA',
 			'Schedule' => 'Echéancier',
+			'Selected accounts' => 'Comptes sélectionnés',
 			'Settle' => 'Régler',
 			'Settlement' => 'Règlement',
 			'Specific informations' => 'Informations spécifiques',

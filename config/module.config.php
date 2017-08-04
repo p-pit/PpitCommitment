@@ -105,6 +105,33 @@ return array(
         										),
         								),
         						),
+	       						'group' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/group[:type]',
+        										'defaults' => array(
+        												'action' => 'group',
+        										),
+        								),
+        						),
+	       						'sendMessage' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/send-message[:type]',
+        										'defaults' => array(
+        												'action' => 'sendMessage',
+        										),
+        								),
+        						),
+        						'dropboxLink' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/dropbox-link[/:document]',
+        										'defaults' => array(
+        												'action' => 'dropboxLink',
+        										),
+        								),
+        						),
 	       						'detail' => array(
         								'type' => 'segment',
         								'options' => array(
@@ -180,44 +207,17 @@ return array(
 		        								),
 		        						),
 		        				),
+        				'rephase' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/rephase',
+        								'defaults' => array(
+        										'action' => 'rephase',
+        								),
+        						),
+        				),
 	       		),
-	       			'dataList' => array(
-	                    'type' => 'segment',
-	                    'options' => array(
-	                        'route' => '/data-list[/:community_id]',
-		                    'constraints' => array(
-		                    	'community_id' => '[0-9]*',
-		                    ),
-	                    	'defaults' => array(
-	                    		'action' => 'dataList',
-	                        ),
-	                    ),
-	                ),
-	       			'delete' => array(
-	                    'type' => 'segment',
-	                    'options' => array(
-	                        'route' => '/delete[/:id]',
-		                    'constraints' => array(
-		                    	'id' => '[0-9]*',
-		                    ),
-	                    	'defaults' => array(
-	                            'action' => 'delete',
-	                        ),
-	                    ),
-	                ),
-/*	       			'list' => array(
-	                    'type' => 'segment',
-	                    'options' => array(
-	                        'route' => '/list[/:community_id]',
-		                    'constraints' => array(
-		                    	'community_id' => '[0-9]*',
-		                    ),
-	                    	'defaults' => array(
-	                    		'action' => 'list',
-	                        ),
-	                    ),
-	                ),*/
-	       		),
+	       	),
         	'commitment' => array(
         		'type'    => 'segment',
         			'options' => array(
@@ -402,7 +402,7 @@ return array(
         								),
         						),
         				),
-        				'workflow' => array(
+/*        				'workflow' => array(
         						'type' => 'segment',
         						'options' => array(
         								'route' => '/workflow[/:type][/:id][/:act]',
@@ -413,7 +413,7 @@ return array(
         										'action' => 'workflow',
         								),
         						),
-        				),
+        				),*/
         				'try' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -875,17 +875,21 @@ return array(
 				array('route' => 'commitmentAccount/index', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/contactIndex', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/search', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentAccount/group', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentAccount/sendMessage', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentAccount/dropboxLink', 'roles' => array('user')),
+            	array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/put', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/delete', 'roles' => array('sales_manager')),
+//            	array('route' => 'commitmentAccount/delete', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/update', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
-
+            	array('route' => 'commitmentAccount/rephase', 'roles' => array('admin')),
+            		
             	array('route' => 'commitment', 'roles' => array('sales_manager', 'business_owner')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'business_owner')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager', 'business_owner')),
@@ -906,7 +910,7 @@ return array(
             	array('route' => 'commitment/updateTerm', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/suspend', 'roles' => array('admin')),
             	array('route' => 'commitment/serviceAdd', 'roles' => array('guest')),
-            	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
+//            	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/serviceSettle', 'roles' => array('accountant')),
             	array('route' => 'commitment/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/paymentResponse', 'roles' => array('accountant')),
@@ -1089,6 +1093,7 @@ return array(
 					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
 					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
+					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
 					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
 			),
 			'labels' => array(
@@ -1122,7 +1127,7 @@ return array(
 									'fr_FR' => 'Identifiant',
 							),
 					),
-					'customer_name' => array(
+					'name' => array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1219,60 +1224,8 @@ return array(
 							),
 					),
 			),
-			'order' => 'customer_name',
+			'order' => 'name',
 	),
-		
-	// Contact
-/*	'commitmentAccount/contact/index' => array(
-			'title' => array('en_US' => 'P-Pit Contacts', 'fr_FR' => 'P-Pit Contacts'),
-	),
-	'commitmentAccount/contact/search' => array(
-			'title' => array('en_US' => 'Contacts', 'fr_FR' => 'Contacts'),
-			'todoTitle' => array('en_US' => 'to call back', 'fr_FR' => 'à rappeler'),
-			'main' => array(
-					'status' => 'select',
-					'place_id' => 'select',
-					'customer_name' => 'contains',
-					'callback_date' => 'range',
-					'origine' => 'contains',
-			),
-			'more' => array(
-			),
-	),
-	'commitmentAccount/contact/list' => array(
-			'property_1' => 'image',
-			'photo_link_id' => 'photo',
-			'n_fn' => 'text',
-			'property_2' => 'phone',
-	),
-	'commitmentAccount/contact/detail' => array(
-			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
-			'displayAudit' => true,
-			'tabs' => array(
-			),
-	),
-	'commitmentAccount/contact/update' => array(
-			'status' => array('mandatory' => true),
-			'n_first' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
-			'email' => array('mandatory' => false),
-			'tel_work' => array('mandatory' => false),
-			'place_id' => array('mandatory' => true),
-			'callback_date' => array('mandatory' => false),
-			'origine' => array('mandatory' => false),
-			'contact_history' => array('mandatory' => false),
-	),
-	'commitmentAccount/contact/export' => array(
-			'status' => array('mandatory' => true),
-			'n_first' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
-			'email' => array('mandatory' => false),
-			'tel_work' => array('mandatory' => false),
-			'place_id' => array('mandatory' => true),
-			'callback_date' => array('mandatory' => true),
-			'origine' => array('mandatory' => false),
-			'contact_history' => array('mandatory' => false),
-	),*/
 
 	// Account
 	'commitmentAccount/index' => array(
@@ -1282,7 +1235,8 @@ return array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
-				'customer_name' => 'contains',
+					'status' => 'select',
+				'name' => 'contains',
 				'callback_date' => 'range',
 				'origine' => 'contains',
 				'email' => 'contains',
@@ -1291,7 +1245,7 @@ return array(
 			),
 	),
 	'commitmentAccount/list' => array(
-			'customer_name' => 'text',
+			'name' => 'text',
 	),
 	'commitmentAccount/detail' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
@@ -1312,7 +1266,7 @@ return array(
 	'commitmentAccount/update' => array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
-			'customer_name' => array('mandatory' => true),
+			'name' => array('mandatory' => true),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
@@ -1341,7 +1295,7 @@ return array(
 	'commitmentAccount/export' => array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
-			'customer_name' => array('mandatory' => true),
+			'name' => array('mandatory' => true),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
@@ -1352,6 +1306,28 @@ return array(
 			'contact_history' => array('mandatory' => false),
 	),
 
+	'interaction/type' => array(
+			'modalities' => array(
+					'contact' => array('en_US' => 'Contacts', 'fr_FR' => 'Contacts'),
+			),
+	),
+		
+	'interaction/type/contact' => array(
+			'controller' => '\PpitCommitment\Model\Account::controlInteraction',
+			'processor' => '\PpitCommitment\Model\Account::processInteraction',
+	),
+
+	'interaction/csv/contact' => array(
+			'columns' => array(
+					'last_name' => array('property' => 'n_last'),
+					'first_name' => array('property' => 'n_first'),
+					'email' => array('property' => 'email'),
+					'tel_work' => array('property' => 'tel_work'),
+					'tel_cell' => array('property' => 'tel_cell'),
+					'place' => array('property' => 'place_identifier'),
+			),
+	),
+		
 	'commitment/types' => array(
 			'type' => 'select',
 			'modalities' => array(
@@ -1386,7 +1362,7 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 					),
-					'customer_name' => array(
+					'account_name' => array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1464,7 +1440,7 @@ return array(
 							),
 					),
 			),
-			'order' => 'customer_name ASC',
+			'order' => 'account_name ASC',
 			'todo' => array(
 					'sales_manager' => array(
 							'status' => array('selector' => 'in', 'value' => array('new')),
@@ -1513,7 +1489,7 @@ return array(
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
-					'customer_name' => 'contains',
+					'account_name' => 'contains',
 			),
 	),
 
@@ -1537,7 +1513,7 @@ return array(
 			'header' => array(
 					array(
 							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('customer_name'),
+							'params' => array('account_name'),
 					),
 			),
 			'description' => array(
@@ -1563,7 +1539,7 @@ return array(
 			'header' => array(
 					array(
 							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('customer_name'),
+							'params' => array('account_name'),
 					),
 			),
 			'description' => array(
@@ -1651,7 +1627,7 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 					),
-					'customer_name' => array(
+					'name' => array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1698,7 +1674,7 @@ return array(
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
-					'customer_name' => 'contains',
+					'name' => 'contains',
 			),
 	),
 	
@@ -1736,7 +1712,7 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 					),
-					'customer_name' => array(
+					'name' => array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1783,7 +1759,7 @@ return array(
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
-					'customer_name' => 'contains',
+					'name' => 'contains',
 			),
 	),
 		
@@ -1847,7 +1823,7 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 					),
-					'customer_name' => array(
+					'name' => array(
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1979,7 +1955,7 @@ return array(
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
-					'customer_name' => 'contains',
+					'name' => 'contains',
 					'property_1' => 'select',
 					'property_2' => 'select',
 					'property_3' => 'select',
@@ -2379,6 +2355,30 @@ L\'équipe P-Pit
 <h4>Classement</h4>
 <p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
 ',
+			),
+			'commitmentAccount/list/checkAll' => array(
+					'en_US' => '
+<h4>Check all</h4>
+<p>This check-box allows to check at one time all the items of the list.</p>
+					',
+					'fr_FR' => '
+<h4>Tout sélectionner</h4>
+<p>Cette case à cocher permet de sélectionner d\'un coup tous les éléments de la liste.</p>
+',
+			),
+			'commitmentAccount/list/groupedActions' => array(
+					'en_US' => '
+<h4>Grouped actions</h4>
+<p>The group action button operates along with the individual or global checkboxes on the left column.</p>
+<p>It opens a new panel proposing actions to apply to each student who has previously been checked in the list.</p>
+<p>For example you can send an emailing by checking the target accounts and then send the email in a grouped way.</p>
+					',
+					'fr_FR' => '
+<h4>Actions groupées</h4>
+<p>Le bouton d\'actions groupées agit conjointement avec les cases à cocher individuelles ou globales en colonne de gauche de la liste.</p>
+<p>Il ouvre un nouveau panneau proposant des actions à appliquer à chaque compte qui a préalablement été sélectionné dans la liste.</p>
+<p>Par exemple vous pouvez envoyer un emailing en cochant dans la liste les comptes à cibler puis émettre l\'email de façon groupée.</p>
+					',
 			),
 			'commitmentAccount/list/add' => array(
 					'en_US' => '',

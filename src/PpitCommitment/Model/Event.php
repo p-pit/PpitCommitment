@@ -138,7 +138,7 @@ class Event implements InputFilterAwareInterface
     public function retrieveTarget()
     {
     	$params = $this->criteria;
-    	$this->matchingAccounts = Account::getList($this->type, $params, 'customer_name', 'ASC', 'search');
+    	$this->matchingAccounts = Account::getList($this->type, $params, 'name', 'ASC', 'search');
     	return $this->matchingAccounts;
     }
 

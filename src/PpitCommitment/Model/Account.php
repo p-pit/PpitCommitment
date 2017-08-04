@@ -24,8 +24,17 @@ class Account implements InputFilterAwareInterface
     public $type;
     public $place_id;
     public $identifier;
-    public $customer_community_id;
-    public $supplier_community_id;
+    public $name;
+    public $contact_1_id;
+    public $contact_1_status;
+    public $contact_2_id;
+    public $contact_2_status;
+    public $contact_3_id;
+    public $contact_3_status;
+    public $contact_4_id;
+    public $contact_4_status;
+    public $contact_5_id;
+    public $contact_5_status;
     public $opening_date;
     public $closing_date;
     public $callback_date;
@@ -47,17 +56,11 @@ class Account implements InputFilterAwareInterface
     public $audit;
     public $update_time;
     
-    // Depreciated
-    public $customer_bill_contact_id;
-    
     // Joined properties
     public $place_caption;
-    public $customer_name;
-    public $customer_status;
-    public $supplier_name;
 
-    public $contact_1_id;
-    public $contact_1_status;
+   	public $customer_community_id; // Deprecated
+    
     public $n_title;
     public $n_first;
     public $n_last;
@@ -75,8 +78,6 @@ class Account implements InputFilterAwareInterface
     public $adr_country;
     public $photo_link_id;
     
-    public $contact_2_id;
-    public $contact_2_status;
     public $n_title_2;
     public $n_first_2;
     public $n_last_2;
@@ -93,8 +94,6 @@ class Account implements InputFilterAwareInterface
     public $adr_state_2;
     public $adr_country_2;
     
-    public $contact_3_id;
-    public $contact_3_status;
     public $n_title_3;
     public $n_first_3;
     public $n_last_3;
@@ -111,8 +110,6 @@ class Account implements InputFilterAwareInterface
     public $adr_state_3;
     public $adr_country_3;
     
-    public $contact_4_id;
-    public $contact_4_status;
     public $n_title_4;
     public $n_first_4;
     public $n_last_4;
@@ -129,8 +126,6 @@ class Account implements InputFilterAwareInterface
     public $adr_state_4;
     public $adr_country_4;
     
-    public $contact_5_id;
-    public $contact_5_status;
     public $n_title_5;
     public $n_first_5;
     public $n_last_5;
@@ -149,8 +144,6 @@ class Account implements InputFilterAwareInterface
     
     // Transient properties
     public $place;
-	public $customer_community;
-	public $supplier_community;
     public $contact_1;
     public $contact_2;
     public $contact_3;
@@ -184,9 +177,17 @@ class Account implements InputFilterAwareInterface
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
-        $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
-        $this->customer_bill_contact_id = (isset($data['customer_bill_contact_id'])) ? $data['customer_bill_contact_id'] : null;
-        $this->supplier_community_id = (isset($data['supplier_community_id'])) ? $data['supplier_community_id'] : null;
+        $this->name = (isset($data['name'])) ? $data['name'] : null;
+        $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
+        $this->contact_1_status = (isset($data['contact_1_status'])) ? $data['contact_1_status'] : null;
+        $this->contact_2_id = (isset($data['contact_2_id'])) ? $data['contact_2_id'] : null;
+        $this->contact_2_status = (isset($data['contact_2_status'])) ? $data['contact_2_status'] : null;
+        $this->contact_3_id = (isset($data['contact_3_id'])) ? $data['contact_3_id'] : null;
+        $this->contact_3_status = (isset($data['contact_3_status'])) ? $data['contact_3_status'] : null;
+        $this->contact_4_id = (isset($data['contact_4_id'])) ? $data['contact_4_id'] : null;
+        $this->contact_4_status = (isset($data['contact_4_status'])) ? $data['contact_4_status'] : null;
+        $this->contact_5_id = (isset($data['contact_5_id'])) ? $data['contact_5_id'] : null;
+        $this->contact_5_status = (isset($data['contact_5_status'])) ? $data['contact_5_status'] : null;
         $this->opening_date = (isset($data['opening_date'])) ? $data['opening_date'] : null;
         $this->closing_date = (isset($data['closing_date']) && $data['closing_date'] != '9999-12-31') ? $data['closing_date'] : null;
         $this->callback_date = (isset($data['callback_date']) && $data['callback_date'] != '9999-12-31') ? $data['callback_date'] : null;
@@ -210,12 +211,9 @@ class Account implements InputFilterAwareInterface
 
         // Joined properties
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
-        $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
-        $this->customer_status = (isset($data['customer_status'])) ? $data['customer_status'] : null;
-        $this->supplier_name = (isset($data['supplier_name'])) ? $data['supplier_name'] : null;
         
-        $this->contact_1_id = (isset($data['contact_1_id'])) ? $data['contact_1_id'] : null;
-        $this->contact_1_status = (isset($data['contact_1_status'])) ? $data['contact_1_status'] : null;
+        $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
+        
         $this->n_title = (isset($data['n_title'])) ? $data['n_title'] : null;
         $this->n_first = (isset($data['n_first'])) ? $data['n_first'] : null;
         $this->n_last = (isset($data['n_last'])) ? $data['n_last'] : null;
@@ -233,8 +231,6 @@ class Account implements InputFilterAwareInterface
         $this->adr_country = (isset($data['adr_country'])) ? $data['adr_country'] : null;
         $this->photo_link_id = (isset($data['photo_link_id'])) ? $data['photo_link_id'] : null;
         
-        $this->contact_2_id = (isset($data['contact_2_id'])) ? $data['contact_2_id'] : null;
-        $this->contact_2_status = (isset($data['contact_2_status'])) ? $data['contact_2_status'] : null;
         $this->n_title_2 = (isset($data['n_title_2'])) ? $data['n_title_2'] : null;
         $this->n_first_2 = (isset($data['n_first_2'])) ? $data['n_first_2'] : null;
         $this->n_last_2 = (isset($data['n_last_2'])) ? $data['n_last_2'] : null;
@@ -251,8 +247,6 @@ class Account implements InputFilterAwareInterface
         $this->adr_state_2 = (isset($data['adr_state_2'])) ? $data['adr_state_2'] : null;
         $this->adr_country_2 = (isset($data['adr_country_2'])) ? $data['adr_country_2'] : null;
         
-        $this->contact_3_id = (isset($data['contact_3_id'])) ? $data['contact_3_id'] : null;
-        $this->contact_3_status = (isset($data['contact_3_status'])) ? $data['contact_3_status'] : null;
         $this->n_title_3 = (isset($data['n_title_3'])) ? $data['n_title_3'] : null;
         $this->n_first_3 = (isset($data['n_first_3'])) ? $data['n_first_3'] : null;
         $this->n_last_3 = (isset($data['n_last_3'])) ? $data['n_last_3'] : null;
@@ -269,8 +263,6 @@ class Account implements InputFilterAwareInterface
         $this->adr_state_3 = (isset($data['adr_state_3'])) ? $data['adr_state_3'] : null;
         $this->adr_country_3 = (isset($data['adr_country_3'])) ? $data['adr_country_3'] : null;
         
-        $this->contact_4_id = (isset($data['contact_4_id'])) ? $data['contact_4_id'] : null;
-        $this->contact_4_status = (isset($data['contact_4_status'])) ? $data['contact_4_status'] : null;
         $this->n_title_4 = (isset($data['n_title_4'])) ? $data['n_title_4'] : null;
         $this->n_first_4 = (isset($data['n_first_4'])) ? $data['n_first_4'] : null;
         $this->n_last_4 = (isset($data['n_last_4'])) ? $data['n_last_4'] : null;
@@ -287,8 +279,6 @@ class Account implements InputFilterAwareInterface
         $this->adr_state_4 = (isset($data['adr_state_4'])) ? $data['adr_state_4'] : null;
         $this->adr_country_4 = (isset($data['adr_country_4'])) ? $data['adr_country_4'] : null;
         
-        $this->contact_5_id = (isset($data['contact_5_id'])) ? $data['contact_5_id'] : null;
-        $this->contact_5_status = (isset($data['contact_5_status'])) ? $data['contact_5_status'] : null;
         $this->n_title_5 = (isset($data['n_title_5'])) ? $data['n_title_5'] : null;
         $this->n_first_5 = (isset($data['n_first_5'])) ? $data['n_first_5'] : null;
         $this->n_last_5 = (isset($data['n_last_5'])) ? $data['n_last_5'] : null;
@@ -315,9 +305,7 @@ class Account implements InputFilterAwareInterface
     	$data['type'] =  ($this->type) ? $this->type : null;
     	$data['place_id'] = (int) $this->place_id;
     	$data['identifier'] = $this->identifier;
-    	$data['customer_community_id'] =  (int) $this->customer_community_id;
-    	$data['customer_bill_contact_id'] =  (int) $this->customer_bill_contact_id;
-    	$data['supplier_community_id'] =  (int) $this->supplier_community_id;
+    	$data['name'] = $this->name;
     	$data['opening_date'] =  ($this->opening_date) ? $this->opening_date : null;
     	$data['closing_date'] =  ($this->closing_date) ? $this->closing_date : null;
     	$data['callback_date'] =  ($this->callback_date) ? $this->callback_date : null;
@@ -340,9 +328,6 @@ class Account implements InputFilterAwareInterface
 
     	// Joined properties
     	$data['place_caption'] = $this->place_caption;
-    	$data['customer_name'] = $this->customer_name;
-    	$data['customer_status'] = $this->customer_status;
-    	$data['supplier_name'] = $this->supplier_name;
 
     	$data['contact_1_id'] = $this->contact_1_id;
     	$data['contact_1_status'] = $this->contact_1_status;
@@ -455,12 +440,7 @@ class Account implements InputFilterAwareInterface
     	$data['audit'] = json_encode($this->audit);
 
     	unset($data['place_caption']);
-    	unset($data['customer_name']);
-    	unset($data['customer_status']);
-    	unset($data['supplier_name']);
 
-    	unset($data['contact_1_id']);
-    	unset($data['contact_1_status']);
     	unset($data['n_title']);
     	unset($data['n_first']);
     	unset($data['n_last']);
@@ -472,8 +452,6 @@ class Account implements InputFilterAwareInterface
     	unset($data['address']);
     	unset($data['photo_link_id']);
 
-    	unset($data['contact_2_id']);
-    	unset($data['contact_2_status']);
     	unset($data['n_title_2']);
     	unset($data['n_first_2']);
     	unset($data['n_last_2']);
@@ -484,8 +462,6 @@ class Account implements InputFilterAwareInterface
     	unset($data['tel_cell_2']);
     	unset($data['address_2']);
     	 
-    	unset($data['contact_3_id']);
-    	unset($data['contact_3_status']);
     	unset($data['n_title_3']);
     	unset($data['n_first_3']);
     	unset($data['n_last_3']);
@@ -496,8 +472,6 @@ class Account implements InputFilterAwareInterface
     	unset($data['tel_cell_3']);
     	unset($data['address_3']);
     	 
-    	unset($data['contact_4_id']);
-    	unset($data['contact_4_status']);
     	unset($data['n_title_4']);
     	unset($data['n_first_4']);
     	unset($data['n_last_4']);
@@ -508,8 +482,6 @@ class Account implements InputFilterAwareInterface
     	unset($data['tel_cell_4']);
     	unset($data['address_4']);
     	 
-    	unset($data['contact_5_id']);
-    	unset($data['contact_5_status']);
     	unset($data['n_title_5']);
     	unset($data['n_first_5']);
     	unset($data['n_last_5']);
@@ -523,19 +495,19 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($type, $entry, $params, $major, $dir, $mode = 'todo')
+    public static function getList($type, $entry, $params, $major, $dir, $mode = 'todo', $limitation = 300)
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
 			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
-			->join(array('supplier' => 'core_community'), 'commitment_account.supplier_community_id = supplier.id', array('supplier_name' => 'name'), 'left')
-			->join(array('customer' => 'core_community'), 'commitment_account.customer_community_id = customer.id', array('customer_name' => 'name', 'customer_status' => 'status', 'contact_1_id', 'contact_1_status', 'contact_2_id', 'contact_2_status', 'contact_3_id', 'contact_3_status', 'contact_4_id', 'contact_4_status', 'contact_5_id', 'contact_5_status'), 'left')
-			->join('core_vcard', 'customer.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id', 'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country'), 'left')
-			->join(array('contact_2' => 'core_vcard'), 'customer.contact_2_id = contact_2.id', array('n_title_2' =>'n_title', 'n_first_2' => 'n_first', 'n_last_2' => 'n_last', 'n_fn_2' => 'n_fn', 'email_2' => 'email', 'birth_date_2' => 'birth_date', 'tel_work_2' => 'tel_work', 'tel_cell_2' => 'tel_cell', 'adr_street_2' => 'adr_street', 'adr_extended_2' => 'adr_extended', 'adr_post_office_box_2' => 'adr_post_office_box', 'adr_zip_2' => 'adr_zip', 'adr_city_2' => 'adr_city', 'adr_state_2' => 'adr_state', 'adr_country_2' => 'adr_country'), 'left')
-			->join(array('contact_3' => 'core_vcard'), 'customer.contact_3_id = contact_3.id', array('n_title_3' =>'n_title', 'n_first_3' => 'n_first', 'n_last_3' => 'n_last', 'n_fn_3' => 'n_fn', 'email_3' => 'email', 'birth_date_3' => 'birth_date', 'tel_work_3' => 'tel_work', 'tel_cell_3' => 'tel_cell', 'adr_street_3' => 'adr_street', 'adr_extended_3' => 'adr_extended', 'adr_post_office_box_3' => 'adr_post_office_box', 'adr_zip_3' => 'adr_zip', 'adr_city_3' => 'adr_city', 'adr_state_3' => 'adr_state', 'adr_country_3' => 'adr_country'), 'left')
-			->join(array('contact_4' => 'core_vcard'), 'customer.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
-			->join(array('contact_5' => 'core_vcard'), 'customer.contact_5_id = contact_5.id', array('n_title_5' =>'n_title', 'n_first_5' => 'n_first', 'n_last_5' => 'n_last', 'n_fn_5' => 'n_fn', 'email_5' => 'email', 'birth_date_5' => 'birth_date', 'tel_work_5' => 'tel_work', 'tel_cell_5' => 'tel_cell', 'adr_street_5' => 'adr_street', 'adr_extended_5' => 'adr_extended', 'adr_post_office_box_5' => 'adr_post_office_box', 'adr_zip_5' => 'adr_zip', 'adr_city_5' => 'adr_city', 'adr_state_5' => 'adr_state', 'adr_country_5' => 'adr_country'), 'left')
-			->order(array($major.' '.$dir, 'supplier_name', 'customer_name'));
+			->join('core_vcard', 'commitment_account.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id', 'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country'), 'left')
+			->join(array('contact_2' => 'core_vcard'), 'commitment_account.contact_2_id = contact_2.id', array('n_title_2' =>'n_title', 'n_first_2' => 'n_first', 'n_last_2' => 'n_last', 'n_fn_2' => 'n_fn', 'email_2' => 'email', 'birth_date_2' => 'birth_date', 'tel_work_2' => 'tel_work', 'tel_cell_2' => 'tel_cell', 'adr_street_2' => 'adr_street', 'adr_extended_2' => 'adr_extended', 'adr_post_office_box_2' => 'adr_post_office_box', 'adr_zip_2' => 'adr_zip', 'adr_city_2' => 'adr_city', 'adr_state_2' => 'adr_state', 'adr_country_2' => 'adr_country'), 'left')
+			->join(array('contact_3' => 'core_vcard'), 'commitment_account.contact_3_id = contact_3.id', array('n_title_3' =>'n_title', 'n_first_3' => 'n_first', 'n_last_3' => 'n_last', 'n_fn_3' => 'n_fn', 'email_3' => 'email', 'birth_date_3' => 'birth_date', 'tel_work_3' => 'tel_work', 'tel_cell_3' => 'tel_cell', 'adr_street_3' => 'adr_street', 'adr_extended_3' => 'adr_extended', 'adr_post_office_box_3' => 'adr_post_office_box', 'adr_zip_3' => 'adr_zip', 'adr_city_3' => 'adr_city', 'adr_state_3' => 'adr_state', 'adr_country_3' => 'adr_country'), 'left')
+			->join(array('contact_4' => 'core_vcard'), 'commitment_account.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
+			->join(array('contact_5' => 'core_vcard'), 'commitment_account.contact_5_id = contact_5.id', array('n_title_5' =>'n_title', 'n_first_5' => 'n_first', 'n_last_5' => 'n_last', 'n_fn_5' => 'n_fn', 'email_5' => 'email', 'birth_date_5' => 'birth_date', 'tel_work_5' => 'tel_work', 'tel_cell_5' => 'tel_cell', 'adr_street_5' => 'adr_street', 'adr_extended_5' => 'adr_extended', 'adr_post_office_box_5' => 'adr_post_office_box', 'adr_zip_5' => 'adr_zip', 'adr_city_5' => 'adr_city', 'adr_state_5' => 'adr_state', 'adr_country_5' => 'adr_country'), 'left')
+			->order(array($major.' '.$dir, 'name'));
+		if ($limitation) $select->limit($limitation);
+			
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
 		$where->notEqualTo('commitment_account.status', 'deleted');
@@ -549,10 +521,10 @@ class Account implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'customer_name') $where->like('customer.name', '%'.$params[$propertyId].'%');
-    			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
+    			if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (strpos($params[$propertyId], ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $params[$propertyId])));
+    			elseif ($params[$propertyId] == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
     	}
@@ -564,8 +536,17 @@ class Account implements InputFilterAwareInterface
 			$account->properties = $account->getProperties();
 
 			// Filter on authorized perimeter
-			if (array_key_exists($type, $context->getPerimeters())) {
-				$keep = true;
+			$keep = true;
+			if (array_key_exists('p-pit-admin', $context->getPerimeters())) {
+				foreach ($context->getPerimeters()['p-pit-admin'] as $key => $values) {
+					$keep2 = false;
+					foreach ($values as $value) {
+						if ($account->properties[$key] == $value) $keep2 = true;
+					}
+					if (!$keep2) $keep = false;
+				}
+			}
+			elseif (array_key_exists($type, $context->getPerimeters())) {
 				foreach ($context->getPerimeters()[$type] as $key => $values) {
 					$keep2 = false;
 					foreach ($values as $value) {
@@ -573,9 +554,8 @@ class Account implements InputFilterAwareInterface
 					}
 					if (!$keep2) $keep = false;
 				}
-				if ($keep) $accounts[] = $account;
 			}
-			else $accounts[] = $account;
+			if ($keep) $accounts[] = $account;
 		}
 		return $accounts;
     }
@@ -588,110 +568,75 @@ class Account implements InputFilterAwareInterface
     	// Retrieve the place, the customer and the supplier
     	$account->place = Place::getTable()->get($account->place_id);
     	if ($account->place) $account->place_caption = $account->place->caption;
-    	if ($account->supplier_community_id) {
-    		$account->supplier_community = Community::getTable()->get($account->supplier_community_id);
-	    	$account->supplier_name = $account->supplier_community->name;
-    	}
-    	if ($account->customer_community_id) {
-    		$account->customer_community = Community::getTable()->get($account->customer_community_id);
-    		$account->customer_name = $account->customer_community->name;
-    		$account->customer_status = $account->customer_community->status;
-    		if ($account->customer_community->contact_1_id) {
-	    		$account->contact_1_id = $account->customer_community->contact_1_id;
-	    		$account->contact_1_status = $account->customer_community->contact_1_status;
-	    		$account->contact_1 = Vcard::get($account->customer_community->contact_1_id);
+    	if ($account->contact_1_id) {
+	    	$account->contact_1 = Vcard::get($account->contact_1_id);
 		    	
-		    	$userContact = UserContact::get($account->contact_1_id, 'vcard_id');
-		    	if ($userContact) {
-		    		$account->userContact = $userContact;
+		    $userContact = UserContact::get($account->contact_1_id, 'vcard_id');
+		    if ($userContact) {
+		    	$account->userContact = $userContact;
 
-		    		$user = User::get($userContact->user_id);
-		    		$account->user = $user;
-		    	}
-		    	if (!$account->user) $account->user = User::instanciate();
-		    	$account->username = $account->user->username;
-	    	}
-	    	else $account->contact_1 = Vcard::instanciate();
+		    	$user = User::get($userContact->user_id);
+		    	$account->user = $user;
+		    }
+		    if (!$account->user) $account->user = User::instanciate();
+		    $account->username = $account->user->username;
+	    }
+	    else $account->contact_1 = Vcard::instanciate();
 
-	    	$account->n_first = $account->contact_1->n_first;
-	    	$account->n_last = $account->contact_1->n_last;
-	    	$account->email = $account->contact_1->email;
-	    	$account->birth_date = $account->contact_1->birth_date;
-	    	$account->tel_work = $account->contact_1->tel_work;
-	    	$account->tel_cell = $account->contact_1->tel_cell;
-	    	$account->is_notified = $account->contact_1->is_notified;
-	    	$account->locale = $account->contact_1->locale;
+    	$account->n_title = $account->contact_1->n_title;
+	    $account->n_first = $account->contact_1->n_first;
+    	$account->n_last = $account->contact_1->n_last;
+    	$account->email = $account->contact_1->email;
+    	$account->birth_date = $account->contact_1->birth_date;
+    	$account->tel_work = $account->contact_1->tel_work;
+    	$account->tel_cell = $account->contact_1->tel_cell;
+    	$account->is_notified = $account->contact_1->is_notified;
+    	$account->locale = $account->contact_1->locale;
 	    	
-	    	if ($account->customer_community->contact_2_id) {
-	        	$account->contact_2 = Vcard::get($account->customer_community->contact_2_id);
-	    		$account->contact_2_status = $account->customer_community->contact_2_status;
-	        }
-	        if ($account->customer_community->contact_3_id) {
-	        	$account->contact_3 = Vcard::get($account->customer_community->contact_3_id);
-	    		$account->contact_3_status = $account->customer_community->contact_3_status;
-	        }
-	        if ($account->customer_community->contact_4_id) {
-	        	$account->contact_4 = Vcard::get($account->customer_community->contact_4_id);
-	    		$account->contact_4_status = $account->customer_community->contact_4_status;
-	        }
-	        if ($account->customer_community->contact_5_id) {
-	        	$account->contact_5 = Vcard::get($account->customer_community->contact_5_id);
-	    		$account->contact_5_status = $account->customer_community->contact_5_status;
-	        }
-    	}
+	    if ($account->contact_2_id) {
+	        $account->contact_2 = Vcard::get($account->contact_2_id);
+	    	$account->n_title_2 = $account->contact_2->n_title;
+		    $account->n_first_2 = $account->contact_2->n_first;
+	    	$account->n_last_2 = $account->contact_2->n_last;
+	    	$account->email_2 = $account->contact_2->email;
+	    	$account->birth_date_2 = $account->contact_2->birth_date;
+	    	$account->tel_work_2 = $account->contact_2->tel_work;
+	    	$account->tel_cell_2 = $account->contact_2->tel_cell;
+	    }
+	    if ($account->contact_3_id) {
+	        $account->contact_3 = Vcard::get($account->contact_3_id);
+	    	$account->n_title_3 = $account->contact_3->n_title;
+		    $account->n_first_3 = $account->contact_3->n_first;
+	    	$account->n_last_3 = $account->contact_3->n_last;
+	    	$account->email_3 = $account->contact_3->email;
+	    	$account->birth_date_3 = $account->contact_3->birth_date;
+	    	$account->tel_work_3 = $account->contact_3->tel_work;
+	    	$account->tel_cell_3 = $account->contact_3->tel_cell;
+	    }
+	    if ($account->contact_4_id) {
+	        $account->contact_4 = Vcard::get($account->contact_4_id);
+	    	$account->n_title_4 = $account->contact_4->n_title;
+		    $account->n_first_4 = $account->contact_4->n_first;
+	    	$account->n_last_4 = $account->contact_4->n_last;
+	    	$account->email_4 = $account->contact_4->email;
+	    	$account->birth_date_4 = $account->contact_4->birth_date;
+	    	$account->tel_work_4 = $account->contact_4->tel_work;
+	    	$account->tel_cell_4 = $account->contact_4->tel_cell;
+	    }
+	    if ($account->contact_5_id) {
+	        $account->contact_5 = Vcard::get($account->contact_5_id);
+	    	$account->n_title_5 = $account->contact_5->n_title;
+		    $account->n_first_5 = $account->contact_5->n_first;
+	    	$account->n_last_5 = $account->contact_5->n_last;
+	    	$account->email_5 = $account->contact_5->email;
+	    	$account->birth_date_5 = $account->contact_5->birth_date;
+	    	$account->tel_work_5 = $account->contact_5->tel_work;
+	    	$account->tel_cell_5 = $account->contact_5->tel_cell;
+	    }
 
     	return $account;
     }
-
-    public static function getArray($id, $column = 'id')
-    {
-    	$account = Account::get($id, $column);
-    
-    	if (!$account) return null;
-    	$data = $account->toarray();
-
-    	// Retrieve the place, the customer and the supplier
-    	$data['place'] = $account->place;
-    	$data['place_caption'] = $account->place_caption;
-    	if ($account->supplier_community_id) {
-    		$data['supplier_community'] = $account->supplier_community;
-    		$data['supplier_name'] = $account->supplier_name;
-    	}
-    	if ($account->customer_community_id) {
-    		$data['customer_community'] = $account->customer_community;
-    		$data['customer_name'] = $account->customer_name;
-    		$data['customer_status'] = $account->customer_status;
-    		if ($account->customer_community->contact_1_id) {
-    			$data['contact_1_id'] = $account->contact_1_id;
-    			$data['constact_1_status'] = $account->contact_1_status;
-    			$data['contact_1'] = $account->contact_1->toArray();
-    		  
-    			if ($account->userContact) {
-    				$data['userContact'] = $account->userContact->toArray();
-    				$data['user'] = $account->user;
-    			}
-    			$data['username'] = $account->username;
-    		}
-    		if ($account->customer_community->contact_2_id) {
-    			$data['contact_2'] = $account->contact_2->toArray();
-    			$data['contact_2_status'] = $account->contact_2_status;
-    		}
-    	    if ($account->customer_community->contact_3_id) {
-    			$data['contact_3'] = $account->contact_3->toArray();
-    			$data['contact_3_status'] = $account->contact_3_status;
-    		}
-    	    if ($account->customer_community->contact_4_id) {
-    			$data['contact_4'] = $account->contact_4->toArray();
-    			$data['contact_4_status'] = $account->contact_4_status;
-    		}
-    	    if ($account->customer_community->contact_5_id) {
-    			$data['contact_5'] = $account->contact_5->toArray();
-    			$data['contact_5_status'] = $account->contact_5_status;
-    		}
-    	}
-    	return $data;
-    }
-    
+   
     public static function instanciate($type = null)
     {
 		$account = new Account;
@@ -699,7 +644,6 @@ class Account implements InputFilterAwareInterface
 		$account->type = $type;
 		$account->contact_history = array();
 		$account->audit = array();
-		$account->customer_community = Community::instanciate();
 		$account->contact_1 = Vcard::instanciate();
 		$account->json_property_1 = array();
 		$account->json_property_2 = array();
@@ -725,11 +669,35 @@ class Account implements InputFilterAwareInterface
 		    	$this->identifier = trim(strip_tags($data['identifier']));
 		    	if (strlen($this->identifier) > 255) return 'Integrity';
 			}
-    		if (array_key_exists('customer_name', $data)) {
-		    	$this->customer_name = trim(strip_tags($data['customer_name']));
-		    	if (!$this->customer_name || strlen($this->customer_name) > 255) return 'Integrity';
+    		if (array_key_exists('name', $data)) {
+		    	$this->name = trim(strip_tags($data['name']));
+		    	if (!$this->name || strlen($this->name) > 255) return 'Integrity';
 			}
-    		if (array_key_exists('customer_community_id', $data)) $this->customer_community_id = (int) $data['customer_community_id'];
+    		if (array_key_exists('contact_1_id', $data)) $this->contact_1_id = (int) $data['contact_1_id'];
+    		if (array_key_exists('contact_1_status', $data)) {
+		    	$this->contact_1_status = trim(strip_tags($data['contact_1_status']));
+		    	if (strlen($this->contact_1_status) > 255) return 'Integrity';
+			}
+        	if (array_key_exists('contact_2_id', $data)) $this->contact_2_id = (int) $data['contact_2_id'];
+    		if (array_key_exists('contact_2_status', $data)) {
+		    	$this->contact_2_status = trim(strip_tags($data['contact_2_status']));
+		    	if (strlen($this->contact_2_status) > 255) return 'Integrity';
+			}
+        	if (array_key_exists('contact_3_id', $data)) $this->contact_3_id = (int) $data['contact_3_id'];
+    		if (array_key_exists('contact_3_status', $data)) {
+		    	$this->contact_3_status = trim(strip_tags($data['contact_3_status']));
+		    	if (strlen($this->contact_3_status) > 255) return 'Integrity';
+			}
+        	if (array_key_exists('contact_4_id', $data)) $this->contact_4_id = (int) $data['contact_4_id'];
+    		if (array_key_exists('contact_4_status', $data)) {
+		    	$this->contact_4_status = trim(strip_tags($data['contact_4_status']));
+		    	if (strlen($this->contact_4_status) > 255) return 'Integrity';
+			}
+        	if (array_key_exists('contact_5_id', $data)) $this->contact_5_id = (int) $data['contact_5_id'];
+    		if (array_key_exists('contact_5_status', $data)) {
+		    	$this->contact_5_status = trim(strip_tags($data['contact_5_status']));
+		    	if (strlen($this->contact_5_status) > 255) return 'Integrity';
+			}
 			if (array_key_exists('n_first', $data)) {
 		    	$this->n_first = trim(strip_tags($data['n_first']));
 		    	if (strlen($this->n_first) > 255) return 'Integrity';
@@ -754,7 +722,6 @@ class Account implements InputFilterAwareInterface
 		    	$this->tel_cell = trim(strip_tags($data['tel_cell']));
 		    	if (strlen($this->tel_cell) > 255) return 'Integrity';
 			}
-			if (array_key_exists('customer_bill_contact_id', $data)) $this->customer_bill_contact_id = (int) $data['customer_bill_contact_id'];
 			if (array_key_exists('opening_date', $data)) {
 		    	$this->opening_date = trim(strip_tags($data['opening_date']));
 		    	if (!$this->opening_date || !checkdate(substr($this->opening_date, 5, 2), substr($this->opening_date, 8, 2), substr($this->opening_date, 0, 4))) return 'Integrity';
@@ -832,7 +799,7 @@ class Account implements InputFilterAwareInterface
 			}
 			if (array_key_exists('update_time', $data)) $this->update_time = $data['update_time'];
 				
-			$this->customer_community->name = ($this->customer_name) ? $this->customer_name : $this->n_last.', '.$this->n_first;
+			if (!$this->name) $this->name = $this->n_last.', '.$this->n_first;
 			$this->contact_1->n_first = $this->n_first;
 			$this->contact_1->n_last = $this->n_last;
 			$this->contact_1->email = $this->email;
@@ -868,7 +835,6 @@ class Account implements InputFilterAwareInterface
 
     	// Isolation check
     	if ($account->update_time > $update_time) return 'Isolation';
-		$this->customer_community->update($this->customer_community->update_time);
     	$this->contact_1->update($this->contact_1->update_time);
     	Account::getTable()->save($this);
     	return 'OK';
@@ -882,7 +848,42 @@ class Account implements InputFilterAwareInterface
     	}
     	return false;
     }
-    
+
+    /**
+     * @param Interaction $interaction
+     * @return string
+     */
+    public static function processInteraction($data, $interaction)
+    {
+    	$rc = 'OK';
+    	$context = Context::getCurrent();
+    	if ($interaction->format == 'text/csv') {
+    		$account = Account::instanciate();
+			$account->contact_1 = Vcard::instanciate();
+			$targetData = array();
+    		$targetData['type'] = $interaction->category;
+			$targetData['status'] = 'new';
+    		$targetData['callback_date'] = date('Y-m-d');
+    		$targetData['origine'] = 'file';
+    		foreach ($data as $column => $value) {
+    			if (array_key_exists($column, $context->getConfig('interaction/csv/contact')['columns'])) {
+    				$targetData[$context->getConfig('interaction/csv/contact')['columns'][$column]['property']] = $value;
+    			}
+    		}
+			$account->contact_1->loadData($targetData);
+			$account->loadData($targetData);
+			$place = Place::get($targetData['place_identifier'], 'identifier');
+			if ($place) $account->place_id = $place->id;
+    		$account->contact_1 = Vcard::optimize($account->contact_1);
+    		$account->contact_1_id = $account->contact_1->id;
+    		$account->contact_1_status = 'main';
+			$account->id = null;
+    		$rc = $account->add();
+    		if ($rc != 'OK') return $rc;
+    	}
+    	return $rc;
+    }
+
     public function isDeletable()
     {
     	$context = Context::getCurrent();
@@ -907,9 +908,6 @@ class Account implements InputFilterAwareInterface
     	if ($update_time && $account->update_time > $update_time) return 'Isolation';
     	$user = User::get($this->contact_1->id, 'vcard_id');
     	if ($user) $user->delete($user->update_time);
-
-/*    	$this->contact_1->delete($this->contact_1->update_time);
-    	if ($this->customer_community->isDeletable()) $this->customer_community->delete($this->customer_community->update_time);*/
     	 
     	$this->status = 'deleted';
     	Account::getTable()->save($this);

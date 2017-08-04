@@ -1,0 +1,92 @@
+<!-- 
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<hr>
+<h4 style="text-align: center">
+	<strong><?php echo $this->translate('Send an email', 'ppit-contact', $context->getLocale()) ?></strong>
+</h4>
+
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+		'update_time' => $mail->update_time,
+		'message' => $message,
+		'error' => $error,
+		'csrfForm' => $csrfForm,
+		'context' => $context,
+));
+?>
+
+<?php 
+if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
+?>
+
+	<div class="panel-body">
+		<input type="hidden" id="mail_update_time" value="<?php echo $mail->update_time ?>" />
+
+		<div class="form-group" id="mask_recipients_group">
+			<label class="col-sm-5 control-label">
+				<?php echo $this->translate('Mask recipients', 'ppit-contact', $context->getLocale()) ?>
+			</label>
+			<div class="col-sm-7">
+				<input type="checkbox" id="mask_recipients" class="form-control" value="1" checked="checked" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="mask_recipients_error></p></div>
+		</div>
+
+		<div class="form-group" id="subject_group">
+			<label class="col-sm-5 control-label">
+				* <?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()) ?>
+			</label>
+			<div class="col-sm-7">
+				<input class="form-control" id="subject" value="<?php echo $mail->subject ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="subject_error"></p></div>
+		</div>
+	
+		<div class="form-group" id="body_group">
+			<div class="col-sm-12">
+				<textarea class="form-control" id="body" rows="10" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $mail->body ?></textarea>
+			</div>
+			<div class="col-sm-12"><p class="help-block" id="body_error"></p></div>
+		</div>
+	
+		<div class="form-group" id="attachment_group">
+			<label class="col-sm-5 control-label">
+				<?php echo $this->translate('Attachment', 'ppit-contact', $context->getLocale()) ?>
+			</label>
+			<div class="col-sm-6">
+				<select class="form-control" id="attachment" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+					<option />
+		<?php foreach ($documentList as $document) : ?>
+					<option value="<?php echo $document ?>"><?php echo $document ?></option>
+		<?php endforeach;?>
+				</select>
+			</div>
+			<div class="col-sm-1"><span id="attachment_link"/></div>
+			<div class="col-sm-12"><p class="help-block" id="attachment_error"></p></div>
+		</div>
+
+<?php if ($message != 'OK') : ?>
+	    <div class="form-group">
+			<div class="col-sm-5">&nbsp;</div>
+			<div class="col-sm-7">
+				<input id="send-message-button" class="btn btn-default" value="<?php echo $this->translate('Send', 'ppit-core', $context->getLocale()) ?>">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-12">
+				<div class="alert alert-warning" id="send-message-alert" style="text-align: center">
+					<strong><?php echo $this->translate('Please confirm', 'ppit-core', $context->getLocale()) ?></strong>
+				</div>
+			</div>
+		</div>
+<?php endif;?>
+	</div>
+</form

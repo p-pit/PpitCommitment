@@ -29,8 +29,7 @@ class CommitmentMessage implements InputFilterAwareInterface
     public $update_time;
 
     // Joined properties
-    public $customer_name;
-    public $supplyer_name;
+    public $account_name;
 
     // Transient properties
     public $files;
@@ -58,8 +57,7 @@ class CommitmentMessage implements InputFilterAwareInterface
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
         
         // Joined properties
-        $this->customer_name = (isset($data['customer_name'])) ? $data['customer_name'] : null;
-        $this->supplyer_name = (isset($data['supplyer_name'])) ? $data['supplyer_name'] : null;
+        $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
     }
 
     public function toArray() {
@@ -99,14 +97,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		// Retrieve the account
 		if ($message->account_id) {
 			$account = Account::getTable()->get($message->account_id);
-	
-			// Retrieve the customer
-			$customer = Community::get($account->customer_community_id);
-			$message->customer_name = $customer->name;
-	
-			// Retrieve the supplyer
-			$supplyer = Community::get($account->supplyer_community_id);
-			$message->supplyer_name = $supplyer->name;
+			$message->account_name = $account->name;
 		}
 
 		return $message;
@@ -135,11 +126,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 		$this->id = null;
 
 	    if ($this->files) {
-    		if ($context->getCommunityId()) {
-    			$community = Community::get($context->getCommunityId());
-    			$root_id = $community->root_document_id;
-    		}
-    		else $root_id = Document::getTable()->get(0, 'parent_id')->id; 
+			$root_id = Document::getTable()->get(0, 'parent_id')->id; 
     		$document = Document::instanciate($root_id);
     		$document->files = $this->files;
     		$document->saveFile();

@@ -81,8 +81,8 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
-	<?php if ($propertyId == 'customer_name') : ?>
-				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->customer_community->name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+	<?php if ($propertyId == 'name') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 	<?php elseif ($propertyId == 'n_first') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
@@ -140,7 +140,7 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 	<?php elseif ($property['type'] == 'photo') : ?>
 
 <!-- Photo -->
-				<img height="150" src="<?php echo $this->basePath('photos/'.$account->properties[$propertyId]) ?>"/>
+				<img height="150" src="<?php echo $this->basePath('photos/'.$account->properties[$propertyId]) ?>.jpg"/>
 	
 	<?php else : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />

@@ -39,7 +39,7 @@
 	
 	<tr <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
 		<td colspan="<?php echo 1 + count($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')))?>">
-			<strong><?php echo $commitment->customer_name ?></strong> -
+			<strong><?php echo $commitment->account_name ?></strong> -
 			<?php echo $commitment->caption ?>
 			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate($commitment->credit_status, 'ppit-core', $context->getLocale()).')' ?>
 		</td>
@@ -63,8 +63,8 @@
 		if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 		?>
 	
-		<?php if ($propertyId == 'customer_name') : ?>
-		<td><?php echo $commitment->customer_name ?></td>
+		<?php if ($propertyId == 'account_name') : ?>
+		<td><?php echo $commitment->account_name ?></td>
 	
 		<?php elseif ($rendering == 'text') : ?>
 		<td><?php echo $commitment->properties[$propertyId] ?></td>

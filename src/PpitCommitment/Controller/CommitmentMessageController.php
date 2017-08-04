@@ -106,29 +106,10 @@ class CommitmentMessageController extends AbstractActionController
     		$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
     		$connection->beginTransaction();
     		try {
-	    		
-	    		// Create the community and the account
-	    		$community = Community::instanciate();
-	    		$community->status = 'new';
-	    		$community->name = $instance_caption;
-	    		$rc = $community->add();
-
-	    		if ($rc != 'OK') {
-	    			$connection->rollback();
-
-	    			// Update the message with any return code from the account insert or update
-	    			$message->http_status = $rc;
-	    			$message->update($message->update_time);
-	    			
-	    			// Write to the log
-	    			$logger->info('accountPost/'.$instance_caption.';422;'.$rc.';');
-	    			$this->getResponse()->setStatusCode('422');
-	    			return $this->getResponse();
-	    		}
 
 	    		$account = Account::instanciate();
 	    		$account->status = 'new';
-	    		$account->customer_community_id = $community->id;
+	    		$account->name = $instance_caption;
 	    		$rc = $account->add();
 	    			
 	    		if ($rc != 'OK') {
@@ -198,15 +179,9 @@ class CommitmentMessageController extends AbstractActionController
     		$this->getResponse()->setStatusCode('401');
     	}
     	else {
-    		$community = Community::get($instance_caption, 'name');
-    		if (!$community) {
-    			$this->getResponse()->setContent(json_encode(array()));
-    		}
-    		else {
-    			$account = Account::get($community->id, 'customer_community_id');
-    			if (!$account) $this->getResponse()->setStatusCode('400');
-    			else $this->getResponse()->setContent(json_encode(Commitment::getList(null, array('account_id' => $account->id), 'commitment_date', 'DESC', 'search')));
-    		}
+    		$account = Account::get($instance_caption, 'name');
+    		if (!$account) $this->getResponse()->setStatusCode('400');
+    		else $this->getResponse()->setContent(json_encode(Commitment::getList(null, array('account_id' => $account->id), 'commitment_date', 'DESC', 'search')));
     	}
     	return $this->getResponse();
     }
@@ -296,46 +271,25 @@ class CommitmentMessageController extends AbstractActionController
 			$connection->beginTransaction();
 			try {
 
-				// Retrieve the community and account and create if not exist
-				$community = Community::get($instance_caption, 'name');
-				if ($community) $account = Account::get($community->id, 'customer_community_id');
-				else {
-					$community = Community::instanciate();
-		    		$community->status = 'new';
-		    		$community->name = $instance_caption;
-		    		$rc = $community->add();
+				// Retrieve the account and create if not exist
 	
-		    		if ($rc != 'OK') {
-		    			$connection->rollback();
-	
-		    			// Update the message with any return code from the account insert or update
-		    			$message->http_status = $rc;
-		    			$message->update($message->update_time);
-		    			
-		    			// Write to the log
-		    			$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
-		    			$this->getResponse()->setStatusCode('422');
-		    			return $this->getResponse();
-		    		}
-	
-		    		$account = Account::instanciate();
-		    		$account->status = 'new';
-		    		$account->customer_community_id = $community->id;
-		    		$rc = $account->add();
-		    			
-		    		if ($rc != 'OK') {
-		    			$connection->rollback();
-	
-		    			// Update the message with any return code from the account insert or update
-		    			$message->http_status = $rc;
-		    			$message->update($message->update_time);
-		    			
-		    			// Write to the log
-		    			$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
-		    			$this->getResponse()->setStatusCode('422');
-		    			return $this->getResponse();
-		    		}
-				}
+	    		$account = Account::instanciate();
+	    		$account->status = 'new';
+	    		$account->name = $instance_caption;
+	    		$rc = $account->add();
+	    			
+	    		if ($rc != 'OK') {
+	    			$connection->rollback();
+
+	    			// Update the message with any return code from the account insert or update
+	    			$message->http_status = $rc;
+	    			$message->update($message->update_time);
+	    			
+	    			// Write to the log
+	    			$logger->info('commitmentPost/'.$instance_caption.'/'.$id.';422;'.$rc.';');
+	    			$this->getResponse()->setStatusCode('422');
+	    			return $this->getResponse();
+	    		}
 				
 				// Create or update the commitment
 				if ($id) $commitment = Commitment::get($id);
@@ -1017,22 +971,13 @@ class CommitmentMessageController extends AbstractActionController
 	    				$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
 	    				$connection->beginTransaction();
 		    			try {
-		        			if (!array_key_exists('customer_name', $row)) {
-		        				$resultStatus[] = 'customer_name?';
+		        			if (!array_key_exists('account_name', $row)) {
+		        				$resultStatus[] = 'account_name?';
 		        				$error = 'Consistency';
 		        			}
 		    			    else {
-		        				$data['customer_name'] = $row['customer_name'];
-		        				$customerCommunity = Community::get($data['customer_name'], 'name');
-		        				if (!$customerCommunity) {
-		        					$customerCommunity = Community::instanciate();
-		        					$customerCommunity->name = $data['customer_name'];
-		        					$customerCommunity->add();
-		        					$account = Account::instanciate();
-		        					$account->customer_community_id = $customerCommunity->id;
-		        					$account->add();
-		        				}
-		        				else $account = Account::get($customerCommunity->id, 'customer_community_id');
+		        				$data['account_name'] = $row['account_name'];
+								$account = Account::get($data['account_name'], 'name');
 		        				$commitment->account_id = $account->id;
 		        				$commitment->add();
 	    						$connection->commit();

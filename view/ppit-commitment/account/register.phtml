@@ -45,8 +45,8 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
-	<?php if ($propertyId == 'customer_name') : ?>
-				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->customer_name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+	<?php if ($propertyId == 'name') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 	<?php elseif ($propertyId == 'n_first') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />

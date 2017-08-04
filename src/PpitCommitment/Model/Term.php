@@ -102,8 +102,7 @@ class Term implements InputFilterAwareInterface
 
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
-    		->join('commitment_account', 'commitment_account.id = commitment.account_id', array(), 'left')
-    		->join('core_community', 'core_community.id = commitment_account.customer_community_id', array('name'), 'left')
+    		->join('commitment_account', 'commitment_account.id = commitment.account_id', array('name'), 'left')
 			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
 		$where->notEqualTo('commitment_term.status', 'deleted');
@@ -116,7 +115,7 @@ class Term implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'name') $where->like('core_community.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'name') $where->like('commitment_account.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
@@ -142,8 +141,7 @@ class Term implements InputFilterAwareInterface
     		$term->commitment_caption = $commitment->caption;
 			$account = Account::get($commitment->account_id);
 			if ($account) {
-				$community = Community::get($account->customer_community_id);
-				$term->name = $community->name;
+				$term->name = $account->name;
 			}
     	}
     	$term->properties = $term->toArray('flat');

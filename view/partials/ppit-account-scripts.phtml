@@ -227,6 +227,24 @@ function getAccountList(params, major, dir) {
 					sortAccountList($(this).attr('id').split('-')[0]);
 				});
 			});
+
+			// Connect the check all checkbox
+			$('#account-checkbox').click(function () {
+				var current = document.getElementById('account-checkbox').checked;
+				var accountNumber = $('#account-number').val();
+				document.getElementById('down-account-checkbox').checked = (current) ? true : false;
+				for (i = 0; i < accountNumber; i++) {
+					document.getElementById('account-checkbox_' + i).checked = (current) ? true : false;
+				}
+			});
+			$('#down-account-checkbox').click(function () {
+				var current = document.getElementById('down-account-checkbox').checked;
+				var accountNumber = $('#account-number').val();
+				document.getElementById('account-checkbox').checked = (current) ? true : false;
+				for (i = 0; i < accountNumber; i++) {
+					document.getElementById('account-checkbox_' + i).checked = (current) ? true : false;
+				}
+			});
 			
 			// Connect the grouped actions anchors
 			$('.account-group-anchor').each(function () {
@@ -371,6 +389,7 @@ function getAccountUpdate(id, action) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('account-update-panel').innerHTML = xhttp.responseText;
+			if (id == 0) $('#status').val('<?php echo $status ?>');
 			
 			$(function () {
 			    $('.tip').tooltip({
@@ -826,7 +845,7 @@ function getAccountDetail(id) {
 			if (id != 0) {
 				getCommitmentAccountList('?account_id=' + id, 'identifier', 'DESC');
 	<?php if ($context->isAllowed('community/sendMessage')) : ?>
-				getCommunitySendMessage(id);
+//				getCommunitySendMessage(id);
 	<?php endif;?>
 			}
 <?php endif;?>
@@ -841,6 +860,195 @@ function getAccountDetail(id) {
 	// Highlight the clicked button (and only it in its class)
 	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
 	$('#account-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
+}
+
+<?php 
+$properties = array();
+$properties['mask_recipients'] = array('type' => 'checkbox');
+$properties['subject'] = array('type' => 'input', 'mandatory' => 'true', 'maxSize' => 255);
+$properties['body'] = array('type' => 'ckeditor', 'mandatory' => 'true', 'maxSize' => 65535);
+$properties['attachment'] = array('type' => 'select', 'mandatory' => 'false');
+$properties['update_time'] = array('type' => 'hidden');
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Mail', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function connectSendMessageForm(id)
+{
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('ppit-form');
+	
+	// Check validity
+	var validity = checkMailUpdateProperties(id);
+
+	if (validity) {
+		
+		// Create a new FormData object.
+		var formData = new FormData();
+	
+		var accountNumber = $('#account-number').val();
+		for (i = 0, j = 0; i < accountNumber; i++) {
+			if (document.getElementById('account-checkbox_' + i).checked) {
+				formData.append('account_' + j, $('#account_' + i).val());
+				j++;
+			}
+		}
+		formData.append('nb-account', j);
+			
+		// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+		formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+		formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'ckeditor') : ?>
+		formData.append('<?php echo $propertyId ?>', CKEDITOR.instances.<?php echo $propertyId ?>.getData());
+
+	<?php endif ?>
+
+<?php endforeach ?>
+	
+		var xhttp = new XMLHttpRequest();
+		var route = '<?php echo $this->url('commitmentAccount/sendMessage') ?>';
+	
+		// Execute the ajax request
+		xhttp = new XMLHttpRequest();
+		xhttp.open("POST", route, true);
+		xhttp.onreadystatechange = function() {
+				if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+			if (xhttp.readyState == 4) {
+		<?php if (!$config['isTraceActive']) : ?>
+				if (xhttp.status == 200) {
+		<?php endif;?>
+	
+				document.getElementById('send-message-panel').innerHTML = xhttp.responseText;
+				CKEDITOR.replace('body');
+				
+				$(function () {
+				    $('.tip').tooltip({
+				        content: function () {
+				            return $(this).prop('title');
+				        }
+				    });
+				});
+				
+				connectRemoveIcon('remove-anchor', 'form_action');
+		<?php if (!$config['isTraceActive']) : ?>
+				}
+		<?php endif;?>
+			}
+		}
+		xhttp.send(formData);
+	}
+	else return false;
+}
+
+function getSendMessageForm() {
+	$('#send-message-button').removeClass('btn-default').addClass('btn-warning');
+	$('#send-message-alert').show();
+	$('#send-message-button').click(function () { connectSendMessageForm(); });
+}
+
+function getSendMessage() {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/sendMessage') ?>';
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+			if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+
+			document.getElementById('send-message-panel').innerHTML = xhttp.responseText;
+			CKEDITOR.replace('body');
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
+
+			connectRemoveIcon('remove-anchor', 'form_action');
+			$('#attachment').change(function () {
+				if ($('#attachment').val()) $('#attachment_link').html('<a class="glyphicon glyphicon-paperclip" href="<?php echo $this->url('commitmentAccount/dropboxLink', array(), array('force_canonical' => true)) ?>/' + $('#attachment').val() + '" target="_blank"></a>'); 
+				else $('#attachment_link').html('');
+			});
+			$('#send-message-alert').hide();
+			$('#send-message-button').click(function () { getSendMessageForm(); });
+			
+	<?php if (!$config['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send();
+}
+
+function getAccountGroup() {
+
+	// Ensure the target is displayed
+	$('#form_action').show();
+	$(location).attr('hash', 'form_action');
+
+	// Disabled the list checkboxes
+	$('.account-checkbox').attr('disabled', 'disabled');
+	var route = '<?php echo $this->url('commitmentAccount/group') ?>';
+	var formData = new FormData();
+
+	var accountNumber = $('#account-number').val();
+	for (i = 0, j = 0; i < accountNumber; i++) {
+		if (document.getElementById('account-checkbox_' + i).checked) {
+			formData.append('account_' + j, $('#account_' + i).val());
+			j++;
+		}
+	}
+	formData.append('nb-account', j);
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("POST", route, true);
+	xhttp.onreadystatechange = function() {
+			if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$config['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+
+			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			getSendMessage(false);
+			
+			$(function () {
+			    $('.tip').tooltip({
+			        content: function () {
+			            return $(this).prop('title');
+			        }
+			    });
+			});
+			
+			connectRemoveIcon('remove-anchor', 'form_action');
+	<?php if (!$config['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send(formData);
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('.account-group-anchor').removeClass("btn-default").addClass("btn-primary");
 }
 
 function activateAccount() {

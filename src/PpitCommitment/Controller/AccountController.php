@@ -2,6 +2,7 @@
 
 namespace PpitCommitment\Controller;
 
+use PpitContact\Model\ContactMessage;
 use PpitCommitment\Model\Account;
 use PpitCommitment\ViewHelper\SsmlAccountViewHelper;
 use PpitCore\Model\Community;
@@ -68,9 +69,6 @@ class AccountController extends AbstractActionController
     	
     	// Retrieve the query parameters
     	$filters = array();
-    
-    	$customer_name = ($params()->fromQuery('customer_name', null));
-    	if ($customer_name) $filters['customer_name'] = $customer_name;
 
     	foreach ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) {
     
@@ -115,7 +113,7 @@ class AccountController extends AbstractActionController
     	return $view;
     }
 
-    public function getList()
+    public function getList($limitation = 300)
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
@@ -127,13 +125,13 @@ class AccountController extends AbstractActionController
     	$params = $this->getFilters($this->params(), $type);
 //    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
 
-    	$major = ($this->params()->fromQuery('major', 'customer_name'));
-    	$dir = ($this->params()->fromQuery('dir', 'ASC'));
+    	$major = ($this->params()->fromQuery('major'));
+    	$dir = ($this->params()->fromQuery('dir'));
     
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
     
     	// Retrieve the list
-    	$accounts = Account::getList($type, $entry, $params, $major, $dir, $mode);
+    	$accounts = Account::getList($type, $entry, $params, $major, $dir, $mode, $limitation);
 
     	// Return the link list
     	$view = new ViewModel(array(
@@ -159,7 +157,7 @@ class AccountController extends AbstractActionController
     
     public function exportAction()
     {
-    	$view = $this->getList();
+    	$view = $this->getList(null);
 
    		include 'public/PHPExcel_1/Classes/PHPExcel.php';
    		include 'public/PHPExcel_1/Classes/PHPExcel/Writer/Excel2007.php';
@@ -184,7 +182,163 @@ class AccountController extends AbstractActionController
     	$data['photo_link_id'] = $account->contact_1->photo_link_id;
     	$account->properties = $data;
     }
+
+    public function groupAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
     
+    	// Retrieve the type
+    	$type = $this->params()->fromRoute();
+    
+    	$request = $this->getRequest();
+    	if (!$request->isPost()) return $this->redirect()->toRoute('home');
+    	$nbAccount = $request->getPost('nb-account');
+    
+    	$accounts = array();
+    	for ($i = 0; $i < $nbAccount; $i++) {
+    		$account = Account::get($request->getPost('account_'.$i));
+    		$accounts[] = $account;
+    	}
+    
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'type' => $type,
+    			'accounts' => $accounts,
+    			'places' => Place::getList(array()),
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+
+    public function sendMessageAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the type
+    	$type = $this->params()->fromRoute(0);
+
+    	$mail = ContactMessage::instanciate();
+    	$mail->type = 'email';
+    	$mail->subject = $context->getConfig('community/sendMessage')['subject'][$context->getLocale()];
+    	$mail->body = $context->getConfig('community/sendMessage')['body'][$context->getLocale()];
+
+    	$documentList = array();
+    	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
+    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
+    		try {
+    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['contact']);
+    			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
+    		}
+    		catch(\Exception $e) {}
+    	}
+    	else $dropbox = null;
+
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$nbAccount = $request->getPost('nb-account');
+    		$accounts = array();
+    		for ($i = 0; $i < $nbAccount; $i++) {
+    			$account = Account::get($request->getPost('account_'.$i));
+    			$accounts[] = $account;
+    			
+    			$data = array();
+    			$data['type'] = 'email';
+    			$data['to'] = array();
+    			foreach($accounts as $account) {
+    				if ($account->email) {
+    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email;
+    					else $data['to'][$account->email] = $account->email;
+    				}
+    			    if ($account->email_2) {
+    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_2;
+    					else $data['to'][$account->email_2] = $account->email_2;
+    				}
+    			    if ($account->email_3) {
+    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_3;
+    					else $data['to'][$account->email_3] = $account->email_3;
+    				}
+    			    if ($account->email_4) {
+    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_4;
+    					else $data['to'][$account->email_4] = $account->email_4;
+    				}
+    			    if ($account->email_5) {
+    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_5;
+    					else $data['to'][$account->email_5] = $account->email_5;
+    				}
+    			}
+    			if (!$data['to']) $data['to'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
+    			else $data['cci'] = array($context->getConfig('community/sendMessage')['cci']);
+    			$data['subject'] = $request->getPost('subject');
+    			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
+    			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
+    			$data['body'] = $request->getPost('body');
+    			$attachment = $request->getPost('attachment');
+    			if ($attachment) {
+					$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+   					$link = $url('commitmentAccount/dropboxLink', array('document' => $attachment), array('force_canonical' => true));
+    				$data['body'] .= '<br><br>Pièce jointe : <a src="'.$link.'">'.$attachment.'</a>';
+    			}
+
+    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+    			
+    			// Atomicity
+    			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$rc = $mail->add();
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    		}
+    	}
+
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getconfig(),
+    			'type' => $type,
+    			'mail' => $mail,
+	    		'dropbox' => $dropbox,
+	    		'documentList' => $documentList,
+    			'csrfForm' => $csrfForm,
+    			'message' => $message,
+    			'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+
+    public function dropboxLinkAction()
+    {
+    	$context = Context::getCurrent();
+    	$document = $this->params()->fromRoute('document', 0);
+    	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
+    	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+    	$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
+    	$link = $dropboxClient->createTemporaryDirectLink($dropbox['folders']['contact'].'/'.$document);
+    	if ($link[0]) return $this->redirect()->toUrl($link[0]);
+    	else return $this->response;
+    }
+
     public function detailAction()
     {
     	// Retrieve the context
@@ -249,56 +403,39 @@ class AccountController extends AbstractActionController
 					}
 					if ($type) $data['credits'] = array($type => true);
 
-					$communityData = array('name' => ($account->customer_name) ? $account->customer_name : $account->n_last.', '.$account->n_first);
-    				$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
-					if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
-
 					// Add the main contact
 					if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
 					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
     			}
+    			 
 				if (!$error) {
 	    			// Atomically save
 	    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
 	    			$connection->beginTransaction();
 	    			try {
 	    				if (!$account->id) {
-	    					$return = $account->customer_community->add();
-			        		if ($return != 'OK') $error = 'Duplicate';
-			        		else {
-			        			$account->customer_community_id = $account->customer_community->id;
-			        			$account->contact_1->community_id = $account->customer_community->id;
-		    					$account->contact_1 = Vcard::optimize($account->contact_1);
-		    					$account->customer_community->contact_1_id = $account->contact_1->id;
-		    					$account->customer_community->contact_1_status = 'main';
-		    					$account->customer_community->update($account->customer_community->update_time);
-		    					$account->add();
-			        		}
+	    					$account->contact_1 = Vcard::optimize($account->contact_1);
+	    					$account->contact_1_id = $account->contact_1->id;
+	    					$account->contact_1_status = 'main';
+	    					$account->add();
 	    				}
 	    				elseif ($action == 'delete') {
-	    					$return = $account->customer_community->delete(null);
-	    					if ($return != 'OK') $error = $return;
-	    					else {
-	    						$return = $account->delete($request->getPost('update_time'));
-	    						if ($return != 'OK') $error = $return;
-	    					}
+    						$return = $account->delete($request->getPost('update_time'));
+    						if ($return != 'OK') $error = $return;
 	    				}
 	    				else {
+
 	    					// Save the contact
-	    					$return = $account->customer_community->update(null);
+	    					$return = $account->contact_1->update($account->contact_1->update_time);
 	    					if ($return != 'OK') $error = $return;
 	    					else {
-		    					$return = $account->contact_1->update($account->contact_1->update_time);
-		    					if ($return != 'OK') $error = $return;
-		    					else {
-		    						$return = $account->update($request->getPost('update_time'));
-		    						if ($return != 'OK') $error = $return;
-									else {
-										if (array_key_exists('file', $data)) $account->contact_1->savePhoto($data['file']);
-									}
-		    					}
-	    					}
+	    						$return = $account->update($request->getPost('update_time'));
+	    						if ($return != 'OK') $error = $return;
+								else {
+									if (array_key_exists('file', $data)) $account->contact_1->savePhoto($data['file']);
+								}
+		    				}
 	    				}
 	    				if ($error) $connection->rollback();
 	    				else {
@@ -454,27 +591,27 @@ class AccountController extends AbstractActionController
     	$type = $account->type;
     	
     	if ($contactNumber == 'contact_1') {
-    		if (!$account->contact_1) $account->contact_1 = Vcard::instanciate($account->customer_community_id);
+    		if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
     		$contact = $account->contact_1;
     		$contact_status = $account->contact_1_status;
     	}
     	elseif ($contactNumber == 'contact_2') {
-    		if (!$account->contact_2) $account->contact_2 = Vcard::instanciate($account->customer_community_id);
+    		if (!$account->contact_2) $account->contact_2 = Vcard::instanciate();
     		$contact = $account->contact_2;
     		$contact_status = $account->contact_2_status;
     	}
     	elseif ($contactNumber == 'contact_3') {
-    		if (!$account->contact_3) $account->contact_3 = Vcard::instanciate($account->customer_community_id);
+    		if (!$account->contact_3) $account->contact_3 = Vcard::instanciate();
     		$contact = $account->contact_3;
     		$contact_status = $account->contact_3_status;
     	}
     	elseif ($contactNumber == 'contact_4') {
-    		if (!$account->contact_4) $account->contact_4 = Vcard::instanciate($account->customer_community_id);
+    		if (!$account->contact_4) $account->contact_4 = Vcard::instanciate();
     		$contact = $account->contact_4;
     		$contact_status = $account->contact_4_status;
     	}
     	elseif ($contactNumber == 'contact_5') {
-    		if (!$account->contact_5) $account->contact_5 = Vcard::instanciate($account->customer_community_id);
+    		if (!$account->contact_5) $account->contact_5 = Vcard::instanciate();
     		$contact = $account->contact_5;
     		$contact_status = $account->contact_5_status;
     	}
@@ -522,63 +659,58 @@ class AccountController extends AbstractActionController
     				}
     				else {
     					if ($contactNumber == 'contact_1') {
-							$contact_1_status = $account->customer_community->contact_1_status = $contact_status;
+							$contact_1_status = $account->contact_1_status = $contact_status;
 							if ($contact_status == 'invoice') {
-								if ($account->customer_community->contact_2_status == 'invoice') $account->customer_community->contact_2_status = '';
-								if ($account->customer_community->contact_3_status == 'invoice') $account->customer_community->contact_3_status = '';
-								if ($account->customer_community->contact_4_status == 'invoice') $account->customer_community->contact_4_status = '';
-								if ($account->customer_community->contact_5_status == 'invoice') $account->customer_community->contact_5_status = '';
+								if ($account->contact_2_status == 'invoice') $account->contact_2_status = '';
+								if ($account->contact_3_status == 'invoice') $account->contact_3_status = '';
+								if ($account->contact_4_status == 'invoice') $account->contact_4_status = '';
+								if ($account->contact_5_status == 'invoice') $account->contact_5_status = '';
 							}
-    						$account->customer_community->contact_1_id = $contact->id;
-    						$account->customer_community->update($account->customer_community->update_time);
+    						$account->contact_1_id = $contact->id;
     						$account->contact_1 = $contact;
     					}
     					elseif ($contactNumber == 'contact_2') {
-							$account->contact_2_status = $account->customer_community->contact_2_status = $contact_status;
+							$account->contact_2_status = $contact_status;
     						if ($contact_status == 'invoice') {
-								if ($account->customer_community->contact_1_status == 'invoice') $account->customer_community->contact_1_status = '';
-								if ($account->customer_community->contact_3_status == 'invoice') $account->customer_community->contact_3_status = '';
-								if ($account->customer_community->contact_4_status == 'invoice') $account->customer_community->contact_4_status = '';
-								if ($account->customer_community->contact_5_status == 'invoice') $account->customer_community->contact_5_status = '';
+								if ($account->contact_1_status == 'invoice') $account->contact_1_status = '';
+								if ($account->contact_3_status == 'invoice') $account->contact_3_status = '';
+								if ($account->contact_4_status == 'invoice') $account->contact_4_status = '';
+								if ($account->contact_5_status == 'invoice') $account->contact_5_status = '';
 							}
-							$account->customer_community->contact_2_id = $contact->id;
-    						$account->customer_community->update($account->customer_community->update_time);
+							$account->contact_2_id = $contact->id;
     						$account->contact_2 = $contact;
     					}
     					elseif ($contactNumber == 'contact_3') {
-							$account->contact_3_status = $account->customer_community->contact_3_status = $contact_status;
+							$account->contact_3_status = $contact_status;
     					    if ($contact_status == 'invoice') {
-								if ($account->customer_community->contact_1_status == 'invoice') $account->customer_community->contact_1_status = '';
-								if ($account->customer_community->contact_2_status == 'invoice') $account->customer_community->contact_2_status = '';
-								if ($account->customer_community->contact_4_status == 'invoice') $account->customer_community->contact_4_status = '';
-								if ($account->customer_community->contact_5_status == 'invoice') $account->customer_community->contact_5_status = '';
+								if ($account->contact_1_status == 'invoice') $account->contact_1_status = '';
+								if ($account->contact_2_status == 'invoice') $account->contact_2_status = '';
+								if ($account->contact_4_status == 'invoice') $account->contact_4_status = '';
+								if ($account->contact_5_status == 'invoice') $account->contact_5_status = '';
 							}
-							$account->customer_community->contact_3_id = $contact->id;
-    						$account->customer_community->update($account->customer_community->update_time);
+							$account->contact_3_id = $contact->id;
     						$account->contact_3 = $contact;
     					}
     					elseif ($contactNumber == 'contact_4') {
-							$account->contact_4_status = $account->customer_community->contact_4_status = $contact_status;
+							$account->contact_4_status = $contact_status;
     					    if ($contact_status == 'invoice') {
-								if ($account->customer_community->contact_1_status == 'invoice') $account->customer_community->contact_1_status = '';
-								if ($account->customer_community->contact_2_status == 'invoice') $account->customer_community->contact_2_status = '';
-								if ($account->customer_community->contact_3_status == 'invoice') $account->customer_community->contact_3_status = '';
-								if ($account->customer_community->contact_5_status == 'invoice') $account->customer_community->contact_5_status = '';
+								if ($account->contact_1_status == 'invoice') $account->contact_1_status = '';
+								if ($account->contact_2_status == 'invoice') $account->contact_2_status = '';
+								if ($account->contact_3_status == 'invoice') $account->contact_3_status = '';
+								if ($account->contact_5_status == 'invoice') $account->contact_5_status = '';
 							}
-							$account->customer_community->contact_4_id = $contact->id;
-    						$account->customer_community->update($account->customer_community->update_time);
+							$account->contact_4_id = $contact->id;
     						$account->contact_4 = $contact;
     					}
     					elseif ($contactNumber == 'contact_5') {
-							$account->contact_5_status = $account->customer_community->contact_5_status = $contact_status;
+							$account->contact_5_status = $contact_status;
     					    if ($contact_status == 'invoice') {
-								if ($account->customer_community->contact_1_status == 'invoice') $account->customer_community->contact_1_status = '';
-								if ($account->customer_community->contact_2_status == 'invoice') $account->customer_community->contact_2_status = '';
-								if ($account->customer_community->contact_3_status == 'invoice') $account->customer_community->contact_3_status = '';
-								if ($account->customer_community->contact_4_status == 'invoice') $account->customer_community->contact_4_status = '';
+								if ($account->contact_1_status == 'invoice') $account->contact_1_status = '';
+								if ($account->contact_2_status == 'invoice') $account->contact_2_status = '';
+								if ($account->contact_3_status == 'invoice') $account->contact_3_status = '';
+								if ($account->contact_4_status == 'invoice') $account->contact_4_status = '';
 							}
-							$account->customer_community->contact_5_id = $contact->id;
-    						$account->customer_community->update($account->customer_community->update_time);
+							$account->contact_5_id = $contact->id;
     						$account->contact_5 = $contact;
     					}
     					$account->update($request->getPost('update_time'));
@@ -641,9 +773,7 @@ class AccountController extends AbstractActionController
 				}
 				$data['origine'] = 'web';
 
-				$communityData = array('name' => ($account->customer_name) ? $account->customer_name : $account->n_last.', '.$account->n_first);
-    			$communityData['next_credit_consumption_date'] = date('Y-m-d', strtotime(date('Y-m-d').' + 31 days'));
-				if ($account->customer_community->loadData($communityData, $account->customer_community->id) != 'OK') throw new \Exception('View error');
+				if (!$account->name) $account->name = $account->n_last.', '.$account->n_first;
 
 				// Add the main contact
 				if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
@@ -654,13 +784,9 @@ class AccountController extends AbstractActionController
     			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				$account->customer_community->add();
-		        	$account->customer_community_id = $account->customer_community->id;
-					$account->contact_1->community_id = $account->customer_community->id;
 	    			$account->contact_1 = Vcard::optimize($account->contact_1);
-	    			$account->customer_community->contact_1_id = $account->contact_1->id;
-	    			$account->customer_community->contact_1_status = 'main';
-	    			$account->customer_community->update($account->customer_community->update_time);
+	    			$account->contact_1_id = $account->contact_1->id;
+	    			$account->contact_1_status = 'main';
     				$return = $account->add();
     
     				if ($return != 'OK') {
@@ -732,22 +858,16 @@ class AccountController extends AbstractActionController
     			$this->getResponse()->setStatusCode('404');
     			return $this->getResponse();
     		}
-    		$community = Community::get($contact->id, 'contact_1_id');
-    	   	if (!$community) {
-    			$logger->info('account/get;'.$instance_caption.';404;'.'vcard_id: '.$contact->id.';');
-    			$this->getResponse()->setStatusCode('404');
-    			return $this->getResponse();
-    		}
-    		$account =  Account::get($community->id, 'customer_community_id');
-    	    if (!$community) {
-    			$logger->info('account/get;'.$instance_caption.';404;'.'customer_community_id: '.$community->id.';');
+    		$account =  Account::get($contact->id, 'contact_1_id');
+    	    if (!$account) {
+    			$logger->info('account/get;'.$instance_caption.';404;'.'contact_1_id: '.$contact->id.';');
     			$this->getResponse()->setStatusCode('404');
     			return $this->getResponse();
     		}
     		$result = array(
-    				'account_identifier' => $account->id.'-'.$community->id,
+    				'account_identifier' => $account->id,
     				'status' => $account->status,
-    				'name' => $community->name,
+    				'name' => $account->name,
     				'title' => $contact->n_title,
     				'n_first' => $contact->n_first,
     				'n_last' => $contact->n_last,
@@ -813,30 +933,10 @@ class AccountController extends AbstractActionController
 	    				return $this->getResponse();
 	    			}
 	    		}
-	    		$community = Community::get($contact->id, 'contact_1_id');
-	    		if (!$community) {
-	    			$data = array();
-	    			$data['contact_1_id'] = $contact->id;
-	    			$data['name'] = $contact->n_fn;
-	    			$data['next_credit_consumption_date'] = '9999-12-31';
-	    			$community = Community::instanciate();
-	    			if ($community->loadData($data) != 'OK') {
-						$logger->info('account/put;500;community;');
-				    	$this->getResponse()->setStatusCode('500');
-						return $this->getResponse();
-	    			}
-	    			$rc = $community->add();
-	    			if ($rc != 'OK') {
-	    				$connection->rollback();
-	    				$logger->info('account/put;409;community;');
-	    				$this->getResponse()->setStatusCode('409');
-	    				return $this->getResponse();
-	    			}
-	    		}
-	    		$account =  Account::get($community->id, 'customer_community_id');
+	    		$account =  Account::get($contact->id, 'contact_1_id');
 	    		if (!$account) {
 	    			$data = array();
-	    			$data['customer_community_id'] = $community->id;
+	    			$data['contact_1_id'] = $contact_1_id;
 	    			$data['status'] = 'new';
 	    			$data['opening_date'] = date('Y-m-d');
 	    			$account = Account::instanciate();
@@ -866,7 +966,7 @@ class AccountController extends AbstractActionController
     		}
     	}
     }
-    
+/*    
 	public function deleteAction()
     {
     	$id = (int) $this->params()->fromRoute('id', 0);
@@ -923,5 +1023,31 @@ class AccountController extends AbstractActionController
     	));
    		$view->setTerminal(true);
    		return $view;
+    }*/
+
+    public function rephaseAction()
+    {
+    	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0));
+    	$cursor = Account::getTable()->transSelectWith($select);
+    	foreach ($cursor as $account) {
+    	    if ($account->customer_community_id) {
+	    		$community = Community::getTable()->transGet($account->customer_community_id);
+	    		if ($community) {
+		    		$account->name = $community->name;
+		    		$account->contact_1_id = $community->contact_1_id;
+		    		$account->contact_1_status = $community->contact_1_status;
+		    		$account->contact_2_id = $community->contact_2_id;
+		    		$account->contact_2_status = $community->contact_2_status;
+		    		$account->contact_3_id = $community->contact_3_id;
+		    		$account->contact_3_status = $community->contact_3_status;
+		    		$account->contact_4_id = $community->contact_4_id;
+		    		$account->contact_4_status = $community->contact_4_status;
+		    		$account->contact_5_id = $community->contact_5_id;
+		    		$account->contact_5_status = $community->contact_5_status;
+		    		Account::getTable()->transSave($account);
+		    		echo $account->id.'<br>';
+	    		}
+    	    }
+    	}
     }
 }
