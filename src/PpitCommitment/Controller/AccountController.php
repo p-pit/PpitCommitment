@@ -254,30 +254,30 @@ class AccountController extends AbstractActionController
     			$data = array();
     			$data['type'] = 'email';
     			$data['to'] = array();
+    			$data['cci'] = array();
     			foreach($accounts as $account) {
     				if ($account->email) {
-    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email;
+    					if ($request->getPost('mask_recipients')) $data['cci'][$account->email] = $account->email;
     					else $data['to'][$account->email] = $account->email;
     				}
     			    if ($account->email_2) {
-    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_2;
+    					if ($request->getPost('mask_recipients')) $data['cci'][$account->email] = $account->email_2;
     					else $data['to'][$account->email_2] = $account->email_2;
     				}
     			    if ($account->email_3) {
-    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_3;
+    					if ($request->getPost('mask_recipients')) $data['cci'][$account->email] = $account->email_3;
     					else $data['to'][$account->email_3] = $account->email_3;
     				}
     			    if ($account->email_4) {
-    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_4;
+    					if ($request->getPost('mask_recipients')) $data['cci'][$account->email] = $account->email_4;
     					else $data['to'][$account->email_4] = $account->email_4;
     				}
     			    if ($account->email_5) {
-    					if ($request->getPost('mask_recipients')) $data['cci'][] = $account->email_5;
+    					if ($request->getPost('mask_recipients')) $data['cci'][$account->email] = $account->email_5;
     					else $data['to'][$account->email_5] = $account->email_5;
     				}
     			}
-    			if (!$data['to']) $data['to'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
-    			else $data['cci'] = array($context->getConfig('community/sendMessage')['cci']);
+    			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
     			$data['subject'] = $request->getPost('subject');
     			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
     			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
@@ -286,7 +286,7 @@ class AccountController extends AbstractActionController
     			if ($attachment) {
 					$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
    					$link = $url('commitmentAccount/dropboxLink', array('document' => $attachment), array('force_canonical' => true));
-    				$data['body'] .= '<br><br>Pièce jointe : <a src="'.$link.'">'.$attachment.'</a>';
+    				$data['body'] .= '<br><br>Pièce jointe : <a href="'.$link.'">'.$attachment.'</a>';
     			}
 
     			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');

@@ -877,7 +877,7 @@ return array(
             	array('route' => 'commitmentAccount/search', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/group', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/sendMessage', 'roles' => array('sales_manager')),
-            	array('route' => 'commitmentAccount/dropboxLink', 'roles' => array('user')),
+            	array('route' => 'commitmentAccount/dropboxLink', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/put', 'roles' => array('guest')),
