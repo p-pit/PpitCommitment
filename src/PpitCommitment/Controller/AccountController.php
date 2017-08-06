@@ -25,7 +25,7 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-    	$place = Place::getTable()->transGet($context->getPlaceId());
+    	$place = Place::get($context->getPlaceId());
 
 		$entry = $this->params()->fromRoute('entry');
     	$type = $this->params()->fromRoute('type', null);

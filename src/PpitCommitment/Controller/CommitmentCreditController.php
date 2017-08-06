@@ -33,7 +33,7 @@ class CommitmentCreditController extends AbstractActionController
     public function indexAction()
     {
     	$context = Context::getCurrent();
-    	$place = Place::getTable()->transGet($context->getPlaceId());
+    	$place = Place::get($context->getPlaceId());
     	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
 		$instance_id = $context->getInstanceId();
 

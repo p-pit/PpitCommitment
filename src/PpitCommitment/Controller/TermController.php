@@ -17,8 +17,8 @@ class TermController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-    	$place = Place::getTable()->transGet($context->getPlaceId());
-
+    	$place = Place::get($context->getPlaceId());
+		
     	$type = $this->params()->fromRoute('type', 0);
 
 		$applicationId = 'p-pit-engagements';
