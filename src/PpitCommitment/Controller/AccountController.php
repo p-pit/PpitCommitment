@@ -398,8 +398,10 @@ class AccountController extends AbstractActionController
 			    	$data = array();
 					foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 						$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-						if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
-						else $data[$propertyId] = $request->getPost($propertyId);
+						if ($property['type'] != 'title') {
+							if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
+							else $data[$propertyId] = $request->getPost($propertyId);
+						}
 					}
 					if ($type) $data['credits'] = array($type => true);
 

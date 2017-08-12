@@ -1108,11 +1108,9 @@ return array(
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
-									'new' => array('en_US' => 'Hot', 'fr_FR' => 'Chaud'),
-									'warm' => array('en_US' => 'Warm', 'fr_FR' => 'Tiède'),
-									'cold' => array('en_US' => 'Cold', 'fr_FR' => 'Froid'),
-									'active' => array('en_US' => 'Active', 'fr_FR' => 'Actif'),
-									'inactive' => array('en_US' => 'Inactive', 'fr_FR' => 'Inactif'),
+									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'prospect' => array('en_US' => 'Prospect', 'fr_FR' => 'Prospect'),
+									'active' => array('en_US' => 'Customer', 'fr_FR' => 'Client'),
 									'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
 							),
 							'labels' => array(

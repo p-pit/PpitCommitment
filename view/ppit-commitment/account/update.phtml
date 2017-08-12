@@ -77,80 +77,85 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	?>
+	<?php if ($property['type'] == 'title') : ?>
+		<hr>
+		<h5 style="text-align: center"><?php echo $property['labels'][$context->getLocale()] ?></h5>
+		<div>&nbsp;</div>
+	<?php else : ?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
-	<?php if ($propertyId == 'name') : ?>
+		<?php if ($propertyId == 'name') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->name ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
-	<?php elseif ($propertyId == 'n_first') : ?>
+		<?php elseif ($propertyId == 'n_first') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->n_first ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
-	<?php elseif ($propertyId == 'n_last') : ?>
+		<?php elseif ($propertyId == 'n_last') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->n_last ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
-	<?php elseif ($propertyId == 'email') : ?>
+		<?php elseif ($propertyId == 'email') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->email ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
-	<?php elseif ($propertyId == 'tel_work') : ?>
+		<?php elseif ($propertyId == 'tel_work') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->tel_work ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
-	<?php elseif ($propertyId == 'tel_cell') : ?>
+		<?php elseif ($propertyId == 'tel_cell') : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->contact_1->tel_cell ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			
-	<?php elseif ($propertyId == 'birth_date') : ?>
+		<?php elseif ($propertyId == 'birth_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->contact_1->birth_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
-	<?php elseif ($propertyId == 'place_id') : ?>
+		<?php elseif ($propertyId == 'place_id') : ?>
 				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
 	    			<option />
-		<?php foreach ($places as $place) : ?>
+			<?php foreach ($places as $place) : ?>
 	    			<option value="<?php echo $place->id ?>" <?php if ($account->properties[$propertyId] == $place->id) echo 'selected="selected"' ?>><?php echo $place->caption ?></option>
-		<?php endforeach;?>
+			<?php endforeach;?>
 				</select>
 
-	<?php elseif ($propertyId == 'closing_date') : ?>
+		<?php elseif ($propertyId == 'closing_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->closing_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 				
-	<?php elseif ($property['type'] == 'date') : ?>
+		<?php elseif ($property['type'] == 'date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
-	<?php elseif ($property['type'] == 'number') : ?>
+		<?php elseif ($property['type'] == 'number') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($account->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
-	<?php elseif ($property['type'] == 'textarea') : ?>
+		<?php elseif ($property['type'] == 'textarea') : ?>
 				<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $account->properties[$propertyId] ?></textarea>
 
-	<?php elseif ($property['type'] == 'log') : ?>
+		<?php elseif ($property['type'] == 'log') : ?>
 				<textarea class="form-control" id="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>></textarea>
 
-	<?php elseif ($property['type'] == 'select') : ?>
+		<?php elseif ($property['type'] == 'select') : ?>
 				<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
 	    			<option />
-		<?php foreach ($property['modalities'] as $key => $labels) : ?>
+			<?php foreach ($property['modalities'] as $key => $labels) : ?>
 	    			<option value="<?php echo $key ?>" <?php if ($account->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
-		<?php endforeach;?>
+			<?php endforeach;?>
 				</select>
 
-	<?php elseif ($property['type'] == 'photo') : ?>
+		<?php elseif ($property['type'] == 'photo') : ?>
 
 <!-- Photo -->
 				<img height="150" src="<?php echo $this->basePath('photos/'.$account->properties[$propertyId]) ?>.jpg"/>
 	
-	<?php else : ?>
+		<?php else : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
-	<?php endif;?>
+		<?php endif;?>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
 		</div>
 
-	<?php if ($property['type'] == 'photo' && !$isDisabled) : ?>
+		<?php if ($property['type'] == 'photo' && !$isDisabled) : ?>
 	    <div class="photo-group">
 			<label class="col-sm-5 control-label"></label>
 			<div class="col-sm-7">
@@ -159,11 +164,11 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 		</div>
 		<div>&nbsp;</div>
 
-	<?php elseif ($property['type'] == 'log' && $account->properties[$propertyId]) : ?>
+		<?php elseif ($property['type'] == 'log' && $account->properties[$propertyId]) : ?>
 <!-- Display the history -->
 		<div id="<?php echo $propertyId ?>-history-panel" class="panel panel-default">
 			<div class="panel-body">
-	<?php foreach ($account->properties[$propertyId] as $comment) : ?>
+			<?php foreach ($account->properties[$propertyId] as $comment) : ?>
 				<div class="row">
 					<div class="col-md-12">
 						<strong><?php echo $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10) ?>:</strong>&nbsp;
@@ -175,12 +180,13 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 					<div class="col-md-2" align="right">&nbsp;</div>
 					<div class="col-md-10"><em><?php echo $comment['comment'] ?></em></div>
 				</div>
-	<?php endforeach;?>
+			<?php endforeach;?>
 			</div>
 		</div>
 		<div>&nbsp;</div>
 		<div>
-	<?php endif; ?>
+		<?php endif; ?>
+	<?php endif;?>
 
 <?php endforeach;?>
 

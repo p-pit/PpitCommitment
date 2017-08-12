@@ -53,6 +53,10 @@ class Account implements InputFilterAwareInterface
     public $property_10;
     public $json_property_1;
     public $json_property_2;
+    public $comment_1;
+    public $comment_2;
+    public $comment_3;
+    public $comment_4;
     public $audit;
     public $update_time;
     
@@ -206,6 +210,10 @@ class Account implements InputFilterAwareInterface
         $this->property_10 = (isset($data['property_10'])) ? $data['property_10'] : null;
         $this->json_property_1 = (isset($data['json_property_1'])) ? json_decode($data['json_property_1'], true) : null;
         $this->json_property_2 = (isset($data['json_property_2'])) ? json_decode($data['json_property_2'], true) : null;
+        $this->comment_1 = (isset($data['comment_1'])) ? $data['comment_1'] : null;
+        $this->comment_2 = (isset($data['comment_2'])) ? $data['comment_2'] : null;
+        $this->comment_3 = (isset($data['comment_3'])) ? $data['comment_3'] : null;
+        $this->comment_4 = (isset($data['comment_4'])) ? $data['comment_4'] : null;
         $this->audit = (isset($data['audit'])) ? json_decode($data['audit'], true) : null;
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
@@ -324,6 +332,10 @@ class Account implements InputFilterAwareInterface
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
     	$data['json_property_1'] = $this->json_property_1;
     	$data['json_property_2'] = $this->json_property_2;
+    	$data['comment_1'] =  ($this->comment_1) ? $this->comment_1 : null;
+    	$data['comment_2'] =  ($this->comment_2) ? $this->comment_2 : null;
+    	$data['comment_3'] =  ($this->comment_3) ? $this->comment_3 : null;
+    	$data['comment_4'] =  ($this->comment_4) ? $this->comment_4 : null;
     	$data['audit'] = $this->audit;
 
     	// Joined properties
@@ -511,8 +523,8 @@ class Account implements InputFilterAwareInterface
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
 		$where->notEqualTo('commitment_account.status', 'deleted');
-		if ($entry == 'contact') $where->in('commitment_account.status', array('new', 'warm', 'cold'));
-		else $where->in('commitment_account.status', array('active', 'inactive', 'gone'));
+		if ($entry == 'contact') $where->notEqualTo('commitment_account.status', 'active');
+		else $where->equalTo('commitment_account.status', 'active');
 		
     	// Todo list vs search modes
     	if ($mode == 'todo') {
@@ -790,6 +802,22 @@ class Account implements InputFilterAwareInterface
 			}
         	if (array_key_exists('json_property_2', $data)) {
 				$this->json_property_2 = $data['json_property_2'];
+			}
+    		if (array_key_exists('comment_1', $data)) {
+				$this->comment_1 = trim(strip_tags($data['comment_1']));
+				if (strlen($this->comment_1) > 65535) return 'Integrity';
+			}
+        	if (array_key_exists('comment_2', $data)) {
+				$this->comment_2 = trim(strip_tags($data['comment_2']));
+				if (strlen($this->comment_2) > 65535) return 'Integrity';
+			}
+        	if (array_key_exists('comment_3', $data)) {
+				$this->comment_3 = trim(strip_tags($data['comment_3']));
+				if (strlen($this->comment_3) > 65535) return 'Integrity';
+			}
+        	if (array_key_exists('comment_4', $data)) {
+				$this->comment_4 = trim(strip_tags($data['comment_4']));
+				if (strlen($this->comment_4) > 65535) return 'Integrity';
 			}
 			if (array_key_exists('is_notified', $data)) {
 				$this->is_notified = $data['is_notified'];

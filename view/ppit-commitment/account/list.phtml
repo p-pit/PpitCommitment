@@ -79,8 +79,8 @@
 	<?php 
 	$color = null;
 	if ($account->status == 'new') $backgroundColor = 'LightGreen';
-	elseif ($account->status == 'warm') $backgroundColor = 'LightSalmon';
-	elseif ($account->status == 'cold') { $backgroundColor = 'Red'; $color = 'white'; }
+	elseif (!in_array($account->status, array('new', 'active', 'gone'))) $backgroundColor = 'LightSalmon';
+	elseif ($account->status == 'gone') { $backgroundColor = 'Red'; $color = 'white'; }
 	else $backgroundColor = null;
 	?>
 	
