@@ -1214,21 +1214,12 @@ class Commitment implements InputFilterAwareInterface
 		$cursor = Commitment::getTable()->selectWith($select);
 
 		$newCommitments = array();
-		$confirmedCommitments = array();
-		$rejectedCommitments = array();
-		$registeredCommitments = array();
 		
 		foreach ($context->getConfig('commitment')['types'] as $type => $properties) {
 			$newCommitments[$type] = array();
-			$confirmedCommitments[$type] = array();
-			$rejectedCommitments[$type] = array();
-			$registeredCommitments[$type] = array();
 		}
 		foreach($cursor as $commiment) {
 			if ($commitment->status == 'new') $newCommitments[$commitment->type][] = $commitment->identifier;
-			elseif ($commitment->status == 'confirmed') $confirmedCommitments[$commitment->type][] = $commitment->identifier;
-			elseif ($commitment->status == 'rejected') $rejectedCommitments[$commitment->type][] = $commitment->identifier;
-			elseif ($commitment->status == 'registered') $registeredCommitments[$commitment->type][] = $commitment->identifier;
 			$commitment->notification_time = date('Y-m-d H:i:s');
 			Commitment::getTable()->save($commitment);
 		}
@@ -1243,48 +1234,6 @@ class Commitment implements InputFilterAwareInterface
 	    		$url = $config['ppitCoreSettings']['domainName'];
 	    		$title = sprintf($context->getConfig('commitment')['messages']['addTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
 	    		$text = sprintf($context->getConfig('commitment')['messages']['addText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $newCommitments[$type]));
-	    		foreach ($cursor as $contact) {
-	    			ContactMessage::sendMail($contact->email, $text, $title, null);
-	    		}
-	    	}
-	
-			if (count($confirmedCommitments[$type]) > 0) {
-	    		$select = Vcard::getTable()->getSelect();
-	    		$where = new Where;
-	    		$where->like('roles', '%business_owner%');
-	    		$select->where($where);
-	    		$cursor = Vcard::getTable()->selectWith($select);
-	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getConfig('commitment')['messages']['confirmTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getConfig('commitment')['messages']['confirmText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $confirmedCommitments[$type]));
-	    		foreach ($cursor as $contact) {
-	    			ContactMessage::sendMail($contact->email, $text, $title, null);
-	    		}
-	    	}
-	    	
-	    	if (count($rejectedCommitments[$type]) > 0) {
-	    		$select = Vcard::getTable()->getSelect();
-	    		$where = new Where;
-	    		$where->like('roles', '%business_owner%');
-	    		$select->where($where);
-	    		$cursor = Vcard::getTable()->selectWith($select);
-	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getConfig('commitment')['messages']['rejectTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getConfig('commitment')['messages']['rejectText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $rejectedCommitments[$type]));
-	    		foreach ($cursor as $contact) {
-	    			ContactMessage::sendMail($contact->email, $text, $title, null);
-	    		}
-	    	}
-	    	
-	    	if (count($registeredCommitments[$type]) > 0) {
-	    		$select = Vcard::getTable()->getSelect();
-	    		$where = new Where;
-	    		$where->like('roles', '%business_owner%');
-	    		$select->where($where);
-	    		$cursor = Vcard::getTable()->selectWith($select);
-	    		$url = $config['ppitCoreSettings']['domainName'];
-	    		$title = sprintf($context->getConfig('commitment')['messages']['registerTitle']['fr_FR'], $properties['labels'][$context->getLocale()]);
-	    		$text = sprintf($context->getConfig('commitment')['messages']['registerText']['fr_FR'], $url, $properties['labels'][$context->getLocale()], implode(',', $registeredCommitments[$type]));
 	    		foreach ($cursor as $contact) {
 	    			ContactMessage::sendMail($contact->email, $text, $title, null);
 	    		}

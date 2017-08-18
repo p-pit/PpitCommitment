@@ -395,7 +395,14 @@ class AccountController extends AbstractActionController
 
     			// Load the input data
     			if ($action != 'delete') {
-			    	$data = array();
+    			    			
+					// Unlink the current place community for the account type
+					$place = Place::get($account->place_id);
+					if ($place && array_key_exists($account->type, $place->communities)) {
+    					unset($account->contact_1->communities[$place->communities[$account->type]]);
+    				}
+    				
+    				$data = array();
 					foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 						$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
 						if ($property['type'] != 'title') {
@@ -409,6 +416,12 @@ class AccountController extends AbstractActionController
 					if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
 					if ($account->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
+    			
+					// Link to the place community for the account type
+					$place = Place::get($account->place_id);
+					if ($place && array_key_exists($account->type, $place->communities)) {
+						$account->contact_1->communities[$place->communities[$account->type]] = true;
+    				}
     			}
     			 
 				if (!$error) {
@@ -500,7 +513,7 @@ class AccountController extends AbstractActionController
     
     			// Load the input data
     			$data = array();
-    			$data['roles'] = array('student' => true);
+    			$data['roles'] = array();
     			$data['perimeters'] = array();
     			if ($type) $data['credits'] = array($type => true);
     			$data['username'] = $request->getPost('username');
@@ -1032,7 +1045,7 @@ class AccountController extends AbstractActionController
     	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0));
     	$cursor = Account::getTable()->transSelectWith($select);
     	foreach ($cursor as $account) {
-    	    if ($account->customer_community_id) {
+/*    	    if ($account->customer_community_id) {
 	    		$community = Community::getTable()->transGet($account->customer_community_id);
 	    		if ($community) {
 		    		$account->name = $community->name;
@@ -1049,7 +1062,18 @@ class AccountController extends AbstractActionController
 		    		Account::getTable()->transSave($account);
 		    		echo $account->id.'<br>';
 	    		}
-    	    }
+    	    }*/
+    		if ($account->contact_1_id) {
+    			$contact = Vcard::getTable()->transGet($account->contact_1_id);
+    			if ($contact) {
+    				$place = Place::getTable()->transGet($account->place_id);
+    				if ($place && array_key_exists($account->type, $place->communities)) {
+    					$contact->communities[$place->communities[$account->type]] = true;
+		    			Vcard::getTable()->transSave($contact);
+    					echo $contact->id.'<br>';
+    				}
+    			}
+    		}
     	}
     }
 }

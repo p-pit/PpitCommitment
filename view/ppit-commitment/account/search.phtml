@@ -82,7 +82,7 @@
 			} 
 			elseif ($propertyId == 'status') {
 				if ($entry == 'contact') {
-					$modalities['*'] = '*';
+					$modalities['new, interested, candidate, answer, conversion,gone'] = '*';
 					foreach ($property['modalities'] as $modalityId => $modality) {
 						if ($modalityId != 'active') $modalities[$modalityId] = $modality[$context->getLocale()];
 					}
