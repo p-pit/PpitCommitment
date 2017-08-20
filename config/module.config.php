@@ -153,12 +153,21 @@ return array(
         										),
         								),
         						),
-	       						'put' => array(
+	       						'post' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/put[/:email]',
+        										'route' => '/post[/:type]',
         										'defaults' => array(
-        												'action' => 'put',
+        												'action' => 'post',
+        										),
+        								),
+        						),
+	       						'processPost' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/process-post[/:interaction_id]',
+        										'defaults' => array(
+        												'action' => 'processPost',
         										),
         								),
         						),
@@ -880,7 +889,8 @@ return array(
             	array('route' => 'commitmentAccount/dropboxLink', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/put', 'roles' => array('guest')),
+            	array('route' => 'commitmentAccount/post', 'roles' => array('guest')),
+            	array('route' => 'commitmentAccount/processPost', 'roles' => array('user')),
 //            	array('route' => 'commitmentAccount/delete', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager')),
@@ -1282,6 +1292,32 @@ return array(
 			'adr_state' => array('mandatory' => false),
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
+	),
+		
+	'commitmentAccount/post' => array(
+			'place_identifier' => array('mandatory' => false),
+			'n_title' => array('mandatory' => false),
+			'n_last' => array('mandatory' => true),
+			'n_first' => array('mandatory' => true),
+			'email' => array('mandatory' => true),
+			'request' => array('mandatory' => true),
+			'request_comment' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'tel_cell' => array('mandatory' => false),
+			'adr_street' => array('mandatory' => false),
+			'adr_extended' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => false),
+			'adr_post_office_box' => array('mandatory' => false),
+			'adr_city' => array('mandatory' => false),
+			'adr_state' => array('mandatory' => false),
+			'adr_country' => array('mandatory' => false),
+			'birth_date' => array('mandatory' => false),
+			'gender' => array('mandatory' => false),
+			'place_identifier' => array('mandatory' => false),
+			'locale' => array('mandatory' => false),
+	),
+	'commitmentAccount/requestTypes' => array(
+			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
 	'commitmentAccount/export' => array(
 			'status' => array('mandatory' => true),

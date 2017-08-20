@@ -507,7 +507,7 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($type, $entry, $params, $major, $dir, $mode = 'todo', $limitation = 300)
+    public static function getList($type, $entry, $params, $major = 'name', $dir = 'ASC', $mode = 'search', $limitation = 300)
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
@@ -862,7 +862,7 @@ class Account implements InputFilterAwareInterface
     	$account = Account::get($this->id);
 
     	// Isolation check
-    	if ($account->update_time > $update_time) return 'Isolation';
+    	if ($update_time && $account->update_time > $update_time) return 'Isolation';
     	$this->contact_1->update($this->contact_1->update_time);
     	Account::getTable()->save($this);
     	return 'OK';

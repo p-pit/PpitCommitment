@@ -9,6 +9,8 @@
 			'Actual shipment' => 'Expédition réelle',
 			'Add a commitment' => 'Ajouter un engagement',
 			'Add a photograph' => 'Ajouter une photo',
+			'ALREADY EXISTING ACCOUNT' => 'COMPTE DEJA EXISTANT',
+			'ALREADY EXISTING CONTACT' => 'CONTACT DEJA EXISTANT',
 			'Amount' => 'Montant',
 			'An email including a validation link has be sent to you. Please, click on this link.' => 'Un email contenant un lien de validation vous a été envoyé. Veuillez cliquer sur ce lien.',
 			'Are you sure you want to delete the account?' => 'Etes-vous sûr(e) de vouloir supprimer le compte',
