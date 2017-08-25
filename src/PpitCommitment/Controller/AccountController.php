@@ -906,7 +906,12 @@ class AccountController extends AbstractActionController
 
     		// Load the data from the post request
     		$data = json_decode($this->request->getContent(), true);
-    		if (!is_array($data) || !array_key_exists('email', $data) || !array_key_exists('n_first', $data) || !array_key_exists('n_last', $data)) {
+    		if (!is_array($data) || !array_key_exists('place_identifier', $data) || !array_key_exists('email', $data) || !array_key_exists('n_first', $data) || !array_key_exists('n_last', $data)) {
+    			$this->getResponse()->setStatusCode('400');
+    			return $this->getResponse();
+    		}
+    		$place = Place::get($data['place_identifier'], 'identifier');
+    	   	if (!$place /* || !$context->hasAccessTo('place', $place) */) {
     			$this->getResponse()->setStatusCode('400');
     			return $this->getResponse();
     		}
@@ -942,6 +947,8 @@ class AccountController extends AbstractActionController
     	$type = $interaction->category;
     	$reference = $interaction->reference;
     	$data = json_decode($interaction->content, true);
+    	$place = Place::get($data['place_identifier'], 'identifier');
+    	$data['place_id'] = $place->id;
 
     	if (array_key_exists('request', $data) && array_key_exists($data['request'], $context->getConfig('commitmentAccount/requestTypes'.(($type) ? '/'.$type : '')))) {
 	    	$requestType = $context->getConfig('commitmentAccount/requestTypes'.(($type) ? '/'.$type : ''))[$data['request']][$context->getLocale()];
@@ -959,26 +966,28 @@ class AccountController extends AbstractActionController
     		if (count($accounts) > 0) {
     			reset($accounts);
 				$account = Account::get(current($accounts)->id);
-				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
-				$account->contact_history[] = array(
-						'time' => date('Y-m-d H:i:s'),
-						'n_fn' => 'support@p-pit.fr',
-						'comment' => $translator->translate('ALREADY EXISTING ACCOUNT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
-				);
-		   		$rc = $account->update(null);
-		   		if ($rc != 'OK') {
-		   			$interaction->http_status = '500';
-		   		}
-		   		else {
-		   			$interaction->status = 'processed';
-		   			$interaction->http_status = '200';
-		   		}
+				if ($account->place_id == $place->id) {
+					if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+					$account->contact_history[] = array(
+							'time' => date('Y-m-d H:i:s'),
+							'n_fn' => 'support@p-pit.fr',
+							'comment' => $translator->translate('ALREADY EXISTING ACCOUNT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
+					);
+			   		$rc = $account->update(null);
+			   		if ($rc != 'OK') {
+			   			$interaction->http_status = '500';
+			   		}
+			   		else {
+			   			$interaction->status = 'processed';
+			   			$interaction->http_status = '200';
+			   		}
+				}
 		   		$interaction->update(null);
 		   		$this->getResponse()->setStatusCode($interaction->http_status);
 	    		return $this->getResponse();
 	    	}
 	    	else {
-	
+
 				// Create the account
 		   		$account = Account::instanciate($type);
 		   		if ($account->loadData($data) != 'OK') {

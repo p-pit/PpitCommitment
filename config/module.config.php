@@ -890,7 +890,7 @@ return array(
             	array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/post', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/processPost', 'roles' => array('user')),
+            	array('route' => 'commitmentAccount/processPost', 'roles' => array('admin', 'ws-incoming')),
 //            	array('route' => 'commitmentAccount/delete', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentAccount/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager')),
