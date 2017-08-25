@@ -558,7 +558,7 @@ class Account implements InputFilterAwareInterface
 					if (!$keep2) $keep = false;
 				}
 			}
-			elseif (array_key_exists($type, $context->getPerimeters())) {
+			if (array_key_exists($type, $context->getPerimeters())) {
 				foreach ($context->getPerimeters()[$type] as $key => $values) {
 					$keep2 = false;
 					foreach ($values as $value) {
