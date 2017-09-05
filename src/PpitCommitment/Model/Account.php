@@ -436,6 +436,7 @@ class Account implements InputFilterAwareInterface
     	if ($this->adr_city_5) $data['address_5'] .= ' '.$this->adr_city_5;
     	if ($this->adr_state_5) $data['address_5'] .= ' - '.$this->adr_state_5;
     	if ($this->adr_country_5) $data['address_5'] .= ' - '.$this->adr_country_5;
+    	$data['update_time'] = $this->update_time;
     	 
     	return $data;
     }
@@ -518,7 +519,6 @@ class Account implements InputFilterAwareInterface
 			->join(array('contact_4' => 'core_vcard'), 'commitment_account.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
 			->join(array('contact_5' => 'core_vcard'), 'commitment_account.contact_5_id = contact_5.id', array('n_title_5' =>'n_title', 'n_first_5' => 'n_first', 'n_last_5' => 'n_last', 'n_fn_5' => 'n_fn', 'email_5' => 'email', 'birth_date_5' => 'birth_date', 'tel_work_5' => 'tel_work', 'tel_cell_5' => 'tel_cell', 'adr_street_5' => 'adr_street', 'adr_extended_5' => 'adr_extended', 'adr_post_office_box_5' => 'adr_post_office_box', 'adr_zip_5' => 'adr_zip', 'adr_city_5' => 'adr_city', 'adr_state_5' => 'adr_state', 'adr_country_5' => 'adr_country'), 'left')
 			->order(array($major.' '.$dir, 'name'));
-		if ($limitation) $select->limit($limitation);
 			
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
@@ -528,7 +528,9 @@ class Account implements InputFilterAwareInterface
 		
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
+//    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
+			$where->notEqualTo('commitment_account.status', 'gone');
+			$select->limit(20);
     	}
     	else {
     		// Set the filters
@@ -539,6 +541,7 @@ class Account implements InputFilterAwareInterface
     			elseif ($params[$propertyId] == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
     			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
+			if ($limitation) $select->limit($limitation);
     	}
     	$select->where($where);
 		$cursor = Account::getTable()->selectWith($select);
@@ -562,7 +565,8 @@ class Account implements InputFilterAwareInterface
 				foreach ($context->getPerimeters()[$type] as $key => $values) {
 					$keep2 = false;
 					foreach ($values as $value) {
-						if ($account->properties[$key] == $value) $keep2 = true;
+						if (!array_key_exists($key, $account->properties)) $keep2 = true;
+						elseif ($account->properties[$key] == $value) $keep2 = true;
 					}
 					if (!$keep2) $keep = false;
 				}
