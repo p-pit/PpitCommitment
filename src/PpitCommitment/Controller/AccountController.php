@@ -335,6 +335,7 @@ class AccountController extends AbstractActionController
     	$document = $this->params()->fromRoute('document', 0);
     	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+var_dump($dropbox);
     	$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
     	$link = $dropboxClient->createTemporaryDirectLink($dropbox['folders']['contact'].'/'.$document);
     	if ($link[0]) return $this->redirect()->toUrl($link[0]);

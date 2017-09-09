@@ -530,7 +530,7 @@ class Account implements InputFilterAwareInterface
     	if ($mode == 'todo') {
 //    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
 			$where->notEqualTo('commitment_account.status', 'gone');
-			$select->limit(20);
+//			$select->limit(20);
     	}
     	else {
     		// Set the filters

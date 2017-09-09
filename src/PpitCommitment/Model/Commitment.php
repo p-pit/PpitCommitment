@@ -1259,7 +1259,7 @@ class Commitment implements InputFilterAwareInterface
     	$instances = array();
     	$instanceIds = array();
     	foreach ($cursor as $instance) {
-    		$unlimitedCredits = (array_key_exists('unlimitedCredits', $instance->specifications)) ? $instance->specifications['unlimitedCredits'] : false;
+    		$unlimitedCredits = (array_key_exists('credit', $instance->specifications) && array_key_exists('unlimitedCredits', $instance->specifications['credit'])) ? $instance->specifications['credit']['unlimitedCredits'] : false;
     		
     		// Log
     		if ($config['isTraceActive']) {

@@ -1149,7 +1149,7 @@ function connectCommitmentUpdateForm(id, action, params)
 
 			var xhttp = new XMLHttpRequest();
 			var route, target;
-			route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+			route = '<?php echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 			if (action) route += '/' + action;
 			route += params;
 			target = 'commitment-update-panel';
@@ -1174,7 +1174,7 @@ function connectCommitmentUpdateForm(id, action, params)
 function getCommitmentUpdate(id, action, params) {
 
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitment/update', array('type' => $type)) ?>/' + id;
+	var route = '<?php echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 	if (action) route += '/' + action;
 	route += params;
 	xhttp.open('GET', route, true);

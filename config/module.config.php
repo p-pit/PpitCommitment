@@ -1020,11 +1020,19 @@ return array(
 			),
 	),
 
-	'menus' => array(
-/*			'p-pit-engagements' => array(
+	'menus/p-pit-engagements' => array(
+					'contact' => array(
+							'route' => 'commitmentAccount/contactIndex',
+							'params' => array('entry' => 'contact'),
+							'glyphicon' => 'glyphicon-user',
+							'label' => array(
+									'en_US' => 'Contacts',
+									'fr_FR' => 'Contacts',
+							),
+					),
 					'account' => array(
 							'route' => 'commitmentAccount/index',
-							'params' => array(),
+							'params' => array('entry' => 'account'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
 									'en_US' => 'Accounts',
@@ -1033,7 +1041,7 @@ return array(
 					),
 					'commitment' => array(
 							'route' => 'commitment/index',
-							'params' => array('type' => 'p-pit-studies'),
+							'params' => array(),
 							'glyphicon' => 'glyphicon-link',
 							'label' => array(
 									'en_US' => 'Commitments',
@@ -1068,7 +1076,6 @@ return array(
 									'fr_FR' => 'Interactions',
 							),
 					),
-			),*/
 	),
 
 	'creditConsumers' => array(
