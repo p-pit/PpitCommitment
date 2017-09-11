@@ -335,7 +335,7 @@ class AccountController extends AbstractActionController
     	$document = $this->params()->fromRoute('document', 0);
     	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-var_dump($dropbox);
+
     	$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
     	$link = $dropboxClient->createTemporaryDirectLink($dropbox['folders']['contact'].'/'.$document);
     	if ($link[0]) return $this->redirect()->toUrl($link[0]);
@@ -401,8 +401,9 @@ var_dump($dropbox);
     			    			
 					// Unlink the current place community for the account type
 					$place = Place::get($account->place_id);
-					if ($place && array_key_exists($account->type, $place->communities)) {
-    					unset($account->contact_1->communities[$place->communities[$account->type]]);
+					$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
+					if ($place && array_key_exists($community->id, $account->contact_1->communities)) {
+    					unset($account->contact_1->communities[$community->id]);
     				}
     				
     				$data = array();
@@ -422,8 +423,9 @@ var_dump($dropbox);
     			
 					// Link to the place community for the account type
 					$place = Place::get($account->place_id);
-					if ($place && array_key_exists($account->type, $place->communities)) {
-						$account->contact_1->communities[$place->communities[$account->type]] = true;
+    				$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
+					if ($place) {
+    					$account->contact_1->communities[$community->id] = true;
     				}
     			}
     			 
@@ -501,6 +503,31 @@ var_dump($dropbox);
     	
     	// Retrieve the account
     	$account = Account::get($id);
+    	$account->user = User::get($account->contact_1_id, 'vcard_id');
+    	if ($account->user) {
+    		$account->username = $account->user->username;
+    		$new_password = null;
+    	}
+    	else {
+    		$account->user = User::instanciate();
+    		$username = strtolower(substr($account->n_first, 0, 1).$account->n_last);
+    		$account->user->username = $username;
+    		for($i = 1; true; $i++) {
+    			$existingUser = User::getTable()->transGet($account->user->username, 'username');
+    			if (!$existingUser) break;
+    			else $account->user->username = $username.$i;
+    		}
+    		$account->username = $account->user->username;
+
+	    	// Generate the new password
+	    	$new_password = '';
+	    	$characters = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z");
+	    		
+	    	for($i = 0; $i < 6; $i++)
+	    	{
+	    		$new_password .= ($i%2) ? strtoupper($characters[array_rand($characters)]) : $characters[array_rand($characters)];
+	    	}
+    	}
 
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
@@ -513,16 +540,21 @@ var_dump($dropbox);
     		$csrfForm->setData($request->getPost());
     		 
     		if ($csrfForm->isValid()) { // CSRF check
-    
+    			$place = Place::get($account->place_id);
+    			$community = Community::get('p-pit-studies/'.$place->identifier, 'identifier');
+
     			// Load the input data
     			$data = array();
+    			$data['communities'] = array($community->id => true);
     			$data['roles'] = array();
     			$data['perimeters'] = array();
     			if ($type) $data['credits'] = array($type => true);
-    			$data['username'] = $request->getPost('username');
+    			$account->username = $request->getPost('username');
+    			$data['username'] = $account->username;
     			$data['state'] = $request->getPost('state');
     			$data['is_notified'] = $request->getPost('is_notified');
-    			$data['new_password'] = $request->getPost('new_password');
+    			$new_password = $request->getPost('new_password');
+    			$data['new_password'] = $new_password;
     			$data['locale'] = $request->getPost('locale');
     			$data['is_demo_mode_active'] = false;
  
@@ -565,7 +597,7 @@ var_dump($dropbox);
 	    					if ($data['new_password']) {
 	    						$account->user->new_password = $data['new_password'];
 	    						if ($rc != 'OK') $error = $rc;
-	    						else $context->getSecurityAgent()->changePassword($user, $user->username, $user->password, $user->new_password, null);
+	    						else $context->getSecurityAgent()->changePassword($account->user, $account->user->username, null, $account->user->new_password, null);
 	    					}
     					}
     					if ($error) $connection->rollback();
@@ -590,6 +622,7 @@ var_dump($dropbox);
     			'id' => $id,
     			'action' => $action,
     			'account' => $account,
+    			'new_password' => $new_password,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
     			'message' => $message

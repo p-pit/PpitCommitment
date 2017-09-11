@@ -26,7 +26,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 		<div class="form-group" id="username_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('Identifier', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-				<input class="form-control" id="username" value="<?php echo $account->username ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+				<input class="form-control" id="username" value="<?php echo $account->username ?>" <?php if ($account->user->user_id || $isDisabled) echo 'disabled="disabled"'?> />
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="username_error"><?php if ($error == 'Duplicate user') echo $this->translate('This identifier has already been chosen, please select another one', 'ppit-core', $context->getLocale()) ?></div>
 		</div>
@@ -51,7 +51,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 		<div class="form-group" id="new_password_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('New password', 'ppit-core', $context->getLocale()) ?></label>
 			<div class="col-sm-7">
-				<input type="password" id="new_password" class="form-control" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
+				<input /*type="password"*/ id="new_password" class="form-control" value="<?php echo $new_password ?>" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="new_password_error"></p></div>
 		</div>
@@ -60,7 +60,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 		<div class="form-group" id="new_password2_group">
 			<label class="col-sm-5 control-label"><?php echo $this->translate('New password', 'ppit-core', $context->getLocale()) ?> (2)</label>
 			<div class="col-sm-7">
-				<input type="password" id="new_password2" class="form-control" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
+				<input /*type="password"*/ id="new_password2" class="form-control" value="<?php echo $new_password ?>" <?php if ($isDisabled) echo 'disabled ="disabled"' ?>>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="new_password2_error"></p></div>
 		</div>
