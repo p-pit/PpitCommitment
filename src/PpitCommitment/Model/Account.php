@@ -53,6 +53,9 @@ class Account implements InputFilterAwareInterface
     public $property_10;
     public $json_property_1;
     public $json_property_2;
+    public $json_property_3;
+    public $json_property_4;
+    public $json_property_5;
     public $comment_1;
     public $comment_2;
     public $comment_3;
@@ -210,6 +213,9 @@ class Account implements InputFilterAwareInterface
         $this->property_10 = (isset($data['property_10'])) ? $data['property_10'] : null;
         $this->json_property_1 = (isset($data['json_property_1'])) ? json_decode($data['json_property_1'], true) : null;
         $this->json_property_2 = (isset($data['json_property_2'])) ? json_decode($data['json_property_2'], true) : null;
+        $this->json_property_3 = (isset($data['json_property_3'])) ? json_decode($data['json_property_3'], true) : null;
+        $this->json_property_4 = (isset($data['json_property_4'])) ? json_decode($data['json_property_4'], true) : null;
+        $this->json_property_5 = (isset($data['json_property_5'])) ? json_decode($data['json_property_5'], true) : null;
         $this->comment_1 = (isset($data['comment_1'])) ? $data['comment_1'] : null;
         $this->comment_2 = (isset($data['comment_2'])) ? $data['comment_2'] : null;
         $this->comment_3 = (isset($data['comment_3'])) ? $data['comment_3'] : null;
@@ -332,6 +338,9 @@ class Account implements InputFilterAwareInterface
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
     	$data['json_property_1'] = $this->json_property_1;
     	$data['json_property_2'] = $this->json_property_2;
+    	$data['json_property_3'] = $this->json_property_3;
+    	$data['json_property_4'] = $this->json_property_4;
+    	$data['json_property_5'] = $this->json_property_5;
     	$data['comment_1'] =  ($this->comment_1) ? $this->comment_1 : null;
     	$data['comment_2'] =  ($this->comment_2) ? $this->comment_2 : null;
     	$data['comment_3'] =  ($this->comment_3) ? $this->comment_3 : null;
@@ -450,6 +459,9 @@ class Account implements InputFilterAwareInterface
     	$data['terms_of_sales'] =  ($this->terms_of_sales) ? json_encode($this->terms_of_sales) : null;
     	$data['json_property_1'] = json_encode($this->json_property_1);
     	$data['json_property_2'] = json_encode($this->json_property_2);
+    	$data['json_property_3'] = json_encode($this->json_property_3);
+    	$data['json_property_4'] = json_encode($this->json_property_4);
+    	$data['json_property_5'] = json_encode($this->json_property_5);
     	$data['audit'] = json_encode($this->audit);
 
     	unset($data['place_caption']);
@@ -663,6 +675,9 @@ class Account implements InputFilterAwareInterface
 		$account->contact_1 = Vcard::instanciate();
 		$account->json_property_1 = array();
 		$account->json_property_2 = array();
+		$account->json_property_3 = array();
+		$account->json_property_4 = array();
+		$account->json_property_5 = array();
 		$account->is_notified = 1;
 		$account->locale = 'fr_FR';
 		return $account;
@@ -807,7 +822,16 @@ class Account implements InputFilterAwareInterface
         	if (array_key_exists('json_property_2', $data)) {
 				$this->json_property_2 = $data['json_property_2'];
 			}
-    		if (array_key_exists('comment_1', $data)) {
+            if (array_key_exists('json_property_3', $data)) {
+				$this->json_property_3 = $data['json_property_3'];
+			}
+            if (array_key_exists('json_property_4', $data)) {
+				$this->json_property_4 = $data['json_property_4'];
+			}
+            if (array_key_exists('json_property_5', $data)) {
+				$this->json_property_5 = $data['json_property_5'];
+			}
+			if (array_key_exists('comment_1', $data)) {
 				$this->comment_1 = trim(strip_tags($data['comment_1']));
 				if (strlen($this->comment_1) > 65535) return 'Integrity';
 			}

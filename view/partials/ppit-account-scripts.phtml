@@ -294,7 +294,7 @@ $properties = array();
 
 foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
 	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-	if ($property['type'] != 'title') {
+	if ($options && (!array_key_exists('readonly', $options) || !$options['readonly']) && $property['type'] != 'title') {
 		$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea' || $property['type'] == 'log') ? 2047 : 255);
 	}
 }

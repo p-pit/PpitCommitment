@@ -216,7 +216,16 @@ return array(
 		        								),
 		        						),
 		        				),
-        				'rephase' => array(
+        						'contactForm' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/contact-form[/:type][/:place_identifier][/:state_id][/:discipline][/:id]',
+        										'defaults' => array(
+        												'action' => 'contactForm',
+        										),
+        								),
+        						),
+	       				'rephase' => array(
         						'type' => 'segment',
         						'options' => array(
         								'route' => '/rephase',
@@ -898,6 +907,7 @@ return array(
             	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
+				array('route' => 'commitmentAccount/contactForm', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/rephase', 'roles' => array('admin')),
             		
             	array('route' => 'commitment', 'roles' => array('sales_manager')),

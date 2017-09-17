@@ -1,3 +1,40 @@
+<style>
+table.structured-data {
+	font-size: 0.83em;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+}
+table.structured-data caption { 
+	font-size:1.5em; 
+	padding:1em 0 0.5em 1em;
+}
+table.structured-data th {
+	color: #666;
+//    font-size:0.83em;
+	text-align: center;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+	background-color:#DDD;
+}
+
+table.structured-data td {
+	color: #666;
+//	font-size: 0.83em;
+	border-width:1px; 
+ 	border-style:solid; 
+	border-color:gray;
+}
+
+table.structured-data td.subject {
+	font-weight: bold;
+}
+
+table.structured-data tr.period {
+	background-color:#DDD;
+}
+</style>
 <h4 style="text-align: center">
 	<strong><?php echo $context->getConfig('commitmentAccount/detail'.(($type) ? '/'.$type : ''))['title'][$context->getLocale()] ?></strong>
 	<?php if ($account->id && $context->isDemoModeActive()) : ?>
@@ -82,8 +119,9 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 		<h5 style="text-align: center"><?php echo $property['labels'][$context->getLocale()] ?></h5>
 		<div>&nbsp;</div>
 	<?php else : ?>
+	  <?php if (!array_key_exists('readonly', $options) || !$options['readonly'] || $account->properties[$propertyId]) : ?>
 		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
-			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
+			<label class="col-sm-5 control-label"><?php if (array_key_exists('mandatory', $options) && $options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 
 		<?php if ($propertyId == 'name') : ?>
@@ -146,6 +184,35 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 
 <!-- Photo -->
 				<img height="150" src="<?php echo $this->basePath('photos/'.$account->properties[$propertyId]) ?>.jpg"/>
+
+<!-- Structured data -->
+
+		<?php elseif ($property['type'] == 'structured') : ?>
+			<?php foreach ($account->properties[$propertyId] as $itemId => $item) : ?>
+				<?php if (is_array($item)) : ?>
+				<table class="table structured-data">
+					<?php reset($item); ?>
+					<tr>
+						<?php foreach (current($item) as $cellId => $cell) : ?>
+						<th><?php echo $cellId ?></th>
+						<?php endforeach;?>
+					</tr>
+					<?php foreach ($item as $row) : ?>
+					<tr>
+						<?php foreach ($row as $cellId => $cell) : ?>
+						<td><?php echo $cell ?></td>
+						<?php endforeach;?>
+					</tr>
+					<?php endforeach;?>
+				</table>
+				<?php else : ?>
+				<div>&nbsp;</div>
+				<table class="table structured-data">
+					<tr><th><?php echo $itemId ?></th></tr>
+					<tr><td><?php echo $item ?></td></tr>
+				</table>
+				<?php endif;?>
+			<?php endforeach;?>
 	
 		<?php else : ?>
 				<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
@@ -186,6 +253,7 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 		<div>&nbsp;</div>
 		<div>
 		<?php endif; ?>
+	  <?php endif;?>
 	<?php endif;?>
 
 <?php endforeach;?>
