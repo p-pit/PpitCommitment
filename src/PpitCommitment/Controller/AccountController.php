@@ -4,6 +4,8 @@ namespace PpitCommitment\Controller;
 
 use PpitContact\Model\ContactMessage;
 use PpitCommitment\Model\Account;
+use PpitCommitment\ViewHelper\PdfIndexCardViewHelper;
+use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCommitment\ViewHelper\SsmlAccountViewHelper;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Community;
@@ -795,6 +797,29 @@ class AccountController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
+
+    public function indexCardAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Retrieve the entry and type
+    	$type = $this->params()->fromRoute('type');
+
+    	$id = (int) $this->params()->fromRoute('id', 0);
+		$account = Account::get($id);
+		$account->properties = $account->getProperties();
+		$place = Place::get($account->place->id);
+
+		// create new PDF document
+		$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		PdfIndexCardViewHelper::render($pdf, $place, $account);
+
+		// Close and output PDF document
+		// This method has several options, check the source code documentation for more information.
+		$content = $pdf->Output('index-card-'.$context->getInstance()->caption.'-'.$account->name.'.pdf', 'I');
+		return $this->response;
+	}
 
     public function registerAction()
     {

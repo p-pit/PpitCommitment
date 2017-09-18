@@ -207,7 +207,19 @@ return array(
 		        								),
 		        						),
 		        				),
-			       				'register' => array(
+	       						'indexCard' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/index-card[/:id][/:type]',
+		        								'constraints' => array(
+		        										'id'     => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'indexCard',
+		        								),
+		        						),
+		        				),
+	       						'register' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/register[/:type]',
@@ -906,10 +918,11 @@ return array(
 				array('route' => 'commitmentAccount/update', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager', 'manager')),
+				array('route' => 'commitmentAccount/indexCard', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
 				array('route' => 'commitmentAccount/contactForm', 'roles' => array('guest')),
             	array('route' => 'commitmentAccount/rephase', 'roles' => array('admin')),
-            		
+
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager')),
