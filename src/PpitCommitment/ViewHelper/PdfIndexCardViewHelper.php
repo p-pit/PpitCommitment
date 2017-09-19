@@ -103,16 +103,27 @@ class PdfIndexCardViewHelper
 	    foreach($cardSpec['1st-column']['rows'] as $propertyId => $unused) {
 			$property = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
 			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-	    	$rows .= sprintf('<tr><td style="width: 50%%; text-align: center; font-weight: bold">%s</td><td style="width: 50%%; text-align: center">%s</td></tr>', $property['labels'][$context->getLocale()], $account->properties[$propertyId]);
+			if ($propertyId == 'name') $value = $account->name;
+			elseif ($property['type'] == 'date') $value = $context->decodeDate($account->properties[$propertyId]);
+			elseif ($property['type'] == 'number') $value = $context->formatFloat($account->properties[$propertyId], 2);
+			elseif ($property['type'] == 'select' && array_key_exists($account->properties[$propertyId], $property['modalities'])) $value = $property['modalities'][$account->properties[$propertyId]][$context->getLocale()];
+			else $value = $account->properties[$propertyId];
+
+			$rows .= sprintf('<tr><td style="width: 50%%; text-align: center; font-weight: bold">%s</td><td style="width: 50%%; text-align: center">%s</td></tr>', $property['labels'][$context->getLocale()], $value);
 	    }
 	    $table1 = sprintf('<table class="table note-report"><tr><th style="width: 100%%">%s</th></tr>%s</table>', $title['labels'][$context->getLocale()], $rows);
-
 	    $rows = '';
 	    $title = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$cardSpec['2nd-column']['title']];
 	    foreach($cardSpec['2nd-column']['rows'] as $propertyId => $unused) {
 	    	$property = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
 	    	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-	    	$rows .= sprintf('<tr><td style="width: 50%%; text-align: center; font-weight: bold">%s</td><td style="width: 50%%; text-align: center">%s</td></tr>', $property['labels'][$context->getLocale()], $account->properties[$propertyId]);
+			if ($propertyId == 'name') $value = $account->name;
+			elseif ($property['type'] == 'date') $value = $context->decodeDate($account->properties[$propertyId]);
+			elseif ($property['type'] == 'number') $value = $context->formatFloat($account->properties[$propertyId], 2);
+			elseif ($property['type'] == 'select' && array_key_exists($account->properties[$propertyId], $property['modalities'])) $value = $property['modalities'][$account->properties[$propertyId]][$context->getLocale()];
+			else $value = $account->properties[$propertyId];
+
+			$rows .= sprintf('<tr><td style="width: 50%%; text-align: center; font-weight: bold">%s</td><td style="width: 50%%; text-align: center">%s</td></tr>', $property['labels'][$context->getLocale()], $value);
 	    }
 	    $table2 = sprintf('<table class="table note-report"><tr><th style="width: 100%%">%s</th></tr>%s</table>', $title['labels'][$context->getLocale()], $rows);
 	     
