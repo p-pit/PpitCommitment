@@ -73,6 +73,7 @@
 			'Orders in progress' => 'Commandes en cours',
 			'Please accept the conditions' => "Veuillez accepter les conditions",
 			'Positioning' => 'Positionnement',
+			'Print the index card' => 'Imprimer la fiche',
 			'Integrate a CSV file' => 'Intégrer un fichier CSV',
 			'Qty' => 'Qté',
 			'Quantity' => 'Quantité',

@@ -66,7 +66,7 @@ class PdfIndexCardViewHelper
     	$pdf->AddPage();
 
     	// Title
-    	$text = '<div>&nbsp;</div><div style="text-align: center"><strong>'.$cardSpec['title'][$context->getLocale()].' - '.$account->contact_1->n_fn.'</strong></div><div style="text-align: center"><strong>Période du '.$context->decodeDate($context->getConfig('currentPeriodStart')).' au '.$context->decodeDate($context->getConfig('currentPeriodEnd')).'</strong></div>';
+    	$text = '<div>&nbsp;</div><div style="text-align: center"><strong>'.$cardSpec['title'][$context->getLocale()].' - '.$account->contact_1->n_fn.'</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(10);
 

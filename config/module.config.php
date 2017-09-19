@@ -924,11 +924,11 @@ return array(
             	array('route' => 'commitmentAccount/rephase', 'roles' => array('admin')),
 
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
-            	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/search', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/list', 'roles' => array('sales_manager')),
-            	array('route' => 'commitment/accountList', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/accountList', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitment/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/message', 'roles' => array('guest')),
