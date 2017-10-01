@@ -51,6 +51,11 @@ class Account implements InputFilterAwareInterface
     public $property_8;
     public $property_9;
     public $property_10;
+    public $property_11;
+    public $property_12;
+    public $property_13;
+    public $property_14;
+    public $property_15;
     public $json_property_1;
     public $json_property_2;
     public $json_property_3;
@@ -211,6 +216,11 @@ class Account implements InputFilterAwareInterface
         $this->property_8 = (isset($data['property_8'])) ? $data['property_8'] : null;
         $this->property_9 = (isset($data['property_9'])) ? $data['property_9'] : null;
         $this->property_10 = (isset($data['property_10'])) ? $data['property_10'] : null;
+        $this->property_11 = (isset($data['property_11'])) ? $data['property_11'] : null;
+        $this->property_12 = (isset($data['property_12'])) ? $data['property_12'] : null;
+        $this->property_13 = (isset($data['property_13'])) ? $data['property_13'] : null;
+        $this->property_14 = (isset($data['property_14'])) ? $data['property_14'] : null;
+        $this->property_15 = (isset($data['property_15'])) ? $data['property_15'] : null;
         $this->json_property_1 = (isset($data['json_property_1'])) ? json_decode($data['json_property_1'], true) : null;
         $this->json_property_2 = (isset($data['json_property_2'])) ? json_decode($data['json_property_2'], true) : null;
         $this->json_property_3 = (isset($data['json_property_3'])) ? json_decode($data['json_property_3'], true) : null;
@@ -336,6 +346,11 @@ class Account implements InputFilterAwareInterface
     	$data['property_8'] =  ($this->property_8) ? $this->property_8 : null;
     	$data['property_9'] =  ($this->property_9) ? $this->property_9 : null;
     	$data['property_10'] =  ($this->property_10) ? $this->property_10 : null;
+    	$data['property_11'] =  ($this->property_11) ? $this->property_11 : null;
+    	$data['property_12'] =  ($this->property_12) ? $this->property_12 : null;
+    	$data['property_13'] =  ($this->property_13) ? $this->property_13 : null;
+    	$data['property_14'] =  ($this->property_14) ? $this->property_14 : null;
+    	$data['property_15'] =  ($this->property_15) ? $this->property_15 : null;
     	$data['json_property_1'] = $this->json_property_1;
     	$data['json_property_2'] = $this->json_property_2;
     	$data['json_property_3'] = $this->json_property_3;
@@ -546,12 +561,15 @@ class Account implements InputFilterAwareInterface
     	}
     	else {
     		// Set the filters
-    		foreach ($params as $propertyId => $property) {
-    			if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
-    			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $params[$propertyId]);
-    			elseif (strpos($params[$propertyId], ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $params[$propertyId])));
-    			elseif ($params[$propertyId] == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
-    			else $where->like('commitment_account.'.$propertyId, '%'.$params[$propertyId].'%');
+    		foreach ($params as $propertyId => $value) {
+    			$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+    			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+    			if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
+    			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
+    			elseif (strpos($value, ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $value)));
+    			elseif ($value == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
+    			elseif ($property['type'] == 'select') $where->equalTo('commitment_account.'.$propertyId, $value);
+    			else $where->like('commitment_account.'.$propertyId, '%'.$value.'%');
     		}
 			if ($limitation) $select->limit($limitation);
     	}
@@ -816,7 +834,27 @@ class Account implements InputFilterAwareInterface
 				$this->property_10 = trim(strip_tags($data['property_10']));
 				if (strlen($this->property_10) > 255) return 'Integrity';
 			}
-    		if (array_key_exists('json_property_1', $data)) {
+    		if (array_key_exists('property_11', $data)) {
+				$this->property_11 = trim(strip_tags($data['property_11']));
+				if (strlen($this->property_11) > 255) return 'Integrity';
+			}
+    		if (array_key_exists('property_12', $data)) {
+				$this->property_12 = trim(strip_tags($data['property_12']));
+				if (strlen($this->property_12) > 255) return 'Integrity';
+			}
+    		if (array_key_exists('property_13', $data)) {
+				$this->property_13 = trim(strip_tags($data['property_13']));
+				if (strlen($this->property_13) > 255) return 'Integrity';
+			}
+    		if (array_key_exists('property_14', $data)) {
+				$this->property_14 = trim(strip_tags($data['property_14']));
+				if (strlen($this->property_14) > 255) return 'Integrity';
+			}
+    		if (array_key_exists('property_15', $data)) {
+				$this->property_15 = trim(strip_tags($data['property_15']));
+				if (strlen($this->property_15) > 255) return 'Integrity';
+			}
+			if (array_key_exists('json_property_1', $data)) {
 				$this->json_property_1 = $data['json_property_1'];
 			}
         	if (array_key_exists('json_property_2', $data)) {

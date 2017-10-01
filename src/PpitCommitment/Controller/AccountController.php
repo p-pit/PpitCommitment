@@ -356,7 +356,6 @@ class AccountController extends AbstractActionController
     	else $account = Account::instanciate($type);
     	$this->getAccountProperties($account);
     	if (!$type) $type = $account->type;
-
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
