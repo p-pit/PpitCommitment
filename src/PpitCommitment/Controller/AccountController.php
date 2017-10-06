@@ -28,7 +28,7 @@ class AccountController extends AbstractActionController
     public function indexAction()
     {
     	$context = Context::getCurrent();
-    	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::get($context->getPlaceId());
 
 		$entry = $this->params()->fromRoute('entry');

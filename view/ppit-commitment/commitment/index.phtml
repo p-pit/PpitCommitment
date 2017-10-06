@@ -9,26 +9,26 @@ echo $this->partial('/partials/header');
 	
 	<div>&nbsp;</div>
 	
-	<div id="main_menu" >
-	    <div class="col-md-10 col-md-offset-1">
-			<div align="center">
+	<div class="row" id="main_menu">
 
 <?php foreach ($context->getConfig('menus/p-pit-engagements') as $entryId => $entryDef) : ?>
+
+		<div class="col-md-2">
 	<?php if ($entryId == 'commitment') $color = 'btn-primary'; else $color = 'btn-default' ?>
 	<?php if ($context->isAllowed($entryDef['route'])) : ?>
-				<button type="button" class="btn <?php echo $color ?> menu-btn" id="<?php echo $entryId ?>-anchor">
+			<button type="button" class="btn <?php echo $color ?> menu-btn" style="width:100%; text-align: left" id="<?php echo $entryId ?>-anchor">
 		<?php if (array_key_exists('glyphicon', $entryDef)) : ?>
-					<span class="glyphicon <?php echo $entryDef['glyphicon'] ?>"></span>
+				<span class="glyphicon <?php echo $entryDef['glyphicon'] ?>"></span>
 		<?php endif;?>
-					<?php echo $entryDef['label'][$context->getLocale()] ?>
-				</button>
+				<?php echo $entryDef['label'][$context->getLocale()] ?>
+			</button>
 	<?php endif ?>
-<?php endforeach;?>
-
-			</div>
-			<div>&nbsp;</div>
 		</div>
+
+<?php endforeach;?>
 	</div>
+
+	<div>&nbsp;</div>
 
 	<!-- Main panel -->
 	<div class="row">

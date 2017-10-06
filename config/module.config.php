@@ -1046,7 +1046,7 @@ return array(
 	'menus/p-pit-engagements' => array(
 					'contact' => array(
 							'route' => 'commitmentAccount/contactIndex',
-							'params' => array('entry' => 'contact'),
+							'params' => array('entry' => 'contact', 'type' => 'business'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
 									'en_US' => 'Contacts',
@@ -1055,7 +1055,7 @@ return array(
 					),
 					'account' => array(
 							'route' => 'commitmentAccount/index',
-							'params' => array('entry' => 'account'),
+							'params' => array('entry' => 'account', 'type' => 'business'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
 									'en_US' => 'Accounts',
@@ -1134,8 +1134,8 @@ return array(
 					'fr_FR' => 'Origine',
 			),
 	),
-		
-	'commitmentAccount' => array(
+
+	'commitmentAccount/business' => array(
 			'statuses' => array(),
 			'properties' => array(
 					'status' => array(
@@ -1259,10 +1259,10 @@ return array(
 	),
 
 	// Account
-	'commitmentAccount/index' => array(
+	'commitmentAccount/index/business' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
-	'commitmentAccount/search' => array(
+	'commitmentAccount/search/business' => array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
@@ -1275,10 +1275,10 @@ return array(
 			'more' => array(
 			),
 	),
-	'commitmentAccount/list' => array(
+	'commitmentAccount/list/business' => array(
 			'name' => 'text',
 	),
-	'commitmentAccount/detail' => array(
+	'commitmentAccount/detail/business' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
 			'tabs' => array(
@@ -1294,7 +1294,7 @@ return array(
 					),
 			),
 	),
-	'commitmentAccount/update' => array(
+	'commitmentAccount/update/business' => array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
@@ -1307,7 +1307,7 @@ return array(
 			'place_id' => array('mandatory' => true),
 			'contact_history' => array('mandatory' => false),
 	),
-	'commitmentAccount/updateContact' => array(
+	'commitmentAccount/updateContact/business' => array(
 			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => false),
@@ -1324,7 +1324,7 @@ return array(
 			'locale' => array('mandatory' => true),
 	),
 		
-	'commitmentAccount/post' => array(
+	'commitmentAccount/post/business' => array(
 			'place_identifier' => array('mandatory' => false),
 			'n_title' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
@@ -1341,15 +1341,13 @@ return array(
 			'adr_city' => array('mandatory' => false),
 			'adr_state' => array('mandatory' => false),
 			'adr_country' => array('mandatory' => false),
-			'birth_date' => array('mandatory' => false),
-			'gender' => array('mandatory' => false),
 			'place_identifier' => array('mandatory' => false),
 			'locale' => array('mandatory' => false),
 	),
-	'commitmentAccount/requestTypes' => array(
+	'commitmentAccount/requestTypes/business' => array(
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
-	'commitmentAccount/export' => array(
+	'commitmentAccount/export/business' => array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
@@ -1397,7 +1395,7 @@ return array(
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),
 		
-	'commitment' => array(
+	'commitment/business' => array(
 			'properties' => array(
 					'type' => array(
 							'type' => 'repository',
@@ -1535,11 +1533,11 @@ return array(
 			),
 	),
 
-	'commitment/index' => array(
+	'commitment/index/business' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 		
-	'commitment/search' => array(
+	'commitment/search/business' => array(
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
@@ -1550,12 +1548,12 @@ return array(
 			),
 	),
 
-	'commitment/list' => array(
+	'commitment/list/business' => array(
 			'status' => 'select',
 			'including_options_amount' => 'number',
 	),
 
-	'commitment/update' => array(
+	'commitment/update/business' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
