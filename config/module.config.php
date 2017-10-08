@@ -1029,8 +1029,7 @@ return array(
 	'ppitApplications' => array(
     		'p-pit-engagements' => array(
     				'labels' => array('fr_FR' => 'P-Pit Engagements', 'en_US' => 'Commitments by 2Pit'),
-    				'route' => 'commitmentAccount/index',
-    				'params' => array(),
+					'default' => 'account',
 					'roles' => array(
 							'sales_manager' => array(
 									'show' => true,
@@ -1396,6 +1395,8 @@ return array(
 	),
 		
 	'commitment/business' => array(
+			'currencySymbol' => '€',
+			'tax' => 'excluding',
 			'properties' => array(
 					'type' => array(
 							'type' => 'repository',
@@ -2214,7 +2215,7 @@ return array(
 					),
 			),
 	),
-	'commitment/accountList' => array(
+	'commitment/accountList/business' => array(
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'properties' => array(
 				'caption' => 'text',

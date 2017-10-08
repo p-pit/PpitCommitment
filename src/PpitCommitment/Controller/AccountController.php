@@ -399,12 +399,14 @@ class AccountController extends AbstractActionController
 
     			// Load the input data
     			if ($action != 'delete') {
-    			    			
-					// Unlink the current place community for the account type
-					$place = Place::get($account->place_id);
-					$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
-					if ($place && array_key_exists($community->id, $account->contact_1->communities)) {
-    					unset($account->contact_1->communities[$community->id]);
+
+    				if ($account->id) {
+						// Unlink the current place community for the account type
+						$place = Place::get($account->place_id);
+						$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
+						if ($place && array_key_exists($community->id, $account->contact_1->communities)) {
+	    					unset($account->contact_1->communities[$community->id]);
+	    				}
     				}
     				
     				$data = array();
@@ -416,7 +418,6 @@ class AccountController extends AbstractActionController
 						}
 					}
 					if ($type) $data['credits'] = array($type => true);
-
 					// Add the main contact
 					if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
@@ -425,11 +426,11 @@ class AccountController extends AbstractActionController
 					// Link to the place community for the account type
 					$place = Place::get($account->place_id);
     				$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
-					if ($place) {
+    				if ($place) {
     					$account->contact_1->communities[$community->id] = true;
     				}
     			}
-    			 
+
 				if (!$error) {
 	    			// Atomically save
 	    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
