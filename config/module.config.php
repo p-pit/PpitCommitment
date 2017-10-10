@@ -1134,6 +1134,74 @@ return array(
 			),
 	),
 
+	'commitmentAccount/business/property/property_1' => array(
+			'type' => 'select',
+			'modalities' => array(
+					'agro' => array('en_US' => 'To be translated', 'fr_FR' => 'Agroalimentaire'),
+					'banque' => array('en_US' => 'To be translated', 'fr_FR' => 'Banque / Assurance'),
+					'bois' => array('en_US' => 'To be translated', 'fr_FR' => 'Bois / Papier / Carton / Imprimerie'),
+					'btp' => array('en_US' => 'To be translated', 'fr_FR' => 'BTP / Matériaux de construction'),
+					'chimie' => array('en_US' => 'To be translated', 'fr_FR' => 'Chimie / Parachimie'),
+					'commerce' => array('en_US' => 'To be translated', 'fr_FR' => 'Commerce / Négoce / Distribution'),
+					'edition' => array('en_US' => 'To be translated', 'fr_FR' => 'Édition / Communication / Multimédia'),
+					'electricite' => array('en_US' => 'To be translated', 'fr_FR' => 'Électronique / Électricité'),
+					'conseil' => array('en_US' => 'To be translated', 'fr_FR' => 'Études et conseils'),
+					'pharmacie' => array('en_US' => 'To be translated', 'fr_FR' => 'Industrie pharmaceutique'),
+					'informatique' => array('en_US' => 'To be translated', 'fr_FR' => 'Informatique / Télécoms'),
+					'equipement' => array('en_US' => 'To be translated', 'fr_FR' => 'Machines et équipements / Automobile'),
+					'metallurgie' => array('en_US' => 'To be translated', 'fr_FR' => 'Métallurgie / Travail du métal'),
+					'plastique' => array('en_US' => 'To be translated', 'fr_FR' => 'Plastique / Caoutchouc'),
+					'services' => array('en_US' => 'To be translated', 'fr_FR' => 'Services aux entreprises'),
+					'textile' => array('en_US' => 'To be translated', 'fr_FR' => 'Textile / Habillement / Chaussure'),
+					'transport' => array('en_US' => 'To be translated', 'fr_FR' => 'Transports / Logistique'),
+					'autres' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres'),
+			),
+			'labels' => array(
+					'en_US' => 'Sector',
+					'fr_FR' => 'Secteur',
+			),
+	),
+
+	'commitmentAccount/business/property/property_2' => array(
+			'type' => 'select',
+			'modalities' => array(
+					'cdi' => array('en_US' => 'To be translated', 'fr_FR' => 'CDI'),
+					'cdd' => array('en_US' => 'To be translated', 'fr_FR' => 'CDD'),
+					'professionnalisation' => array('en_US' => 'To be translated', 'fr_FR' => 'Alternance - Contrat de professionnalisation'),
+					'alternance' => array('en_US' => 'To be translated', 'fr_FR' => 'Alternance - Stage alterné'),
+					'stage' => array('en_US' => 'To be translated', 'fr_FR' => 'Stage'),
+					'autres' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres : missions de courte-moyenne durée,…'),
+			),
+			'labels' => array(
+					'en_US' => 'Contract type',
+					'fr_FR' => 'Type de contrat',
+			),
+	),
+
+	'commitmentAccount/business/property/property_3' => array(
+			'type' => 'date',
+			'labels' => array(
+					'en_US' => 'Internship begin date',
+					'fr_FR' => 'Date début de stage',
+			),
+	),
+
+	'commitmentAccount/business/property/comment_1' => array(
+			'type' => 'textarea',
+			'labels' => array(
+					'en_US' => 'Enterprise description',
+					'fr_FR' => 'Description de l\'entreprise',
+			),
+	),
+
+	'commitmentAccount/business/property/comment_2' => array(
+			'type' => 'textarea',
+			'labels' => array(
+					'en_US' => 'Offer description',
+					'fr_FR' => 'Description de l\'offre',
+			),
+	),
+		
 	'commitmentAccount/business' => array(
 			'statuses' => array(),
 			'properties' => array(
@@ -1162,6 +1230,13 @@ return array(
 							'labels' => array(
 									'en_US' => 'Name',
 									'fr_FR' => 'Dénomination',
+							),
+					),
+					'contact_1_id' => array(
+							'type' => 'photo',
+							'labels' => array(
+									'en_US' => '',
+									'fr_FR' => '',
 							),
 					),
 					'n_title' => array(
@@ -1211,6 +1286,27 @@ return array(
 									'fr_FR' => 'Contact - Mobile',
 							),
 					),
+					'adr_street' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Address',
+									'fr_FR' => 'Contact - Adresse',
+							),
+					),
+					'adr_zip' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Zip code',
+									'fr_FR' => 'Contact - Code postal',
+							),
+					),
+					'adr_city' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - City',
+									'fr_FR' => 'Contact - Ville',
+							),
+					),
 					'place_id' => array(
 							'type' => 'select',
 							'modalities' => array(
@@ -1252,6 +1348,26 @@ return array(
 									'en_US' => 'Comment',
 									'fr_FR' => 'Commentaire',
 							),
+					),
+					'property_1' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/property_1',
+					),
+					'property_2' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/property_2',
+					),
+					'property_3' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/property_3',
+					),
+					'comment_1' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/comment_1',
+					),
+					'comment_2' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/comment_2',
 					),
 			),
 			'order' => 'name',
@@ -1303,8 +1419,15 @@ return array(
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
-			'place_id' => array('mandatory' => true),
+			'adr_street' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => false),
+			'adr_city' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
+			'property_1' => array('mandatory' => false),
+			'property_2' => array('mandatory' => false),
+			'property_3' => array('mandatory' => false),
+			'comment_1' => array('mandatory' => false),
+			'comment_2' => array('mandatory' => false),
 	),
 	'commitmentAccount/updateContact/business' => array(
 			'n_title' => array('mandatory' => false),
@@ -1356,8 +1479,16 @@ return array(
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
+			'adr_street' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => true),
+			'adr_city' => array('mandatory' => false),
 			'place_id' => array('mandatory' => true),
 			'contact_history' => array('mandatory' => false),
+			'property_1' => array('mandatory' => false),
+			'property_2' => array('mandatory' => false),
+			'property_3' => array('mandatory' => false),
+			'comment_1' => array('mandatory' => false),
+			'comment_2' => array('mandatory' => false),
 	),
 
 	'interaction/type' => array(

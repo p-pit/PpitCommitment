@@ -158,6 +158,9 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 			<?php endforeach;?>
 				</select>
 
+		<?php elseif ($property['type'] == 'input') : ?>
+				<input class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
 		<?php elseif ($propertyId == 'closing_date') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->closing_date) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />

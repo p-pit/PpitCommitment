@@ -412,12 +412,14 @@ class AccountController extends AbstractActionController
     				$data = array();
 					foreach ($context->getConfig('commitmentAccount/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
 						$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+						if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 						if ((!array_key_exists('readonly', $property) || $property['readonly']) && $property['type'] != 'title') {
 							if ($property['type'] == 'photo' && array_key_exists($propertyId, $request->getFiles()->toArray())) $data['file'] = $request->getFiles()->toArray()[$propertyId];
 							else $data[$propertyId] = $request->getPost($propertyId);
 						}
 					}
 					if ($type) $data['credits'] = array($type => true);
+
 					// Add the main contact
 					if (!$account->contact_1) $account->contact_1 = Vcard::instanciate();
 					if ($account->contact_1->loadData($data) != 'OK') throw new \Exception('View error');
@@ -1032,7 +1034,7 @@ class AccountController extends AbstractActionController
     						if ($error) $connection->rollback();
     						else {
 								$path = $context->getConfig('ppitDocument')['dropbox']['folders']['students'].'/'.strtolower($account->contact_1->n_last).'_'.strtolower($account->contact_1->n_first).'_'.$account->contact_1->email;
-								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+/*								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
 						    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
 						    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
 						    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
@@ -1043,7 +1045,7 @@ class AccountController extends AbstractActionController
 							    		$result = $dropboxClient->uploadFile($path.'/'.$file['name'], \Dropbox\WriteMode::add(), $f);
 							    		fclose($f);
 						    		}
-    							}
+    							}*/
     							$connection->commit();
     							return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'discipline' => $discipline, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
     						}
@@ -1138,7 +1140,6 @@ class AccountController extends AbstractActionController
     public function postAction()
     {
     	$context = Context::getCurrent();
-    	$type = $this->params()->fromRoute('type');
 
     	if (!$context->wsAuthenticate($this->getEvent())) {
     		$this->getResponse()->setStatusCode('401');
@@ -1148,13 +1149,20 @@ class AccountController extends AbstractActionController
 
     		// Load the data from the post request
     		$data = json_decode($this->request->getContent(), true);
-    		if (!is_array($data) || !array_key_exists('place_identifier', $data) || !array_key_exists('email', $data) || !array_key_exists('n_first', $data) || !array_key_exists('n_last', $data)) {
+    		if (!is_array($data) || !array_key_exists('type', $data) || !array_key_exists('place_identifier', $data) || !array_key_exists('email', $data) || !array_key_exists('n_first', $data) || !array_key_exists('n_last', $data)) {
     			$this->getResponse()->setStatusCode('400');
+    			echo 'Mandatory data is not provided';
+    			return $this->getResponse();
+    		}
+    	   	if (!in_array($data['type'], array('p-pit-studies', 'business'))) {
+    			$this->getResponse()->setStatusCode('400');
+    			echo 'Unknown type '.$data['type'];
     			return $this->getResponse();
     		}
     		$place = Place::get($data['place_identifier'], 'identifier');
     	   	if (!$place /* || !$context->hasAccessTo('place', $place) */) {
     			$this->getResponse()->setStatusCode('400');
+    			echo 'The place identified by '.$data['place_identifier'].' does not exist';
     			return $this->getResponse();
     		}
     		// Log the web-service as an incoming interaction
@@ -1162,7 +1170,7 @@ class AccountController extends AbstractActionController
 			$reference = $context->getFormatedName().'_'.date('Y-m-d_H:i:s');
 			$intData = array();
 			$intData['type'] = 'web_service';
-			$intData['category'] = $type;
+			$intData['category'] = $data['type'];
 			$intData['format'] = $this->getRequest()->getHeaders()->get('content-type')->getFieldValue();
 			$intData['direction'] = 'input';
 			$intData['route'] = 'commitmentAccount/processPost';
@@ -1204,7 +1212,7 @@ class AccountController extends AbstractActionController
     	$vcard = Vcard::get($data['email'], 'email');
     	if ($vcard) {
     		// Check if the account already exists. No update and the sales manager are notified.
-    		$accounts = Account::getList('p-pit-studies', 'contact', array('contact_1_id' => $vcard->id));
+    		$accounts = Account::getList($interaction->category, 'contact', array('contact_1_id' => $vcard->id));
     		if (count($accounts) > 0) {
     			reset($accounts);
 				$account = Account::get(current($accounts)->id);
@@ -1238,7 +1246,7 @@ class AccountController extends AbstractActionController
 		   		else {
 		    		$account->contact_1_id = $vcard->id;
 		    		$account->contact_1_status = 'main';
-		    		$account->name = $vcard->n_last.', '.$vcard->n_first;
+		    		if (!$account->name) $account->name = $vcard->n_last.', '.$vcard->n_first;
 		   			if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
 		   			$account->contact_history[] = array(
 		   					'time' => date('Y-m-d H:i:s'),

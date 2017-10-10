@@ -375,6 +375,13 @@ class Account implements InputFilterAwareInterface
     	$data['birth_date'] = $this->birth_date;
     	$data['tel_work'] = $this->tel_work;
     	$data['tel_cell'] = $this->tel_cell;
+    	$data['adr_street'] = $this->adr_street;
+    	$data['adr_extended'] = $this->adr_extended;
+    	$data['adr_post_office_box'] = $this->adr_post_office_box;
+    	$data['adr_zip'] = $this->adr_zip;
+    	$data['adr_city'] = $this->adr_city;
+    	$data['adr_state'] = $this->adr_state;
+    	$data['adr_country'] = $this->adr_country;
     	$data['address'] = '';
     	if ($this->adr_street) $data['address'] .= $this->adr_street;
     	if ($this->adr_extended) $data['address'] .= ' '.$this->adr_extended;
@@ -489,6 +496,13 @@ class Account implements InputFilterAwareInterface
     	unset($data['birth_date']);
     	unset($data['tel_work']);
     	unset($data['tel_cell']);
+    	unset($data['adr_street']);
+    	unset($data['adr_extended']);
+    	unset($data['adr_post_office_box']);
+    	unset($data['adr_zip']);
+    	unset($data['adr_city']);
+    	unset($data['adr_state']);
+    	unset($data['adr_country']);
     	unset($data['address']);
     	unset($data['photo_link_id']);
 
@@ -531,7 +545,7 @@ class Account implements InputFilterAwareInterface
     	unset($data['tel_work_5']);
     	unset($data['tel_cell_5']);
     	unset($data['address_5']);
-    	 
+
     	return $data;
     }
     
@@ -638,6 +652,13 @@ class Account implements InputFilterAwareInterface
     	$account->birth_date = $account->contact_1->birth_date;
     	$account->tel_work = $account->contact_1->tel_work;
     	$account->tel_cell = $account->contact_1->tel_cell;
+    	$account->adr_street = $account->contact_1->adr_street;
+    	$account->adr_extended = $account->contact_1->adr_extended;
+    	$account->adr_post_office_box = $account->contact_1->adr_post_office_box;
+    	$account->adr_zip = $account->contact_1->adr_zip;
+    	$account->adr_city = $account->contact_1->adr_city;
+    	$account->adr_state = $account->contact_1->adr_state;
+    	$account->adr_country = $account->contact_1->adr_country;
     	$account->is_notified = $account->contact_1->is_notified;
     	$account->locale = $account->contact_1->locale;
 	    	
