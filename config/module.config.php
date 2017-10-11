@@ -325,6 +325,15 @@ return array(
         								),
         						),
         				),
+    					'dropboxLink' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/dropbox-link[/:document]',
+        								'defaults' => array(
+        										'action' => 'dropboxLink',
+        								),
+        						),
+        				),
         				'update' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -931,6 +940,7 @@ return array(
             	array('route' => 'commitment/accountList', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitment/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/detail', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/dropboxLink', 'roles' => array('guest')),
             	array('route' => 'commitment/message', 'roles' => array('guest')),
             	array('route' => 'commitment/post', 'roles' => array('admin')),
             	array('route' => 'commitment/try', 'roles' => array('guest')),
@@ -1467,6 +1477,8 @@ return array(
 			'locale' => array('mandatory' => false),
 	),
 	'commitmentAccount/requestTypes/business' => array(
+			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
+			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
 	'commitmentAccount/export/business' => array(
@@ -1483,7 +1495,6 @@ return array(
 			'adr_zip' => array('mandatory' => true),
 			'adr_city' => array('mandatory' => false),
 			'place_id' => array('mandatory' => true),
-			'contact_history' => array('mandatory' => false),
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),

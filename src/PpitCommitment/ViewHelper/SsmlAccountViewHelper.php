@@ -11,7 +11,7 @@ class SsmlAccountViewHelper
 		$context = Context::getCurrent();
 		$translator = $context->getServiceManager()->get('translator');
 
-		$title = (isset ($context->getConfig('commitmentAccount/search')['title']) ? $context->getConfig('commitmentAccount/search')['title'][$context->getLocale()] : $this->translate('Accounts', 'ppit-commitment', $context->getLocale()));
+		$title = (isset ($context->getConfig('commitmentAccount/search')['title']) ? $context->getConfig('commitmentAccount/search')['title'][$context->getLocale()] : $translator->translate('Accounts', 'ppit-commitment', $context->getLocale()));
 		
 		// Set document properties
 		$workbook->getProperties()->setCreator('P-PIT')

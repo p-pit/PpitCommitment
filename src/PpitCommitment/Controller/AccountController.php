@@ -18,6 +18,7 @@ use PpitCore\Model\UserContact;
 use PpitCore\Model\Vcard;
 use Zend\Db\Sql\Where;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Http\Client;
 use Zend\Log\Logger;
 use Zend\Log\Writer;
 use Zend\View\Model\JsonModel;
@@ -28,9 +29,10 @@ class AccountController extends AbstractActionController
     public function indexAction()
     {
     	$context = Context::getCurrent();
-		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
-    	$place = Place::get($context->getPlaceId());
 
+    	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
+    	$place = Place::get($context->getPlaceId());
+    	 
 		$entry = $this->params()->fromRoute('entry');
     	$type = $this->params()->fromRoute('type', null);
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
@@ -231,14 +233,19 @@ class AccountController extends AbstractActionController
 
     	$documentList = array();
     	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
-    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
-    		try {
-    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['contact']);
-    			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
-    		}
-    		catch(\Exception $e) {}
+	    	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+	    	$client = new Client(
+	    			'https://api.dropboxapi.com/2/files/list_folder',
+	    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+	    			);
+	    	$client->setEncType('application/json');
+	    	$client->setMethod('POST');
+	    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+	    	$client->setRawBody(json_encode(array('path' => $dropbox['folders']['contact'])));
+	    	$response = $client->send();
+	    	foreach (json_decode($response->getBody(), true)['entries'] as $entry) {
+	    		$documentList[] = $entry['name'];
+	    	}
     	}
     	else $dropbox = null;
 
@@ -321,7 +328,6 @@ class AccountController extends AbstractActionController
     			'config' => $context->getconfig(),
     			'type' => $type,
     			'mail' => $mail,
-	    		'dropbox' => $dropbox,
 	    		'documentList' => $documentList,
     			'csrfForm' => $csrfForm,
     			'message' => $message,
@@ -335,13 +341,23 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
     	$document = $this->params()->fromRoute('document', 0);
-    	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-    	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-
-    	$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
-    	$link = $dropboxClient->createTemporaryDirectLink($dropbox['folders']['contact'].'/'.$document);
-    	if ($link[0]) return $this->redirect()->toUrl($link[0]);
-    	else return $this->response;
+		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+    	$client = new Client(
+    			'https://api.dropboxapi.com/2/files/get_temporary_link',
+    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+    			);
+    	$client->setEncType('application/json');
+    	$client->setMethod('POST');
+    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+    	$client->setRawBody(json_encode(array('path' => $dropbox['folders']['contact'].'/'.$document)));
+    	$response = $client->send();
+    	$this->response->http_status = $response->renderStatusLine();
+    	$result = json_decode($response->getBody(), true);
+    	if (is_array($result) && array_key_exists('link', $result)) return $this->redirect()->toUrl($result['link']);
+    	else {
+	    	$this->response->http_status = 400;
+    		return $this->response;
+    	}
     }
 
     public function detailAction()
@@ -1005,7 +1021,7 @@ class AccountController extends AbstractActionController
     					// Link to the place community for the account type
     					$place = Place::get($account->place_id);
     					$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
-    					if ($place) {
+    					if ($place && $community) {
     						$account->contact_1->communities[$community->id] = true;
     					}
 
@@ -1034,18 +1050,40 @@ class AccountController extends AbstractActionController
     						if ($error) $connection->rollback();
     						else {
 								$path = $context->getConfig('ppitDocument')['dropbox']['folders']['students'].'/'.strtolower($account->contact_1->n_last).'_'.strtolower($account->contact_1->n_first).'_'.$account->contact_1->email;
-/*								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
-						    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-						    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-						    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
-						    		$dropboxClient->createFolder($path);
-						    		
+								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+									$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+							    	$client = new Client(
+							    			'https://api.dropboxapi.com/2/files/create_folder_v2',
+							    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+							    	);
+							    	$client->setEncType('application/json');
+							    	$client->setMethod('POST');
+							    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+							    	$client->setRawBody(json_encode(array('path' => $path)));
+							    	$response = $client->send();
+							    	
 						    		foreach($this->getRequest()->getFiles()->toArray() as $fileId => $file) {
-							    		$f = fopen($file['tmp_name'], "rb");
-							    		$result = $dropboxClient->uploadFile($path.'/'.$file['name'], \Dropbox\WriteMode::add(), $f);
-							    		fclose($f);
+								    	$f = fopen($file['tmp_name'], "rb");
+								    	$client = new Client(
+								    			'https://content.dropboxapi.com/2/files/upload',
+								    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+								    	);
+								    	$client->setEncType('application/octet-stream');
+								    	$client->setMethod('POST');
+								    	$client->getRequest()->getHeaders()->addHeaders(array(
+								    			'Authorization' => 'Bearer '.$dropbox['credential'],
+								    			'Dropbox-API-Arg' => json_encode(array(
+								    					'path' => $path.'/'.$file['name'],
+								    					'mode' => 'add',
+								    					'autorename' => true,
+								    					'mute' => false,
+								    			)),
+								    	));
+								    	$client->setRawBody(fread($f, filesize($file['tmp_name'])));
+										$response = $client->send();
+								    	fclose($f);
 						    		}
-    							}*/
+						    	}
     							$connection->commit();
     							return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'discipline' => $discipline, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
     						}
@@ -1206,6 +1244,7 @@ class AccountController extends AbstractActionController
     	else {
     		$requestType = $context->getConfig('commitmentAccount/requestTypes'.(($type) ? '/'.$type : ''))['general_information'][$context->getLocale()];
     	}
+
     	if (array_key_exists('request_comment', $data)) $requestComment = $data['request_comment'];
     	else $requestComment = '';
 

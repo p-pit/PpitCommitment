@@ -300,12 +300,6 @@ class CommitmentController extends AbstractActionController
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
 
-    	if ($context->getConfig('ppitDocument') && array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
-    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-    		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-    	}
-    	else $dropbox = null;
-
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
@@ -314,10 +308,32 @@ class CommitmentController extends AbstractActionController
     		'commitment' => $commitment,
     		'products' => Product::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
     		'options' => ProductOption::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
-    		'dropbox' => $dropbox,
     	));
 		$view->setTerminal(true);
 		return $view;
+    }
+
+    public function dropboxLinkAction()
+    {
+    	$context = Context::getCurrent();
+    	$document = $this->params()->fromRoute('document', 0);
+    	$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+    	$client = new Client(
+    			'https://api.dropboxapi.com/2/files/get_temporary_link',
+    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+    			);
+    	$client->setEncType('application/json');
+    	$client->setMethod('POST');
+    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+    	$client->setRawBody(json_encode(array('path' => $dropbox['folders']['settlements'].'/'.$document)));
+    	$response = $client->send();
+    	$this->response->http_status = $response->renderStatusLine();
+    	$result = json_decode($response->getBody(), true);
+    	if (is_array($result) && array_key_exists('link', $result)) return $this->redirect()->toUrl($result['link']);
+    	else {
+    		$this->response->http_status = 400;
+    		return $this->response;
+    	}
     }
 
     public function tryAction()

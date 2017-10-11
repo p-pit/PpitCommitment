@@ -8,6 +8,7 @@ use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
 use PpitCore\Model\Place;
 use PpitCore\Form\CsrfForm;
+use Zend\Http\Client;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
@@ -168,14 +169,19 @@ class TermController extends AbstractActionController
 
     	$documentList = array();
     	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
-    		require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
     		$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-    		$dropboxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
-    		try {
-    			$properties = $dropboxClient->getMetadataWithChildren($dropbox['folders']['settlements']);
-    			foreach ($properties['contents'] as $content) $documentList[] = substr($content['path'], strrpos($content['path'], '/')+1);
-    		}
-    		catch(\Exception $e) {}
+    		$client = new Client(
+	    			'https://api.dropboxapi.com/2/files/list_folder',
+	    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+	    	);
+	    	$client->setEncType('application/json');
+	    	$client->setMethod('POST');
+	    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+	    	$client->setRawBody(json_encode(array('path' => $dropbox['folders']['settlements'])));
+	    	$response = $client->send();
+	    	foreach (json_decode($response->getBody(), true)['entries'] as $entry) {
+	    		$documentList[] = $entry['name'];
+	    	}
     	}
     	else $dropbox = null;
     	 

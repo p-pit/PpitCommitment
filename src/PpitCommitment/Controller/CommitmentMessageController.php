@@ -837,11 +837,26 @@ class CommitmentMessageController extends AbstractActionController
 				$adapter->addFilter('Rename', 'data/documents/'.$destinationPath);
 				if ($adapter->receive($file['name'])) {
 					try {
-				    	require_once "vendor/dropbox/dropbox-sdk/lib/Dropbox/autoload.php";
-						$dropbox = $context->getConfig('ppitDocument')['dropbox'];
-						$dbxClient = new \Dropbox\Client($dropbox['credential'], $dropbox['clientIdentifier']);
 						$f = fopen('data/documents/'.$destinationPath, "rb");
-						$result = $dbxClient->uploadFile('/'.$dropbox['folders'][$folder].'/'.$name, \Dropbox\WriteMode::add(), $f);
+						$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+						$client = new Client(
+				    			'https://content.dropboxapi.com/2/files/upload',
+				    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+				    	);
+				    	$client->setEncType('application/octet-stream');
+				    	$client->setMethod('POST');
+						$path = $context->getConfig('ppitDocument')['dropbox']['folders'][$folder];
+				    	$client->getRequest()->getHeaders()->addHeaders(array(
+				    			'Authorization' => 'Bearer '.$dropbox['credential'],
+				    			'Dropbox-API-Arg' => json_encode(array(
+				    					'path' => $path.'/'.$name,
+				    					'mode' => 'add',
+				    					'autorename' => true,
+				    					'mute' => false,
+				    			)),
+				    	));
+				    	$client->setRawBody(fread($f, filesize('data/documents/'.$destinationPath)));
+						$response = $client->send();
 						fclose($f);
 						$message = 'OK';
 					}
