@@ -1536,7 +1536,7 @@ return array(
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),
 		
-	'commitment/business' => array(
+	'commitment' => array(
 			'currencySymbol' => '€',
 			'tax' => 'excluding',
 			'properties' => array(
@@ -1676,11 +1676,11 @@ return array(
 			),
 	),
 
-	'commitment/index/business' => array(
+	'commitment/index' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
 		
-	'commitment/search/business' => array(
+	'commitment/search' => array(
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
@@ -1691,12 +1691,12 @@ return array(
 			),
 	),
 
-	'commitment/list/business' => array(
+	'commitment/list' => array(
 			'status' => 'select',
 			'including_options_amount' => 'number',
 	),
 
-	'commitment/update/business' => array(
+	'commitment/update' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
@@ -2357,7 +2357,7 @@ return array(
 					),
 			),
 	),
-	'commitment/accountList/business' => array(
+	'commitment/accountList' => array(
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'properties' => array(
 				'caption' => 'text',

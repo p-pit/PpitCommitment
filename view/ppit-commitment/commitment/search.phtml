@@ -16,22 +16,26 @@
 	</div>
 	<div class="panel-body">
 
+		<div class="col-md-6">
+
 <!-- Filters -->
 
-		<div class="form-group">
-			<label class="col-sm-4 control-label"><span class="glyphicon glyphicon-search"></span></label>
-			<div class="col-sm-1 control-label">
+		<div class="col-sm-6">&nbsp;</div>
+		
+		<div class="col-sm-3">
+    		<button type="button" class="form-control btn btn-default btn-xs" title="<?php echo $this->translate('Search', 'ppit-core', $context->getLocale()) ?>" id="search-button">
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</div>
+		<div class="col-sm-3 search">
+    		<button type="button" class="form-control btn btn-default btn-xs" title="<?php echo $this->translate('Erase', 'ppit-core', $context->getLocale()) ?>" id="erase-button">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
 <?php if ($context->isDemoModeActive()) : ?>
 				<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/search/x'][$context->getLocale()] ?>">
 				    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 				</a>
 <?php endif;?>
-			</div>
-			<div class="col-sm-7">
-	    		<button type="button" class="form-control btn btn-default btn-xs" title="<?php echo $this->translate('Erase', 'ppit-core', $context->getLocale()) ?>" id="erase-button">
-					<span class="glyphicon glyphicon-remove"></span>
-				</button>
-			</div>
 		</div>
 		
 <?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
@@ -42,27 +46,30 @@
 	<?php $label = $property['labels'][$context->getLocale()] ?>
 	
 	<?php if ($rendering == 'contains') : ?>
-		<div class="form-group">
-			<label class="col-sm-5 control-label"><?php echo $label ?></label>
-			<div class="col-sm-7">
-				<input class="form-control" type="text" id="search_<?php echo $propertyId ?>" placeholder="<?php echo $this->translate('Contains', 'ppit-core', $context->getLocale()) ?>" />
-			</div>
+		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_<?php echo $propertyId ?>">
+			</span>
+			<input class="form-control" type="text" class="search_input" id="search_<?php echo $propertyId ?>" placeholder="<?php echo $this->translate('Contains', 'ppit-core', $context->getLocale()) ?>" />
 		</div>
 
 	<?php elseif ($rendering == 'range') : ?>
 
-		<div class="form-group">
-			<label class="col-sm-5 control-label"><?php echo $label ?></label>
-			<div class="col-sm-7">
-	    		<input class="form-control" type="text" id="search_min_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Min', 'ppit-core', $context->getLocale()) ?>" />
-			</div>
+		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_min_<?php echo $propertyId ?>">
+			</span>
+	    	<input class="form-control" type="text" class="search_input" id="search_min_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Min', 'ppit-core', $context->getLocale()) ?>" />
 		</div>
 
-		<div class="form-group">
-			<label class="col-sm-5 control-label">&nbsp;</label>
-			<div class="col-sm-7">
-	    		<input class="form-control" type="text" id="search_max_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Max', 'ppit-core', $context->getLocale()) ?>" />
-			</div>
+		<label class="col-sm-6 control-label search">&nbsp;</label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_max_<?php echo $propertyId ?>">
+			</span>
+	    	<input class="form-control" type="text" class="search_input" id="search_max_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Max', 'ppit-core', $context->getLocale()) ?>" />
 		</div>
 
 	<?php elseif ($rendering == 'select') : ?>
@@ -81,39 +88,34 @@
 			}
 		}
 		?>
-		<div class="form-group">
-			<label class="col-sm-5 control-label"><?php echo $label ?></label>
-			<div class="col-sm-7">
-				<select id="search_<?php echo $propertyId ?>" class="form-control">
-					<option value=""></option>
-		<?php foreach ($modalities as $modalityId => $modalityLabel) : ?>
-		    		<option value="<?php echo $modalityId ?>" <?php if ($propertyId == 'type' && $modalityId == $type) echo 'selected="selected"' ?>><?php echo $modalityLabel ?></option>
+
+		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_<?php echo $propertyId ?>">
+			</span>
+			<select id="search_<?php echo $propertyId ?>" class="form-control search_input">
+				<option value=""></option>
+		<?php var_dump($type); foreach ($modalities as $modalityId => $modalityLabel) : ?>
+		    	<option value="<?php echo $modalityId ?>" <?php if ($propertyId == 'type' && $modalityId === $type) echo 'selected="selected"' ?>><?php echo $modalityLabel ?></option>
 		<?php endforeach;?>
-		    	</select>
-			</div>
+		    </select>
 		</div>
 
 	<?php endif;?>
-
 <?php endforeach;?>
+		</div>
 
-	    <div>&nbsp;</div>
-
-	    <div>
-	    		<button type="button" class="btn btn-default" title="<?php echo $this->translate('Export', 'ppit-core', $context->getLocale()) ?>" id="export-button">
-					<span class="glyphicon glyphicon-cloud-download"></span>
-					<span><?php echo $this->translate('Export', 'ppit-core', $context->getLocale())?></span>
-				</button>
-<?php if ($context->isDemoModeActive()) : ?>
-				<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/search/export'][$context->getLocale()] ?>">
-				    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
-				</a>
+		<div class="col-md-6">
+<?php if ($type) : ?>
+			<div class="col-md-6 col-md-offset-3"><canvas id="chart"></canvas></div>
 <?php endif;?>
-	    </div>
-	    
-		<div>&nbsp;</div>
+		</div>
 
 <!-- Add or update section -->
-		<div id="commitment-list-panel"></div>
+		<div style="background-color: #ffffff;" class="row">
+			<div>&nbsp;</div>
+			<div id="commitment-list-panel"></div>
+		</div>
 	</div>
 </div>

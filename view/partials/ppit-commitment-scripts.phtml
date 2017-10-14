@@ -1,12 +1,3 @@
-
-function connectRemoveIcon(id, target)
-{
-	$('#' + id).click(function () {
-		$('#' + target).hide();
-		filterCommitmentList();
-	});
-}
-
 function getParams() {
 
 	// Create a new FormData object.
@@ -16,23 +7,31 @@ function getParams() {
 
 	<?php if ($rendering == 'range') : ?>
 	
-	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
-	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = min_<?php echo $propertyId ?>;
-	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+	if (document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
+		var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
+		if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = min_<?php echo $propertyId ?>;
+		if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+	}
 
-	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
-	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = max_<?php echo $propertyId ?>;
-	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+	if (document.getElementById('search_check_max_<?php echo $propertyId ?>').checked) {
+		var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
+		if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = max_<?php echo $propertyId ?>;
+		if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+	}
 
 	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
 
-	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	if (document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+		var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+		if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	}
 
 	<?php else : ?>
 
-	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	if (document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+		var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+		if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+	}
 	
 	<?php endif;?>
 
@@ -89,49 +88,107 @@ function filterCommitmentList() {
 		criterion = ascCriterion.split('-')[0];
 		dir = 'ASC';
 	}
-	else {
+	else if (descCriterion) {
 		criterion = descCriterion.split('-')[0];
-		dir = 'ASC';
+		dir = 'DESC';
+	}
+	else {
+		criterion = 'including_options_amount';
+		dir = 'DESC';
 	}
 	getCommitmentList(getParams(), criterion, dir);
 }
 
 function connectCommitmentSearchInputs() {
 
-	$('#export-button').click(function () { exportCommitmentList(); });
-	
-	$('#erase-button').unbind();
-	$('#erase-button').click(function () { eraseCommitmentSearch(); });
+	$('#erase-button').click(function () { 
+		$('.search_input').val('');
+		$('.search_check').attr('checked', false);
+		filterCommitmentList();
+	});
 
 <?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
 
 	<?php if ($propertyId == 'type') : ?>
-		$('#search_<?php echo $propertyId ?>').change(function () { 
-			document.location.href = '<?php echo $this->url('commitment/index') ?>/' + $('#search_type').val(); 
-		});
+	$('#search_<?php echo $propertyId ?>').change(function () { 
+		document.location.href = '<?php echo $this->url('commitment/index') ?>/' + $('#search_type').val(); 
+	});
 
 	<?php elseif ($rendering == 'range') : ?>
-	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterCommitmentList(); });
-	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterCommitmentList(); });
+
+	$('#search_check_min_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		if (!document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
+			$('#search_min_<?php echo $propertyId ?>').val('');
+		}
+	});
+
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { 
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+	});
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { 
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		document.getElementById('search_check_max_<?php echo $propertyId ?>').checked = true;	
+	});
 
 		<?php if ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
-	$('#search_min_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
-	$('#search_max_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
 		<?php endif;?>
 	
-	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
-		$('#search_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
-	
 	<?php else : ?>
-		$('#search_<?php echo $propertyId ?>').keyup(function () { filterCommitmentList(); });
+
+	$('#search_check_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+			$('#search_<?php echo $propertyId ?>').val('');
+		}
+	});
+	
+		<?php if ($rendering == 'select' || $rendering == 'repository') : ?>
+
+	$('#search_<?php echo $propertyId ?>').change(function () { 
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;
+	});
+	
+		<?php else : ?>
+	$('#search_<?php echo $propertyId ?>').keyup(function () { 
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		$('#search-button').unbind('click');
+		$('#search-button').click(function () { 
+			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		});
+		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;	
+	});
 
 		<?php if ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
 	$("#search_<?php echo $propertyId ?>").datepicker();
 	$('#search_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
 		<?php endif;?>
 
+		<?php endif;?>
 	<?php endif;?>
 
 <?php endforeach;?>
@@ -150,6 +207,11 @@ function getCommitmentList(params, major, dir) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('commitment-list-panel').innerHTML = xhttp.responseText;
+
+			$('.detail-row').hide();
+			$('.invisible').hide();
+
+			$('#export-button').click(function () { exportCommitmentList(); });
 			
 			$(function () {
 			    $('.tip').tooltip({
@@ -180,6 +242,7 @@ function getCommitmentList(params, major, dir) {
 		}
 	}
 	xhttp.send();
+	$('#search-button').removeClass('btn-success').addClass('btn-default');
 }
 
 function connectAuditPanel()
@@ -784,10 +847,10 @@ function connectCommitmentCreditStatusForm(id)
 function getCommitmentDetail(id) {
 
 	// Ensure the target is displayed
-	$('#form_action').show();
+	$('#detail-row_' + id).show();
 
 	// Anchor to the new panel
-	$(location).attr('hash', 'form_action');
+	$(location).attr('hash', 'detail-row_' + id);
 
 	var route = '<?php echo $this->url('commitment/detail', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 
@@ -800,11 +863,16 @@ function getCommitmentDetail(id) {
 	<?php if (!$config['isTraceActive']) : ?>
 			if (xhttp.status == 200) {
 	<?php endif;?>
-			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			document.getElementById('detail-div_' + id).innerHTML = xhttp.responseText;
 
 			connectAuditPanel();
 			connectCgvPanel();
-			connectRemoveIcon('remove-anchor', 'form_action');
+
+			$('#remove-anchor').click(function () {
+				$('.detail-row').hide();
+				filterCommitmentList();
+			});
+
 			getCommitmentUpdate(id, '');
 			
 			$('.detail-remove-anchor').click(function () { getCommitmentDetail(id); });
@@ -883,21 +951,40 @@ function getCommitmentDetail(id) {
 	$('#commitment-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
 }
 
-function activateCommitment() {
-	// Load the search panel and highlight the menu entry
-	loadPanel('index_action', '<?php echo $this->url('commitment/search', array('type' => $type)) ?>');
-	
-	<?php
-	$todoTitle = $this->translate('todo list', 'ppit-core', $context->getLocale());
-	?>
-	$('#mode-text').text('<?php echo $todoTitle ?>');
-	
-	// Connect the search inputs
-	connectCommitmentSearchInputs();
+function getSearch()
+{
+	// Hide the other panels
+	$('.ppit-panel').hide();
+	$('#index_action').show();
+	// Anchor to the main panel
+	$(location).attr('hash', '#');
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", '<?php echo $this->url('commitment/search', array('type' => $type)) ?>', false);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+				document.getElementById('index_action').innerHTML = xhttp.responseText;
+				<?php
+				$todoTitle = $this->translate('todo list', 'ppit-core', $context->getLocale());
+				?>
+				$('#mode-text').text('<?php echo $todoTitle ?>');
+				connectCommitmentSearchInputs();
+				var params = '?';
+	<?php foreach ($params as $id => $value) : ?>	
+				params += '<?php echo $id?>=<?php echo $value ?>&'
+	<?php endforeach;?>
+				getCommitmentList(params, 'including_options_amount', 'DESC');
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send();
+}
 
-	var params = '?';
-<?php foreach ($params as $id => $value) : ?>	
-	params += '<?php echo $id?>=<?php echo $value ?>&'
-<?php endforeach;?>
-	getCommitmentList(params, 'including_options_amount', 'DESC');
+function activateCommitment() {
+	getSearch();
 }

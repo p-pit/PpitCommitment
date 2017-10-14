@@ -1,3 +1,37 @@
+<!-- 
+/**
+ * PpitAccounting V1.0 (https://github.com/p-pit/PpitAccounting)
+ *
+ * @link      https://github.com/p-pit/PpitAccounting
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitAccounting/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<style>
+{
+    .large
+    {
+        display: none;
+    }
+}
+</style>
+
+<div class="col-md-12">
+
+<div>
+	<button type="button" class="btn btn-default" title="<?php echo $this->translate('Export', 'ppit-core', $context->getLocale()) ?>" id="export-button">
+		<span class="glyphicon glyphicon-cloud-download"></span>
+		<span><?php echo $this->translate('Export', 'ppit-core', $context->getLocale())?></span>
+	</button>
+<?php if ($context->isDemoModeActive()) : ?>
+	<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/search/export'][$context->getLocale()] ?>">
+		<img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
+	</a>
+<?php endif;?>
+</div>
+<div>&nbsp;</div>
+
 <table class="table table-striped ppit_index">
 
 	<tr class="to-mask"><td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) + 1 ?>">&nbsp;</td></tr>	
@@ -84,6 +118,11 @@
 	</tr>
 
 	<?php endif;?>
+	
+	<tr class="detail-row" id="detail-row_<?php echo $commitment->id ?>" rowspan="2"><td colspan="99"><div class="col-md-6 col-md-offset-3 ppit-panel" id="detail-div_<?php echo $commitment->id ?>"></div></td></tr>
+	<tr class="invisible"><td colspan="99"></td></tr>
 <?php $i++; endforeach; ?>
 
 </table>
+
+</div>

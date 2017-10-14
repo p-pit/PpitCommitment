@@ -749,7 +749,7 @@ function get<?php echo $contactNumber ?>Update(id, action) {
 function getCommitmentAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitment/accountList', array('type' => $type)) ?>'
+	route = '<?php echo $this->url('commitment/accountList') ?>'
 	route += params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
@@ -770,23 +770,23 @@ function getCommitmentAccountList(params, major, dir) {
 			});
 			
 			// Connect the add anchors
-			$('#commitment-add').click(function () {
+/*			$('#commitment-add').click(function () {
 				getCommitmentUpdate(0, '', params);
-			});
+			});*/
 			
 			// Connect the detail anchors
-			$('.commitment-detail-anchor').each(function () {
+/*			$('.commitment-detail-anchor').each(function () {
 				$(this).click(function () {
 					getCommitmentUpdate($(this).attr('id').split('_')[1], 'update', params);
 				});
-			});
+			});*/
 			
 			// Connect the delete anchors
-			$('.commitment-delete-anchor').each(function () {
+/*			$('.commitment-delete-anchor').each(function () {
 				$(this).click(function () {
 					getCommitmentUpdate($(this).attr('id').split('_')[1], 'delete', params);
 				});
-			});
+			});*/
 
 			$('.account-list-anchor').each(function () {
 				$(this).click(function () {
@@ -1088,7 +1088,7 @@ function activateAccount() {
 /////////////////////////////
 
 <?php
-$properties = array();
+/*$properties = array();
 
 $properties['commitment-type'] = array('type' => 'select', 'mandatory' => 'true', 'maxSize' => 255);
 foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
@@ -1098,9 +1098,9 @@ foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as 
 
 $properties['update_time'] = array('type' => 'hidden');
 
-echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) 
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Commitment', 'context' => $context, 'properties' => $properties)) */
 ?>
-
+/*
 function connectCommitmentUpdateForm(id, action, params)
 {
 
@@ -1175,7 +1175,7 @@ function connectCommitmentUpdateForm(id, action, params)
 function getCommitmentUpdate(id, action, params) {
 
 	var xhttp = new XMLHttpRequest();
-	var route = '<?php echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
+	var route = '<?php //echo $this->url('commitment/update', array('type' => ($type) ? $type : 'generic')) ?>/' + id;
 	if (action) route += '/' + action;
 	route += params;
 	xhttp.open('GET', route, true);
@@ -1207,4 +1207,4 @@ function getCommitmentUpdate(id, action, params) {
 		}
 	}
 	xhttp.send();
-}
+}*/

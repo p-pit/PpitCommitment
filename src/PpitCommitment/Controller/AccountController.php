@@ -1279,7 +1279,8 @@ class AccountController extends AbstractActionController
 
 				// Create the account
 		   		$account = Account::instanciate($type);
-		   		if ($account->loadData($data) != 'OK') {
+				$rc = $account->loadData($data);
+				if ($rc != 'OK') {
 		   			$interaction->http_status = '400';
 		   		}
 		   		else {
@@ -1309,7 +1310,8 @@ class AccountController extends AbstractActionController
     			 
     	// Create the contact 1
     	$contact = Vcard::instanciate();
-    	if ($contact->loadData($data) != 'OK') {
+		$rc = $contact->loadData($data);
+    	if ($rc != 'OK') {
     		$interaction->http_status = '400';
     	}
     	else {
