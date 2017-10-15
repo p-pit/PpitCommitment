@@ -1004,6 +1004,7 @@ class Account implements InputFilterAwareInterface
     public static function processPost($data, $interaction)
     {
     	$context = Context::getCurrent();
+		$translator = $context->getServiceManager()->get('translator');
     	$type = $interaction->category;
     	$reference = $interaction->reference;
     	$place = Place::get($data['place_identifier'], 'identifier');
@@ -1043,7 +1044,7 @@ class Account implements InputFilterAwareInterface
     				}
     			}
     			$interaction->update(null);
-    			return $interaction->http_status = '500';
+    			return $rc;
     		}
     		else {
     	
@@ -1052,6 +1053,7 @@ class Account implements InputFilterAwareInterface
     			$rc = $account->loadData($data);
     			if ($rc != 'OK') {
     				$interaction->http_status = '400';
+    				$rc = 'Account integrity';
     			}
     			else {
     				$account->contact_1_id = $vcard->id;
@@ -1073,7 +1075,7 @@ class Account implements InputFilterAwareInterface
     				}
     			}
     			$interaction->update(null);
-    			return $interaction->http_status;
+    			return $rc;
     		}
     	}
     	
@@ -1082,6 +1084,7 @@ class Account implements InputFilterAwareInterface
     	$rc = $contact->loadData($data);
     	if ($rc != 'OK') {
     		$interaction->http_status = '400';
+    		$rc = 'Vcard integrity';
     	}
     	else {
     		$rc = $contact->add();
@@ -1093,6 +1096,7 @@ class Account implements InputFilterAwareInterface
     			$account = Account::instanciate($type);
     			if ($account->loadData($data) != 'OK') {
     				$interaction->http_status = '400';
+    				$rc = 'Account integrity';
     			}
     			else {
     				$account->contact_1_id = $contact->id;
@@ -1115,7 +1119,7 @@ class Account implements InputFilterAwareInterface
     		}
     	}
     	$interaction->update(null);
-    	return $interaction->http_status;
+    	return $rc;
     }
     
     public function isDeletable()

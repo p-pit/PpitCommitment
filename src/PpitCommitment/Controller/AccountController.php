@@ -1217,8 +1217,11 @@ class AccountController extends AbstractActionController
 			$rc = $interaction->loadData($intData);
     		$interaction->http_status = '200';
 			$rc = $interaction->add();
-    		return $this->redirect()->toRoute('commitmentAccount/processPost', array('interaction_id' => $interaction->id));
-    	}
+			$rc = Account::processPost($data, $interaction);
+	   		$this->getResponse()->setStatusCode($interaction->http_status);
+   			$this->response->setContent(json_encode(array('interaction_id' => $interaction->id, 'rc' => $rc)));
+   			return $this->getResponse();
+	    }
     }
 
     public function processPostAction()
@@ -1234,8 +1237,9 @@ class AccountController extends AbstractActionController
 		}
     	$data = json_decode($interaction->content, true);
 		$rc = Account::processPost($data, $interaction);
-   		$this->getResponse()->setStatusCode($rc);
-		return $this->response;
+   		$this->getResponse()->setStatusCode($interaction->http_status);
+   		echo $rc;
+		return $this->getResponse();
     }
 /*    
 	public function deleteAction()

@@ -1391,7 +1391,8 @@ return array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
-					'status' => 'select',
+				'place_id' => 'select',
+				'status' => 'select',
 				'name' => 'contains',
 				'callback_date' => 'range',
 				'origine' => 'contains',
@@ -1422,6 +1423,7 @@ return array(
 			),
 	),
 	'commitmentAccount/update/business' => array(
+			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
@@ -1604,6 +1606,8 @@ return array(
 					),
 					'amount' => array(
 							'type' => 'number',
+							'min_value' => 0,
+							'max_value' => 1000000,
 							'labels' => array(
 									'en_US' => 'Amount',
 									'fr_FR' => 'Montant',
@@ -1703,9 +1707,16 @@ return array(
 			'including_options_amount' => 'number',
 	),
 
+	'commitment/update/business' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+			'amount' => array('mandatory' => false),
+	),
+		
 	'commitment/update' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
+//			'amount' => array('mandatory' => false),
 	),
 
 	'commitment/invoice_identifier_mask' => date('Y-'),
