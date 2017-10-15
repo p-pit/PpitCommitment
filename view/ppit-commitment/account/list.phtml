@@ -66,13 +66,7 @@
 <?php endif;?>
 		</td>
 		
-		<td colspan="5">
-<?php if ($entry == 'contact') : ?>
-			<button type="button" class="btn btn-default index-btn" title="<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale())?>" id="account-register-anchor">
-				<?php echo $this->translate('Register form', 'ppit-commitment', $context->getLocale()) ?>
-			</button>
-<?php endif;?>
-		</td>
+		<td colspan="5">&nbsp;</td>
 	</tr>
 
 	<input type="hidden" id="account-number" value="<?php echo count($accounts) ?>" />
@@ -123,6 +117,12 @@
 	
 		<?php elseif ($rendering == 'text') : ?>
 		<td><?php echo $account->properties[$propertyId] ?></td>
+	
+		<?php elseif ($rendering == 'select') : ?>
+		<td><?php echo $property['modalities'][$account->properties[$propertyId]][$context->getLocale()] ?></td>
+	
+		<?php elseif ($rendering == 'date') : ?>
+		<td><?php echo $context->decodeDate($account->properties[$propertyId]) ?></td>
 	
 		<?php elseif ($rendering == 'photo') : ?>
 		<td>

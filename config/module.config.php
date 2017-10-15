@@ -1402,6 +1402,8 @@ return array(
 	),
 	'commitmentAccount/list/business' => array(
 			'name' => 'text',
+			'callback_date' => 'date',
+			'status' => 'select',
 	),
 	'commitmentAccount/detail/business' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
@@ -1513,6 +1515,11 @@ return array(
 			'processor' => '\PpitCommitment\Model\Account::processInteraction',
 	),
 
+	'interaction/type/web_service' => array(
+			'controller' => null,
+			'processor' => '\PpitCommitment\Model\Account::processPost',
+	),
+		
 	'interaction/csv/contact' => array(
 			'columns' => array(
 					'last_name' => array('property' => 'n_last'),
