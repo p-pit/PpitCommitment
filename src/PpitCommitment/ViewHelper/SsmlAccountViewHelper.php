@@ -25,7 +25,7 @@ class SsmlAccountViewHelper
 		$sheet = $workbook->getActiveSheet();
 		
 		$i = 0;
-		$colNames = array(1 => 'A', 2 => 'B', 3 => 'C', 4 => 'D', 5 => 'E', 6 => 'F', 7 => 'G', 8 => 'H', 9 => 'I', 10 => 'J', 11 => 'K', 12 => 'L', 13 => 'M', 14 => 'N', 15 => 'O', 16 => 'P', 17 => 'Q', 18 => 'R', 19 => 'S', 20 => 'T', 21 => 'U', 22 => 'V', 23 => 'W', 24 => 'X', 25 => 'Y', 26 => 'Z', 27 => 'AA', 28 => 'AB', 29 => 'AC', 30 => 'AD', 31 => 'AE', 32 => 'AF', 33 => 'AG', 34 => 'AH', 35 => 'AI', 36 => 'AJ', 37 => 'AK', 38 => 'AL', 39 => 'AM', 40 => 'AN');
+		$colNames = array(1 => 'A', 2 => 'B', 3 => 'C', 4 => 'D', 5 => 'E', 6 => 'F', 7 => 'G', 8 => 'H', 9 => 'I', 10 => 'J', 11 => 'K', 12 => 'L', 13 => 'M', 14 => 'N', 15 => 'O', 16 => 'P', 17 => 'Q', 18 => 'R', 19 => 'S', 20 => 'T', 21 => 'U', 22 => 'V', 23 => 'W', 24 => 'X', 25 => 'Y', 26 => 'Z', 27 => 'AA', 28 => 'AB', 29 => 'AC', 30 => 'AD', 31 => 'AE', 32 => 'AF', 33 => 'AG', 34 => 'AH', 35 => 'AI', 36 => 'AJ', 37 => 'AK', 38 => 'AL', 39 => 'AM', 40 => 'AN', 41 => 'AO');
 		
 		foreach($context->getConfig('commitmentAccount/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 			$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
@@ -43,6 +43,16 @@ class SsmlAccountViewHelper
 				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				$i++;
 				if ($propertyId == 'name') $sheet->setCellValue($colNames[$i].$j, $account->name);
+				elseif ($propertyId == 'contact_history') {
+					$text = '';
+					foreach ($account->properties[$propertyId] as $comment) {
+						$text .= $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10).":\n";
+						if (array_key_exists('status', $comment)) $text .= $context->getconfig('commitmentAccount'.(($type) ? '/'.$type : ''))['statuses'][$comment['status']]['labels'][$context->getLocale()];
+						$text .= '('.$comment['n_fn'].') '.$comment['comment']."\n";
+					}
+					$sheet->getStyle($colNames[$i].$j)->getAlignment()->setWrapText(true);
+					$sheet->setCellValue($colNames[$i].$j, $text);
+				}
 				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $account->place_caption);
 				elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $account->n_first);
 				elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $account->n_last);

@@ -576,13 +576,15 @@ class Account implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $value) {
-    			$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+    			if (in_array(substr($propertyId, 0, 4), array('min_', 'max_'))) $propertyKey = substr($propertyId, 4);
+    			else $propertyKey = $propertyId;
+    			$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyKey];
     			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
     			if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
     			elseif (strpos($value, ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $value)));
     			elseif ($value == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
-    			elseif ($property['type'] == 'select') $where->equalTo('commitment_account.'.$propertyId, $value);
+    			elseif (in_array($property['type'], array('select', 'table'))) $where->equalTo('commitment_account.'.$propertyId, $value);
     			else $where->like('commitment_account.'.$propertyId, '%'.$value.'%');
     		}
 			if ($limitation) $select->limit($limitation);
