@@ -108,7 +108,7 @@ return array(
 	       						'group' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/group[:type]',
+        										'route' => '/group[/:type]',
         										'defaults' => array(
         												'action' => 'group',
         										),
@@ -117,7 +117,7 @@ return array(
 	       						'sendMessage' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/send-message[:type]',
+        										'route' => '/send-message[/:type]',
         										'defaults' => array(
         												'action' => 'sendMessage',
         										),
@@ -1459,7 +1459,11 @@ return array(
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
 	),
-		
+	'commitmentAccount/groupUpdate/business' => array(
+			'status' => array('mandatory' => false),
+			'callback_date' => array('mandatory' => false),
+	),
+
 	'commitmentAccount/post/business' => array(
 			'place_identifier' => array('mandatory' => false),
 			'n_title' => array('mandatory' => false),

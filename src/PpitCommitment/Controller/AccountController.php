@@ -195,7 +195,7 @@ class AccountController extends AbstractActionController
     	$context = Context::getCurrent();
     
     	// Retrieve the type
-    	$type = $this->params()->fromRoute();
+    	$type = $this->params()->fromRoute('type');
     
     	$request = $this->getRequest();
     	if (!$request->isPost()) return $this->redirect()->toRoute('home');
@@ -206,13 +206,38 @@ class AccountController extends AbstractActionController
     		$account = Account::get($request->getPost('account_'.$i));
     		$accounts[] = $account;
     	}
-    
+
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+		$message = null;
+    	$request = $this->getRequest();
+    	if ($request->getPost('action') == 'update') {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		if ($csrfForm->isValid()) { // CSRF check
+    			$data = array();
+    			foreach ($context->getConfig('commitmentAccount/groupUpdate'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+    				$data[$propertyId] = $request->getPost($propertyId);
+    			}
+    			foreach ($accounts as $account) {
+    				if ($account->loadData($data) != 'OK') throw new \Exception('View error');
+    				$account->update($request->getPost('update_time'));
+    			}
+    		}
+    	}
+
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
     			'type' => $type,
     			'accounts' => $accounts,
+    			'account' => current($accounts),
     			'places' => Place::getList(array()),
+    			'csrfForm' => $csrfForm,
+    			'message' => $message,
+    			'error' => $error,
     	));
     	$view->setTerminal(true);
     	return $view;

@@ -228,6 +228,11 @@ function getAccountList(params, major, dir) {
 				});
 			});
 
+			// Able the group action button
+			$('.account-checkbox').click(function () {
+				$('.account-group-anchor').removeAttr('disabled');
+			});
+
 			// Connect the check all checkbox
 			$('#account-checkbox').click(function () {
 				var current = document.getElementById('account-checkbox').checked;
@@ -1000,6 +1005,79 @@ function getSendMessage() {
 	xhttp.send();
 }
 
+<?php 
+$properties = array();
+
+foreach ($context->getConfig('commitmentAccount/groupUpdate'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
+	$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+	if ($propertyId != 'place_id' && $property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+	if ($options && (!array_key_exists('readonly', $options) || !$options['readonly']) && $property['type'] != 'title') {
+		$properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea' || $property['type'] == 'log') ? 2047 : 255);
+	}
+}
+
+$properties['update_time'] = array('type' => 'hidden');
+
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Group', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function postGroup()
+{
+
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php endif;?>
+<?php endforeach ?>
+
+	var form = document.getElementById('group-form');
+	form.onsubmit = function(event) {
+		event.preventDefault();
+	
+		// Check validity
+		var validity;
+		validity = checkGroupUpdateProperties();
+
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			formData.append('action', 'update');
+			var nbAccount = $('#group-nb-account').val();
+			formData.append('nb-account', nbAccount);
+			for (i = 0; i < nbAccount; i++) formData.append('account_' + i, $('#group-account_' + i).val());
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+			formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+			formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php endif ?>
+
+<?php endforeach ?>
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentAccount/group', array('type' => $type)) ?>';
+			target = 'form_action';
+			xhttp.open('POST', route, true);
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					document.getElementById(target).innerHTML = xhttp.responseText;
+					filterAccountList();
+					postGroup();
+				}
+				connectRemoveIcon('remove-anchor', 'form_action');
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
 function getAccountGroup() {
 
 	// Ensure the target is displayed
@@ -1008,7 +1086,7 @@ function getAccountGroup() {
 
 	// Disabled the list checkboxes
 	$('.account-checkbox').attr('disabled', 'disabled');
-	var route = '<?php echo $this->url('commitmentAccount/group') ?>';
+	var route = '<?php echo $this->url('commitmentAccount/group', array('type' => $type)) ?>';
 	var formData = new FormData();
 
 	var accountNumber = $('#account-number').val();
@@ -1031,6 +1109,7 @@ function getAccountGroup() {
 	<?php endif;?>
 
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
+			postGroup();
 			getSendMessage(false);
 			
 			$(function () {
