@@ -749,7 +749,7 @@ function get<?php echo $contactNumber ?>Update(id, action) {
 function getCommitmentAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitment/accountList') ?>'
+	route = '<?php echo $this->url('commitment/accountList', array('type' => $type)) ?>'
 	route += params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);

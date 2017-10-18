@@ -457,7 +457,6 @@ class AccountController extends AbstractActionController
 	    				if (!$account->id) {
 	    					$account->contact_1 = Vcard::optimize($account->contact_1);
 	    					$account->contact_1_id = $account->contact_1->id;
-	    					$account->contact_1_status = 'main';
 	    					$account->add();
 	    				}
 	    				elseif ($action == 'delete') {

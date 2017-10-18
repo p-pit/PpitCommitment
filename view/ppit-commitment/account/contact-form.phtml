@@ -6,14 +6,14 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/css/main.css') ?>">
   <script src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/lib/jquery-3.2.1.min.js') ?>" charset="utf-8"></script>
-  <title>Inscription au admission</title>
+  <title>Inscription aux Journées d'Admission</title>
   <link rel="shortcut icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
   <link rel="icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
 </head>
 <body>
   <header class="header">
     <div class="header_container">
-      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" alt="ESI Environment Social Impact Business School" class="header_logo">
+      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" width="250" alt="ESI Environment Social Impact Business School" class="header_logo">
 <?php if ($state_id != 'index') : ?>
       <div class="header_state">
 	<?php $first = true; $full = true; foreach ($context->getConfig('commitmentAccount/contactForm') as $stateId => $state) : ?>
