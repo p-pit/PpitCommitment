@@ -219,7 +219,7 @@ class AccountController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
     			$data = array();
     			foreach ($context->getConfig('commitmentAccount/groupUpdate'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
-    				$data[$propertyId] = $request->getPost($propertyId);
+    				if ($request->getPost($propertyId)) $data[$propertyId] = $request->getPost($propertyId);
     			}
     			foreach ($accounts as $account) {
     				if ($account->loadData($data) != 'OK') throw new \Exception('View error');
@@ -1265,99 +1265,21 @@ class AccountController extends AbstractActionController
    		echo $rc;
 		return $this->getResponse();
     }
-/*    
-	public function deleteAction()
-    {
-    	$id = (int) $this->params()->fromRoute('id', 0);
-    	if (!$id) return $this->redirect()->toRoute('index');
-
-    	// Retrieve the context
-    	$context = Context::getCurrent();
-
-    	// Retrieve the organizational unit
-		$account = Account::get($id);
-		$csrfForm = new CsrfForm();
-		$csrfForm->addCsrfElement('csrf');
-		$message = null;
-		$error = null;
-    	// Retrieve the user validation from the post
-    	$request = $this->getRequest();
-    	if ($request->isPost()) {
-    		
-    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
-    		$csrfForm->setData($request->getPost());
-    		
-    		if ($csrfForm->isValid()) {
-
-    			// Atomicity
-    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
-    			$connection->beginTransaction();
-    			try {
-		    		// Delete the row
-					$return = $account->delete($account->update_time);
-					if ($return != 'OK') {
-						$connection->rollback();
-						$error = $return;
-					}
-					else {
-						$connection->commit();
-						$message = $return;
-					}
-    			}
-           	    catch (\Exception $e) {
-	    			$connection->rollback();
-	    			throw $e;
-	    		}
-    		}  
-    	}
-    	$view = new ViewModel(array(
-    		'context' => $context,
-			'config' => $context->getconfig(),
-    		'type' => $account->type,
-    		'account' => $account,
-    		'id' => $id,
-    		'csrfForm' => $csrfForm,
-    		'message' => $message,
-    		'error' => $error,
-    	));
-   		$view->setTerminal(true);
-   		return $view;
-    }*/
 
     public function rephaseAction()
     {
-    	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0));
-    	$cursor = Account::getTable()->transSelectWith($select);
+    	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0, 'status <> ?' => 'deleted', 'type' => 'p-pit-studies'));
+    	$cursor = Account::getTable()->selectWith($select);
     	foreach ($cursor as $account) {
-/*    	    if ($account->customer_community_id) {
-	    		$community = Community::getTable()->transGet($account->customer_community_id);
-	    		if ($community) {
-		    		$account->name = $community->name;
-		    		$account->contact_1_id = $community->contact_1_id;
-		    		$account->contact_1_status = $community->contact_1_status;
-		    		$account->contact_2_id = $community->contact_2_id;
-		    		$account->contact_2_status = $community->contact_2_status;
-		    		$account->contact_3_id = $community->contact_3_id;
-		    		$account->contact_3_status = $community->contact_3_status;
-		    		$account->contact_4_id = $community->contact_4_id;
-		    		$account->contact_4_status = $community->contact_4_status;
-		    		$account->contact_5_id = $community->contact_5_id;
-		    		$account->contact_5_status = $community->contact_5_status;
-		    		Account::getTable()->transSave($account);
-		    		echo $account->id.'<br>';
-	    		}
-    	    }*/
     		if ($account->contact_1_id) {
-    			$contact = Vcard::getTable()->transGet($account->contact_1_id);
-    			if ($contact) {
-    				$place = Place::getTable()->transGet($account->place_id);
-    				if ($place && array_key_exists($account->type, $place->communities)) {
-    					$contact->communities[$place->communities[$account->type]] = true;
-		    			Vcard::getTable()->transSave($contact);
-    					echo $contact->id.'<br>';
-    				}
+    			$contact = Vcard::getTable()->get($account->contact_1_id);
+    			if ($contact && $account->property_2) {
+					echo $contact->n_fn.' ('.$account->update_time.') : '.$contact->tel_cell.' > '.$account->property_2.'<br>';
+/*					$contact->tel_cell = $account->property_2;
+					$contact->update(null);*/
     			}
     		}
     	}
+    	return $this->response;
     }
 }

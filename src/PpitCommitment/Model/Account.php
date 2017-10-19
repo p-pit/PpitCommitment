@@ -580,7 +580,8 @@ class Account implements InputFilterAwareInterface
     			else $propertyKey = $propertyId;
     			$property = $context->getConfig('commitmentAccount'.(($type) ? '/'.$type : ''))['properties'][$propertyKey];
     			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-    			if (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
+    			if ($propertyId == 'n_fn') $where->like('core_vcard.n_fn', '%'.$value.'%');
+    			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_account.'.substr($propertyId, 4), $value);
     			elseif (strpos($value, ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $value)));
     			elseif ($value == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
