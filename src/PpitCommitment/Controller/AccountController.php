@@ -491,14 +491,15 @@ class AccountController extends AbstractActionController
 	    				else {
 
 	    					// Save the contact
+	    					if (array_key_exists('file', $data)) {
+								$account->contact_1->savePhoto($data['file']);
+								$account->contact_1->photo_link_id = null;
+							}
 	    					$return = $account->contact_1->update($account->contact_1->update_time);
 	    					if ($return != 'OK') $error = $return;
 	    					else {
 	    						$return = $account->update($request->getPost('update_time'));
 	    						if ($return != 'OK') $error = $return;
-								else {
-									if (array_key_exists('file', $data)) $account->contact_1->savePhoto($data['file']);
-								}
 		    				}
 	    				}
 	    				if ($error) $connection->rollback();

@@ -316,6 +316,8 @@ function connectAccountUpdateForm(id, action)
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat':'H:i:s', 'step': 15, 'scrollDefault': 'now' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -342,7 +344,7 @@ function connectAccountUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -442,6 +444,8 @@ function connectCommunitySendMessageForm(id)
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -457,7 +461,7 @@ function connectCommunitySendMessageForm(id)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -548,6 +552,8 @@ function connectUserUpdateForm(id, action)
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -570,7 +576,7 @@ function connectUserUpdateForm(id, action)
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -657,6 +663,8 @@ function connect<?php echo $contactNumber ?>UpdateForm(id, action)
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -675,7 +683,7 @@ function connect<?php echo $contactNumber ?>UpdateForm(id, action)
 			
 			// Get the properties values
 	<?php foreach ($properties as $propertyId => $property) : ?>
-		<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+		<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 		<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -885,6 +893,8 @@ function connectSendMessageForm(id)
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -909,7 +919,7 @@ function connectSendMessageForm(id)
 			
 		// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 		formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -1027,6 +1037,8 @@ function postGroup()
 <?php foreach ($properties as $propertyId => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -1049,7 +1061,7 @@ function postGroup()
 			
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 			formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>
@@ -1189,6 +1201,8 @@ function connectCommitmentUpdateForm(id, action, params)
 <?php foreach ($properties as $property_id => $property) : ?>
 	<?php if ($property['type'] == 'date') : ?>
 		$('#input_<?php echo $property_id ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
 	<?php endif;?>
 <?php endforeach ?>
 
@@ -1207,7 +1221,7 @@ function connectCommitmentUpdateForm(id, action, params)
 			// Get the properties values
 <?php foreach ($properties as $propertyId => $property) : ?>
 
-	<?php if ($property['type'] == 'input' || $property['type'] == 'date' || $property['type'] == 'textarea' || $property['type'] == 'log' || $property['type'] == 'select' || $property['type'] == 'repository' || $property['type'] == 'number' || $property['type'] == 'email' || $property['type'] == 'phone' || $property['type'] == 'hidden') : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'repository', 'number', 'email', 'phone', 'hidden'))) : ?>
 				formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
 
 	<?php elseif ($property['type'] == 'checkbox') : ?>

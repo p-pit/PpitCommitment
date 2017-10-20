@@ -664,7 +664,8 @@ class Account implements InputFilterAwareInterface
     	$account->adr_country = $account->contact_1->adr_country;
     	$account->is_notified = $account->contact_1->is_notified;
     	$account->locale = $account->contact_1->locale;
-	    	
+    	$account->photo_link_id = $account->contact_1->photo_link_id;
+    	 
 	    if ($account->contact_2_id) {
 	        $account->contact_2 = Vcard::get($account->contact_2_id);
 	    	$account->n_title_2 = $account->contact_2->n_title;

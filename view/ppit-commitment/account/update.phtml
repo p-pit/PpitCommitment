@@ -169,6 +169,9 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($account->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
+		<?php elseif ($property['type'] == 'time') : ?>
+				<input class="form-control time" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" value="<?php echo $account->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+
 		<?php elseif ($property['type'] == 'number') : ?>
 				<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
 				<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($account->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
@@ -190,7 +193,7 @@ if ($account->id && $action != 'update' || $message == 'OK') $isDisabled = true;
 		<?php elseif ($property['type'] == 'photo') : ?>
 
 <!-- Photo -->
-				<img height="150" src="<?php echo $this->basePath('photos/'.$account->properties[$propertyId]) ?>.jpg"/>
+				<img height="150" src="<?php echo $this->basePath('photos/'.(($account->photo_link_id) ? $account->photo_link_id :  $account->contact_1_id.'.jpg')) ?>"/>
 
 <!-- Structured data -->
 
