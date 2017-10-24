@@ -106,7 +106,10 @@
 			$mandatory = (array_key_exists('mandatory', $field) && $field['mandatory']) ? 'require' : '';
 			?>
 
-			<?php if ($field['type'] == 'structured') : ?>
+			<?php if ($field['type'] == 'hidden') : ?>
+				<input type="hidden" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" value="<?php echo $field['value'] ?>" />
+
+			<?php elseif ($field['type'] == 'structured') : ?>
 <!-- Structured field -->
 				<?php foreach ($field['properties'] as $itemId => $item) : ?>
 
@@ -270,5 +273,10 @@
 <?php endif?>
 
   <script src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/js/main.js') ?>" charset="utf-8"></script>
+  
+<?php if ($state_id != 'index' && array_key_exists('custom-js', $currentState)) : ?>
+	<?php echo $this->partial($currentState['custom-js']) ?>	
+<?php endif;?>
+
 </body>
 </html>

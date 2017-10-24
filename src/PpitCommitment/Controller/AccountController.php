@@ -976,12 +976,20 @@ class AccountController extends AbstractActionController
     		else $contact = Vcard::instanciate();
     	}
     	else {
-    		$contact = Vcard::instanciate();
-    		$account = Account::instanciate($type);
-    		$account->place_id = $place->id;
-    		$account->opening_date = date('Y-m-d');
-    		$account->origine = 'web';
-    		$account->property_1 = $discipline;
+    		$email = $request->getPost('email');
+    		$account = null;
+    		if ($email) {
+    			$contact = Vcard::get($email, 'email');
+    			$account = Account::get($contact->id, 'contact_1_id');
+    		}
+    		else $contact = Vcard::instanciate();
+    		if (!$account) {
+	    		$account = Account::instanciate($type);
+	    		$account->place_id = $place->id;
+	    		$account->opening_date = date('Y-m-d');
+	    		$account->origine = 'web';
+	    		$account->property_1 = $discipline;
+    		}
     	}
     
     	$applicationId = 'p-pit-contact';
