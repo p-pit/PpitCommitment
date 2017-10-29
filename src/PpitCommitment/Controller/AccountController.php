@@ -980,7 +980,8 @@ class AccountController extends AbstractActionController
     		$account = null;
     		if ($email) {
     			$contact = Vcard::get($email, 'email');
-    			$account = Account::get($contact->id, 'contact_1_id');
+    			if ($contact) $account = Account::get($contact->id, 'contact_1_id');
+    			else $contact = Vcard::instanciate();
     		}
     		else $contact = Vcard::instanciate();
     		if (!$account) {
