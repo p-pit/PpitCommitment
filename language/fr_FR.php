@@ -63,6 +63,7 @@
 			'Left' => 'A gauche',
 			'Linked URL' => 'URL liée',
 			'Location' => 'Lieu',
+			'Mail template' => 'Modèle de mail',
 			'Means' => 'Mode',
 			'Messages' => 'Messages',
 			'Nbr' => 'Nbr',

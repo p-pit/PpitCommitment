@@ -26,7 +26,6 @@
 <?php 
 if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
-
 	<div class="panel-body">
 		<input type="hidden" id="mail_update_time" value="<?php echo $mail->update_time ?>" />
 
@@ -37,25 +36,45 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-7">
 				<input type="checkbox" id="mask_recipients" class="form-control" value="1" checked="checked" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="mask_recipients_error></p></div>
+			<div class="col-sm-12"><p class="help-block" id="mask_recipients_error"></p></div>
 		</div>
 
-		<div class="form-group" id="subject_group">
+		<div class="form-group" id="template_id_group">
 			<label class="col-sm-5 control-label">
-				* <?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()) ?>
+				<?php echo $this->translate('Mail template', 'ppit-commitment', $context->getLocale()) ?>
 			</label>
 			<div class="col-sm-7">
-				<input class="form-control" id="subject" value="<?php echo $mail->subject ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+				<select id="template_id" class="form-control" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+<?php foreach ($templates as $templateId => $template) : ?>
+					<option value="<?php echo $templateId ?>"><?php echo $template['labels'][$context->getLocale()] ?></option>
+<?php endforeach;?>
+				</select>
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="subject_error"></p></div>
+			<div class="col-sm-12"><p class="help-block" id="template_id_error"></p></div>
 		</div>
-	
-		<div class="form-group" id="body_group">
-			<div class="col-sm-12">
-				<textarea class="form-control" id="body" rows="10" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $mail->body ?></textarea>
+
+<?php foreach ($templates as $templateId => $template) : ?>
+		<div class="email-template" id="email-template_<?php echo $templateId ?>">
+			<div class="form-group" id="<?php echo $templateId ?>_subject_group">
+				<label class="col-sm-5 control-label">
+					* <?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()) ?>
+				</label>
+				<div class="col-sm-7">
+					<input class="form-control" id="<?php echo $templateId ?>_subject" value="<?php echo $template['subject'][$context->getLocale()] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+				</div>
+				<div class="col-sm-12"><p class="help-block" id="<?php echo $templateId ?>_subject_error"></p></div>
 			</div>
-			<div class="col-sm-12"><p class="help-block" id="body_error"></p></div>
+		
+			<div class="form-group" id="<?php echo $templateId ?>_body_group">
+				<div class="col-sm-12">
+					<textarea class="form-control" id="<?php echo $templateId ?>_body" rows="10" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $template['body'][$context->getLocale()] ?></textarea>
+				</div>
+				<div class="col-sm-12"><p class="help-block" id="<?php echo $templateId ?>_body_error"></p></div>
+			</div>
 		</div>
+<?php endforeach;?>
+		
+		<?php echo $signature['body'][$context->getLocale()] ?>
 	
 		<div class="form-group" id="attachment_group">
 			<label class="col-sm-5 control-label">
@@ -73,7 +92,7 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-12"><p class="help-block" id="attachment_error"></p></div>
 		</div>
 
-<?php if ($message != 'OK') : ?>
+	<?php if ($message != 'OK') : ?>
 	    <div class="form-group">
 			<div class="col-sm-5">&nbsp;</div>
 			<div class="col-sm-7">
@@ -87,6 +106,6 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 				</div>
 			</div>
 		</div>
-<?php endif;?>
+	<?php endif;?>
 	</div>
 </form

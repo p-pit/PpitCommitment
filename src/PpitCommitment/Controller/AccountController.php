@@ -30,6 +30,12 @@ class AccountController extends AbstractActionController
     {
     	$context = Context::getCurrent();
 
+    	$templates = array();
+    	foreach ($context->getConfig('commitmentAccount/sendMessage')['templates'] as $templateId => $template) {
+    		if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+    		$templates[$templateId] = $template;
+    	}
+
     	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::get($context->getPlaceId());
     	 
@@ -60,6 +66,7 @@ class AccountController extends AbstractActionController
     			'currentEntry' => $currentEntry,
     			'entry' => $entry,
     			'type' => $type,
+    			'templates' => $templates,
     			'status' => $status,
     	));
     }
@@ -251,10 +258,18 @@ class AccountController extends AbstractActionController
     	// Retrieve the type
     	$type = $this->params()->fromRoute(0);
 
+    	$templates = array();
+    	foreach ($context->getConfig('commitmentAccount/sendMessage')['templates'] as $templateId => $template) {
+    		if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+    		$templates[$templateId] = $template;
+    	}
+    	$signature = $context->getConfig('commitmentAccount/sendMessage')['signature'];
+    	if ($signature['definition'] != 'inline') $signature = $context->getConfig($signature['definition']);
+    	
     	$mail = ContactMessage::instanciate();
     	$mail->type = 'email';
-    	$mail->subject = $context->getConfig('community/sendMessage')['subject'][$context->getLocale()];
-    	$mail->body = $context->getConfig('community/sendMessage')['body'][$context->getLocale()];
+    	$mail->subject = $context->getConfig('commitmentAccount/sendMessage/generic')['subject'][$context->getLocale()];
+    	$mail->body = $context->getConfig('commitmentAccount/sendMessage/generic')['body'][$context->getLocale()];
 
     	$documentList = array();
     	if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
@@ -314,16 +329,15 @@ class AccountController extends AbstractActionController
     				}
     			}
     			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
-    			$data['subject'] = $request->getPost('subject');
+    			$template_id = $request->getPost('template_id');
+    			$data['subject'] = $request->getPost($template_id.'_subject');
     			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
     			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
-    			$data['body'] = $request->getPost('body');
     			$attachment = $request->getPost('attachment');
-    			if ($attachment) {
-					$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
-   					$link = $url('commitmentAccount/dropboxLink', array('document' => $attachment), array('force_canonical' => true));
-    				$data['body'] .= '<br><br>Pièce jointe : <a href="'.$link.'">'.$attachment.'</a>';
-    			}
+				$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+   				$link = $url('commitmentAccount/dropboxLink', array('document' => $attachment), array('force_canonical' => true));
+    			$data['body'] = sprintf($request->getPost($template_id.'_body'), $link);
+    			$data['body'] .= $signature['body'][$context->getLocale()];
 
     			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
     			
@@ -352,6 +366,8 @@ class AccountController extends AbstractActionController
     			'context' => $context,
     			'config' => $context->getconfig(),
     			'type' => $type,
+    			'templates' => $templates,
+    			'signature' => $signature,
     			'mail' => $mail,
 	    		'documentList' => $documentList,
     			'csrfForm' => $csrfForm,

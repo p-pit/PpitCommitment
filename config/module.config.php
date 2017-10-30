@@ -2396,6 +2396,38 @@ return array(
 				),*/
 			),
 	),
+
+		'commitmentAccount/sendMessage' => array(
+				'templates' => array(
+						'generic' => array('definition' => 'commitmentAccount/sendMessage/generic'),
+						'esi' => array('definition' => 'customization/esi/send-message/information-request'),
+				),
+				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
+		),
+
+		'commitmentAccount/sendMessage/generic' => array(
+				'labels' => array(
+						'en_US' => 'Generic',
+						'fr_FR' => 'Générique',
+				),
+				'cci' => 'support@p-pit.fr',
+				'from_mail' => 'support@p-pit.fr',
+				'from_name' => 'noreply@p-pit.fr',
+				'subject' => array('en_US' => 'Important message from P-Pit', 'fr_FR' => 'Message important de P-Pit'),
+				'body' => array(
+						'en_US' => '<p>Hello,</p>
+<p>We hope that our services are giving you satisfaction. Please send your requests or questions to the P-Pit support: support@p-pit.fr.</p>
+<p>Best regards,</p>
+<p>The P-Pit staff</p>
+',
+						'fr_FR' => '<p>Bonjour,</p>
+<p>Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-Pit : support@p-pit.fr.</p>
+<p>Bien cordialement,</p>
+<p>L\'équipe P-Pit</p>
+',
+				),
+		),
+
 	'commitment/consumeCredit' => array(
 			'messages' => array(
 					'availabilityAlertTitle' => array(
