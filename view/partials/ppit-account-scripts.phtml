@@ -842,11 +842,7 @@ function connectSendMessageForm(id)
 		<?php endif;?>
 	
 				document.getElementById('send-message-panel').innerHTML = xhttp.responseText;
-<?php foreach ($properties as $propertyId => $property) : ?>
-	<?php if ($property['type'] == 'ckeditor') : ?>
-					CKEDITOR.replace('<?php echo $propertyId ?>');
-	<?php endif;?>
-<?php endforeach;?>
+				showTemplate();
 				
 				$(function () {
 				    $('.tip').tooltip({

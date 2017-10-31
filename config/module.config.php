@@ -2400,7 +2400,6 @@ return array(
 		'commitmentAccount/sendMessage' => array(
 				'templates' => array(
 						'generic' => array('definition' => 'commitmentAccount/sendMessage/generic'),
-						'esi' => array('definition' => 'customization/esi/send-message/information-request'),
 				),
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),

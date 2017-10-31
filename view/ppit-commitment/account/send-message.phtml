@@ -46,15 +46,22 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 			<div class="col-sm-7">
 				<select id="template_id" class="form-control" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
 <?php foreach ($templates as $templateId => $template) : ?>
-					<option value="<?php echo $templateId ?>"><?php echo $template['labels'][$context->getLocale()] ?></option>
+					<option value="<?php echo $templateId ?>" <?php if ($templateId == $selectedTemplateId) echo 'selected="selected"'?>><?php echo $template['labels'][$context->getLocale()] ?></option>
 <?php endforeach;?>
 				</select>
 			</div>
 			<div class="col-sm-12"><p class="help-block" id="template_id_error"></p></div>
 		</div>
 
+		<hr>
+		
 <?php foreach ($templates as $templateId => $template) : ?>
 		<div class="email-template" id="email-template_<?php echo $templateId ?>">
+	<?php if ($isDisabled) : ?>
+		<strong><?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()).': '.$template['subject'][$context->getLocale()] ?></strong>
+		<p>&nbsp;</p>
+		<?php echo $body ?>
+	<?php else : ?>
 			<div class="form-group" id="<?php echo $templateId ?>_subject_group">
 				<label class="col-sm-5 control-label">
 					* <?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()) ?>
@@ -71,10 +78,11 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 				</div>
 				<div class="col-sm-12"><p class="help-block" id="<?php echo $templateId ?>_body_error"></p></div>
 			</div>
+		
+			<?php echo $signature['body'][$context->getLocale()] ?>
+	<?php endif;?>
 		</div>
 <?php endforeach;?>
-		
-		<?php echo $signature['body'][$context->getLocale()] ?>
 	
 		<div class="form-group" id="attachment_group">
 			<label class="col-sm-5 control-label">

@@ -294,6 +294,8 @@ class AccountController extends AbstractActionController
     	$csrfForm->addCsrfElement('csrf');
     	$error = null;
     	$message = null;
+    	$selectedTemplateId = null;
+    	$body = null;
     	$request = $this->getRequest();
     	if ($request->isPost()) {
     		$nbAccount = $request->getPost('nb-account');
@@ -329,16 +331,17 @@ class AccountController extends AbstractActionController
     				}
     			}
     			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
-    			$template_id = $request->getPost('template_id');
-    			$data['subject'] = $request->getPost($template_id.'_subject');
+    			$selectedTemplateId = $request->getPost('template_id');
+    			$data['subject'] = $request->getPost($selectedTemplateId.'_subject');
     			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
     			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
     			$attachment = $request->getPost('attachment');
 				$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
    				$link = $url('commitmentAccount/dropboxLink', array('document' => $attachment), array('force_canonical' => true));
-    			$data['body'] = sprintf($request->getPost($template_id.'_body'), $link);
-    			$data['body'] .= $signature['body'][$context->getLocale()];
-
+    			$body = sprintf($request->getPost($selectedTemplateId.'_body'), $link);
+    			$body .= $signature['body'][$context->getLocale()];
+    			$data['body'] = $body;
+    			
     			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
     			
     			// Atomicity
@@ -367,6 +370,8 @@ class AccountController extends AbstractActionController
     			'config' => $context->getconfig(),
     			'type' => $type,
     			'templates' => $templates,
+    			'selectedTemplateId' => $selectedTemplateId,
+    			'body' => $body,
     			'signature' => $signature,
     			'mail' => $mail,
 	    		'documentList' => $documentList,
