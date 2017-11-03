@@ -928,7 +928,7 @@ class Account implements InputFilterAwareInterface
 			$this->contact_1->tel_work = $this->tel_work;
 			$this->contact_1->tel_cell = $this->tel_cell;
 			$this->contact_1->n_fn = $this->n_last.', '.$this->n_first;
-    		$this->properties = $this->toArray(); // Deprecated
+    		$this->properties = $this->getProperties(); // Deprecated
     		$this->files = $files;
 
     	// Update the audit

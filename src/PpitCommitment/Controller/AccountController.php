@@ -190,7 +190,7 @@ class AccountController extends AbstractActionController
 
     public function getAccountProperties($account)
     {
-    	$data = $account->toArray();
+    	$data = $account->getProperties();
     	$data['contact_history'] = $account->contact_history;
     	$data['photo_link_id'] = $account->contact_1->photo_link_id;
     	$account->properties = $data;
@@ -213,6 +213,8 @@ class AccountController extends AbstractActionController
     		$account = Account::get($request->getPost('account_'.$i));
     		$accounts[] = $account;
     	}
+    	$input = Account::instanciate($type);
+    	$input->status = '';
 
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
@@ -228,19 +230,20 @@ class AccountController extends AbstractActionController
     			foreach ($context->getConfig('commitmentAccount/groupUpdate'.(($type) ? '/'.$type : '')) as $propertyId => $options) {
     				if ($request->getPost($propertyId)) $data[$propertyId] = $request->getPost($propertyId);
     			}
+    			$input->loadData($data);
     			foreach ($accounts as $account) {
     				if ($account->loadData($data) != 'OK') throw new \Exception('View error');
     				$account->update($request->getPost('update_time'));
     			}
     		}
     	}
-
+		$input->getProperties();
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
     			'type' => $type,
     			'accounts' => $accounts,
-    			'account' => current($accounts),
+    			'input' => $input,
     			'places' => Place::getList(array()),
     			'csrfForm' => $csrfForm,
     			'message' => $message,

@@ -575,7 +575,7 @@ class CommitmentController extends AbstractActionController
     
     	// Retrieve the type
     	$type = $this->params()->fromRoute('type', null);
-    	 
+
     	// Retrieve the account
     	$account_id = $this->params()->fromQuery('account_id', null);
     	$id = (int) $this->params()->fromRoute('id', 0);
