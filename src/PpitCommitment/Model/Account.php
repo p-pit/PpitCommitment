@@ -10,11 +10,18 @@ use PpitCore\Model\Document;
 use PpitCore\Model\User;
 use PpitCore\Model\UserContact;
 use Zend\Db\Sql\Where;
+use Zend\Filter\StripTags;
 use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;
 use Zend\InputFilter\InputFilterAwareInterface;
 use Zend\InputFilter\InputFilterInterface;
-use Zend\Filter\StripTags;
+use Zend\Log\Logger;
+use Zend\Log\Writer;
+use Zend\Mail;
+use Zend\Mail\Message;
+use Zend\Mime\Message as MimeMessage;
+use Zend\Mime\Mime;
+use Zend\Mime\Part as MimePart;
 
 class Account implements InputFilterAwareInterface
 {
@@ -41,6 +48,7 @@ class Account implements InputFilterAwareInterface
     public $origine;
     public $contact_history;
     public $terms_of_sales;
+    public $notification_time;
     public $property_1;
     public $property_2;
     public $property_3;
@@ -70,7 +78,8 @@ class Account implements InputFilterAwareInterface
     
     // Joined properties
     public $place_caption;
-
+    public $place_identifier;
+    
    	public $customer_community_id; // Deprecated
     
     public $n_title;
@@ -88,6 +97,8 @@ class Account implements InputFilterAwareInterface
     public $adr_city;
     public $adr_state;
     public $adr_country;
+    public $gender;
+    public $nationality;
     public $photo_link_id;
     
     public $n_title_2;
@@ -206,6 +217,7 @@ class Account implements InputFilterAwareInterface
         $this->origine = (isset($data['origine'])) ? $data['origine'] : null;
         $this->contact_history = (isset($data['contact_history'])) ? json_decode($data['contact_history'], true) : null;
         $this->terms_of_sales = (isset($data['terms_of_sale'])) ? json_decode($data['terms_of_sale'], true) : null;
+        $this->notification_time = (isset($data['notification_time'])) ? $data['notification_time'] : null;
         $this->property_1 = (isset($data['property_1'])) ? $data['property_1'] : null;
         $this->property_2 = (isset($data['property_2'])) ? $data['property_2'] : null;
         $this->property_3 = (isset($data['property_3'])) ? $data['property_3'] : null;
@@ -235,6 +247,7 @@ class Account implements InputFilterAwareInterface
 
         // Joined properties
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
+        $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
         
         $this->customer_community_id = (isset($data['customer_community_id'])) ? $data['customer_community_id'] : null;
         
@@ -253,6 +266,8 @@ class Account implements InputFilterAwareInterface
         $this->adr_city = (isset($data['adr_city'])) ? $data['adr_city'] : null;
         $this->adr_state = (isset($data['adr_state'])) ? $data['adr_state'] : null;
         $this->adr_country = (isset($data['adr_country'])) ? $data['adr_country'] : null;
+        $this->gender = (isset($data['gender'])) ? $data['gender'] : null;
+        $this->nationality = (isset($data['nationality'])) ? $data['nationality'] : null;
         $this->photo_link_id = (isset($data['photo_link_id'])) ? $data['photo_link_id'] : null;
         
         $this->n_title_2 = (isset($data['n_title_2'])) ? $data['n_title_2'] : null;
@@ -336,6 +351,7 @@ class Account implements InputFilterAwareInterface
     	$data['origine'] =  ($this->origine) ? $this->origine : null;
     	$data['contact_history'] = $this->contact_history;
     	$data['terms_of_sales'] =  $this->terms_of_sales;
+    	$data['notification_time'] =  $this->notification_time;
     	$data['property_1'] =  ($this->property_1) ? $this->property_1 : null;
     	$data['property_2'] =  ($this->property_2) ? $this->property_2 : null;
     	$data['property_3'] =  ($this->property_3) ? $this->property_3 : null;
@@ -390,6 +406,8 @@ class Account implements InputFilterAwareInterface
     	if ($this->adr_city) $data['address'] .= ' '.$this->adr_city;
     	if ($this->adr_state) $data['address'] .= ' - '.$this->adr_state;
     	if ($this->adr_country) $data['address'] .= ' - '.$this->adr_country;
+    	$data['gender'] = $this->gender;
+    	$data['nationality'] = $this->nationality;
     	$data['photo_link_id'] = $this->photo_link_id;
 
     	$data['contact_2_id'] = $this->contact_2_id;
@@ -504,6 +522,8 @@ class Account implements InputFilterAwareInterface
     	unset($data['adr_state']);
     	unset($data['adr_country']);
     	unset($data['address']);
+    	unset($data['gender']);
+    	unset($data['nationality']);
     	unset($data['photo_link_id']);
 
     	unset($data['n_title_2']);
@@ -553,8 +573,8 @@ class Account implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
-			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption'), 'left')
-			->join('core_vcard', 'commitment_account.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id', 'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country'), 'left')
+			->join('core_place', 'commitment_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left')
+			->join('core_vcard', 'commitment_account.contact_1_id = core_vcard.id', array('n_title', 'n_first', 'n_last', 'n_fn', 'email', 'birth_date', 'tel_work', 'tel_cell', 'photo_link_id', 'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country', 'gender', 'nationality'), 'left')
 			->join(array('contact_2' => 'core_vcard'), 'commitment_account.contact_2_id = contact_2.id', array('n_title_2' =>'n_title', 'n_first_2' => 'n_first', 'n_last_2' => 'n_last', 'n_fn_2' => 'n_fn', 'email_2' => 'email', 'birth_date_2' => 'birth_date', 'tel_work_2' => 'tel_work', 'tel_cell_2' => 'tel_cell', 'adr_street_2' => 'adr_street', 'adr_extended_2' => 'adr_extended', 'adr_post_office_box_2' => 'adr_post_office_box', 'adr_zip_2' => 'adr_zip', 'adr_city_2' => 'adr_city', 'adr_state_2' => 'adr_state', 'adr_country_2' => 'adr_country'), 'left')
 			->join(array('contact_3' => 'core_vcard'), 'commitment_account.contact_3_id = contact_3.id', array('n_title_3' =>'n_title', 'n_first_3' => 'n_first', 'n_last_3' => 'n_last', 'n_fn_3' => 'n_fn', 'email_3' => 'email', 'birth_date_3' => 'birth_date', 'tel_work_3' => 'tel_work', 'tel_cell_3' => 'tel_cell', 'adr_street_3' => 'adr_street', 'adr_extended_3' => 'adr_extended', 'adr_post_office_box_3' => 'adr_post_office_box', 'adr_zip_3' => 'adr_zip', 'adr_city_3' => 'adr_city', 'adr_state_3' => 'adr_state', 'adr_country_3' => 'adr_country'), 'left')
 			->join(array('contact_4' => 'core_vcard'), 'commitment_account.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
@@ -586,6 +606,7 @@ class Account implements InputFilterAwareInterface
     			elseif (strpos($value, ',')) $where->in('commitment_account.'.$propertyId, array_map('trim', explode(', ', $value)));
     			elseif ($value == '*') $where->notEqualTo('commitment_account.'.$propertyId, '');
     			elseif (in_array($property['type'], array('select', 'table'))) $where->equalTo('commitment_account.'.$propertyId, $value);
+    			elseif ($value === null) $where->isNull($propertyId);
     			else $where->like('commitment_account.'.$propertyId, '%'.$value.'%');
     		}
 			if ($limitation) $select->limit($limitation);
@@ -651,6 +672,7 @@ class Account implements InputFilterAwareInterface
     	$account->n_title = $account->contact_1->n_title;
 	    $account->n_first = $account->contact_1->n_first;
     	$account->n_last = $account->contact_1->n_last;
+    	$account->n_fn = $account->contact_1->n_fn;
     	$account->email = $account->contact_1->email;
     	$account->birth_date = $account->contact_1->birth_date;
     	$account->tel_work = $account->contact_1->tel_work;
@@ -662,6 +684,8 @@ class Account implements InputFilterAwareInterface
     	$account->adr_city = $account->contact_1->adr_city;
     	$account->adr_state = $account->contact_1->adr_state;
     	$account->adr_country = $account->contact_1->adr_country;
+    	$account->gender = $account->contact_1->gender;
+    	$account->nationality = $account->contact_1->nationality;
     	$account->is_notified = $account->contact_1->is_notified;
     	$account->locale = $account->contact_1->locale;
     	$account->photo_link_id = $account->contact_1->photo_link_id;
@@ -706,7 +730,7 @@ class Account implements InputFilterAwareInterface
 	    	$account->tel_work_5 = $account->contact_5->tel_work;
 	    	$account->tel_cell_5 = $account->contact_5->tel_cell;
 	    }
-
+	    $account->properties = $account->getProperties();
     	return $account;
     }
    
@@ -820,6 +844,10 @@ class Account implements InputFilterAwareInterface
 						'n_fn' => $context->getFormatedName(),
 						'comment' => $data['contact_history'],
 				);
+			}
+        	if (array_key_exists('notification_time', $data)) {
+				$this->notification_time = trim(strip_tags($data['notification_time']));
+				if (strlen($this->notification_time) > 255) return 'Integrity';
 			}
 			if (array_key_exists('property_1', $data)) {
 				$this->property_1 = trim(strip_tags($data['property_1']));
@@ -1126,7 +1154,55 @@ class Account implements InputFilterAwareInterface
     	$interaction->update(null);
     	return $rc;
     }
-    
+
+	public function notify($admins, $url)
+	{
+		$context = Context::getCurrent();
+		$settings = $context->getConfig();
+    	if ($settings['isDemoAccountUpdatable'] || $context->getInstanceId() != 0) { // instance 0 is for demo
+			$notification = $context->getConfig('commitmentAccount/notification');
+			if ($notification['definition'] != 'inline') $notification = $context->getConfig($notification['definition']);
+			$template = $notification['template'];
+			if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+			$text = sprintf($template['body'][$context->getLocale()], $context->getInstance()->fqdn, $url);
+    		$part = new MimePart($text);
+    		$part->type = "text/html";
+
+/*	    	$img = new MimePart($context->getConfig('customisation/esi/send-message/logo')['content']);
+    		$img->type = "image/gif";
+    		$img->encoding = Mime::ENCODING_BASE64;
+    		$img->disposition = Mime::DISPOSITION_INLINE;*/
+    		
+    		$body = new MimeMessage();
+    		$body->setParts(array($part/*, $img*/));
+    		 
+    		$mail = new Mail\Message();
+    		$mail->setEncoding("UTF-8");
+    		$mail->setBody($body);
+    		$from_mail = $context->getConfig('commitmentAccount/notification')['from_mail'];
+    		$from_name = $context->getConfig('commitmentAccount/notification')['from_name'];
+    		$mail->setFrom($from_mail, $from_name);
+    		$mail->setSubject($template['subject']);
+
+    		$mail->addTo($this->email, $this->n_fn);
+    		foreach ($admins as $email => $contact) $mail->addBcc($email, $email);
+    		if ($settings['mailProtocol'] == 'Smtp') {
+    			$transport = new Mail\Transport\Smtp();
+    		}
+    		elseif ($settings['mailProtocol'] == 'Sendmail') {
+    			$transport = new Mail\Transport\SendMail();
+    		}
+//    		if ($settings['mailProtocol']) $transport->send($mail);
+
+    		if ($settings['isTraceActive']) {
+    			$writer = new Writer\Stream('data/log/mailing.txt');
+    			$logger = new Logger();
+    			$logger->addWriter($writer);
+    			$logger->info('to: '.$this->email.' - subject: '.$template['subject'].' - body: '.$text);
+    		}
+    	}
+    }
+
     public function isDeletable()
     {
     	$context = Context::getCurrent();

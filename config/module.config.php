@@ -18,9 +18,9 @@ return array(
 			'routes' => array(
                 'notify' => array(
                     'options' => array(
-                        'route'    => 'order notify',
+                        'route'    => 'account notify',
                         'defaults' => array(
-                            'controller' => 'PpitCommitment\Controller\Commitment',
+                            'controller' => 'PpitCommitment\Controller\Account',
                             'action'     => 'notify'
                         )
                     )
@@ -231,7 +231,7 @@ return array(
         						'contactForm' => array(
         								'type' => 'segment',
         								'options' => array(
-        										'route' => '/contact-form[/:type][/:place_identifier][/:state_id][/:discipline][/:id]',
+        										'route' => '/contact-form[/:type][/:place_identifier][/:state_id][/:action_id][/:id]',
         										'defaults' => array(
         												'action' => 'contactForm',
         										),
@@ -1132,6 +1132,7 @@ return array(
 			'type' => 'select',
 			'modalities' => array(
 					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
+					'inscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
 					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
 					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
@@ -1175,27 +1176,39 @@ return array(
 	'commitmentAccount/business/property/property_2' => array(
 			'type' => 'select',
 			'modalities' => array(
-					'cdi' => array('en_US' => 'To be translated', 'fr_FR' => 'CDI'),
-					'cdd' => array('en_US' => 'To be translated', 'fr_FR' => 'CDD'),
-					'professionnalisation' => array('en_US' => 'To be translated', 'fr_FR' => 'Alternance - Contrat de professionnalisation'),
-					'alternance' => array('en_US' => 'To be translated', 'fr_FR' => 'Alternance - Stage alterné'),
-					'stage' => array('en_US' => 'To be translated', 'fr_FR' => 'Stage'),
-					'autres' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres : missions de courte-moyenne durée,…'),
+					'p-pit-learning' => array('en_US' => 'P-Pit Learning', 'fr_FR' => 'P-Pit Learning'),
+					'p-pit-commitment' => array('en_US' => 'P-Pit Commitment', 'fr_FR' => 'P-Pit Engagements'),
+					'p-pit-studies' => array('en_US' => 'P-Pit Studies', 'fr_FR' => 'P-Pit Studies'),
 			),
 			'labels' => array(
-					'en_US' => 'Contract type',
-					'fr_FR' => 'Type de contrat',
+					'en_US' => 'Subscribed product',
+					'fr_FR' => 'Produit souscrit',
 			),
 	),
 
 	'commitmentAccount/business/property/property_3' => array(
-			'type' => 'date',
+			'type' => 'text',
 			'labels' => array(
-					'en_US' => 'Internship begin date',
-					'fr_FR' => 'Date début de stage',
+					'en_US' => 'Web site', 'fr_FR' => 'Site web'
 			),
 	),
 
+	'commitmentAccount/business/property/property_4' => array(
+			'type' => 'text',
+			'labels' => array('en_US' => 'Footer legal mention', 'fr_FR' => 'Mention légale de pied de page'),
+	),
+		
+	'commitmentAccount/business/property/contact_meeting_context' => array(
+			'type' => 'select',
+			'modalities' => array(
+					'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Prise de contact'),
+			),
+			'labels' => array(
+					'en_US' => 'Next meeting context',
+					'fr_FR' => 'Cadre prochaine rencontre',
+			),
+	),
+	
 	'commitmentAccount/business/property/comment_1' => array(
 			'type' => 'textarea',
 			'labels' => array(
@@ -1215,6 +1228,27 @@ return array(
 	'commitmentAccount/business' => array(
 			'statuses' => array(),
 			'properties' => array(
+					'title_1' => array(
+							'type' => 'title',
+							'labels' => array(
+									'en_US' => 'ENTERPRISE IDENTIFICATION',
+									'fr_FR' => 'IDENTIFICATION DE L\'ENTREPRISE',
+							),
+					),
+					'title_2' => array(
+							'type' => 'title',
+							'labels' => array(
+									'en_US' => 'REGISTRATION DATA',
+									'fr_FR' => 'DONNEES D\'INSCRIPTION',
+							),
+					),
+					'title_3' => array(
+							'type' => 'title',
+							'labels' => array(
+									'en_US' => 'COMMENTS',
+									'fr_FR' => 'COMMENTAIRES',
+							),
+					),
 					'status' => array(
 							'type' => 'select',
 							'modalities' => array(
@@ -1303,6 +1337,20 @@ return array(
 									'fr_FR' => 'Contact - Adresse',
 							),
 					),
+					'adr_extended' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Complement',
+									'fr_FR' => 'Contact - Complément',
+							),
+					),
+					'adr_post_office_box' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Post office box',
+									'fr_FR' => 'Contact - Boîte postale',
+							),
+					),
 					'adr_zip' => array(
 							'type' => 'input',
 							'labels' => array(
@@ -1315,6 +1363,20 @@ return array(
 							'labels' => array(
 									'en_US' => 'Contact - City',
 									'fr_FR' => 'Contact - Ville',
+							),
+					),
+					'adr_state' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - State',
+									'fr_FR' => 'Contact - Etat',
+							),
+					),
+					'adr_country' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Country',
+									'fr_FR' => 'Contact - Pays',
 							),
 					),
 					'place_id' => array(
@@ -1371,6 +1433,14 @@ return array(
 							'type' => 'repository',
 							'definition' => 'commitmentAccount/business/property/property_3',
 					),
+					'property_4' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/property_4',
+					),
+					'property_13' => array(
+							'type' => 'repository',
+							'definition' => 'commitmentAccount/business/property/contact_meeting_context',
+					),
 					'comment_1' => array(
 							'type' => 'repository',
 							'definition' => 'commitmentAccount/business/property/comment_1',
@@ -1394,6 +1464,7 @@ return array(
 				'place_id' => 'select',
 				'status' => 'select',
 				'name' => 'contains',
+				'property_1' => 'select',
 				'callback_date' => 'range',
 				'origine' => 'contains',
 				'email' => 'contains',
@@ -1441,6 +1512,7 @@ return array(
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),
+			'property_4' => array('mandatory' => false),
 			'comment_1' => array('mandatory' => false),
 			'comment_2' => array('mandatory' => false),
 	),
@@ -1508,10 +1580,69 @@ return array(
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),
+			'property_4' => array('mandatory' => false),
 			'comment_1' => array('mandatory' => false),
 			'comment_2' => array('mandatory' => false),
 	),
+	
+	'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
 
+	'commitmentAccount/indexCard/business' => array(
+			'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
+			'header' => array(
+					'place_id' => null,
+					'status' => null,
+					'origine' => null,
+			),
+			'1st-column' => array(
+					'title' => 'title_1',
+					'rows' => array(
+							'n_first' => array('mandatory' => true),
+							'n_last' => array('mandatory' => true),
+							'email' => array('mandatory' => false),
+							'tel_work' => array('mandatory' => false),
+							'tel_cell' => array('mandatory' => false),
+							'adr_street' => array('mandatory' => false),
+							'adr_extended' => array('mandatory' => false),
+							'adr_post_office_box' => array('mandatory' => false),
+							'adr_zip' => array('mandatory' => false),
+							'adr_city' => array('mandatory' => false),
+							'adr_state' => array('mandatory' => false),
+							'adr_country' => array('mandatory' => false),
+					),
+			),
+			'2nd-column' => array(
+					'title' => 'title_2',
+					'rows' => array(
+							'property_1' => array('mandatory' => false),
+							'property_2' => array('mandatory' => false),
+							'property_3' => array('mandatory' => false),
+							'property_4' => array('mandatory' => false),
+					),
+			),
+			'pdfDetailStyle' => '
+<style>
+table.note-report {
+	font-size: 1em;
+	border: 1px solid gray;
+}
+table.note-report th {
+	color: #FFF;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: center;
+	border: 1px solid gray;
+	background-color: #006169;
+}
+		
+table.note-report td {
+	color: #666;
+	border: 1px solid gray;
+}
+</style>
+',
+	),
+		
 	'interaction/type' => array(
 			'modalities' => array(
 					'contact' => array('en_US' => 'Contacts', 'fr_FR' => 'Contacts'),
@@ -2427,6 +2558,28 @@ return array(
 				),
 		),
 
+		'commitmentAccount/notification' => array(
+				'definition' => 'inline',
+				'template' => array('definition' => 'commitmentAccount/notification/template'),
+				'from_mail' => 'support@p-pit.fr',
+				'from_name' => 'noreply@p-pit.fr',
+				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
+		),
+		
+		'commitmentAccount/notification/template' => array(
+				'subject' => array('en_US' => 'Current registration request', 'fr_FR' => 'Demande d\'inscription en cours'),
+				'body' => array(
+						'en_US' => '<p>Hello,</p>
+<p>You have initiated a registration request on the web site %s that you have not been able to complete. We propose you to resume it by following this link: %s</p>
+<p>Best regards,</p>
+',
+						'fr_FR' => '<p>Bonjour,</p>
+<p>Vous avez initié une demande d\'inscription sur le site %s que vous n\'avez pas pu finaliser. Nous vous proposons de la reprendre en suivant ce lien : %s</p>
+<p>Cordialement,</p>
+',
+				),
+		),
+		
 	'commitment/consumeCredit' => array(
 			'messages' => array(
 					'availabilityAlertTitle' => array(
@@ -2567,7 +2720,7 @@ L\'équipe P-Pit
 	),
 		
 	'demo' => array(
-			'commitmentAccount/search/title' => array(
+			'commitmentAccount/search/business/title' => array(
 					'en_US' => '
 <h4>Account list</h4>
 <p>As a default, all the accounts with a <em>Active</em> status are presented in the list.</p>
@@ -2633,7 +2786,7 @@ L\'équipe P-Pit
 <p>Par exemple vous pouvez envoyer un emailing en cochant dans la liste les comptes à cibler puis émettre l\'email de façon groupée.</p>
 					',
 			),
-			'commitmentAccount/list/add' => array(
+			'commitmentAccount/list/business/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un compte</h4>
@@ -2655,14 +2808,14 @@ L\'équipe P-Pit
 	</ul>
 					',
 			),
-			'commitmentAccount/list/detail' => array(
+			'commitmentAccount/list/business/detail' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Détail d\'un compte</h4>
 <p>Le bouton zoom permet d\'accéder au détail d\'un compte et aux engagements associés.</p>
 					',
 			),
-			'commitmentAccount/update' => array(
+			'commitmentAccount/update/business' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Gestion des données du compte</h4>
@@ -2671,7 +2824,7 @@ L\'équipe P-Pit
 <p>Il donne enfin un accès centralisé, en ajout ou modification, aux engagements associés à ce compte.</p>
 					',
 			),
-			'commitment/accountList/add' => array(
+			'commitment/accountList/business/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un engagement</h4>

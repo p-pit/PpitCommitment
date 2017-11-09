@@ -224,6 +224,7 @@ class CommitmentController extends AbstractActionController
 
 		// Retrieve the order type
 		$type = $this->params()->fromRoute('type', null);
+		if ($type != 'p-pit-studies') $type = null;
 
 		$major = ($this->params()->fromQuery('major', 'identifier'));
 		$dir = ($this->params()->fromQuery('dir', 'ASC'));
@@ -575,6 +576,7 @@ class CommitmentController extends AbstractActionController
     
     	// Retrieve the type
     	$type = $this->params()->fromRoute('type', null);
+    	if ($type != 'p-pit-studies') $type = null;
 
     	// Retrieve the account
     	$account_id = $this->params()->fromQuery('account_id', null);

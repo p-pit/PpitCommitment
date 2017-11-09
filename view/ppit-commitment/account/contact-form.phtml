@@ -13,15 +13,17 @@
 <body>
   <header class="header">
     <div class="header_container">
-      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" width="250" alt="ESI Environment Social Impact Business School" class="header_logo">
+      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" width="250" alt="<?php echo $context->getInstance()->caption ?>" class="header_logo">
 <?php if ($state_id != 'index') : ?>
       <div class="header_state">
-	<?php $first = true; $full = true; foreach ($context->getConfig('commitmentAccount/contactForm') as $stateId => $state) : ?>
-		<?php if (!$first) : ?>
+	<?php $first = true; $full = true; foreach ($template as $stateId => $state) : ?>
+		<?php if ($stateId != 'index') :?>
+			<?php if (!$first) : ?>
         <div class="header_line"></div>
-	    <?php endif;?>
+		    <?php endif;?>
         <div class="header_number <?php if ($full) echo 'header_number-full' ?>"><?php echo $state['header_number'] ?></div>
-        <?php if ($state_id == $stateId) $full = false; ?>
+        	<?php if ($state_id == $stateId) $full = false; ?>
+        <?php endif;?>
 	<?php $first = false; endforeach;?>
       </div>
 <?php endif;?>      
@@ -31,29 +33,26 @@
 <!-- Index -->
 <?php if ($state_id == 'index') : ?>
   <section class="banner">
-    <h1 class="banner_title">Inscription aux Journées d'Admission</h1>
+    <h1 class="banner_title"><?php echo $template['index']['banner_title'][$context->getLocale()] ?></h1>
   </section>
   <div class="question">
-      <h2 class="question_title">Formation choisie</h2>
+      <h2 class="question_title"><?php echo $template['index']['question_title'][$context->getLocale()] ?></h2>
       <div class="question_container">
-        <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id)) ?>" method="post">
-        	<input type="hidden" name="discipline" value="bachelor"/>
-	        <input class="question_button" type="submit" value="Bachelor in Green, Social & Digital Business">
+<?php foreach ($template['index']['actions']['buttons'] as $buttonId => $button) : ?>
+        <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id, 'action_id' => $buttonId)) ?>" method="post">
+	        <input class="question_button" type="submit" value="<?php echo $button['labels'][$context->getLocale()] ?>">
 	    </form>
-        <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id)) ?>" method="post">
-        	<input type="hidden" name="discipline" value="master"/>
-	        <input class="question_button" type="submit" value="Mastère in Green, Social & Digital Management">
-	    </form>
+<?php endforeach;?>
       </div>
   </div>
   <footer class="footer">
-    Retourner sur <a class="footer_link" href="https://www.esi-business-school.com/">www.esi-business-school.com</a>
+    <?php echo $template['index']['footer'][$context->getLocale()] ?>
   </footer>
 
 <?php else : ?>
   
   <section class="state">
-    <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'discipline' => $discipline, 'state_id' => $state_id, 'id' => $id)) ?>" method="post" enctype="multipart/form-data">
+    <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $state_id, 'id' => $id)) ?>" method="post" enctype="multipart/form-data">
       <h1 class="state_title"><?php echo $currentState['title'][$context->getLocale()]?></h1>
 
 <!-- Duplicate error -->
@@ -194,12 +193,12 @@
               <select class="input_select" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>">
 				<option/>
 					<?php foreach ($field['modalities'] as $modalityId => $modality) : ?>
-                <option value="<?php echo $modalityId?>"><?php echo $modality[$context->getLocale()]?></option>
+                <option value="<?php echo $modalityId?>" <?php if ($account->properties[$fieldId] == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
 					<?php endforeach;?>
               </select>
 
 				<?php elseif ($field['type'] == 'textarea') : ?>
-              <textarea class="input_textarea" name="<?php echo $fieldId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"></textarea>
+              <textarea class="input_textarea" name="<?php echo $fieldId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"><?php echo $account->properties[$fieldId] ?></textarea>
 
 				<?php else : ?>
 				<?php
@@ -208,7 +207,7 @@
 				elseif ($field['type'] == 'email') $type = 'email';
 				elseif ($field['type'] == 'phone') $type = 'number';
 				?>
-              <input class="input_text" type="text" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>">
+              <input class="input_text" type="text" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>" value="<?php echo $account->properties[$fieldId] ?>">
 	
 				<?php endif?>
             </div>
@@ -246,13 +245,8 @@
 		  </div>
 
           <div class="info_infoContainer">
-            <img class="info_img" src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/info.png') ?>" alt="Information">
-            <p>Le jour de l'entretien, merci d'apporter les élements suivants :</p>
-            <ul class="info_list">
-              <li>1 grande enveloppe vierge</li>
-              <li>4 petites enveloppes vierges</li>
-              <li>5 timbres au tarif en vigueur</li>
-            </ul>
+            <img class="info_img" src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/'.$section['information']['img']['src']) ?>" alt="Information">
+            <?php echo $section['information']['text']?>
           </div>
 
 		<?php endif;?>

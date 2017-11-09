@@ -11,11 +11,7 @@
 		</strong>
 	
 <?php if ($context->isDemoModeActive()) : ?>
-	<?php
-	if ($entry == 'contact') $qualifier = 'commitmentAccount/search/contact/title';
-	else $qualifier = 'commitmentAccount/search'.(($type) ? '/'.$type : '').'/title';
-	?>
-		<a class="tip" href="#" title="<?php echo $context->getConfig('demo')[$qualifier][$context->getLocale()] ?>">
+		<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitmentAccount/search'.(($type) ? '/'.$type : '').'/title'][$context->getLocale()] ?>">
 		    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 		</a>
 <?php endif;?>

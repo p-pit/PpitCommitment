@@ -11,6 +11,7 @@ use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Community;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
+use PpitCore\Model\Instance;
 use PpitCore\Model\Interaction;
 use PpitCore\Model\Place;
 use PpitCore\Model\User;
@@ -39,8 +40,8 @@ class AccountController extends AbstractActionController
     	if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::get($context->getPlaceId());
     	 
-		$entry = $this->params()->fromRoute('entry');
-    	$type = $this->params()->fromRoute('type', null);
+		$entry = $this->params()->fromRoute('entry', 'account');
+    	$type = $this->params()->fromRoute('type', 'business');
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 
 		if ($entry == 'contact') $status = 'new'; 
@@ -969,19 +970,21 @@ class AccountController extends AbstractActionController
     	$place_identifier = $this->params()->fromRoute('place_identifier');
     	$place = Place::get($place_identifier, 'identifier');
     	$state_id = $this->params()->fromRoute('state_id');
-    	$discipline = $this->params()->fromRoute('discipline');
-    	
+    	$action_id = $this->params()->fromRoute('action_id');
     	$request = $this->getRequest();
 
     	$type = $this->params()->fromRoute('type');
-    	 
+		$template = $context->getConfig('commitmentAccount/contactForm/'.$type);
+		if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+
     	if ($state_id == 'index') {
 	    	if ($request->isPost()) {
-	    		return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'discipline' => $request->getPost('discipline'), 'state_id' => 'state1'));
+	    		return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => 'state1'));
 	    	}
     		$view = new ViewModel(array(
 	    			'context' => $context,
 	    			'config' => $context->getConfig(),
+    				'template' => $template,
 	    			'type' => $type,
 	    			'place_identifier' => $place_identifier,
     				'place' => $place,
@@ -991,7 +994,7 @@ class AccountController extends AbstractActionController
 	    	return $view;
     	}
 
-    	$currentState = $context->getConfig('commitmentAccount/contactForm')[$state_id];
+    	$currentState = $template[$state_id];
 
     	$id = $this->params()->fromRoute('id');
     	if ($id) {
@@ -1012,8 +1015,8 @@ class AccountController extends AbstractActionController
 	    		$account = Account::instanciate($type);
 	    		$account->place_id = $place->id;
 	    		$account->opening_date = date('Y-m-d');
-	    		$account->origine = 'web';
-	    		$account->property_1 = $discipline;
+	    		$account->origine = 'inscription';
+//	    		$account->property_1 = $action_id;
     		}
     	}
     
@@ -1032,6 +1035,7 @@ class AccountController extends AbstractActionController
     
     		if ($csrfForm->isValid()) { // CSRF check
     			$data = array();
+    			$data[$template['index']['actions']['property']] = $action_id;
     			foreach ($currentState['sections'] as $sectionId => $section) {
     				foreach ($section['fields'] as $fieldId => $field) {
     					if ($field['type'] == 'repository') $field = $context->getConfig($field['definition']);
@@ -1143,7 +1147,7 @@ class AccountController extends AbstractActionController
 						    		}
 						    	}
     							$connection->commit();
-    							return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'discipline' => $discipline, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
+    							return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
     						}
     					}
     					catch (\Exception $e) {
@@ -1158,12 +1162,14 @@ class AccountController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getConfig(),
+    			'template' => $template,
     			'type' => $type,
     			'place_identifier' => $place_identifier,
     			'place' => $place,
     			'state_id' => $state_id,
-    			'discipline' => $discipline,
+    			'action_id' => $action_id,
     			'id' => $id,
+    			'account' => $account,
     			'currentState' => $currentState,
     			'active' => 'application',
     			'applicationId' => $applicationId,
@@ -1300,6 +1306,35 @@ class AccountController extends AbstractActionController
 		return $this->getResponse();
     }
 
+    public function notifyAction()
+    {
+		$context = Context::getCurrent();
+		$instances = Instance::getList(array());
+		foreach ($instances as $instance) {
+			$context->updateFromInstanceId($instance->id);
+			$accounts = Account::getList(null, 'contact', array('status' => 'new', 'origine' => 'inscription', 'notification_time' => null));
+			foreach($accounts as $account) {
+				if (strtotime($account->update_time) - time() > 600) {
+					if ($account->email && $account->n_fn) {
+	/*					$account->notification_time = date('Y-m-d H:i:s');
+						Account::getTable()->save($account);*/
+						$select = Vcard::getTable()->getSelect();
+						$where = new Where;
+						$where->like('roles', '%admin%');
+						$select->where($where);
+						$cursor = Vcard::getTable()->selectWith($select);
+						$admins = array();
+						foreach ($cursor as $contact) $admins[$contact->email] = $contact;
+						$template = $context->getConfig('commitmentAccount/contactForm/'.$account->type);
+						$action_id = $account->properties[$template['index']['actions']['property']];
+						$url = 'https://'.$context->getInstance()->fqdn.'/commitment-account/contact-form/'.$account->type.'/'.$account->place_identifier.'/'.$action_id.'/state1';
+						$account->notify($admins, $url);
+					}
+				}
+			}
+		}
+    }
+    
     public function rephaseAction()
     {
     	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0, 'status <> ?' => 'deleted', 'type' => 'p-pit-studies'));
