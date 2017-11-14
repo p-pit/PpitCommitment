@@ -580,13 +580,13 @@ class Account implements InputFilterAwareInterface
 			->join(array('contact_4' => 'core_vcard'), 'commitment_account.contact_4_id = contact_4.id', array('n_title_4' =>'n_title', 'n_first_4' => 'n_first', 'n_last_4' => 'n_last', 'n_fn_4' => 'n_fn', 'email_4' => 'email', 'birth_date_4' => 'birth_date', 'tel_work_4' => 'tel_work', 'tel_cell_4' => 'tel_cell', 'adr_street_4' => 'adr_street', 'adr_extended_4' => 'adr_extended', 'adr_post_office_box_4' => 'adr_post_office_box', 'adr_zip_4' => 'adr_zip', 'adr_city_4' => 'adr_city', 'adr_state_4' => 'adr_state', 'adr_country_4' => 'adr_country'), 'left')
 			->join(array('contact_5' => 'core_vcard'), 'commitment_account.contact_5_id = contact_5.id', array('n_title_5' =>'n_title', 'n_first_5' => 'n_first', 'n_last_5' => 'n_last', 'n_fn_5' => 'n_fn', 'email_5' => 'email', 'birth_date_5' => 'birth_date', 'tel_work_5' => 'tel_work', 'tel_cell_5' => 'tel_cell', 'adr_street_5' => 'adr_street', 'adr_extended_5' => 'adr_extended', 'adr_post_office_box_5' => 'adr_post_office_box', 'adr_zip_5' => 'adr_zip', 'adr_city_5' => 'adr_city', 'adr_state_5' => 'adr_state', 'adr_country_5' => 'adr_country'), 'left')
 			->order(array($major.' '.$dir, 'name'));
-			
+
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
 		$where->notEqualTo('commitment_account.status', 'deleted');
 		if ($entry == 'contact') $where->notEqualTo('commitment_account.status', 'active');
 		else $where->equalTo('commitment_account.status', 'active');
-		
+
     	// Todo list vs search modes
     	if ($mode == 'todo') {
 //    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
@@ -739,6 +739,7 @@ class Account implements InputFilterAwareInterface
 		$account = new Account;
 		$account->status = 'new';
 		$account->type = $type;
+		$account->opening_date = date('Y-m-d');
 		$account->contact_history = array();
 		$account->audit = array();
 		$account->contact_1 = Vcard::instanciate();
@@ -824,7 +825,8 @@ class Account implements InputFilterAwareInterface
 			}
 			if (array_key_exists('opening_date', $data)) {
 		    	$this->opening_date = trim(strip_tags($data['opening_date']));
-		    	if (!$this->opening_date || !checkdate(substr($this->opening_date, 5, 2), substr($this->opening_date, 8, 2), substr($this->opening_date, 0, 4))) return 'Integrity';
+				if (!$this->opening_date) $this->opening_date = date('Y-m-d'); // Transient rule
+				if (!checkdate(substr($this->opening_date, 5, 2), substr($this->opening_date, 8, 2), substr($this->opening_date, 0, 4))) return 'Integrity';
 			}
 			if (array_key_exists('closing_date', $data)) {
 		    	$this->closing_date = trim(strip_tags($data['closing_date']));
@@ -1042,6 +1044,7 @@ class Account implements InputFilterAwareInterface
     	$place = Place::get($data['place_identifier'], 'identifier');
     	$data['place_id'] = $place->id;
     	$data['origine'] = 'web';
+    	$data['opening_date'] = date('Y-m-d');
     	 
     	if (array_key_exists('request', $data) && array_key_exists($data['request'], $context->getConfig('commitmentAccount/requestTypes'.(($type) ? '/'.$type : '')))) {
     		$requestType = $context->getConfig('commitmentAccount/requestTypes'.(($type) ? '/'.$type : ''))[$data['request']][$context->getLocale()];
@@ -1057,25 +1060,24 @@ class Account implements InputFilterAwareInterface
     	if ($vcard) {
     		// Check if the account already exists. No update and the sales manager are notified.
     		$accounts = Account::getList($interaction->category, 'contact', array('contact_1_id' => $vcard->id));
-    		if (count($accounts) > 0) {
-    			reset($accounts);
-    			$account = Account::get(current($accounts)->id);
-    			if ($account->place_id == $place->id) {
-    				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
-    				$account->contact_history[] = array(
-    						'time' => date('Y-m-d H:i:s'),
-    						'n_fn' => 'support@p-pit.fr',
-    						'comment' => $translator->translate('ALREADY EXISTING ACCOUNT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
-    				);
-    				$rc = $account->update(null);
-    				if ($rc != 'OK') {
-    					$interaction->http_status = '500';
-    				}
-    				else {
-    					$interaction->status = 'processed';
-    					$interaction->http_status = '200';
-    				}
-    			}
+    		reset($accounts);
+    		if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
+    		else $account = null;
+    		if ($account && $account->place_id == $place->id) {
+				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+				$account->contact_history[] = array(
+						'time' => date('Y-m-d H:i:s'),
+						'n_fn' => 'support@p-pit.fr',
+						'comment' => $translator->translate('ALREADY EXISTING ACCOUNT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
+				);
+				$rc = $account->update(null);
+				if ($rc != 'OK') {
+					$interaction->http_status = '500';
+				}
+				else {
+					$interaction->status = 'processed';
+					$interaction->http_status = '200';
+				}
     			$interaction->update(null);
     			return $rc;
     		}
@@ -1165,7 +1167,10 @@ class Account implements InputFilterAwareInterface
 			$template = $notification['template'];
 			if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
 			$text = sprintf($template['body'][$context->getLocale()], $context->getInstance()->fqdn, $url);
-    		$part = new MimePart($text);
+	    	$signature = $context->getConfig('commitmentAccount/sendMessage')['signature'];
+	    	if ($signature['definition'] != 'inline') $signature = $context->getConfig($signature['definition']);
+			$text .= $signature['body'][$context->getLocale()];
+			$part = new MimePart($text);
     		$part->type = "text/html";
 
 /*	    	$img = new MimePart($context->getConfig('customisation/esi/send-message/logo')['content']);
@@ -1182,9 +1187,10 @@ class Account implements InputFilterAwareInterface
     		$from_mail = $context->getConfig('commitmentAccount/notification')['from_mail'];
     		$from_name = $context->getConfig('commitmentAccount/notification')['from_name'];
     		$mail->setFrom($from_mail, $from_name);
-    		$mail->setSubject($template['subject']);
+    		$mail->setSubject($template['subject'][$context->getLocale()]);
 
     		$mail->addTo($this->email, $this->n_fn);
+    		$mail->addBcc('support@p-pit.fr', 'support@p-pit.fr');
     		foreach ($admins as $email => $contact) $mail->addBcc($email, $email);
     		if ($settings['mailProtocol'] == 'Smtp') {
     			$transport = new Mail\Transport\Smtp();
@@ -1192,13 +1198,13 @@ class Account implements InputFilterAwareInterface
     		elseif ($settings['mailProtocol'] == 'Sendmail') {
     			$transport = new Mail\Transport\SendMail();
     		}
-//    		if ($settings['mailProtocol']) $transport->send($mail);
+    		if ($settings['mailProtocol']) $transport->send($mail);
 
     		if ($settings['isTraceActive']) {
     			$writer = new Writer\Stream('data/log/mailing.txt');
     			$logger = new Logger();
     			$logger->addWriter($writer);
-    			$logger->info('to: '.$this->email.' - subject: '.$template['subject'].' - body: '.$text);
+    			$logger->info('to: '.$this->email.' - subject: '.$template['subject'][$context->getLocale()].' - body: '.$text);
     		}
     	}
     }

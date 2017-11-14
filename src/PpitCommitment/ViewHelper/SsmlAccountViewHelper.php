@@ -39,31 +39,33 @@ class SsmlAccountViewHelper
 			$j++;
 			$i = 0;
 			foreach($context->getConfig('commitmentAccount/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
-				$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
-				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				$i++;
-				if ($propertyId == 'name') $sheet->setCellValue($colNames[$i].$j, $account->name);
-				elseif ($propertyId == 'contact_history') {
-					$text = '';
-					foreach ($account->properties[$propertyId] as $comment) {
-						$text .= $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10).":\n";
-						if (array_key_exists('status', $comment)) $text .= $context->getconfig('commitmentAccount'.(($type) ? '/'.$type : ''))['statuses'][$comment['status']]['labels'][$context->getLocale()];
-						$text .= '('.$comment['n_fn'].') '.$comment['comment']."\n";
+				if ($account->properties[$propertyId]) {
+					$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
+					if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+					if ($propertyId == 'name') $sheet->setCellValue($colNames[$i].$j, $account->name);
+					elseif ($propertyId == 'contact_history') {
+						$text = '';
+						foreach ($account->properties[$propertyId] as $comment) {
+							$text .= $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10).":\n";
+							if (array_key_exists('status', $comment)) $text .= $context->getconfig('commitmentAccount'.(($type) ? '/'.$type : ''))['statuses'][$comment['status']]['labels'][$context->getLocale()];
+							$text .= '('.$comment['n_fn'].') '.$comment['comment']."\n";
+						}
+						$sheet->getStyle($colNames[$i].$j)->getAlignment()->setWrapText(true);
+						$sheet->setCellValue($colNames[$i].$j, $text);
 					}
-					$sheet->getStyle($colNames[$i].$j)->getAlignment()->setWrapText(true);
-					$sheet->setCellValue($colNames[$i].$j, $text);
+					elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $account->place_caption);
+					elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $account->n_first);
+					elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $account->n_last);
+					elseif ($propertyId == 'tel_work') $sheet->setCellValue($colNames[$i].$j, $account->tel_work);
+					elseif ($propertyId == 'tel_cell') $sheet->setCellValue($colNames[$i].$j, $account->tel_cell);
+					elseif ($propertyId == 'email') $sheet->setCellValue($colNames[$i].$j, $account->email);
+					elseif ($propertyId == 'birth_date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($account->birth_date));
+					elseif ($property['type'] == 'date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($account->properties[$propertyId]));
+					elseif ($property['type'] == 'number') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->properties[$propertyId], 2));
+					elseif ($property['type'] == 'select')  $sheet->setCellValue($colNames[$i].$j, (array_key_exists($account->properties[$propertyId], $property['modalities'])) ? $property['modalities'][$account->properties[$propertyId]][$context->getLocale()] : $account->properties[$propertyId]);
+					else $sheet->setCellValue($colNames[$i].$j, $account->properties[$propertyId]);
 				}
-				elseif ($propertyId == 'place_id') $sheet->setCellValue($colNames[$i].$j, $account->place_caption);
-				elseif ($propertyId == 'n_first') $sheet->setCellValue($colNames[$i].$j, $account->n_first);
-				elseif ($propertyId == 'n_last') $sheet->setCellValue($colNames[$i].$j, $account->n_last);
-				elseif ($propertyId == 'tel_work') $sheet->setCellValue($colNames[$i].$j, $account->tel_work);
-				elseif ($propertyId == 'tel_cell') $sheet->setCellValue($colNames[$i].$j, $account->tel_cell);
-				elseif ($propertyId == 'email') $sheet->setCellValue($colNames[$i].$j, $account->email);
-				elseif ($propertyId == 'birth_date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($account->birth_date));
-				elseif ($property['type'] == 'date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($account->properties[$propertyId]));
-				elseif ($property['type'] == 'number') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($account->properties[$propertyId], 2));
-				elseif ($property['type'] == 'select')  $sheet->setCellValue($colNames[$i].$j, (array_key_exists($account->properties[$propertyId], $property['modalities'])) ? $property['modalities'][$account->properties[$propertyId]][$context->getLocale()] : $account->properties[$propertyId]);
-				else $sheet->setCellValue($colNames[$i].$j, $account->properties[$propertyId]);
 			}
 		}
 		$i = 0;

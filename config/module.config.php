@@ -1392,8 +1392,8 @@ return array(
 					'opening_date' => array(
 							'type' => 'date',
 							'labels' => array(
-									'en_US' => 'Opening date',
-									'fr_FR' => 'Date d\'ouverture',
+									'en_US' => '1st contact date',
+									'fr_FR' => 'Date 1er contact',
 							),
 					),
 					'closing_date' => array(
@@ -1465,6 +1465,7 @@ return array(
 				'status' => 'select',
 				'name' => 'contains',
 				'property_1' => 'select',
+				'opening_date' => 'range',
 				'callback_date' => 'range',
 				'origine' => 'contains',
 				'email' => 'contains',
@@ -1498,6 +1499,7 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
+			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
@@ -1566,6 +1568,7 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
+			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
