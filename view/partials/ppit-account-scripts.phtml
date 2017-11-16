@@ -771,6 +771,8 @@ function getAccountDetail(id) {
 	$('#account-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
 }
 
+// SendMessage
+
 <?php 
 $properties = array();
 $properties['mask_recipients'] = array('type' => 'checkbox');
@@ -923,6 +925,68 @@ function getSendMessage() {
 	xhttp.send();
 }
 
+// Request password
+
+
+// SendMessage
+
+function connectPasswordRequestForm()
+{
+	var form = document.getElementById('ppit-form');
+	var formData = new FormData();
+	var accountNumber = $('#account-number').val();
+	for (i = 0, j = 0; i < accountNumber; i++) {
+		if (document.getElementById('account-checkbox_' + i).checked) {
+			formData.append('account_' + j, $('#account_' + i).val());
+			j++;
+		}
+	}
+	formData.append('nb-account', j);
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/passwordRequest') ?>';
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("POST", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+			document.getElementById('password-request-panel').innerHTML = xhttp.responseText;
+		}
+	}
+	xhttp.send(formData);
+}
+
+function getRequestPasswordForm() {
+	$('#password-request-button').removeClass('btn-default').addClass('btn-warning');
+	$('#password-request-alert').show();
+	$('#password-request-button').click(function () { connectPasswordRequestForm(); });
+}
+
+function getPasswordRequest() {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentAccount/passwordRequest') ?>';
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+			document.getElementById('password-request-panel').innerHTML = xhttp.responseText;
+			$('#password-request-alert').hide();
+			$('#password-request-button').click(function () { getRequestPasswordForm(); });
+			
+		}
+	}
+	xhttp.send();
+}
+
+
+// Grouped actions
+
 <?php 
 $properties = array();
 
@@ -1031,6 +1095,7 @@ function getAccountGroup() {
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
 			postGroup();
 			getSendMessage(false);
+			getPasswordRequest(false);
 			
 			$(function () {
 			    $('.tip').tooltip({

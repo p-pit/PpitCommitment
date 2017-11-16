@@ -392,6 +392,86 @@ class AccountController extends AbstractActionController
     	return $view;
     }
 
+    public function passwordRequestAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+	    		$nbAccount = $request->getPost('nb-account');
+	    		$accounts = array();
+	    		for ($i = 0; $i < $nbAccount; $i++) {
+	    			$account = Account::get($request->getPost('account_'.$i));
+	    			$accounts[] = $account;
+	    			$user = User::get($account->contact_1_id, 'vcard_id');
+	    			if (!$user) {
+	    				$user = User::instanciate();
+	    				$username = strtolower(substr($account->n_first, 0, 1).$account->n_last);
+	    				$user->username = $username;
+	    				for($i = 1; true; $i++) {
+	    					$existingUser = User::getTable()->transGet($user->username, 'username');
+	    					if (!$existingUser) break;
+	    					else $user->username = $username.$i;
+	    				}
+						$user->vcard_id = $account->contact_1_id;
+						$user->add(false, false);
+						$userContact = UserContact::instanciate();
+						$userContact->user_id = $user->user_id;
+						$userContact->vcard_id = $account->contact_1_id;
+						$userContact->add();
+	    			}
+	    			if (!$error) {
+		    			$password_init_token = $context->getSecurityAgent()->requestPasswordInit($user, false);
+		    			 
+		    			// Insert a mail in the queue
+		    			$contact = Vcard::getTable()->transGet($user->vcard_id);
+		    			$mail = ContactMessage::instanciate();
+		    			$data = array();
+		    			$data['type'] = 'email';
+		    			$data['to'] = array();
+		    			if ($account->email) $data['to'][$account->email] = $account->email;
+		    			if ($account->email_2) $data['to'][$account->email_2] = $account->email_2;
+		    			if ($account->email_3) $data['to'][$account->email_3] = $account->email_3;
+		    			if ($account->email_4) $data['to'][$account->email_4] = $account->email_4;
+		    			if ($account->email_5) $data['to'][$account->email_5] = $account->email_5;
+		    			$data['cci'] = array();
+		    			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
+		    			$selectedTemplateId = $request->getPost('template_id');
+		    			$data['subject'] = $context->getConfig()['ppitUserSettings']['messages']['addTitle'][$context->getLocale()];
+		    			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
+		    			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
+		    			$body = $context->getconfig()['ppitUserSettings']['messages']['addText'][$context->getLocale()];
+						$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+		   				$link = $url('user/initpassword', array('id' => $user->user_id), array('force_canonical' => true)).'?hash='.$password_init_token;
+		    			$body = sprintf($body, $user->username, $link);
+		    			$data['body'] = $body;
+		    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+		    			$rc = $mail->add();
+	    			}
+	    		}
+    			$message = 'OK';
+    		}
+    	}
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'csrfForm' => $csrfForm,
+    			'error' => $error,
+    			'message' => $message,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+
     public function dropboxLinkAction()
     {
     	$context = Context::getCurrent();

@@ -195,6 +195,15 @@ return array(
 		        								),
 		        						),
 		        				),
+	       						'passwordRequest' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/password-request',
+        										'defaults' => array(
+        												'action' => 'passwordRequest',
+        										),
+        								),
+        						),
 	       						'updateContact' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
@@ -926,6 +935,7 @@ return array(
             	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager', 'manager')),
 				array('route' => 'commitmentAccount/update', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager', 'manager')),
+            	array('route' => 'commitmentAccount/passwordRequest', 'roles' => array('admin')),
             	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager', 'manager')),
 				array('route' => 'commitmentAccount/indexCard', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
@@ -1134,6 +1144,7 @@ return array(
 					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
 					'inscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
 					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
+					'cooptation' => array('en_US' => 'Cooptation', 'fr_FR' => 'Cooptation'),
 					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
 					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
