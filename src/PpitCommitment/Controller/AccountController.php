@@ -436,8 +436,9 @@ class AccountController extends AbstractActionController
 		    			// Insert a mail in the queue
 		    			$contact = Vcard::getTable()->transGet($user->vcard_id);
 		    			$mail = ContactMessage::instanciate();
+		    			$mail->type = 'email';
+		    			 
 		    			$data = array();
-		    			$data['type'] = 'email';
 		    			$data['to'] = array();
 		    			if ($account->email) $data['to'][$account->email] = $account->email;
 		    			if ($account->email_2) $data['to'][$account->email_2] = $account->email_2;
@@ -589,9 +590,11 @@ class AccountController extends AbstractActionController
 	    			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
 	    			$connection->beginTransaction();
 	    			try {
-	    				if (!$account->id) {
+	    				if (!$account->contact_1_id) {
 	    					$account->contact_1 = Vcard::optimize($account->contact_1);
 	    					$account->contact_1_id = $account->contact_1->id;
+	    				}
+	    				if (!$account->id) {
 	    					$account->add();
 	    				}
 	    				elseif ($action == 'delete') {

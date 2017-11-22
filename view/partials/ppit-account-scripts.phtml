@@ -1095,8 +1095,11 @@ function getAccountGroup() {
 			document.getElementById('form_action').innerHTML = xhttp.responseText;
 			postGroup();
 			getSendMessage(false);
-			getPasswordRequest(false);
 			
+<?php if ($context->hasRole('admin')) : ?>
+			getPasswordRequest(false);
+<?php endif;?>
+
 			$(function () {
 			    $('.tip').tooltip({
 			        content: function () {

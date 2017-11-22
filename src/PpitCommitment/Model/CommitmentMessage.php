@@ -127,11 +127,12 @@ class CommitmentMessage implements InputFilterAwareInterface
 
 	    if ($this->files) {
 			$root_id = Document::getTable()->get(0, 'parent_id')->id; 
-    		$document = Document::instanciate($root_id);
+			$document = Document::instanciate($root_id);
+			$document->add();
     		$document->files = $this->files;
-    		$document->saveFile();
-    		$document_id = $document->save();
-    		$this->import($document_id);
+    		$document->saveFile($this->files);
+    		$document->update(null);
+    		$this->import($document->id);
     	}
 		CommitmentMessage::getTable()->save($this);
     	return ('OK');

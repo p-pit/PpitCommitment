@@ -1206,7 +1206,7 @@ return array(
 
 	'commitmentAccount/business/property/property_4' => array(
 			'type' => 'text',
-			'labels' => array('en_US' => 'Footer legal mention', 'fr_FR' => 'Mention légale de pied de page'),
+			'labels' => array('en_US' => 'Legal mention', 'fr_FR' => 'Mention légale'),
 	),
 		
 	'commitmentAccount/business/property/contact_meeting_context' => array(
@@ -1300,6 +1300,8 @@ return array(
 									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
 									'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
 									'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
+                                    'mr-mrs' => array('fr_FR' => 'Mr et Mme', 'en_US' => 'Mr & Mrs'),
+									'Maître' => array('fr_FR' => 'Maître', 'en_US' => 'Maître'),
 							),
 							'labels' => array(
 									'en_US' => 'Title',
@@ -1388,6 +1390,60 @@ return array(
 							'labels' => array(
 									'en_US' => 'Contact - Country',
 									'fr_FR' => 'Contact - Pays',
+							),
+					),
+					'n_title_2' => array(
+							'type' => 'select',
+							'modalities' => array(
+									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
+									'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
+									'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
+							),
+							'labels' => array(
+									'en_US' => 'Title',
+									'fr_FR' => 'Titre',
+							),
+					),
+					'n_first_2' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - First name',
+									'fr_FR' => 'Contact - Prénom',
+							),
+					),
+					'n_last_2' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Last name',
+									'fr_FR' => 'Contact - Nom',
+							),
+					),
+					'email_2' => array(
+							'type' => 'email',
+							'labels' => array(
+									'en_US' => 'Contact - Email',
+									'fr_FR' => 'Contact - Email',
+							),
+					),
+					'tel_work_2' => array(
+							'type' => 'phone',
+							'labels' => array(
+									'en_US' => 'Contact - Phone',
+									'fr_FR' => 'Contact - Téléphone',
+							),
+					),
+					'tel_cell_2' => array(
+							'type' => 'phone',
+							'labels' => array(
+									'en_US' => 'Contact - Cellular',
+									'fr_FR' => 'Contact - Mobile',
+							),
+					),
+					'address_2' => array(
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Contact - Address',
+									'fr_FR' => 'Contact - Adresse',
 							),
 					),
 					'place_id' => array(
@@ -1509,10 +1565,12 @@ return array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
-			'name' => array('mandatory' => true),
+			'name' => array('mandatory' => false),
 			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
+			'title_1' => null,
+			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
@@ -1521,13 +1579,15 @@ return array(
 			'adr_street' => array('mandatory' => false),
 			'adr_zip' => array('mandatory' => false),
 			'adr_city' => array('mandatory' => false),
-			'contact_history' => array('mandatory' => false),
+			'title_2' => null,
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),
 			'property_4' => array('mandatory' => false),
+			'title_3' => null,
 			'comment_1' => array('mandatory' => false),
 			'comment_2' => array('mandatory' => false),
+			'contact_history' => array('mandatory' => false),
 	),
 	'commitmentAccount/updateContact/business' => array(
 			'n_title' => array('mandatory' => false),
@@ -1582,6 +1642,8 @@ return array(
 			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
+			'place_id' => array('mandatory' => true),
+			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'email' => array('mandatory' => false),
@@ -1590,13 +1652,23 @@ return array(
 			'adr_street' => array('mandatory' => false),
 			'adr_zip' => array('mandatory' => true),
 			'adr_city' => array('mandatory' => false),
-			'place_id' => array('mandatory' => true),
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),
 			'property_4' => array('mandatory' => false),
+				
+			'n_title_2' => array('mandatory' => false),
+			'n_first_2' => array('mandatory' => true),
+			'n_last_2' => array('mandatory' => true),
+			'tel_work_2' => array('mandatory' => false),
+			'tel_cell_2' => array('mandatory' => false),
+			'email_2' => array('mandatory' => false),
+			'address_2' => array('mandatory' => false),
+			
 			'comment_1' => array('mandatory' => false),
 			'comment_2' => array('mandatory' => false),
+
+			'contact_history' => array('mandatory' => false),
 	),
 	
 	'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
@@ -1611,6 +1683,7 @@ return array(
 			'1st-column' => array(
 					'title' => 'title_1',
 					'rows' => array(
+							'n_title' => array('mandatory' => true),
 							'n_first' => array('mandatory' => true),
 							'n_last' => array('mandatory' => true),
 							'email' => array('mandatory' => false),
