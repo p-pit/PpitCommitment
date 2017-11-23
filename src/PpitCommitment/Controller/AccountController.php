@@ -556,7 +556,7 @@ class AccountController extends AbstractActionController
 						// Unlink the current place community for the account type
 						$place = Place::get($account->place_id);
 						$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
-						if ($place && array_key_exists($community->id, $account->contact_1->communities)) {
+						if ($place && $community && array_key_exists($community->id, $account->contact_1->communities)) {
 	    					unset($account->contact_1->communities[$community->id]);
 	    				}
     				}
@@ -580,7 +580,7 @@ class AccountController extends AbstractActionController
 					// Link to the place community for the account type
 					$place = Place::get($account->place_id);
     				$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
-    				if ($place) {
+    				if ($place && $community) {
     					$account->contact_1->communities[$community->id] = true;
     				}
     			}
