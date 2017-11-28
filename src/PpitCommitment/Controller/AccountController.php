@@ -127,7 +127,7 @@ class AccountController extends AbstractActionController
     	return $view;
     }
 
-    public function getList($limitation = 300)
+    public function getList()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
@@ -135,9 +135,8 @@ class AccountController extends AbstractActionController
     	$entry = $this->params()->fromRoute('entry');
     	$type = $this->params()->fromRoute('type');
     	$status = $this->params()->fromQuery('status');
-
     	$params = $this->getFilters($this->params(), $type);
-//    	if (!array_key_exists('min_closing_date', $params)) $params['min_closing_date'] = date('Y-m-d');
+    	$limit = $this->params()->fromQuery('limit');
 
     	$major = ($this->params()->fromQuery('major', 'name'));
     	$dir = ($this->params()->fromQuery('dir'));
@@ -145,7 +144,7 @@ class AccountController extends AbstractActionController
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
     
     	// Retrieve the list
-    	$accounts = Account::getList($type, $entry, $params, $major, $dir, $mode, $limitation);
+    	$accounts = Account::getList($type, $entry, $params, $major, $dir, $mode, $limit);
 
     	// Return the link list
     	$view = new ViewModel(array(
@@ -411,53 +410,55 @@ class AccountController extends AbstractActionController
 	    		$nbAccount = $request->getPost('nb-account');
 	    		$accounts = array();
 	    		for ($i = 0; $i < $nbAccount; $i++) {
-	    			$account = Account::get($request->getPost('account_'.$i));
-	    			$accounts[] = $account;
-	    			$user = User::get($account->contact_1_id, 'vcard_id');
-	    			if (!$user) {
-	    				$user = User::instanciate();
-	    				$username = strtolower(substr($account->n_first, 0, 1).$account->n_last);
-	    				$user->username = $username;
-	    				for($i = 1; true; $i++) {
-	    					$existingUser = User::getTable()->transGet($user->username, 'username');
-	    					if (!$existingUser) break;
-	    					else $user->username = $username.$i;
-	    				}
-						$user->vcard_id = $account->contact_1_id;
-						$user->add(false, false);
-						$userContact = UserContact::instanciate();
-						$userContact->user_id = $user->user_id;
-						$userContact->vcard_id = $account->contact_1_id;
-						$userContact->add();
-	    			}
-	    			if (!$error) {
-		    			$password_init_token = $context->getSecurityAgent()->requestPasswordInit($user, false);
-		    			 
-		    			// Insert a mail in the queue
-		    			$contact = Vcard::getTable()->transGet($user->vcard_id);
-		    			$mail = ContactMessage::instanciate();
-		    			$mail->type = 'email';
-		    			 
-		    			$data = array();
-		    			$data['to'] = array();
-		    			if ($account->email) $data['to'][$account->email] = $account->email;
-		    			if ($account->email_2) $data['to'][$account->email_2] = $account->email_2;
-		    			if ($account->email_3) $data['to'][$account->email_3] = $account->email_3;
-		    			if ($account->email_4) $data['to'][$account->email_4] = $account->email_4;
-		    			if ($account->email_5) $data['to'][$account->email_5] = $account->email_5;
-		    			$data['cci'] = array();
-		    			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
-		    			$selectedTemplateId = $request->getPost('template_id');
-		    			$data['subject'] = $context->getConfig()['ppitUserSettings']['messages']['addTitle'][$context->getLocale()];
-		    			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
-		    			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
-		    			$body = $context->getconfig()['ppitUserSettings']['messages']['addText'][$context->getLocale()];
-						$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
-		   				$link = $url('user/initpassword', array('id' => $user->user_id), array('force_canonical' => true)).'?hash='.$password_init_token;
-		    			$body = sprintf($body, $user->username, $link);
-		    			$data['body'] = $body;
-		    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
-		    			$rc = $mail->add();
+		    		$account = Account::get($request->getPost('account_'.$i));
+		    		$accounts[] = $account;
+	    			if ($account->email || $account->email_2 || $account->email_3 || $account->email_4 || $account->email_5) {
+		    			$user = User::get($account->contact_1_id, 'vcard_id');
+		    			if (!$user) {
+		    				$user = User::instanciate();
+		    				$username = strtolower(substr($account->n_first, 0, 1).$account->n_last);
+		    				$user->username = $username;
+		    				for($j = 1; true; $j++) {
+		    					$existingUser = User::getTable()->transGet($user->username, 'username');
+		    					if (!$existingUser) break;
+		    					else $user->username = $username.$j;
+		    				}
+							$user->vcard_id = $account->contact_1_id;
+							$user->add(false, false);
+							$userContact = UserContact::instanciate();
+							$userContact->user_id = $user->user_id;
+							$userContact->vcard_id = $account->contact_1_id;
+							$userContact->add();
+		    			}
+		    			if (!$error) {
+			    			$password_init_token = $context->getSecurityAgent()->requestPasswordInit($user, false);
+			    			 
+			    			// Insert a mail in the queue
+			    			$contact = Vcard::getTable()->transGet($user->vcard_id);
+			    			$mail = ContactMessage::instanciate();
+			    			$mail->type = 'email';
+			    			 
+			    			$data = array();
+			    			$data['to'] = array();
+			    			if ($account->email) $data['to'][$account->email] = $account->email;
+			    			if ($account->email_2) $data['to'][$account->email_2] = $account->email_2;
+			    			if ($account->email_3) $data['to'][$account->email_3] = $account->email_3;
+			    			if ($account->email_4) $data['to'][$account->email_4] = $account->email_4;
+			    			if ($account->email_5) $data['to'][$account->email_5] = $account->email_5;
+			    			$data['cci'] = array();
+			    			if (array_key_exists('cci', $context->getConfig('community/sendMessage'))) $data['cci'][$context->getConfig('community/sendMessage')['cci']] = $context->getConfig('community/sendMessage')['cci'];
+			    			$selectedTemplateId = $request->getPost('template_id');
+			    			$data['subject'] = $context->getConfig()['ppitUserSettings']['messages']['addTitle'][$context->getLocale()];
+			    			$data['from_mail'] = $context->getConfig('community/sendMessage')['from_mail'];
+			    			$data['from_name'] = $context->getConfig('community/sendMessage')['from_name'];
+			    			$body = $context->getconfig()['ppitUserSettings']['messages']['addText'][$context->getLocale()];
+							$url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+			   				$link = $url('user/initpassword', array('id' => $user->user_id), array('force_canonical' => true)).'?hash='.$password_init_token;
+			    			$body = sprintf($body, $user->username, $link);
+			    			$data['body'] = $body;
+			    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+			    			$rc = $mail->add();
+		    			}
 	    			}
 	    		}
     			$message = 'OK';
@@ -591,7 +592,7 @@ class AccountController extends AbstractActionController
 	    			$connection->beginTransaction();
 	    			try {
 	    				if (!$account->contact_1_id) {
-	    					$account->contact_1 = Vcard::optimize($account->contact_1);
+	    					$account->contact_1->add();
 	    					$account->contact_1_id = $account->contact_1->id;
 	    				}
 	    				if (!$account->id) {
@@ -850,8 +851,6 @@ class AccountController extends AbstractActionController
     			}
 
     			if ($contact->loadData($data) != 'OK') throw new \Exception('View error');
-    			$contact = Vcard::optimize($contact);
-
     			$contact_status = $request->getPost('contact_status');
     			
     			// Atomically save
@@ -1016,7 +1015,7 @@ class AccountController extends AbstractActionController
     			$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-	    			$account->contact_1 = Vcard::optimize($account->contact_1);
+	    			$account->contact_1->add();
 	    			$account->contact_1_id = $account->contact_1->id;
 	    			$account->contact_1_status = 'main';
     				$return = $account->add();

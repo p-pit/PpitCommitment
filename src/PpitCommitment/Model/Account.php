@@ -569,7 +569,7 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($type, $entry, $params, $major = 'name', $dir = 'ASC', $mode = 'search', $limitation = 300)
+    public static function getList($type, $entry, $params, $major = 'name', $dir = 'ASC', $mode = 'search', $limit)
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
@@ -589,9 +589,7 @@ class Account implements InputFilterAwareInterface
 
     	// Todo list vs search modes
     	if ($mode == 'todo') {
-//    		if ($entry == 'contact') $where->lessThanOrEqualTo('commitment_account.callback_date', date('Y-m-d'));
 			$where->notEqualTo('commitment_account.status', 'gone');
-//			$select->limit(20);
     	}
     	else {
     		// Set the filters
@@ -609,12 +607,12 @@ class Account implements InputFilterAwareInterface
     			elseif ($value === null) $where->isNull($propertyId);
     			else $where->like('commitment_account.'.$propertyId, '%'.$value.'%');
     		}
-			if ($limitation) $select->limit($limitation);
     	}
     	$select->where($where);
 		$cursor = Account::getTable()->selectWith($select);
 		$accounts = array();
 
+		$i = 0;
 		foreach ($cursor as $account) {
 			$account->properties = $account->getProperties();
 
@@ -641,7 +639,11 @@ class Account implements InputFilterAwareInterface
 					}
 				}
 			}
-			if ($keep) $accounts[] = $account;
+			if ($keep) {
+				$i++;
+				if ($limit && $i > $limit) break;
+				$accounts[] = $account;
+			}
 		}
 		return $accounts;
     }
@@ -772,7 +774,7 @@ class Account implements InputFilterAwareInterface
 			}
     		if (array_key_exists('name', $data)) {
 		    	$this->name = trim(strip_tags($data['name']));
-		    	if (!$this->name || strlen($this->name) > 255) return 'Integrity';
+		    	if (strlen($this->name) > 255) return 'Integrity';
 			}
     		if (array_key_exists('contact_1_id', $data)) $this->contact_1_id = (int) $data['contact_1_id'];
     		if (array_key_exists('contact_1_status', $data)) {
@@ -1025,7 +1027,7 @@ class Account implements InputFilterAwareInterface
 			$account->loadData($targetData);
 			$place = Place::get($targetData['place_identifier'], 'identifier');
 			if ($place) $account->place_id = $place->id;
-    		$account->contact_1 = Vcard::optimize($account->contact_1);
+    		$account->contact_1->add();
     		$account->contact_1_id = $account->contact_1->id;
     		$account->contact_1_status = 'main';
 			$account->id = null;
@@ -1231,8 +1233,8 @@ class Account implements InputFilterAwareInterface
     
     	// Isolation check
     	if ($update_time && $account->update_time > $update_time) return 'Isolation';
-    	$user = User::get($this->contact_1->id, 'vcard_id');
-    	if ($user) $user->delete($user->update_time);
+/*    	$user = User::get($this->contact_1->id, 'vcard_id');
+    	if ($user) $user->delete($user->update_time);*/
     	 
     	$this->status = 'deleted';
     	Account::getTable()->save($this);

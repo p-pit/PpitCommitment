@@ -202,7 +202,7 @@ function connectAccountSearchInputs() {
 function getAccountList(params, major, dir) {		
 
 	// Execute the ajax request
-	route = '<?php echo $this->url('commitmentAccount/list', array('entry' => $entry, 'type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC');
+	route = '<?php echo $this->url('commitmentAccount/list', array('entry' => $entry, 'type' => $type)) ?>' + params + '&major=' + major + ((dir =='ASC') ? '&dir=ASC' : '&dir=DESC') + '&limit=' + $('#limit').val();
 	xhttp = new XMLHttpRequest();
 	xhttp.open("GET", route, true);
 	xhttp.onreadystatechange = function() {
@@ -226,6 +226,12 @@ function getAccountList(params, major, dir) {
 				$(this).click(function () {
 					sortAccountList($(this).attr('id').split('-')[0]);
 				});
+			});
+
+			// Connect the more anchor
+			$('#account-more-anchor').click(function () {
+				$('#limit').val('');
+				filterAccountList();
 			});
 
 			// Able the group action button
