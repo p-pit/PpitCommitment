@@ -68,6 +68,7 @@ function getParams() {
 	$searchTitle = (isset ($context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['searchTitle']) ? $context->getConfig('commitmentAccount/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
+	if (!todo) $('#limit').val('');
 
 	return params;
 }
