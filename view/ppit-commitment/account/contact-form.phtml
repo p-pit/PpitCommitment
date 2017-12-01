@@ -277,6 +277,19 @@
 			?>
             <?php echo vsprintf($section['information']['text'], $arguments) ?>
           </div>
+        </div>
+
+		<?php elseif ($section['type'] == 'button') : ?>
+
+        <div class="state_buttonContainer">
+          <?php 
+          $url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
+          $link = $url('commitmentAccount/dropboxLink', array('document' => $section['href']), array('force_canonical' => true));
+          ?>
+          <button class="state_button <?php if (strlen($section['text'][$context->getLocale()]) > 15) echo 'state_button-large' ?>" type="submit" formaction="<?php echo $link ?>">
+            <?php echo $section['text'][$context->getLocale()] ?>
+          </button>
+        </div>
 
 		<?php endif;?>
 
