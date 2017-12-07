@@ -1054,7 +1054,7 @@ class AccountController extends AbstractActionController
     public function contactFormAction()
 	{
 		$context = Context::getCurrent();
-    	$place_identifier = $this->params()->fromRoute('place_identifier');
+		$place_identifier = $this->params()->fromRoute('place_identifier');
     	$place = Place::get($place_identifier, 'identifier');
     	$state_id = $this->params()->fromRoute('state_id');
     	$action_id = $this->params()->fromRoute('action_id');
@@ -1198,8 +1198,8 @@ class AccountController extends AbstractActionController
     						}
     						if ($error) $connection->rollback();
     						else {
-								$path = $context->getConfig('ppitDocument')['dropbox']['folders']['students'].'/'.strtolower($account->contact_1->n_last).'_'.strtolower($account->contact_1->n_first).'_'.$account->contact_1->email;
 								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+									$path = $context->getConfig('ppitDocument')['dropbox']['folders']['students'].'/'.strtolower($account->contact_1->n_last).'_'.strtolower($account->contact_1->n_first).'_'.$account->contact_1->email;
 									$dropbox = $context->getConfig('ppitDocument')['dropbox'];
 							    	$client = new Client(
 							    			'https://api.dropboxapi.com/2/files/create_folder_v2',

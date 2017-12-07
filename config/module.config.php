@@ -1167,6 +1167,7 @@ return array(
 					'commerce' => array('en_US' => 'To be translated', 'fr_FR' => 'Commerce / Négoce / Distribution'),
 					'edition' => array('en_US' => 'To be translated', 'fr_FR' => 'Édition / Communication / Multimédia'),
 					'electricite' => array('en_US' => 'To be translated', 'fr_FR' => 'Électronique / Électricité'),
+					'environnement' => array('en_US' => 'To be translated', 'fr_FR' => 'Environnement'),
 					'conseil' => array('en_US' => 'To be translated', 'fr_FR' => 'Études et conseils'),
 					'pharmacie' => array('en_US' => 'To be translated', 'fr_FR' => 'Industrie pharmaceutique'),
 					'informatique' => array('en_US' => 'To be translated', 'fr_FR' => 'Informatique / Télécoms'),
@@ -1748,12 +1749,13 @@ table.note-report td {
 		
 	'interaction/csv/contact' => array(
 			'columns' => array(
-					'last_name' => array('property' => 'n_last'),
-					'first_name' => array('property' => 'n_first'),
+					'name' => array('property' => 'name'),
+					'n_last' => array('property' => 'n_last'),
+					'n_first' => array('property' => 'n_first'),
 					'email' => array('property' => 'email'),
 					'tel_work' => array('property' => 'tel_work'),
 					'tel_cell' => array('property' => 'tel_cell'),
-					'place' => array('property' => 'place_identifier'),
+					'place_identifier' => array('property' => 'place_identifier'),
 			),
 	),
 		

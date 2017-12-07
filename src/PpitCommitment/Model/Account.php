@@ -569,7 +569,7 @@ class Account implements InputFilterAwareInterface
     	return $data;
     }
     
-    public static function getList($type, $entry, $params, $major = 'name', $dir = 'ASC', $mode = 'search', $limit)
+    public static function getList($type, $entry, $params, $major = 'name', $dir = 'ASC', $mode = 'search', $limit = 50)
     {
     	$context = Context::getCurrent();
     	$select = Account::getTable()->getSelect()
@@ -1019,15 +1019,13 @@ class Account implements InputFilterAwareInterface
     		$targetData['callback_date'] = date('Y-m-d');
     		$targetData['origine'] = 'file';
     		foreach ($data as $column => $value) {
-    			if (array_key_exists($column, $context->getConfig('interaction/csv/contact')['columns'])) {
-    				$targetData[$context->getConfig('interaction/csv/contact')['columns'][$column]['property']] = $value;
-    			}
+    				$targetData[$column] = $value;
     		}
 			$account->contact_1->loadData($targetData);
 			$account->loadData($targetData);
 			$place = Place::get($targetData['place_identifier'], 'identifier');
 			if ($place) $account->place_id = $place->id;
-    		$account->contact_1->add();
+			$account->contact_1->add();
     		$account->contact_1_id = $account->contact_1->id;
     		$account->contact_1_status = 'main';
 			$account->id = null;
