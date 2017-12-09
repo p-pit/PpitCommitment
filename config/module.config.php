@@ -1149,6 +1149,7 @@ return array(
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
 					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
 					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
+					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\adresse'),
 			),
 			'labels' => array(
 					'en_US' => 'Origine',
@@ -1535,7 +1536,7 @@ return array(
 				'property_1' => 'select',
 				'opening_date' => 'range',
 				'callback_date' => 'range',
-				'origine' => 'contains',
+				'origine' => 'select',
 				'email' => 'contains',
 			),
 			'more' => array(
@@ -1756,6 +1757,7 @@ table.note-report td {
 					'tel_work' => array('property' => 'tel_work'),
 					'tel_cell' => array('property' => 'tel_cell'),
 					'place_identifier' => array('property' => 'place_identifier'),
+					'comment' => array('property' => 'comment'),
 			),
 	),
 		

@@ -1439,18 +1439,8 @@ class AccountController extends AbstractActionController
     
     public function rephaseAction()
     {
-    	$select = Account::getTable()->getSelect()->where(array('id > ?' => 0, 'status <> ?' => 'deleted', 'type' => 'p-pit-studies'));
-    	$cursor = Account::getTable()->selectWith($select);
-    	foreach ($cursor as $account) {
-    		if ($account->contact_1_id) {
-    			$contact = Vcard::getTable()->get($account->contact_1_id);
-    			if ($contact && $account->property_2) {
-					echo $contact->n_fn.' ('.$account->update_time.') : '.$contact->tel_cell.' > '.$account->property_2.'<br>';
-/*					$contact->tel_cell = $account->property_2;
-					$contact->update(null);*/
-    			}
-    		}
-    	}
+    	foreach (Vcard::getList(null, []) as $vcard) Account::addFromVcard(1, $vcard);
+    	echo 'done';
     	return $this->response;
     }
 }

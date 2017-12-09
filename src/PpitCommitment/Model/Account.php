@@ -584,8 +584,10 @@ class Account implements InputFilterAwareInterface
 		$where = new Where;
 		if ($type) $where->equalTo('type', $type);
 		$where->notEqualTo('commitment_account.status', 'deleted');
-		if ($entry == 'contact') $where->notEqualTo('commitment_account.status', 'active');
-		else $where->equalTo('commitment_account.status', 'active');
+		if ($entry) {
+			if ($entry == 'contact') $where->notEqualTo('commitment_account.status', 'active');
+			else $where->equalTo('commitment_account.status', 'active');
+		}
 
     	// Todo list vs search modes
     	if ($mode == 'todo') {
@@ -827,7 +829,7 @@ class Account implements InputFilterAwareInterface
 			}
 			if (array_key_exists('opening_date', $data)) {
 		    	$this->opening_date = trim(strip_tags($data['opening_date']));
-				if (!$this->opening_date) $this->opening_date = date('Y-m-d'); // Transient rule
+//				if (!$this->opening_date) $this->opening_date = date('Y-m-d'); // Transient rule
 				if (!checkdate(substr($this->opening_date, 5, 2), substr($this->opening_date, 8, 2), substr($this->opening_date, 0, 4))) return 'Integrity';
 			}
 			if (array_key_exists('closing_date', $data)) {
@@ -1002,6 +1004,45 @@ class Account implements InputFilterAwareInterface
     	return false;
     }
 
+    public static function addFromVcard($place_id, $vcard) 
+    {
+    	$context = Context::getCurrent();
+		$translator = $context->getServiceManager()->get('translator');
+    	$accounts = Account::getList('business', null, array('contact_1_id' => $vcard->id));
+    	reset($accounts);
+    	if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
+    	else $account = null;
+    	if (!$account || $account->place_id != $place_id) {
+    		// Create the account
+    		$account = Account::instanciate('business');
+    		$data = array();
+    		$data['status'] = 'new';
+    		$data['place_id'] = $place_id;
+    		$data['origine'] = 'address_book';
+    		$data['contact_1_id'] = $vcard->id;
+			$data['contact_1_status'] = 'main';
+			$data['name'] = $vcard->n_last.', '.$vcard->n_first;
+			$data['opening_date'] = substr($vcard->update_time, 0, 10);
+			$data['callback_date'] = date('Y-m-d');
+			$rc = $account->loadData($data);
+var_dump($vcard->update_time); throw new \Exception('');
+    		if ($rc != 'OK') {
+    			throw new \Exception($rc);
+    		}
+    		else {
+    			$account->contact_history[] = array(
+    					'time' => date('Y-m-d H:i:s'),
+    					'n_fn' => 'support@p-pit.fr',
+    					'comment' => $translator->translate('Loaded from address book', 'ppit-commitment', $context->getLocale()),
+    			);
+    			$rc = $account->add();
+    		   	if ($rc != 'OK') {
+    				throw new \Exception($rc);
+	    		}
+    		}
+    	}
+    }
+    
     /**
      * @param Interaction $interaction
      * @return string
@@ -1019,16 +1060,23 @@ class Account implements InputFilterAwareInterface
     		$targetData['callback_date'] = date('Y-m-d');
     		$targetData['origine'] = 'file';
     		foreach ($data as $column => $value) {
-    				$targetData[$column] = $value;
+    			if (array_key_exists($column, $context->getConfig('interaction/csv/contact')['columns'])) {
+    				$targetData[$context->getConfig('interaction/csv/contact')['columns'][$column]['property']] = $value;
+    			}
     		}
 			$account->contact_1->loadData($targetData);
 			$account->loadData($targetData);
 			$place = Place::get($targetData['place_identifier'], 'identifier');
 			if ($place) $account->place_id = $place->id;
-			$account->contact_1->add();
+    		$account->contact_1->add();
     		$account->contact_1_id = $account->contact_1->id;
     		$account->contact_1_status = 'main';
-			$account->id = null;
+			$account->contact_history[] = array(
+					'time' => date('Y-m-d H:i:s'),
+					'n_fn' => 'support@p-pit.fr',
+					'comment' => (array_key_exists('comment', $targetData)) ? $targetData['comment'] : '',
+			);
+    		$account->id = null;
     		$rc = $account->add();
     		if ($rc != 'OK') return $rc;
     	}

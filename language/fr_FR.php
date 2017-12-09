@@ -62,6 +62,7 @@
 			'Invoicing date' => 'Date de Facturation',
 			'Left' => 'A gauche',
 			'Linked URL' => 'URL liée',
+			'Loaded from address book' => 'Chargé depuis le carnet d\'adresse',
 			'Location' => 'Lieu',
 			'Mail template' => 'Modèle de mail',
 			'Means' => 'Mode',
