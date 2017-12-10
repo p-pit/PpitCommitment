@@ -32,7 +32,227 @@ use Zend\View\Model\ViewModel;
  */
 class AccountController extends AbstractActionController
 {
-    public function postAction()
+
+    public function contactFormAction()
+	{
+		$context = Context::getCurrent();
+		$place_identifier = $this->params()->fromRoute('place_identifier');
+    	$place = Place::get($place_identifier, 'identifier');
+    	$state_id = $this->params()->fromRoute('state_id');
+    	$action_id = $this->params()->fromRoute('action_id');
+    	$request = $this->getRequest();
+
+    	$type = $this->params()->fromRoute('type');
+		$template = $context->getConfig('commitmentAccount/contactForm/'.$type);
+		if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+
+    	if ($state_id == 'index') {
+	    	if ($request->isPost()) {
+	    		return $this->redirect()->toRoute('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => 'state1'));
+	    	}
+    		$view = new ViewModel(array(
+	    			'context' => $context,
+	    			'config' => $context->getConfig(),
+    				'template' => $template,
+	    			'type' => $type,
+	    			'place_identifier' => $place_identifier,
+    				'place' => $place,
+	    			'state_id' => $state_id,
+	    	));
+	    	$view->setTerminal(true);
+	    	return $view;
+    	}
+
+    	$currentState = $template[$state_id];
+
+    	$id = $this->params()->fromRoute('id');
+    	if ($id) {
+    		$account = Account::get($id);
+    		if ($account->contact_1_id) $contact = Vcard::get($account->contact_1_id);
+    		else $contact = Vcard::instanciate();
+    	}
+    	else {
+    		$email = $request->getPost('email');
+    		$account = null;
+    		if ($email) {
+    			$contact = Vcard::get($email, 'email');
+    			if ($contact) $account = Account::get($contact->id, 'contact_1_id');
+    			else $contact = Vcard::instanciate();
+    		}
+    		else $contact = Vcard::instanciate();
+    		if (!$account) {
+	    		$account = Account::instanciate($type);
+	    		$account->place_id = $place->id;
+	    		$account->opening_date = date('Y-m-d');
+	    		$account->origine = 'inscription';
+//	    		$account->property_1 = $action_id;
+    		}
+    	}
+    
+    	$applicationId = 'p-pit-contact';
+    	$applicationName = $context->getConfig('ppitApplications')['p-pit-contact']['labels'][$context->getLocale()];
+    	$currentEntry = $this->params()->fromQuery('entry', 'contactMessage');
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    
+    		if ($csrfForm->isValid()) { // CSRF check
+    			$data = array();
+    			$data[$template['index']['actions']['property']] = $action_id;
+    			foreach ($currentState['sections'] as $sectionId => $section) {
+    				foreach ($section['fields'] as $fieldId => $field) {
+    					if ($field['type'] == 'repository') $field = $context->getConfig($field['definition']);
+    
+    					// Structured field
+    					if ($field['type'] == 'structured') {
+    						$fieldData = array();
+    						foreach ($field['properties'] as $itemId => $item) {
+    							if ($item['type'] == 'repeater') {
+    								$repeater = array();
+    								for ($i = 0; $i < 20; $i++) {
+    									$line = array();
+    									foreach ($item['properties'] as $propertyId => $property) {
+    										if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+    										$label = $property['labels'][$context->getLocale()];
+    										$value = $request->getPost(($i == 0) ? $propertyId : $propertyId.$i);
+    										if ($value) {
+    											if ($property['type'] == 'select') $value = $property['modalities'][$value][$context->getLocale()];
+    											$line[$label] = $value;
+    										}
+    									}
+    									if ($line) $repeater[] = $line;
+    								}
+    								$fieldData[] = $repeater;
+    							}
+    							else {
+    								if ($item['type'] == 'repository') $item = $context->getConfig($item['definition']);
+    								$value = $request->getPost($itemId);
+    								if ($item['type'] == 'select') $value = $item['modalities'][$value][$context->getLocale()];
+    								$fieldData[$itemId] = $value;
+    							}
+    						}
+    						$data[$fieldId] = $fieldData;
+    					}
+    					else {
+    						$value = $request->getPost($fieldId);
+    						$data[$fieldId] = $value;
+    					}
+    				}
+    			}
+
+    			if ($contact->loadData($data) == 'OK') {
+    				if ($account->loadData($data) == 'OK') {
+
+    					// Link to the place community for the account type
+    					$place = Place::get($account->place_id);
+    					$community = Community::get($account->type.'/'.$place->identifier, 'identifier');
+    					if ($place && $community) {
+    						$account->contact_1->communities[$community->id] = true;
+    					}
+
+    					// Atomically save
+    					$connection = Account::getTable()->getAdapter()->getDriver()->getConnection();
+    					$connection->beginTransaction();
+    					try {
+    						if (!$contact->id) {
+    							$rc = $contact->add();
+    							if ($rc != 'OK') $error = $rc;
+    						}
+    						if (!$error) {
+    							$account->contact_1_id = $contact->id;
+    							$account->contact_1_status = 'main';
+    							if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+    							$account->contact_history[] = array(
+    									'time' => date('Y-m-d H:i:s'),
+    									'n_fn' => $account->contact_1->email,
+    									'comment' => 'Request: Demande inscription - '.$currentState['title'][$context->getLocale()],
+    							);
+    							if ($account->id) $rc = $account->update(null);
+    							else $rc = $account->add();
+    							if ($rc != 'OK') $error = $rc;
+    							$id = $account->id;
+    						}
+    						if ($error) $connection->rollback();
+    						else {
+								if (array_key_exists('dropbox', $context->getConfig('ppitDocument'))) {
+									$path = $context->getConfig('ppitDocument')['dropbox']['folders']['students'].'/'.strtolower($account->contact_1->n_last).'_'.strtolower($account->contact_1->n_first).'_'.$account->contact_1->email;
+									$dropbox = $context->getConfig('ppitDocument')['dropbox'];
+							    	$client = new Client(
+							    			'https://api.dropboxapi.com/2/files/create_folder_v2',
+							    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+							    	);
+							    	$client->setEncType('application/json');
+							    	$client->setMethod('POST');
+							    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
+							    	$client->setRawBody(json_encode(array('path' => $path)));
+							    	$response = $client->send();
+							    	
+						    		foreach($this->getRequest()->getFiles()->toArray() as $fileId => $file) {
+								    	$f = fopen($file['tmp_name'], "rb");
+								    	$client = new Client(
+								    			'https://content.dropboxapi.com/2/files/upload',
+								    			array('adapter' => 'Zend\Http\Client\Adapter\Curl', 'maxredirects' => 0, 'timeout' => 30)
+								    	);
+								    	$client->setEncType('application/octet-stream');
+								    	$client->setMethod('POST');
+								    	$client->getRequest()->getHeaders()->addHeaders(array(
+								    			'Authorization' => 'Bearer '.$dropbox['credential'],
+								    			'Dropbox-API-Arg' => json_encode(array(
+								    					'path' => $path.'/'.$file['name'],
+								    					'mode' => 'add',
+								    					'autorename' => true,
+								    					'mute' => false,
+								    			)),
+								    	));
+								    	$client->setRawBody(fread($f, filesize($file['tmp_name'])));
+										$response = $client->send();
+								    	fclose($f);
+						    		}
+						    	}
+    							$connection->commit();
+    							return $this->redirect()->toRoute('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
+    						}
+    					}
+    					catch (\Exception $e) {
+    						$connection->rollback();
+    						throw $e;
+    					}
+    				}
+    			}
+    		}
+    	}
+    
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'config' => $context->getConfig(),
+    			'template' => $template,
+    			'type' => $type,
+    			'place_identifier' => $place_identifier,
+    			'place' => $place,
+    			'state_id' => $state_id,
+    			'action_id' => $action_id,
+    			'id' => $id,
+    			'account' => $account,
+    			'currentState' => $currentState,
+    			'active' => 'application',
+    			'applicationId' => $applicationId,
+    			'applicationName' => $applicationName,
+    			'currentEntry' => $currentEntry,
+    			'csrfForm' => $csrfForm,
+    			'error' => $error,
+    			'message' => $message
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+	
+	public function postAction()
     {
     	$context = Context::getCurrent();
     	$writer = new Writer\Stream('data/log/account_get.txt');

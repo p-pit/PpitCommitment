@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/css/main.css') ?>">
+  <script src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/lib/jquery-3.2.1.min.js') ?>" charset="utf-8"></script>
+  <title>Inscription aux Journées d'Admission</title>
+  <link rel="shortcut icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
+  <link rel="icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
+</head>
+<body>
+  <header class="header">
+    <div class="header_container">
+      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" width="250" alt="<?php echo $context->getInstance()->caption ?>" class="header_logo">
+<?php if (/*$state_id != 'index'*/ false) : ?>
+      <div class="header_state">
+	<?php $first = true; $full = true; foreach ($template as $stateId => $state) : ?>
+		<?php if ($stateId != 'index') :?>
+			<?php if (!$first) : ?>
+        <div class="header_line"></div>
+		    <?php endif;?>
+        <div class="header_number <?php if ($full) echo 'header_number-full' ?>"><?php echo $state['header_number'] ?></div>
+        	<?php if ($state_id == $stateId) $full = false; ?>
+        <?php endif;?>
+	<?php $first = false; endforeach;?>
+      </div>
+<?php endif;?>      
+    </div>
+  </header>
+  
+<!-- Index -->
+<?php if ($state_id == 'index') : ?>
+  <section class="banner">
+    <h1 class="banner_title"><?php echo $template['index']['banner_title'][$context->getLocale()] ?></h1>
+  </section>
+  <div class="question">
+      <h2 class="question_title"><?php echo $template['index']['question_title'][$context->getLocale()] ?></h2>
+      <div class="question_container">
+<?php foreach ($template['index']['actions']['buttons'] as $buttonId => $button) : ?>
+        <form action="<?php echo $this->url('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id, 'action_id' => $buttonId)) ?>" method="post">
+	        <input class="question_button" type="submit" value="<?php echo $button['labels'][$context->getLocale()] ?>">
+	    </form>
+<?php endforeach;?>
+      </div>
+  </div>
+  <footer class="footer">
+    <?php echo $template['index']['footer'][$context->getLocale()] ?>
+  </footer>
+
+<?php else : ?>
+  
+  <section class="state">
+    <form action="<?php echo $this->url('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $state_id, 'id' => $id)) ?>" method="post" enctype="multipart/form-data">
+      <h1 class="state_title"><?php echo $currentState['title'][$context->getLocale()]?></h1>
+
+<!-- Duplicate error -->
+	<?php if ($error == 'Duplicate') : ?>
+				<div class="alert alert-danger" style="text-align: center">
+					<strong><?php echo $this->translate('This record already exist', 'ppit-core', $context->getLocale()) ?></strong>
+				</div>
+	<?php endif;?>
+
+<!-- Isolation error -->
+					<input type="hidden" id="update_time" name="update_time" value="<?php echo (isset($update_time)) ? $update_time : 0 ?>" />
+	<?php if ($error == 'Isolation') : ?>
+				<div class="alert alert-danger" style="text-align: center">
+					<strong><?php echo $this->translate('The database has evolved in the meantime, please input again', 'ppit-core', $context->getLocale()) ?></strong>
+				</div>
+	<?php endif;?>
+
+<!-- Consistency error -->
+					<input type="hidden" id="update_time" name="update_time" value="<?php echo (isset($update_time)) ? $update_time : 0 ?>" />
+	<?php if ($error == 'Consistency') : ?>
+				<div class="alert alert-danger" style="text-align: center">
+					<strong><?php echo $this->translate('The data are not consistent', 'ppit-core', $context->getLocale()) ?></strong>
+				</div>
+	<?php endif;?>
+
+<!--  CSRF -->
+	<?php $element = $csrfForm->get('csrf') ?>
+				    <div class="form-group">
+						<?php echo $this->formElement($element) ?>
+	<?php if ($this->formElementErrors($element)) : ?>
+						<div class="alert alert-danger" style="text-align: center">
+							<strong><?php echo $this->translate('The form has expired, please input again', 'ppit-core', $context->getLocale()) ?></strong>
+						</div>
+	<?php endif;?>
+					</div>
+
+      <div class="state_container">
+
+	<?php foreach ($currentState['sections'] as $sectionId => $section) : ?>
+		<?php if ($section['type'] == 'module') : ?>
+        <div class="state_module">
+          <div class="state_moduleTitleContainer">
+            <h2 class="state_moduleTitle"><?php echo $section['title'][$context->getLocale()]?></h2>
+          </div>
+          <div class="state_moduleContainer <?php if (array_key_exists('large', $section)) echo 'state_moduleContainer-large' ?>">
+
+		<?php foreach ($section['fields'] as $fieldId => $field) : ?>
+			<?php 
+			if ($field['type'] == 'repository') $field = $context->getConfig($field['definition']);
+			$mandatory = (array_key_exists('mandatory', $field) && $field['mandatory']) ? 'require' : '';
+			?>
+
+			<?php if ($field['type'] == 'hidden') : ?>
+				<input type="hidden" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" value="<?php echo $field['value'] ?>" />
+
+			<?php elseif ($field['type'] == 'structured') : ?>
+<!-- Structured field -->
+				<?php foreach ($field['properties'] as $itemId => $item) : ?>
+
+					<?php if ($item['type'] == 'repeater') : ?>
+            <div class="input_repeater">
+						<?php foreach ($item['properties'] as $propertyId => $property) : ?>
+
+              <div class="input_container input_container-grid<?php echo count($item['properties']) ?>">
+              <label class="input_label" for="<?php echo $propertyId ?>"><?php if ($mandatory) echo '* '?><?php echo $property['labels'][$context->getLocale()]?></label>
+
+							<?php if ($property['type'] == 'select') : ?>
+              <select class="input_select" name="<?php echo $propertyId ?>" id="<?php echo $propertyId ?>">
+				<option/>
+								<?php foreach ($property['modalities'] as $modalityId => $modality) : ?>
+                <option value="<?php echo $modalityId?>"><?php echo $modality[$context->getLocale()]?></option>
+								<?php endforeach;?>
+              </select>
+
+							<?php elseif ($property['type'] == 'textarea') : ?>
+              <textarea class="input_textarea" name="<?php echo $propertyId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"></textarea>
+
+							<?php else : ?>
+								<?php
+								if ($property['type'] == 'text') $type = '';
+								elseif ($property['type'] == 'number') $type = 'number';
+								elseif ($property['type'] == 'email') $type = 'email';
+								elseif ($property['type'] == 'phone') $type = 'number';
+								?>
+              <input class="input_text" type="text" name="<?php echo $propertyId ?>" id="<?php echo $propertyId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>">
+
+							<?php endif?>
+              </div>
+
+						<?php endforeach;?>
+            </div>
+
+            <div class="input_more">
+              <div class="input_moreButton"><?php echo $item['add-button-label'][$context->getLocale()]?></div>
+            </div>
+        
+	            	<?php else : ?>
+	            	<?php 
+	            	$propertyId = $itemId;
+	            	$property = $item;
+	            	?>
+            <div class="input_container <?php if (array_key_exists('solo', $property)) echo 'input_container-solo' ?>">
+              <label class="input_label" for="<?php echo $propertyId ?>"><?php if ($mandatory) echo '* '?><?php echo $property['labels'][$context->getLocale()]?></label>
+
+						<?php if ($property['type'] == 'select') : ?>
+              <select class="input_select" name="<?php echo $propertyId ?>" id="<?php echo $propertyId ?>">
+				<option/>
+							<?php foreach ($property['modalities'] as $modalityId => $modality) : ?>
+                <option value="<?php echo $modalityId?>"><?php echo $modality[$context->getLocale()]?></option>
+							<?php endforeach;?>
+              </select>
+
+						<?php elseif ($property['type'] == 'textarea') : ?>
+              <textarea class="input_textarea" name="<?php echo $propertyId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"></textarea>
+
+						<?php else : ?>
+							<?php
+							if ($field['type'] == 'text') $type = '';
+							elseif ($field['type'] == 'number') $type = 'number';
+							elseif ($field['type'] == 'email') $type = 'email';
+							elseif ($field['type'] == 'phone') $type = 'number';
+							?>
+		      <input class="input_text" type="text" name="<?php echo $propertyId ?>" id="<?php echo $propertyId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>">
+
+						<?php endif?>
+            </div>
+        	    	<?php endif;?>
+
+    	        <?php endforeach;?>
+
+			<?php else : ?>
+
+<!-- Simple field -->
+            <div class="input_container">
+
+				<?php if ($field['type'] == 'html') : ?>
+					<?php 
+					foreach ($field['parameters'] as $parameterId => $rendering) {
+						if ($rendering == 'date') $arguments[] = $context->decodeDate($account->properties[$parameterId]);
+						else $arguments[] = $account->properties[$parameterId];
+					}
+					?>
+			<div><?php echo vsprintf($context->localize($field['text']), $arguments) ?></div>
+
+				<?php elseif ($field['type'] == 'select') : ?>
+
+              <label class="input_label" for="<?php echo $fieldId ?>"><?php if ($mandatory) echo '* '?><?php echo $field['labels'][$context->getLocale()]?></label>
+              <select class="input_select" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>">
+				<option/>
+					<?php foreach ($field['modalities'] as $modalityId => $modality) : ?>
+                <option value="<?php echo $modalityId?>" <?php if ($account->properties[$fieldId] == $modalityId) echo 'selected="selected"' ?>><?php echo $modality[$context->getLocale()]?></option>
+					<?php endforeach;?>
+              </select>
+
+				<?php elseif ($field['type'] == 'textarea') : ?>
+              <label class="input_label" for="<?php echo $fieldId ?>"><?php if ($mandatory) echo '* '?><?php echo $field['labels'][$context->getLocale()]?></label>
+              <textarea class="input_textarea" name="<?php echo $fieldId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"><?php echo $account->properties[$fieldId] ?></textarea>
+
+				<?php else : ?>
+				<?php
+				if ($field['type'] == 'text') $type = '';
+				elseif ($field['type'] == 'number') $type = 'number';
+				elseif ($field['type'] == 'email') $type = 'email';
+				elseif ($field['type'] == 'phone') $type = 'number';
+				?>
+              <label class="input_label" for="<?php echo $fieldId ?>"><?php if ($mandatory) echo '* '?><?php echo $field['labels'][$context->getLocale()]?></label>
+              <input class="input_text" type="text" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>" value="<?php echo $account->properties[$fieldId] ?>">
+	
+				<?php endif?>
+            </div>
+
+			<?php endif;?>
+
+		<?php endforeach;?>
+
+          </div>
+        </div>
+
+		<?php elseif ($section['type'] == 'info') : ?>
+        <div class="info_container">
+<!--
+          <div class="info_inputContainer">
+
+			<?php foreach ($section['fields'] as $fieldId => $field) : ?>
+				<?php 
+				if ($field['type'] == 'repository') $field = $context->getConfig($field['definition']);
+				$mandatory = (array_key_exists('mandatory', $field) && $field['mandatory']) ? 'require' : '';
+				?>
+
+				<?php if ($field['type'] == 'html') : ?>
+					<?php 
+					foreach ($field['parameters'] as $parameterId => $rendering) {
+						if ($rendering == 'date') $arguments[] = $context->decodeDate($account->properties[$parameterId]);
+						else $arguments[] = $account->properties[$parameterId];
+					}
+					?>
+			<?php echo vsprintf($context->localize($field['text']), $arguments) ?>
+
+				<?php elseif ($field['type'] == 'attachment') : ?>
+
+            <div class="input_container input_container-large">
+              <label class="input_label" for="<?php echo $fieldId ?>"><?php echo $field['labels'][$context->getLocale()]?></label>
+              <input class="input_fileHidden" type="file" id="<?php echo $fieldId ?>" name="<?php echo $fieldId ?>" multiple data-test="require">
+              <label class="input_file" for="<?php echo $fieldId ?>">
+                <div class="input_fileLogo"></div>
+                <div class="input_fileText">+ <?php echo $this->translate('Add a file', 'ppit-core', $context->getLocale())?></div>
+              </label>
+            </div>
+            
+				<?php endif;?>
+			<?php endforeach;?>
+		  </div> -->
+
+          <div class="info_infoContainer">
+            <img class="info_img" src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/'.$section['information']['img']['src']) ?>" alt="Information">
+			<?php 
+			$arguments = array();
+			foreach ($section['information']['parameters'] as $parameterId => $rendering) {
+				if ($rendering == 'date') $arguments[] = $context->decodeDate($account->properties[$parameterId]);
+				else $arguments[] = $account->properties[$parameterId];
+			}
+			?>
+            <?php echo vsprintf($section['information']['text'], $arguments) ?>
+          </div>
+        </div>
+
+		<?php elseif ($section['type'] == 'button') : ?>
+
+        <div class="state_buttonContainer">
+          <?php 
+          $url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
+          $link = $url('account/dropboxLink', array('document' => $section['href']), array('force_canonical' => true));
+          ?>
+          <button class="state_button <?php if (strlen($section['text'][$context->getLocale()]) > 15) echo 'state_button-large' ?>" type="submit" formaction="<?php echo $link ?>">
+            <?php echo $section['text'][$context->getLocale()] ?>
+          </button>
+        </div>
+
+		<?php endif;?>
+
+	<?php endforeach;?>
+		</div>
+
+        <div class="state_buttonContainer">
+          <button class="state_button <?php if (strlen($currentState['next-step']['labels'][$context->getLocale()]) > 15) echo 'state_button-large' ?>" type="submit">
+            <?php echo $currentState['next-step']['labels'][$context->getLocale()] ?>
+            <span class="state_buttonArrow"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+<?php endif?>
+
+  <script src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/js/main.js') ?>" charset="utf-8"></script>
+  
+<?php if ($state_id != 'index' && array_key_exists('custom-js', $currentState)) : ?>
+	<?php echo $this->partial($currentState['custom-js']) ?>	
+<?php endif;?>
+
+</body>
+</html>

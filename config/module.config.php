@@ -61,7 +61,16 @@ return array(
                 ),
            		'may_terminate' => true,
 	       		'child_routes' => array(
- 	       						'post' => array(
+ 	       						'contactForm' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/contact-form[/:type][/:place_identifier][/:state_id][/:action_id][/:id]',
+        										'defaults' => array(
+        												'action' => 'contactForm',
+        										),
+        								),
+        						),
+	       						'post' => array(
         								'type' => 'segment',
         								'options' => array(
         										'route' => '/post[/:type]',
@@ -733,7 +742,8 @@ return array(
         'guards' => array(
             'BjyAuthorize\Guard\Route' => array(
             	array('route' => 'commitmentAccount/post', 'roles' => array('guest')), // Deprecated. For compatibility reasons with Shin Agency
-
+            	array('route' => 'commitmentAccount/contactForm', 'roles' => array('guest')),
+            		
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager')),
