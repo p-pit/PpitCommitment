@@ -3,7 +3,7 @@
 return array(
     'controllers' => array(
         'invokables' => array(
-            'PpitCommitment\Controller\Account' => 'PpitCommitment\Controller\AccountController',
+            'PpitCommitment\Controller\Account' => 'PpitCommitment\Controller\AccountController', // Deprecated. For compatibility reasons with Shin Agency
         	'PpitCommitment\Controller\Commitment' => 'PpitCommitment\Controller\CommitmentController',
         	'PpitCommitment\Controller\CommitmentCredit' => 'PpitCommitment\Controller\CommitmentCreditController',
         	'PpitCommitment\Controller\CommitmentMessage' => 'PpitCommitment\Controller\CommitmentMessageController',
@@ -49,6 +49,7 @@ return array(
 	                ),
 	       		),
             ),
+// Deprecated. For compatibility reasons with Shin Agency
         	'commitmentAccount' => array(
                 'type'    => 'literal',
                 'options' => array(
@@ -60,100 +61,7 @@ return array(
                 ),
            		'may_terminate' => true,
 	       		'child_routes' => array(
-        						'index' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/index[/:entry][/:type]',
-        										'defaults' => array(
-        												'action' => 'index',
-        										),
-        								),
-        						),
-        						'contactIndex' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/contact-index[/:entry][/:type]',
-        										'defaults' => array(
-        												'action' => 'contactIndex',
-        										),
-        								),
-        						),
-	       						'search' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/search[/:entry][/:type]',
-        										'defaults' => array(
-        												'action' => 'search',
-        										),
-        								),
-        						),
-        						'list' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/list[/:entry][/:type]',
-        										'defaults' => array(
-        												'action' => 'list',
-        										),
-        								),
-        						),
-        						'export' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/export[/:entry][/:type]',
-        										'defaults' => array(
-        												'action' => 'export',
-        										),
-        								),
-        						),
-	       						'group' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/group[/:type]',
-        										'defaults' => array(
-        												'action' => 'group',
-        										),
-        								),
-        						),
-	       						'sendMessage' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/send-message[/:type]',
-        										'defaults' => array(
-        												'action' => 'sendMessage',
-        										),
-        								),
-        						),
-        						'dropboxLink' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/dropbox-link[/:document]',
-        										'defaults' => array(
-        												'action' => 'dropboxLink',
-        										),
-        								),
-        						),
-	       						'detail' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/detail[/:type][/:id]',
-        										'constraints' => array(
-        												'id' => '[0-9]*',
-        										),
-        										'defaults' => array(
-        												'action' => 'detail',
-        										),
-        								),
-        						),
-	       						'get' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/get[/:email]',
-        										'defaults' => array(
-        												'action' => 'get',
-        										),
-        								),
-        						),
-	       						'post' => array(
+ 	       						'post' => array(
         								'type' => 'segment',
         								'options' => array(
         										'route' => '/post[/:type]',
@@ -162,99 +70,6 @@ return array(
         										),
         								),
         						),
-	       						'processPost' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/process-post[/:interaction_id]',
-        										'defaults' => array(
-        												'action' => 'processPost',
-        										),
-        								),
-        						),
-	       						'update' => array(
-		        						'type' => 'segment',
-		        						'options' => array(
-		        								'route' => '/update[/:id][/:type]',
-		        								'constraints' => array(
-		        										'id'     => '[0-9]*',
-		        								),
-		        								'defaults' => array(
-		        										'action' => 'update',
-		        								),
-		        						),
-		        				),
-	       						'updateUser' => array(
-		        						'type' => 'segment',
-		        						'options' => array(
-		        								'route' => '/update-user[/:type][/:id][/:act]',
-		        								'constraints' => array(
-		        										'id'     => '[0-9]*',
-		        								),
-		        								'defaults' => array(
-		        										'action' => 'update-user',
-		        								),
-		        						),
-		        				),
-	       						'passwordRequest' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/password-request',
-        										'defaults' => array(
-        												'action' => 'passwordRequest',
-        										),
-        								),
-        						),
-	       						'updateContact' => array(
-		        						'type' => 'segment',
-		        						'options' => array(
-		        								'route' => '/update-contact[/:type][/:contactNumber][/:id][/:act]',
-		        								'constraints' => array(
-		        										'id'     => '[0-9]*',
-		        								),
-		        								'defaults' => array(
-		        										'action' => 'updateContact',
-		        								),
-		        						),
-		        				),
-	       						'indexCard' => array(
-		        						'type' => 'segment',
-		        						'options' => array(
-		        								'route' => '/index-card[/:id][/:type]',
-		        								'constraints' => array(
-		        										'id'     => '[0-9]*',
-		        								),
-		        								'defaults' => array(
-		        										'action' => 'indexCard',
-		        								),
-		        						),
-		        				),
-	       						'register' => array(
-		        						'type' => 'segment',
-		        						'options' => array(
-		        								'route' => '/register[/:type]',
-		        								'defaults' => array(
-		        										'action' => 'register',
-		        								),
-		        						),
-		        				),
-        						'contactForm' => array(
-        								'type' => 'segment',
-        								'options' => array(
-        										'route' => '/contact-form[/:type][/:place_identifier][/:state_id][/:action_id][/:id]',
-        										'defaults' => array(
-        												'action' => 'contactForm',
-        										),
-        								),
-        						),
-	       				'rephase' => array(
-        						'type' => 'segment',
-        						'options' => array(
-        								'route' => '/rephase',
-        								'defaults' => array(
-        										'action' => 'rephase',
-        								),
-        						),
-        				),
 	       		),
 	       	),
         	'commitment' => array(
@@ -917,30 +732,7 @@ return array(
         // Guard listeners to be attached to the application event manager
         'guards' => array(
             'BjyAuthorize\Guard\Route' => array(
-
-            	// Orders
-				array('route' => 'commitmentAccount', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/index', 'roles' => array('sales_manager', 'manager')),
-				array('route' => 'commitmentAccount/contactIndex', 'roles' => array('sales_manager')),
-            	array('route' => 'commitmentAccount/search', 'roles' => array('sales_manager', 'manager')),
-				array('route' => 'commitmentAccount/group', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/sendMessage', 'roles' => array('sales_manager')),
-            	array('route' => 'commitmentAccount/dropboxLink', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/detail', 'roles' => array('sales_manager', 'manager')),
-            	array('route' => 'commitmentAccount/get', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/post', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/processPost', 'roles' => array('admin', 'ws-incoming')),
-//            	array('route' => 'commitmentAccount/delete', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentAccount/export', 'roles' => array('sales_manager', 'manager')),
-            	array('route' => 'commitmentAccount/list', 'roles' => array('sales_manager', 'manager')),
-				array('route' => 'commitmentAccount/update', 'roles' => array('sales_manager', 'manager')),
-            	array('route' => 'commitmentAccount/updateUser', 'roles' => array('sales_manager', 'manager')),
-            	array('route' => 'commitmentAccount/passwordRequest', 'roles' => array('admin')),
-            	array('route' => 'commitmentAccount/updateContact', 'roles' => array('sales_manager', 'manager')),
-				array('route' => 'commitmentAccount/indexCard', 'roles' => array('sales_manager', 'manager')),
-            	array('route' => 'commitmentAccount/register', 'roles' => array('guest')),
-				array('route' => 'commitmentAccount/contactForm', 'roles' => array('guest')),
-            	array('route' => 'commitmentAccount/rephase', 'roles' => array('admin')),
+            	array('route' => 'commitmentAccount/post', 'roles' => array('guest')), // Deprecated. For compatibility reasons with Shin Agency
 
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'manager')),
@@ -1064,7 +856,7 @@ return array(
 
 	'menus/p-pit-engagements' => array(
 					'contact' => array(
-							'route' => 'commitmentAccount/contactIndex',
+							'route' => 'account/contactIndex',
 							'params' => array('entry' => 'contact', 'type' => 'business'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
@@ -1073,7 +865,7 @@ return array(
 							),
 					),
 					'account' => array(
-							'route' => 'commitmentAccount/index',
+							'route' => 'account/index',
 							'params' => array('entry' => 'account', 'type' => 'business'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
@@ -1132,7 +924,7 @@ return array(
 	'currentApplication' => 'ppitCommitment',
 
 	'ppitCoreDependencies' => array(
-			'commitment_account' => new \PpitCommitment\Model\Account,
+			'commitment_account' => new \PpitCore\Model\Account,
 	),
 		
 	'ppitCommitmentDependencies' => array(
@@ -1552,12 +1344,12 @@ return array(
 			'displayAudit' => true,
 			'tabs' => array(
 					'contact_1' => array(
-							'route' => 'commitmentAccount/update',
+							'route' => 'account/update',
 							'params' => array('type' => ''),
 							'labels' => array('en_US' => 'Main contact', 'fr_FR' => 'Contact principal'),
 					),
 					'contact_2' => array(
-							'route' => 'commitmentAccount/updateContact',
+							'route' => 'account/updateContact',
 							'params' => array('type' => '', 'contactNumber' => 2),
 							'labels' => array('en_US' => 'Invoicing', 'fr_FR' => 'Facturation'),
 					),
@@ -1739,8 +1531,8 @@ table.note-report td {
 	),
 		
 	'interaction/type/contact' => array(
-			'controller' => '\PpitCommitment\Model\Account::controlInteraction',
-			'processor' => '\PpitCommitment\Model\Account::processInteraction',
+			'controller' => '\PpitCore\Model\Account::controlInteraction',
+			'processor' => '\PpitCore\Model\Account::processInteraction',
 	),
 
 	'interaction/type/web_service' => array(

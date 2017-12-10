@@ -2,7 +2,6 @@
 namespace PpitCommitment\ViewHelper;
 
 use PpitCore\Model\Context;
-use PpitCommitment\Model\Account;
 
 class SsmlCommitmentViewHelper
 {

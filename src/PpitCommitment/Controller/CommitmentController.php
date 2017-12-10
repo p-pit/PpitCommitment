@@ -3,7 +3,6 @@ namespace PpitCommitment\Controller;
 
 use DateInterval;
 use Date;
-use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentTerm;
@@ -16,6 +15,7 @@ use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCommitment\ViewHelper\XmlUblInvoiceViewHelper;
 use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
 use PpitCore\Form\CsrfForm;
+use PpitCore\Model\Account;
 use PpitCore\Model\Credit;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;

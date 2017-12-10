@@ -1,13 +1,13 @@
 <?php
 namespace PpitCommitment\Model;
 
-use PpitCommitment\Model\Account;
+use PpitCommitment\Model\XmlCommitmentResponse;
+use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
 use PpitCore\Model\Instance;
 use PpitCore\Model\Document;
-use PpitCommitment\Model\XmlCommitmentResponse;
 use SplFileObject;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;

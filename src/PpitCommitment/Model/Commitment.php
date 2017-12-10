@@ -2,9 +2,9 @@
 namespace PpitCommitment\Model;
 
 use PpitAccounting\Model\Journal;
-use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
+use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Vcard;
 use PpitContact\Model\ContactMessage;
@@ -382,7 +382,7 @@ class Commitment implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
-    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array('account_name' => 'name'), 'left');
+    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name'), 'left');
 //    		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
     	
     	$where = new Where();
@@ -411,7 +411,7 @@ class Commitment implements InputFilterAwareInterface
 			foreach ($params as $propertyId => $property) {
 				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
-				elseif ($propertyId == 'account_name') $where->like('commitment_account.name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -1291,7 +1291,7 @@ class Commitment implements InputFilterAwareInterface
     	// Retrieve commitments and count
     	$select = Commitment::getTable()->getSelect()
     		->join('core_instance', 'commitment.instance_id = core_instance.id', array(), 'left')
-    		->join('commitment_account', 'commitment.account_id = commitment_account.id', array('account_name' => 'name'), 'left');
+    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name'), 'left');
     	$where = new Where();
     	$where->in('commitment.instance_id', $instanceIds);
 		$where->notEqualTo('commitment.credit_status', 'closed');

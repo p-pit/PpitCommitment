@@ -1,12 +1,12 @@
 <?php
 namespace PpitCommitment\Controller;
 
-use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
 use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
+use PpitCore\Model\Account;
 use PpitCore\Model\Document;
 use PpitCore\Model\Community;
 use PpitCore\Form\CsrfForm;

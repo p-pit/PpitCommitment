@@ -1,8 +1,8 @@
 <?php
 namespace PpitCommitment\Model;
 
-use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
+use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
@@ -102,7 +102,7 @@ class Term implements InputFilterAwareInterface
 
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
-    		->join('commitment_account', 'commitment_account.id = commitment.account_id', array('name'), 'left')
+    		->join('core_account', 'core_account.id = commitment.account_id', array('name'), 'left')
 			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
 		$where->notEqualTo('commitment_term.status', 'deleted');
@@ -115,7 +115,7 @@ class Term implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'name') $where->like('commitment_account.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');

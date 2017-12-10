@@ -2,7 +2,6 @@
 namespace PpitCommitment;
 
 use PpitCore\Model\GenericTable;
-use PpitCommitment\Model\Account;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentYear;
@@ -45,17 +44,6 @@ class Module
     {
         return array(
             'factories' => array(
- 	          	'PpitCommitment\Model\AccountTable' =>  function($sm) {
-                    $tableGateway = $sm->get('AccountTableGateway');
-                    $table = new GenericTable($tableGateway);
-                    return $table;
-                },
-                'AccountTableGateway' => function ($sm) {
-                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-                    $resultSetPrototype = new ResultSet();
-                    $resultSetPrototype->setArrayObjectPrototype(new Account());
-                    return new TableGateway('commitment_account', $dbAdapter, null, $resultSetPrototype);
-                },
             	'PpitCommitment\Model\CommitmentTable' =>  function($sm) {
                 	$tableGateway = $sm->get('CommitmentTableGateway');
                 	$table = new GenericTable($tableGateway);
