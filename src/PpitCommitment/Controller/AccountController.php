@@ -25,14 +25,8 @@ use Zend\Log\Writer;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-/**
- * 
- * Deprecated. For compatibility reasons with Shin Agency
- *
- */
 class AccountController extends AbstractActionController
 {
-
     public function contactFormAction()
 	{
 		$context = Context::getCurrent();
@@ -48,7 +42,7 @@ class AccountController extends AbstractActionController
 
     	if ($state_id == 'index') {
 	    	if ($request->isPost()) {
-	    		return $this->redirect()->toRoute('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => 'state1'));
+	    		return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => 'state1'));
 	    	}
     		$view = new ViewModel(array(
 	    			'context' => $context,
@@ -216,7 +210,7 @@ class AccountController extends AbstractActionController
 						    		}
 						    	}
     							$connection->commit();
-    							return $this->redirect()->toRoute('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
+    							return $this->redirect()->toRoute('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $currentState['next-step']['state_id'], 'id' => $id));
     						}
     					}
     					catch (\Exception $e) {
@@ -251,7 +245,129 @@ class AccountController extends AbstractActionController
     	$view->setTerminal(true);
     	return $view;
     }
-	
+
+    public static function processPost($data, $interaction)
+    {
+    	$context = Context::getCurrent();
+    	$translator = $context->getServiceManager()->get('translator');
+    	$type = $interaction->category;
+    	$reference = $interaction->reference;
+    	$place = Place::get($data['place_identifier'], 'identifier');
+    	$data['place_id'] = $place->id;
+    	$data['origine'] = 'web';
+    	$data['opening_date'] = date('Y-m-d');
+    
+    	if (array_key_exists('request', $data) && array_key_exists($data['request'], $context->getConfig('core_account/requestTypes'.(($type) ? '/'.$type : '')))) {
+    		$requestType = $context->getConfig('core_account/requestTypes'.(($type) ? '/'.$type : ''))[$data['request']][$context->getLocale()];
+    	}
+    	else {
+    		$requestType = $context->getConfig('core_account/requestTypes'.(($type) ? '/'.$type : ''))['general_information'][$context->getLocale()];
+    	}
+    	 
+    	if (array_key_exists('request_comment', $data)) $requestComment = $data['request_comment'];
+    	else $requestComment = '';
+    	 
+    	$vcard = Vcard::get($data['email'], 'email');
+    	if ($vcard) {
+    		// Check if the account already exists. No update and the sales manager are notified.
+    		$accounts = Account::getList($interaction->category, 'contact', array('contact_1_id' => $vcard->id));
+    		reset($accounts);
+    		if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
+    		else $account = null;
+    		if ($account && $account->place_id == $place->id) {
+    			if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+    			$account->contact_history[] = array(
+    					'time' => date('Y-m-d H:i:s'),
+    					'n_fn' => 'support@p-pit.fr',
+    					'comment' => $translator->translate('ALREADY EXISTING ACCOUNT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
+    			);
+    			$rc = $account->update(null);
+    			if ($rc != 'OK') {
+    				$interaction->http_status = '500';
+    			}
+    			else {
+    				$interaction->status = 'processed';
+    				$interaction->http_status = '200';
+    			}
+    			$interaction->update(null);
+    			return $rc;
+    		}
+    		else {
+    			 
+    			// Create the account
+    			$account = Account::instanciate($type);
+    			$rc = $account->loadData($data);
+    			if ($rc != 'OK') {
+    				$interaction->http_status = '400';
+    				$rc = 'Account integrity';
+    			}
+    			else {
+    				$account->contact_1_id = $vcard->id;
+    				$account->contact_1_status = 'main';
+    				if (!$account->name) $account->name = $vcard->n_last.', '.$vcard->n_first;
+    				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+    				$account->contact_history[] = array(
+    						'time' => date('Y-m-d H:i:s'),
+    						'n_fn' => 'support@p-pit.fr',
+    						'comment' => $translator->translate('ALREADY EXISTING CONTACT', 'ppit-commitment', $context->getLocale()).' - Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
+    				);
+    				$rc = $account->add();
+    				if ($rc != 'OK') {
+    					$interaction->http_status = '500';
+    				}
+    				else {
+    					$interaction->status = 'processed';
+    					$interaction->http_status = '200';
+    				}
+    			}
+    			$interaction->update(null);
+    			return $rc;
+    		}
+    	}
+    	 
+    	// Create the contact 1
+    	$contact = Vcard::instanciate();
+    	$rc = $contact->loadData($data);
+    	if ($rc != 'OK') {
+    		$interaction->http_status = '400';
+    		$rc = 'Vcard integrity';
+    	}
+    	else {
+    		$rc = $contact->add();
+    		if ($rc != 'OK') {
+    			$interaction->http_status = '500';
+    		}
+    		else {
+    			// Create the account
+    			$account = Account::instanciate($type);
+    			if ($account->loadData($data) != 'OK') {
+    				$interaction->http_status = '400';
+    				$rc = 'Account integrity';
+    			}
+    			else {
+    				$account->contact_1_id = $contact->id;
+    				$account->contact_1_status = 'main';
+    				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
+    				$account->contact_history[] = array(
+    						'time' => date('Y-m-d H:i:s'),
+    						'n_fn' => 'support@p-pit.fr',
+    						'comment' => 'Request: '.$requestType.' - Comment: '.$requestComment.' - Ref.: '.$reference,
+    				);
+    				$rc = $account->add();
+    				if ($rc != 'OK') {
+    					$interaction->http_status = '500';
+    				}
+    				else {
+    					$interaction->status = 'processed';
+    					$interaction->http_status = '200';
+    				}
+    			}
+    		}
+    	}
+    	$interaction->update(null);
+    	return $rc;
+    }
+
 	public function postAction()
     {
     	$context = Context::getCurrent();
@@ -308,10 +424,28 @@ class AccountController extends AbstractActionController
     		}
 			$interaction->http_status = '200';
 			$rc = $interaction->add();
-			$rc = Account::processPost($data, $interaction);
+			$rc = AccountController::processPost($data, $interaction);
 	   		$this->getResponse()->setStatusCode($interaction->http_status);
    			$this->response->setContent(json_encode(array('interaction_id' => $interaction->id, 'rc' => $rc)));
    			return $this->getResponse();
 	    }
+    }
+
+    public function processPostAction()
+	{
+    	$context = Context::getCurrent();
+    	$translator = $context->getServiceManager()->get('translator');
+    	$interactionId = $this->params()->fromRoute('interaction_id');
+    	$interaction = Interaction::get($interactionId);
+   		$this->response->setContent(json_encode(array('interaction_id' => $interactionId)));
+    	if ($interaction->status != 'new') {
+			$this->getResponse()->setStatusCode('403');
+			return $this->getResponse();
+		}
+    	$data = json_decode($interaction->content, true);
+		$rc = AccountController::processPost($data, $interaction);
+   		$this->getResponse()->setStatusCode($interaction->http_status);
+   		echo $rc;
+		return $this->getResponse();
     }
 }

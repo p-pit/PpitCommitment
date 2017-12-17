@@ -39,7 +39,7 @@
       <h2 class="question_title"><?php echo $template['index']['question_title'][$context->getLocale()] ?></h2>
       <div class="question_container">
 <?php foreach ($template['index']['actions']['buttons'] as $buttonId => $button) : ?>
-        <form action="<?php echo $this->url('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id, 'action_id' => $buttonId)) ?>" method="post">
+        <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'state_id' => $state_id, 'action_id' => $buttonId)) ?>" method="post">
 	        <input class="question_button" type="submit" value="<?php echo $button['labels'][$context->getLocale()] ?>">
 	    </form>
 <?php endforeach;?>
@@ -52,7 +52,7 @@
 <?php else : ?>
   
   <section class="state">
-    <form action="<?php echo $this->url('account/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $state_id, 'id' => $id)) ?>" method="post" enctype="multipart/form-data">
+    <form action="<?php echo $this->url('commitmentAccount/contactForm', array('type' => $type, 'place_identifier' => $place_identifier, 'action_id' => $action_id, 'state_id' => $state_id, 'id' => $id)) ?>" method="post" enctype="multipart/form-data">
       <h1 class="state_title"><?php echo $currentState['title'][$context->getLocale()]?></h1>
 
 <!-- Duplicate error -->

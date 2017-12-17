@@ -19,7 +19,7 @@ class PdfIndexCardViewHelper
     	// Retrieve the context
     	$context = Context::getCurrent();
 		$translator = $context->getServiceManager()->get('translator');
-    	$cardSpec = $context->getConfig('commitmentAccount/indexCard'.(($account->type) ? '/'.$account->type : ''));
+    	$cardSpec = $context->getConfig('core_account/indexCard'.(($account->type) ? '/'.$account->type : ''));
     	
     	// create new PDF document
     	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];
@@ -79,7 +79,7 @@ class PdfIndexCardViewHelper
     	foreach($cardSpec['header'] as $propertyId => $unused) {
     		if ($propertyId == 'date') $value = $context->decodeDate(date('Y-m-d'));
     		else {
-				$property = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
+				$property = $context->getConfig('core_account'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
 				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 				if ($propertyId == 'place_id') $value = $place->caption;
 				elseif ($propertyId == 'name') $value = $account->contact_1->n_fn;
@@ -98,9 +98,9 @@ class PdfIndexCardViewHelper
 	    $pdf->SetDrawColor(0, 0, 0);
 
 	    $rows = '';
-		$title = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$cardSpec['1st-column']['title']];
+		$title = $context->getConfig('core_account'.(($account->type) ? '/'.$account->type : ''))['properties'][$cardSpec['1st-column']['title']];
 	    foreach($cardSpec['1st-column']['rows'] as $propertyId => $unused) {
-			$property = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
+			$property = $context->getConfig('core_account'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
 			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 			if ($propertyId == 'name') $value = $account->name;
 			elseif ($property['type'] == 'date') $value = $context->decodeDate($account->properties[$propertyId]);
@@ -112,9 +112,9 @@ class PdfIndexCardViewHelper
 	    }
 	    $table1 = sprintf('<table class="table note-report"><tr><th style="width: 100%%">%s</th></tr>%s</table>', $title['labels'][$context->getLocale()], $rows);
 	    $rows = '';
-	    $title = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$cardSpec['2nd-column']['title']];
+	    $title = $context->getConfig('core_account'.(($account->type) ? '/'.$account->type : ''))['properties'][$cardSpec['2nd-column']['title']];
 	    foreach($cardSpec['2nd-column']['rows'] as $propertyId => $unused) {
-	    	$property = $context->getConfig('commitmentAccount'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
+	    	$property = $context->getConfig('core_account'.(($account->type) ? '/'.$account->type : ''))['properties'][$propertyId];
 	    	if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 			if ($propertyId == 'name') $value = $account->name;
 			elseif ($property['type'] == 'date') $value = $context->decodeDate($account->properties[$propertyId]);

@@ -10,7 +10,7 @@ class SsmlAccountViewHelper
 		$context = Context::getCurrent();
 		$translator = $context->getServiceManager()->get('translator');
 
-		$title = (isset ($context->getConfig('commitmentAccount/search')['title']) ? $context->getConfig('commitmentAccount/search')['title'][$context->getLocale()] : $translator->translate('Accounts', 'ppit-commitment', $context->getLocale()));
+		$title = (isset ($context->getConfig('core_account/search')['title']) ? $context->getConfig('core_account/search')['title'][$context->getLocale()] : $translator->translate('Accounts', 'ppit-commitment', $context->getLocale()));
 		
 		// Set document properties
 		$workbook->getProperties()->setCreator('P-PIT')
@@ -26,8 +26,8 @@ class SsmlAccountViewHelper
 		$i = 0;
 		$colNames = array(1 => 'A', 2 => 'B', 3 => 'C', 4 => 'D', 5 => 'E', 6 => 'F', 7 => 'G', 8 => 'H', 9 => 'I', 10 => 'J', 11 => 'K', 12 => 'L', 13 => 'M', 14 => 'N', 15 => 'O', 16 => 'P', 17 => 'Q', 18 => 'R', 19 => 'S', 20 => 'T', 21 => 'U', 22 => 'V', 23 => 'W', 24 => 'X', 25 => 'Y', 26 => 'Z', 27 => 'AA', 28 => 'AB', 29 => 'AC', 30 => 'AD', 31 => 'AE', 32 => 'AF', 33 => 'AG', 34 => 'AH', 35 => 'AI', 36 => 'AJ', 37 => 'AK', 38 => 'AL', 39 => 'AM', 40 => 'AN', 41 => 'AO');
 		
-		foreach($context->getConfig('commitmentAccount/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
-			$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
+		foreach($context->getConfig('core_account/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
+			$property = $context->getConfig('core_account'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
 			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 			$i++;
 			$sheet->setCellValue($colNames[$i].'1', $property['labels'][$context->getLocale()]);
@@ -37,17 +37,17 @@ class SsmlAccountViewHelper
 		foreach ($view->accounts as $account) {
 			$j++;
 			$i = 0;
-			foreach($context->getConfig('commitmentAccount/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
+			foreach($context->getConfig('core_account/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 				$i++;
 				if ($account->properties[$propertyId]) {
-					$property = $context->getConfig('commitmentAccount'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
+					$property = $context->getConfig('core_account'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
 					if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 					if ($propertyId == 'name') $sheet->setCellValue($colNames[$i].$j, $account->name);
 					elseif ($propertyId == 'contact_history') {
 						$text = '';
 						foreach ($account->properties[$propertyId] as $comment) {
 							$text .= $context->decodeDate(substr($comment['time'], 0, 10)).substr($comment['time'], 10).":\n";
-							if (array_key_exists('status', $comment)) $text .= $context->getconfig('commitmentAccount'.(($type) ? '/'.$type : ''))['statuses'][$comment['status']]['labels'][$context->getLocale()];
+							if (array_key_exists('status', $comment)) $text .= $context->getconfig('core_account'.(($type) ? '/'.$type : ''))['statuses'][$comment['status']]['labels'][$context->getLocale()];
 							$text .= '('.$comment['n_fn'].') '.$comment['comment']."\n";
 						}
 						$sheet->getStyle($colNames[$i].$j)->getAlignment()->setWrapText(true);
@@ -68,7 +68,7 @@ class SsmlAccountViewHelper
 			}
 		}
 		$i = 0;
-		foreach($context->getConfig('commitmentAccount/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $property) {
+		foreach($context->getConfig('core_account/export'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $property) {
 			$i++;
 			$sheet->getStyle($colNames[$i].'1')->getFont()->getColor()->setRGB(substr($context->getConfig('styleSheet')['panelHeadingColor'], 1, 6));
 			$sheet->getStyle($colNames[$i].'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB(substr($context->getConfig('styleSheet')['panelHeadingBackground'], 1, 6));

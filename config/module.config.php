@@ -16,15 +16,6 @@ return array(
 	'console' => array(
 		'router' => array(
 			'routes' => array(
-                'notify' => array(
-                    'options' => array(
-                        'route'    => 'account notify',
-                        'defaults' => array(
-                            'controller' => 'PpitCommitment\Controller\Account',
-                            'action'     => 'notify'
-                        )
-                    )
-                )
 			)
 		)
 	),
@@ -49,7 +40,6 @@ return array(
 	                ),
 	       		),
             ),
-// Deprecated. For compatibility reasons with Shin Agency
         	'commitmentAccount' => array(
                 'type'    => 'literal',
                 'options' => array(
@@ -76,6 +66,15 @@ return array(
         										'route' => '/post[/:type]',
         										'defaults' => array(
         												'action' => 'post',
+        										),
+        								),
+        						),
+	       						'processPost' => array(
+        								'type' => 'segment',
+        								'options' => array(
+        										'route' => '/process-post[/:interaction_id]',
+        										'defaults' => array(
+        												'action' => 'processPost',
         										),
         								),
         						),
@@ -743,6 +742,7 @@ return array(
             'BjyAuthorize\Guard\Route' => array(
             	array('route' => 'commitmentAccount/post', 'roles' => array('guest')), // Deprecated. For compatibility reasons with Shin Agency
             	array('route' => 'commitmentAccount/contactForm', 'roles' => array('guest')),
+            	array('route' => 'commitmentAccount/processPost', 'roles' => array('admin', 'ws-incoming')),
             		
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'manager')),
@@ -934,13 +934,12 @@ return array(
 	'currentApplication' => 'ppitCommitment',
 
 	'ppitCoreDependencies' => array(
-			'commitment_account' => new \PpitCore\Model\Account,
 	),
 		
 	'ppitCommitmentDependencies' => array(
 	),
 
-	'commitmentAccount/property/origine' => array(
+	'core_account/property/origine' => array(
 			'type' => 'select',
 			'modalities' => array(
 					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
@@ -951,7 +950,7 @@ return array(
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
 					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
 					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
-					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\adresse'),
+					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\'adresse'),
 			),
 			'labels' => array(
 					'en_US' => 'Origine',
@@ -959,7 +958,7 @@ return array(
 			),
 	),
 
-	'commitmentAccount/business/property/property_1' => array(
+	'core_account/business/property/property_1' => array(
 			'type' => 'select',
 			'modalities' => array(
 					'agro' => array('en_US' => 'To be translated', 'fr_FR' => 'Agroalimentaire'),
@@ -988,7 +987,7 @@ return array(
 			),
 	),
 
-	'commitmentAccount/business/property/property_2' => array(
+	'core_account/business/property/property_2' => array(
 			'type' => 'select',
 			'modalities' => array(
 					'p-pit-learning' => array('en_US' => 'P-Pit Learning', 'fr_FR' => 'P-Pit Learning'),
@@ -1001,19 +1000,19 @@ return array(
 			),
 	),
 
-	'commitmentAccount/business/property/property_3' => array(
+	'core_account/business/property/property_3' => array(
 			'type' => 'text',
 			'labels' => array(
 					'en_US' => 'Web site', 'fr_FR' => 'Site web'
 			),
 	),
 
-	'commitmentAccount/business/property/property_4' => array(
+	'core_account/business/property/property_4' => array(
 			'type' => 'text',
 			'labels' => array('en_US' => 'Legal mention', 'fr_FR' => 'Mention légale'),
 	),
 		
-	'commitmentAccount/business/property/contact_meeting_context' => array(
+	'core_account/business/property/contact_meeting_context' => array(
 			'type' => 'select',
 			'modalities' => array(
 					'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Prise de contact'),
@@ -1024,7 +1023,7 @@ return array(
 			),
 	),
 	
-	'commitmentAccount/business/property/comment_1' => array(
+	'core_account/business/property/comment_1' => array(
 			'type' => 'textarea',
 			'labels' => array(
 					'en_US' => 'Enterprise description',
@@ -1032,7 +1031,7 @@ return array(
 			),
 	),
 
-	'commitmentAccount/business/property/comment_2' => array(
+	'core_account/business/property/comment_2' => array(
 			'type' => 'textarea',
 			'labels' => array(
 					'en_US' => 'Offer description',
@@ -1040,7 +1039,7 @@ return array(
 			),
 	),
 		
-	'commitmentAccount/business' => array(
+	'core_account/business' => array(
 			'statuses' => array(),
 			'properties' => array(
 					'title_1' => array(
@@ -1283,7 +1282,7 @@ return array(
 					),
 					'origine' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/property/origine',
+							'definition' => 'core_account/property/origine',
 					),
 					'contact_history' => array(
 							'type' => 'log',
@@ -1294,41 +1293,41 @@ return array(
 					),
 					'property_1' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/property_1',
+							'definition' => 'core_account/business/property/property_1',
 					),
 					'property_2' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/property_2',
+							'definition' => 'core_account/business/property/property_2',
 					),
 					'property_3' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/property_3',
+							'definition' => 'core_account/business/property/property_3',
 					),
 					'property_4' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/property_4',
+							'definition' => 'core_account/business/property/property_4',
 					),
 					'property_13' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/contact_meeting_context',
+							'definition' => 'core_account/business/property/contact_meeting_context',
 					),
 					'comment_1' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/comment_1',
+							'definition' => 'core_account/business/property/comment_1',
 					),
 					'comment_2' => array(
 							'type' => 'repository',
-							'definition' => 'commitmentAccount/business/property/comment_2',
+							'definition' => 'core_account/business/property/comment_2',
 					),
 			),
 			'order' => 'name',
 	),
 
 	// Account
-	'commitmentAccount/index/business' => array(
+	'core_account/index/business' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
-	'commitmentAccount/search/business' => array(
+	'core_account/search/business' => array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
@@ -1344,12 +1343,12 @@ return array(
 			'more' => array(
 			),
 	),
-	'commitmentAccount/list/business' => array(
+	'core_account/list/business' => array(
 			'name' => 'text',
 			'callback_date' => 'date',
 			'status' => 'select',
 	),
-	'commitmentAccount/detail/business' => array(
+	'core_account/detail/business' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
 			'tabs' => array(
@@ -1365,7 +1364,7 @@ return array(
 					),
 			),
 	),
-	'commitmentAccount/update/business' => array(
+	'core_account/update/business' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
@@ -1393,7 +1392,7 @@ return array(
 			'comment_2' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
 	),
-	'commitmentAccount/updateContact/business' => array(
+	'core_account/updateContact/business' => array(
 			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => false),
@@ -1409,12 +1408,12 @@ return array(
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
 	),
-	'commitmentAccount/groupUpdate/business' => array(
+	'core_account/groupUpdate/business' => array(
 			'status' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 	),
 
-	'commitmentAccount/post/business' => array(
+	'core_account/post/business' => array(
 			'place_identifier' => array('mandatory' => false),
 			'n_title' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
@@ -1434,12 +1433,12 @@ return array(
 			'place_identifier' => array('mandatory' => false),
 			'locale' => array('mandatory' => false),
 	),
-	'commitmentAccount/requestTypes/business' => array(
+	'core_account/requestTypes/business' => array(
 			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
 			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
-	'commitmentAccount/export/business' => array(
+	'core_account/export/business' => array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
@@ -1477,7 +1476,7 @@ return array(
 	
 	'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
 
-	'commitmentAccount/indexCard/business' => array(
+	'core_account/indexCard/business' => array(
 			'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
 			'header' => array(
 					'place_id' => null,
@@ -1547,7 +1546,7 @@ table.note-report td {
 
 	'interaction/type/web_service' => array(
 			'controller' => null,
-			'processor' => '\PpitCommitment\Model\Account::processPost',
+			'processor' => '\PpitCommitment\Controller\Account::processPost',
 	),
 		
 	'interaction/csv/contact' => array(
@@ -2421,14 +2420,15 @@ table.note-report td {
 			),
 	),
 
-		'commitmentAccount/sendMessage' => array(
+		'core_account/sendMessage' => array(
 				'templates' => array(
-						'generic' => array('definition' => 'commitmentAccount/sendMessage/generic'),
+						'generic' => array('definition' => 'core_account/sendMessage/generic'),
+						'generic' => array('definition' => 'customization/P-Pit/send-message/2018'),
 				),
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),
 
-		'commitmentAccount/sendMessage/generic' => array(
+		'core_account/sendMessage/generic' => array(
 				'labels' => array(
 						'en_US' => 'Generic',
 						'fr_FR' => 'Générique',
@@ -2451,15 +2451,15 @@ table.note-report td {
 				),
 		),
 
-		'commitmentAccount/notification' => array(
+		'core_account/notification' => array(
 				'definition' => 'inline',
-				'template' => array('definition' => 'commitmentAccount/notification/template'),
+				'template' => array('definition' => 'core_account/notification/template'),
 				'from_mail' => 'support@p-pit.fr',
 				'from_name' => 'noreply@p-pit.fr',
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),
 		
-		'commitmentAccount/notification/template' => array(
+		'core_account/notification/template' => array(
 				'subject' => array('en_US' => 'Current registration request', 'fr_FR' => 'Demande d\'inscription en cours'),
 				'body' => array(
 						'en_US' => '<p>Hello,</p>
@@ -2613,7 +2613,7 @@ L\'équipe P-Pit
 	),
 		
 	'demo' => array(
-			'commitmentAccount/search/business/title' => array(
+			'core_account/search/business/title' => array(
 					'en_US' => '
 <h4>Account list</h4>
 <p>As a default, all the accounts with a <em>Active</em> status are presented in the list.</p>
@@ -2625,7 +2625,7 @@ L\'équipe P-Pit
 <p>Dès lors qu\'un des critères ci-dessous est spécifié, le mode de recherche est automatiquement activé.</p>
 ',
 			),
-			'commitmentAccount/search/x' => array(
+			'core_account/search/x' => array(
 					'en_US' => '
 <h4>Return in default mode</h4>
 <p>The <code>x</code> button reinitializes all the search criteria and reset the list filtered in todo-list mode.</p>
@@ -2635,7 +2635,7 @@ L\'équipe P-Pit
 <p>Le bouton <code>x</code> réinitialise tous les critères de recherche et ré-affiche la liste filtrée en mode todo-list.</p>
 ',
 			),
-			'commitmentAccount/search/export' => array(
+			'core_account/search/export' => array(
 					'en_US' => '
 <h4>List export</h4>
 <p>The list can be exported to Excel as it is presented: defaulting list or list resulting of a multi-criteria search.</p>
@@ -2645,7 +2645,7 @@ L\'équipe P-Pit
 <p>La liste peut être exportée sous Excel telle que présentée : liste par défaut ou liste résultant d\'une recherche multi-critère.</p>
 ',
 			),
-			'commitmentAccount/list/ordering' => array(
+			'core_account/list/ordering' => array(
 					'en_US' => '
 <h4>Ordering</h4>
 <p>The list can be sorted according to each column in ascending or descending order.</p>
@@ -2655,7 +2655,7 @@ L\'équipe P-Pit
 <p>La liste peut être triée selon chaque colonne en ordre ascendant ou descendant.</p>
 ',
 			),
-			'commitmentAccount/list/checkAll' => array(
+			'core_account/list/checkAll' => array(
 					'en_US' => '
 <h4>Check all</h4>
 <p>This check-box allows to check at one time all the items of the list.</p>
@@ -2665,7 +2665,7 @@ L\'équipe P-Pit
 <p>Cette case à cocher permet de sélectionner d\'un coup tous les éléments de la liste.</p>
 ',
 			),
-			'commitmentAccount/list/groupedActions' => array(
+			'core_account/list/groupedActions' => array(
 					'en_US' => '
 <h4>Grouped actions</h4>
 <p>The group action button operates along with the individual or global checkboxes on the left column.</p>
@@ -2679,7 +2679,7 @@ L\'équipe P-Pit
 <p>Par exemple vous pouvez envoyer un emailing en cochant dans la liste les comptes à cibler puis émettre l\'email de façon groupée.</p>
 					',
 			),
-			'commitmentAccount/list/business/add' => array(
+			'core_account/list/business/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un compte</h4>
@@ -2688,7 +2688,7 @@ L\'équipe P-Pit
 <p>On peut ainsi gérer un regroupement des engagements par compte.</p>
 					',
 			),
-			'commitmentAccount/add' => array(
+			'core_account/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un compte</h4>
@@ -2701,14 +2701,14 @@ L\'équipe P-Pit
 	</ul>
 					',
 			),
-			'commitmentAccount/list/business/detail' => array(
+			'core_account/list/business/detail' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Détail d\'un compte</h4>
 <p>Le bouton zoom permet d\'accéder au détail d\'un compte et aux engagements associés.</p>
 					',
 			),
-			'commitmentAccount/update/business' => array(
+			'core_account/update/business' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Gestion des données du compte</h4>
