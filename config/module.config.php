@@ -1546,7 +1546,7 @@ table.note-report td {
 
 	'interaction/type/web_service' => array(
 			'controller' => null,
-			'processor' => '\PpitCommitment\Controller\Account::processPost',
+			'processor' => '\PpitCommitment\Controller\AccountController::processPost',
 	),
 		
 	'interaction/csv/contact' => array(
@@ -2423,7 +2423,7 @@ table.note-report td {
 		'core_account/sendMessage' => array(
 				'templates' => array(
 						'generic' => array('definition' => 'core_account/sendMessage/generic'),
-						'generic' => array('definition' => 'customization/P-Pit/send-message/2018'),
+						'wishes_2018' => array('definition' => 'customization/p_pit/send-message/wishes_2018'),
 				),
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),

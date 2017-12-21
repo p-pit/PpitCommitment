@@ -256,7 +256,7 @@ class AccountController extends AbstractActionController
     	$data['place_id'] = $place->id;
     	$data['origine'] = 'web';
     	$data['opening_date'] = date('Y-m-d');
-    
+
     	if (array_key_exists('request', $data) && array_key_exists($data['request'], $context->getConfig('core_account/requestTypes'.(($type) ? '/'.$type : '')))) {
     		$requestType = $context->getConfig('core_account/requestTypes'.(($type) ? '/'.$type : ''))[$data['request']][$context->getLocale()];
     	}
@@ -274,7 +274,7 @@ class AccountController extends AbstractActionController
     		reset($accounts);
     		if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
     		else $account = null;
-    		if ($account && $account->place_id == $place->id) {
+    		if ($account /*&& $account->place_id == $place->id*/) { // Demande D. Elfassy de dédoublonner tous centres confondus. Règle non retenue dans l'API REST standard (account/v1)
     			if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
     			$account->contact_history[] = array(
     					'time' => date('Y-m-d H:i:s'),
