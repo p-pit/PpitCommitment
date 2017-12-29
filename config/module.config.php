@@ -629,6 +629,27 @@ return array(
             								),
             						),
             				),
+	        				'downloadInvoice' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/download-invoice[/:id]',
+	        								'constraints' => array(
+	        										'id'     => '[0-9]*',
+	        								),
+	        								'defaults' => array(
+	        										'action' => 'downloadInvoice',
+	        								),
+	        						),
+	        				),
+	        				'serialize' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/serialize',
+	        								'defaults' => array(
+	        										'action' => 'serialize',
+	        								),
+	        						),
+	        				),
             		),
         	),
         	'commitmentTerm' => array(
@@ -703,7 +724,19 @@ return array(
 		        								),
 		        						),
 		        				),
-	       			'delete' => array(
+		        				'invoice' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/invoice[/:id]',
+		        								'constraints' => array(
+		        										'id' => '[0-9]*',
+		        								),
+		        								'defaults' => array(
+		        										'action' => 'invoice',
+		        								),
+		        						),
+		        				),
+	       				'delete' => array(
 	                    'type' => 'segment',
 	                    'options' => array(
 	                        'route' => '/delete[/:id]',
@@ -798,7 +831,10 @@ return array(
             	array('route' => 'commitmentMessage/import', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/submit', 'roles' => array('admin')),
-				array('route' => 'commitmentTerm', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentMessage/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
+				array('route' => 'commitmentMessage/serialize', 'roles' => array('admin')),
+            		
+            	array('route' => 'commitmentTerm', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/index', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/search', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/detail', 'roles' => array('sales_manager')),
@@ -806,6 +842,7 @@ return array(
 				array('route' => 'commitmentTerm/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/list', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/invoice', 'roles' => array('sales_manager', 'accountant')),
             )
         )
     ),
@@ -939,7 +976,7 @@ return array(
 	'ppitCommitmentDependencies' => array(
 	),
 
-	'core_account/property/origine' => array(
+	'core_account/business/property/origine' => array(
 			'type' => 'select',
 			'modalities' => array(
 					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
@@ -950,7 +987,7 @@ return array(
 					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
 					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
 					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
-					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\'adresse'),
+//					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\'adresse'),
 			),
 			'labels' => array(
 					'en_US' => 'Origine',
@@ -1029,6 +1066,7 @@ return array(
 					'en_US' => 'Enterprise description',
 					'fr_FR' => 'Description de l\'entreprise',
 			),
+			'max_length' => 65535,
 	),
 
 	'core_account/business/property/comment_2' => array(
@@ -1037,12 +1075,14 @@ return array(
 					'en_US' => 'Offer description',
 					'fr_FR' => 'Description de l\'offre',
 			),
+			'max_length' => 65535,
 	),
 		
 	'core_account/business' => array(
 			'statuses' => array(),
 			'properties' => array(
 					'title_1' => array(
+							'definition' => 'inline',
 							'type' => 'title',
 							'labels' => array(
 									'en_US' => 'ENTERPRISE IDENTIFICATION',
@@ -1050,6 +1090,7 @@ return array(
 							),
 					),
 					'title_2' => array(
+							'definition' => 'inline',
 							'type' => 'title',
 							'labels' => array(
 									'en_US' => 'REGISTRATION DATA',
@@ -1057,6 +1098,7 @@ return array(
 							),
 					),
 					'title_3' => array(
+							'definition' => 'inline',
 							'type' => 'title',
 							'labels' => array(
 									'en_US' => 'COMMENTS',
@@ -1064,10 +1106,12 @@ return array(
 							),
 					),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
 									'prospect' => array('en_US' => 'Prospect', 'fr_FR' => 'Prospect'),
+									'committed' => array('en_US' => 'Committed', 'fr_FR' => 'Engagé'),
 									'active' => array('en_US' => 'Customer', 'fr_FR' => 'Client'),
 									'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
 							),
@@ -1075,8 +1119,14 @@ return array(
 									'en_US' => 'Status',
 									'fr_FR' => 'Statut',
 							),
+							'perspectives' => array(
+									'contact' => array('new', 'prospect', 'gone'),
+									'account' => array('committed', 'active'),
+							),
+							'mandatory' => true,
 					),
 					'identifier' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Identifier',
@@ -1084,6 +1134,7 @@ return array(
 							),
 					),
 					'name' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -1091,6 +1142,7 @@ return array(
 							),
 					),
 					'contact_1_id' => array(
+							'definition' => 'inline',
 							'type' => 'photo',
 							'labels' => array(
 									'en_US' => '',
@@ -1098,6 +1150,7 @@ return array(
 							),
 					),
 					'n_title' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
@@ -1112,6 +1165,7 @@ return array(
 							),
 					),
 					'n_first' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - First name',
@@ -1119,13 +1173,16 @@ return array(
 							),
 					),
 					'n_last' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Last name',
 									'fr_FR' => 'Contact - Nom',
 							),
+							'mandatory' => true,
 					),
 					'email' => array(
+							'definition' => 'inline',
 							'type' => 'email',
 							'labels' => array(
 									'en_US' => 'Contact - Email',
@@ -1133,6 +1190,7 @@ return array(
 							),
 					),
 					'tel_work' => array(
+							'definition' => 'inline',
 							'type' => 'phone',
 							'labels' => array(
 									'en_US' => 'Contact - Phone',
@@ -1140,6 +1198,7 @@ return array(
 							),
 					),
 					'tel_cell' => array(
+							'definition' => 'inline',
 							'type' => 'phone',
 							'labels' => array(
 									'en_US' => 'Contact - Cellular',
@@ -1147,6 +1206,7 @@ return array(
 							),
 					),
 					'adr_street' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Address',
@@ -1154,6 +1214,7 @@ return array(
 							),
 					),
 					'adr_extended' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Complement',
@@ -1161,6 +1222,7 @@ return array(
 							),
 					),
 					'adr_post_office_box' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Post office box',
@@ -1168,6 +1230,7 @@ return array(
 							),
 					),
 					'adr_zip' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Zip code',
@@ -1175,6 +1238,7 @@ return array(
 							),
 					),
 					'adr_city' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - City',
@@ -1182,6 +1246,7 @@ return array(
 							),
 					),
 					'adr_state' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - State',
@@ -1189,6 +1254,7 @@ return array(
 							),
 					),
 					'adr_country' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Country',
@@ -1196,6 +1262,7 @@ return array(
 							),
 					),
 					'n_title_2' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
@@ -1208,6 +1275,7 @@ return array(
 							),
 					),
 					'n_first_2' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - First name',
@@ -1215,6 +1283,7 @@ return array(
 							),
 					),
 					'n_last_2' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Last name',
@@ -1222,6 +1291,7 @@ return array(
 							),
 					),
 					'email_2' => array(
+							'definition' => 'inline',
 							'type' => 'email',
 							'labels' => array(
 									'en_US' => 'Contact - Email',
@@ -1229,6 +1299,7 @@ return array(
 							),
 					),
 					'tel_work_2' => array(
+							'definition' => 'inline',
 							'type' => 'phone',
 							'labels' => array(
 									'en_US' => 'Contact - Phone',
@@ -1236,6 +1307,7 @@ return array(
 							),
 					),
 					'tel_cell_2' => array(
+							'definition' => 'inline',
 							'type' => 'phone',
 							'labels' => array(
 									'en_US' => 'Contact - Cellular',
@@ -1243,6 +1315,7 @@ return array(
 							),
 					),
 					'address_2' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Contact - Address',
@@ -1250,6 +1323,7 @@ return array(
 							),
 					),
 					'place_id' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'2pit' => array('fr_FR' => 'P-PIT', 'en_US' => '2PIT'),
@@ -1260,6 +1334,7 @@ return array(
 							),
 					),
 					'opening_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => '1st contact date',
@@ -1267,6 +1342,7 @@ return array(
 							),
 					),
 					'closing_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Closing date',
@@ -1274,6 +1350,7 @@ return array(
 							),
 					),
 					'callback_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Callback date',
@@ -1282,9 +1359,10 @@ return array(
 					),
 					'origine' => array(
 							'type' => 'repository',
-							'definition' => 'core_account/property/origine',
+							'definition' => 'core_account/business/property/origine',
 					),
 					'contact_history' => array(
+							'definition' => 'inline',
 							'type' => 'log',
 							'labels' => array(
 									'en_US' => 'Comment',
@@ -1772,11 +1850,11 @@ table.note-report td {
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('caption'),
 					),
-					array(
+/*					array(
 							'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('invoice_date'),
-					),
+					),*/
 			),
 	),
 
@@ -2245,6 +2323,7 @@ table.note-report td {
 									'expected' => array('fr_FR' => 'Attendu', 'en_US' => 'Expected'),
 									'settled' => array('fr_FR' => 'Réglé', 'en_US' => 'Settled'),
 									'collected' => array('fr_FR' => 'Encaissé', 'en_US' => 'Collected'),
+									'invoiced' => array('fr_FR' => 'Facturé', 'en_US' => 'Invoiced'),
 							),
 							'labels' => array(
 									'en_US' => 'Status',
@@ -2423,7 +2502,7 @@ table.note-report td {
 		'core_account/sendMessage' => array(
 				'templates' => array(
 						'generic' => array('definition' => 'core_account/sendMessage/generic'),
-						'wishes_2018' => array('definition' => 'customization/p_pit/send-message/wishes_2018'),
+//						'wishes_2018' => array('definition' => 'customization/flux/send-message/wishes_2018'),
 				),
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),

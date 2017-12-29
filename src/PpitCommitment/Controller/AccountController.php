@@ -141,7 +141,7 @@ class AccountController extends AbstractActionController
     			}
 
     			if ($contact->loadData($data) == 'OK') {
-    				if ($account->loadData($data) == 'OK') {
+					if ($account->loadData($type, $data) == 'OK') {
 
     					// Link to the place community for the account type
     					$place = Place::get($account->place_id);
@@ -266,11 +266,16 @@ class AccountController extends AbstractActionController
     	 
     	if (array_key_exists('request_comment', $data)) $requestComment = $data['request_comment'];
     	else $requestComment = '';
+
+    	unset($data['place_identifier']);
+    	unset($data['type']);
+    	unset($data['request']);
+    	unset($data['request_comment']);
     	 
     	$vcard = Vcard::get($data['email'], 'email');
     	if ($vcard) {
     		// Check if the account already exists. No update and the sales manager are notified.
-    		$accounts = Account::getList($interaction->category, 'contact', array('contact_1_id' => $vcard->id));
+    		$accounts = Account::getList($interaction->category, array('status' => implode(',', $context->getConfig('core_account/'.$interaction->category)['properties']['status']['perspectives']['contact']), 'contact_1_id' => $vcard->id));
     		reset($accounts);
     		if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
     		else $account = null;
@@ -296,7 +301,7 @@ class AccountController extends AbstractActionController
     			 
     			// Create the account
     			$account = Account::instanciate($type);
-    			$rc = $account->loadData($data);
+    			$rc = $account->loadData($type, $data);
     			if ($rc != 'OK') {
     				$interaction->http_status = '400';
     				$rc = 'Account integrity';
@@ -326,27 +331,28 @@ class AccountController extends AbstractActionController
     	}
     	 
     	// Create the contact 1
-    	$contact = Vcard::instanciate();
-    	$rc = $contact->loadData($data);
+    	$vcard = Vcard::instanciate();
+    	$rc = $vcard->loadData($data);
     	if ($rc != 'OK') {
     		$interaction->http_status = '400';
     		$rc = 'Vcard integrity';
     	}
     	else {
-    		$rc = $contact->add();
+    		$rc = $vcard->add();
     		if ($rc != 'OK') {
     			$interaction->http_status = '500';
     		}
     		else {
     			// Create the account
     			$account = Account::instanciate($type);
-    			if ($account->loadData($data) != 'OK') {
+    			if ($account->loadData($type, $data) != 'OK') {
     				$interaction->http_status = '400';
     				$rc = 'Account integrity';
     			}
     			else {
-    				$account->contact_1_id = $contact->id;
+    				$account->contact_1_id = $vcard->id;
     				$account->contact_1_status = 'main';
+    				if (!$account->name) $account->name = $vcard->n_last.', '.$vcard->n_first;
     				if (!$account->callback_date || $account->callback_date > date('Y-m-d')) $account->callback_date = date('Y-m-d');
     				$account->contact_history[] = array(
     						'time' => date('Y-m-d H:i:s'),

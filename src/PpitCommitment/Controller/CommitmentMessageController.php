@@ -716,7 +716,7 @@ class CommitmentMessageController extends AbstractActionController
 			// create new PDF document
 			$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 		
-			PdfInvoiceViewHelper::render($pdf, $commitment, $proforma);
+			PdfInvoiceOldViewHelper::render($pdf, $commitment, $proforma);
 			 
 			// Close and output PDF document
 			// This method has several options, check the source code documentation for more information.
@@ -1186,5 +1186,34 @@ class CommitmentMessageController extends AbstractActionController
     	));
 		$view->setTerminal(true);
 		return $view;
+    }
+
+    public function downloadInvoiceAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	$id = $this->params()->fromRoute('id', null);
+    	if (!$id) return $this->redirect()->toRoute('index');
+    	$message = CommitmentMessage::get($id);
+    	$account = Account::get($message->account_id);
+    	$place = Place::get($account->place_id);
+    	$invoice = json_decode($message->content, true);
+
+    	// create new PDF document
+    	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+    	PdfInvoiceViewHelper::render($pdf, $invoice, $place);
+    	
+    	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$invoice['identifier'].'.pdf', 'I');
+    	return $this->response;
+    }
+    
+    public function serializeAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	echo json_encode($context->getConfig('poc/p-pit-commitment/invoice'), JSON_PRETTY_PRINT);
+    	return $this->response;
     }
 }

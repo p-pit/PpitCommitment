@@ -10,7 +10,7 @@ use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
-use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
+use PpitCommitment\ViewHelper\PdfInvoiceOldViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCommitment\ViewHelper\XmlUblInvoiceViewHelper;
 use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
@@ -459,115 +459,6 @@ class CommitmentController extends AbstractActionController
 		$view->setTerminal(true);
        	return $view;
     }
-/*    
-    public function workflowAction()
-    {
-		// Retrieve the context
-		$context = Context::getCurrent();
-
-		// Retrieve the type
-		$type = $this->params()->fromRoute('type', null);
-		
-    	$id = (int) $this->params()->fromRoute('id', 0);
-    	$action = $this->params()->fromRoute('act', null);
-    	if ($id) $commitment = Commitment::get($id);
-    	else $commitment = Commitment::instanciate($type);
-
-    	// Instanciate the csrf form
-    	$csrfForm = new CsrfForm();
-    	$csrfForm->addCsrfElement('csrf');
-    	$error = null;
-    	if ($action == 'delete') $message = 'confirm-delete';
-    	elseif ($action) $message =  'confirm-update';
-    	else $message = null;
-    	$request = $this->getRequest();
-    	if ($request->isPost()) {
-    		$message = null;
-    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
-    		$csrfForm->setData($request->getPost());
-    		 
-    		if ($csrfForm->isValid()) { // CSRF check
-
-    			// Retrieve the data from the request
-    			$data = array();
-    			foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action]['properties'] as $propertyId => $unused) {
-    				$data[$propertyId] =  $request->getPost($propertyId);
-    			}
-    			foreach ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
-    				if ($property['type'] != 'file') $data[$propertyId] = $request->getPost($propertyId);
-    			}
-    			 
-    			$data['update_time'] = $request->getPost('update_time');
-    			 
-    			// Change the status
-    			if ($action && array_key_exists($action, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'])) {
-    				$actionRules = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['actions'][$action];
-    				if (array_key_exists('targetStatus', $actionRules)) $commitment->status = $actionRules['targetStatus'];
-    			}
-    			
-    			// Retrieve the order form
-    			$files = $request->getFiles()->toArray();
-    			 
-    			$rc = $commitment->loadData($data, $files);
-    			if ($rc != 'OK') throw new \Exception('View error');
-
-    			// Atomically save
-    			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
-    			$connection->beginTransaction();
-    			try {
-    				if (!$commitment->id) {
-    					if ($commitment->subscription_id) {
-    						$subscription = $commitment->subscriptions[$commitment->subscription_id];
-    						$commitment->description = $subscription->description;
-    						$commitment->product_identifier = $subscription->product_identifier;
-    						$commitment->unit_price = $subscription->unit_price;
-    					}
-    					$rc = $commitment->add();
-    				}
-    				else {
-						if ($action == 'update') {
-	    					// Retrieve the CGV
-	    					$document = Document::getWithPath('home/public/resources/cgv');
-	    					$document->retrieveContent();
-	    					reset($document->parts);
-	    					$commitment->cgv = current($document->parts)->content;
-						}
-	    				$rc = $commitment->update($request->getPost('update_time'));
-    				}
-
-    				if ($rc != 'OK') {
-    					$connection->rollback();
-    					$error = $rc;
-    				}
-    				else {
-    					$connection->commit();
-	    				$message = 'OK';
-    				}
-    			}
-    			catch (\Exception $e) {
-    				$connection->rollback();
-    				throw $e;
-    			}
-	    		$action = null;
-    		}
-    	}
-
-    	$view = new ViewModel(array(
-				'context' => $context,
-				'config' => $context->getconfig(),
-    			'type' => $type,
-    			'id' => $id,
-    			'action' => $action,
-//    			'accounts' => Account::getList(null, array(), 'name', 'ASC'),
-   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
-    			'commitment' => $commitment,
-    			'csrfForm' => $csrfForm,
-    			'error' => $error,
-    			'message' => $message
-    	));
-		$view->setTerminal(true);
-       	return $view;
-    }*/
 
     public function updateAction()
     {
@@ -658,7 +549,6 @@ class CommitmentController extends AbstractActionController
     			'type' => $commitment->type,
     			'id' => $id,
     			'action' => $action,
-//    			'accounts' => Account::getList(null, 'account', array(), 'name', 'ASC'),
     			'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
@@ -1326,7 +1216,7 @@ class CommitmentController extends AbstractActionController
     	// create new PDF document
     	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-    	PdfInvoiceViewHelper::render($pdf, $commitment, $proforma);
+    	PdfInvoiceOldViewHelper::render($pdf, $commitment, $proforma);
     	
     	// Close and output PDF document
     	// This method has several options, check the source code documentation for more information.

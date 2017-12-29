@@ -12,6 +12,15 @@
 		<button type="button" class="btn btn-default action-btn" id="term-delete-anchor" title="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>" <?php if (!$term->isDeletable()) echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-trash"></span>
 		</button>
+
+	<?php if ($term->status == 'settled') : ?>
+		<button type="button" class="btn btn-default action-btn" id="invoice-anchor" title="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>" <?php if (!$term->isDeletable()) echo 'disabled="disabled"' ?>>
+			<?php echo $this->translate('Generate invoice', 'ppit-commitment', $context->getLocale())?>
+		</button>
+		
+	<?php elseif ($term->status == 'invoiced') : ?>
+		&nbsp;&nbsp;<a href="<?php echo $this->url('commitmentMessage/downloadInvoice', array('id' => $term->invoice_id)) ?>"><?php echo $this->translate('Download the invoice', 'ppit-commitment', $context->getLocale())?></a>
+	<?php endif;?>
 <?php endif;?>
 
 <!-- Form header -->

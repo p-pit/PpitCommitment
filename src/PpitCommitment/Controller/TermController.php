@@ -2,8 +2,12 @@
 
 namespace PpitCommitment\Controller;
 
+use PpitCommitment\Model\Commitment;
+use PpitCommitment\Model\CommitmentMessage;
+use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlTermViewHelper;
+use PpitCore\Model\Account;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
 use PpitCore\Model\Place;
@@ -292,6 +296,135 @@ class TermController extends AbstractActionController
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
+    		'term' => $term,
+    		'id' => $id,
+    		'csrfForm' => $csrfForm,
+    		'message' => $message,
+    		'error' => $error,
+    	));
+   		$view->setTerminal(true);
+   		return $view;
+    }
+    
+    public function invoiceAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Retrieve the term
+    	$id = (int) $this->params()->fromRoute('id', 0);
+    	if (!$id) return $this->redirect()->toRoute('home');
+    	$term = Term::get($id);
+    	$commitment = Commitment::get($term->commitment_id);
+    	$account = Account::get($commitment->account_id);
+
+    	$commitmentMessage = CommitmentMessage::instanciate('invoice');
+    	$invoice = array();
+    	
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+		$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		 
+    		if ($csrfForm->isValid()) { // CSRF check
+    			
+				$invoiceSpecs = $context->getConfig('commitment/invoice');
+				$invoice['customer_name'] = $account->name;
+				$invoicingContact = null;
+		    	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
+		    	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
+		    	elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
+		    	elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
+		    	elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
+		    		
+		    	if (!$invoicingContact) {
+		    		if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
+		    		elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
+		    		elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
+		    		elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
+		    		elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
+		    	}
+		    	if (!$invoicingContact) $invoicingContact = $account->contact_1;
+		    		 
+		    	$invoice['customer_n_fn'] = '';
+		    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
+		    		if ($invoicingContact->n_title) $invoice['customer_n_fn'] .= $invoicingContact->n_title.' ';
+		    		$invoice['customer_n_fn'] .= $invoicingContact->n_last.' ';
+		    		$invoice['customer_n_fn'] .= $invoicingContact->n_first;
+		    	}
+		    	if ($invoicingContact->adr_street) $invoice['customer_adr_street'] = $invoicingContact->adr_street;
+		    	if ($invoicingContact->adr_extended) $invoice['customer_adr_extended'] = $invoicingContact->adr_extended;
+		    	if ($invoicingContact->adr_post_office_box) $invoice['customer_adr_post_office_box'] = $invoicingContact->adr_post_office_box;
+		    	if ($invoicingContact->adr_zip) $invoice['customer_adr_zip'] = $invoicingContact->adr_zip;
+		    	if ($invoicingContact->adr_city) $invoice['customer_adr_city'] = $invoicingContact->adr_city;
+		    	if ($invoicingContact->adr_state) $invoice['customer_adr_state'] = $invoicingContact->adr_state;
+		    	if ($invoicingContact->adr_street) $invoice['customer_adr_country'] = $invoicingContact->adr_country;
+    			$term->status = 'invoiced';
+
+    			// Atomically save
+    			$connection = CommitmentMessage::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$year = CommitmentYear::getcurrent();
+    				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
+    				$invoice['identifier'] = $context->getConfig('commitment/invoice_identifier_mask').sprintf("%'.05d", $year->next_value);
+    				$commitmentMessage->status = 'new';
+    				$commitmentMessage->account_id = $account->id;
+    				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
+    				$commitmentMessage->direction = 'O';
+    				$commitmentMessage->format = 'application/json';
+    				$year->increment();
+    				$invoice['date'] = date('Y-m-d');
+    				$invoice['description'] = array();
+    				$invoice['description'][] = array('title' => 'Description', 'value' => $commitment->description);
+    				$invoice['description'][] = array('title' => 'Libellé', 'value' => $commitment->caption.' - '.$term->caption);
+    				$invoice['currency_symbol'] = $context->getConfig('commitment')['currencySymbol'];
+			    	$invoice['tax'] = 'excluding';
+			    	$line = array();
+			    	$line['caption'] = $term->caption;
+			    	$line['tax_rate'] = 0.2;
+			    	$line['unit_price'] = round($term->amount / (1 + $line['tax_rate']), 2);
+			    	$line['quantity'] = 1;
+			    	$line['amount'] = $line['unit_price'] * $line['quantity'];
+			    	$invoice['lines'] = array($line);
+			    	$invoice['excluding_tax'] = $line['amount'];
+			    	$invoice['taxable_1_total'] = $line['amount'];
+			    	$invoice['tax_1_amount'] = $term->amount - $line['unit_price'];
+			    	$invoice['tax_inclusive'] = $term->amount;
+					$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+					$commitmentMessage->content = json_encode($invoice, JSON_PRETTY_PRINT);
+			    	$rc = $commitmentMessage->add();
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$term->status = 'invoiced';
+    					$rc = $term->update($request->getPost('update_time'));
+	    				if ($rc != 'OK') {
+	    					$connection->rollback();
+	    					$error = $rc;
+	    				}
+	    				else {
+	    					$connection->commit();
+	    					$message = 'OK';
+	    				}
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    			$action = null;
+    		}
+    	}
+    	$view = new ViewModel(array(
+    		'context' => $context,
     		'term' => $term,
     		'id' => $id,
     		'csrfForm' => $csrfForm,

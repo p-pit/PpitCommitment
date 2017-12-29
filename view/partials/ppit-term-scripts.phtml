@@ -257,6 +257,28 @@ function connectAuditPanel()
 	});
 }
 
+function invoice(id, requestType) {
+
+	var xhttp = new XMLHttpRequest();
+	var route = '<?php echo $this->url('commitmentTerm/invoice') ?>/' + id;
+
+	xhttp.open(requestType, route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+			if (xhttp.status == 200) {
+				document.getElementById('term-update-panel').innerHTML = xhttp.responseText;
+				$('#invoice-button').click(function () { invoice(id, 'POST'); });
+			}
+		}
+	}
+	var formData = new FormData();
+	if (requestType == 'POST') {
+		formData.append('update_time', $('#update_time').val());
+	}
+	xhttp.send(formData);
+}
+
 <?php 
 $properties = array();
 
@@ -360,6 +382,7 @@ function getTermUpdate(commitment_id, id, action, target) {
 			if (id) {
 				$('#term-update-anchor').click(function () { getTermUpdate(commitment_id, id, 'update', target); });
 				$('#term-delete-anchor').click(function () { getTermUpdate(commitment_id, id, 'delete', target); });
+				$('#invoice-anchor').click(function () { invoice(id, 'GET'); });
 			}
 			else $('#term-add-anchor').click(function () { getTermUpdate(commitment_id, id, 'add', target); });
 			

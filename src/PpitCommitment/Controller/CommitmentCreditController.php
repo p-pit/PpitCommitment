@@ -10,7 +10,6 @@
 namespace PpitCommitment\Controller;
 
 use PpitCommitment\Model\Commitment;
-use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;

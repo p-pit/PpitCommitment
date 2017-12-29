@@ -1,0 +1,26 @@
+
+<!-- Load the form header -->
+<?php echo $this->partial('/partials/form-header.phtml', array(
+			'update_time' => $term->update_time,
+			'message' => $message,
+			'error' => $error,
+			'csrfForm' => $csrfForm,
+			'context' => $context,
+)); ?>
+
+<?php if ($message == 'OK') $isDisabled = true; else $isDisabled = false; ?>
+
+<?php if ($message != 'OK') : ?>
+
+			<div class="alert alert-warning"><?php echo $this->translate('Generating an accounting invoice is irreversible. Please confirm.', 'ppit-commitment', $context->getLocale()) ?></div>
+<!-- Submit button -->
+		    <div class="form-group">
+				<div class="col-sm-5">&nbsp;</div>
+				<div class="col-sm-7">
+					<input name="submit" id="invoice-button" class="btn btn-warning" value="<?php echo $this->translate('Generate invoice', 'ppit-commitment', $context->getLocale()) ?>">
+				</div>
+			</div>
+
+<?php endif;?>
+
+		</form>

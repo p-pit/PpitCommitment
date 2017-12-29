@@ -145,7 +145,8 @@ class Notification implements InputFilterAwareInterface
     public function retrieveTarget()
     {
     	$params = $this->criteria;
-    	$this->matchingAccounts = Account::getList($this->type, 'account', $params, 'name', 'ASC', 'search');
+    	$params['status'] = implode(',', $context->getConfig('core_account/'.$this->type)['properties']['status']['perspectives']['account']);
+    	$this->matchingAccounts = Account::getList($this->type, $params, ['name']);
     	return $this->matchingAccounts;
     }
 

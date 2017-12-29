@@ -232,7 +232,7 @@ class Term implements InputFilterAwareInterface
 
     	// Isolation check
     	if ($update_time && $term->update_time > $update_time) return 'Isolation';
-    	if ($this->files) {
+    	if (isset($this->files)) {
 			$root_id = Document::getTable()->get(0, 'parent_id')->id; 
     		$document = Document::instanciate($root_id);
     		$document->files = $this->files;
