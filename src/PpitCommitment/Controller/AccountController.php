@@ -142,6 +142,7 @@ class AccountController extends AbstractActionController
 
     			if ($contact->loadData($data) == 'OK') {
 					if ($account->loadData($type, $data) == 'OK') {
+						if (!$account->name) $account->name = $contact->n_fn;
 
     					// Link to the place community for the account type
     					$place = Place::get($account->place_id);

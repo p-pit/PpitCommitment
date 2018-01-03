@@ -13,7 +13,7 @@
 			<span class="glyphicon glyphicon-trash"></span>
 		</button>
 
-	<?php if ($term->status == 'settled') : ?>
+	<?php if (in_array($term->status, ['settled', 'collected'])) : ?>
 		<button type="button" class="btn btn-default action-btn" id="invoice-anchor" title="<?php echo $this->translate('Delete', 'ppit-core', $context->getLocale()) ?>" <?php if (!$term->isDeletable()) echo 'disabled="disabled"' ?>>
 			<?php echo $this->translate('Generate invoice', 'ppit-commitment', $context->getLocale())?>
 		</button>

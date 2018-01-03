@@ -12,7 +12,7 @@ use PpitMasterData\Model\ProductOption;
 
 require_once('vendor/TCPDF-master/tcpdf.php');
 
-class PdfIndexCardViewHelper
+class PdfIndexCardViewHelper_old
 {	
     public static function render($pdf, $place, $account)
     {

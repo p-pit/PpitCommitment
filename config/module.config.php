@@ -1141,6 +1141,7 @@ return array(
 									'fr_FR' => 'Dénomination',
 							),
 					),
+					'basket' => array('definition' => 'core_account/generic/property/basket'),
 					'contact_1_id' => array(
 							'definition' => 'inline',
 							'type' => 'photo',
@@ -1412,6 +1413,7 @@ return array(
 				'place_id' => 'select',
 				'status' => 'select',
 				'name' => 'contains',
+				'basket' => 'select',
 				'property_1' => 'select',
 				'opening_date' => 'range',
 				'callback_date' => 'range',
@@ -1447,6 +1449,7 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => false),
+			'basket' => array('mandatory' => false),
 			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
@@ -1520,6 +1523,7 @@ return array(
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => false),
 			'name' => array('mandatory' => true),
+			'basket' => array('mandatory' => true),
 			'opening_date' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 			'origine' => array('mandatory' => false),
@@ -1553,7 +1557,8 @@ return array(
 	),
 	
 	'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
-
+	'commitmentAccount/contactForm/generic' => array('definition' => 'customization/flux/commitmentAccount/contactForm'),
+		
 	'core_account/indexCard/business' => array(
 			'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
 			'header' => array(
@@ -2512,8 +2517,8 @@ table.note-report td {
 						'en_US' => 'Generic',
 						'fr_FR' => 'Générique',
 				),
-				'cci' => 'support@p-pit.fr',
-				'from_mail' => 'support@p-pit.fr',
+				'cci' => 'contact@p-pit.fr',
+				'from_mail' => 'contact@p-pit.fr',
 				'from_name' => 'noreply@p-pit.fr',
 				'subject' => array('en_US' => 'Important message from P-Pit', 'fr_FR' => 'Message important de P-Pit'),
 				'body' => array(

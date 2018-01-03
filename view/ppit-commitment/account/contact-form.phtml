@@ -13,7 +13,7 @@
 <body>
   <header class="header">
     <div class="header_container">
-      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" width="250" alt="<?php echo $context->getInstance()->caption ?>" class="header_logo">
+      <img src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/img/logo.png') ?>" height="60" alt="<?php echo $context->getInstance()->caption ?>" class="header_logo">
 <?php if (/*$state_id != 'index'*/ false) : ?>
       <div class="header_state">
 	<?php $first = true; $full = true; foreach ($template as $stateId => $state) : ?>

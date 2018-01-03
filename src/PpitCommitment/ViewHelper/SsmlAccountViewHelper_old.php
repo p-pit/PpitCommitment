@@ -3,7 +3,7 @@ namespace PpitCommitment\ViewHelper;
 
 use PpitCore\Model\Context;
 
-class SsmlAccountViewHelper
+class SsmlAccountViewHelper_old
 {
 	public static function formatXls($workbook, $view)
 	{
