@@ -916,8 +916,17 @@ return array(
 							'params' => array('entry' => 'account', 'type' => 'business'),
 							'glyphicon' => 'glyphicon-user',
 							'label' => array(
-									'en_US' => 'Accounts',
-									'fr_FR' => 'Comptes',
+									'en_US' => 'Enterprises',
+									'fr_FR' => 'Entreprises',
+							),
+					),
+					'b2c' => array(
+							'route' => 'account/index',
+							'params' => array('entry' => 'account', 'type' => 'b2c'),
+							'glyphicon' => 'glyphicon-user',
+							'label' => array(
+									'en_US' => 'B2C',
+									'fr_FR' => 'Particuliers',
 							),
 					),
 					'commitment' => array(
@@ -976,6 +985,7 @@ return array(
 	'ppitCommitmentDependencies' => array(
 	),
 
+	// Business
 	'core_account/business/property/origine' => array(
 			'type' => 'select',
 			'modalities' => array(
@@ -1560,42 +1570,265 @@ return array(
 
 			'contact_history' => array('mandatory' => false),
 	),
-	
-	'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
-	'commitmentAccount/contactForm/generic' => array('definition' => 'customization/flux/commitmentAccount/contactForm'),
+
+		'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
+		'commitmentAccount/contactForm/generic' => array('definition' => 'customization/flux/commitmentAccount/contactForm'),
 		
-	'core_account/indexCard/business' => array(
-			'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
+		'core_account/indexCard/business' => array(
+				'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
+				'header' => array(
+						'place_id' => null,
+						'status' => null,
+						'origine' => null,
+				),
+				'1st-column' => array(
+						'title' => 'title_1',
+						'rows' => array(
+								'n_title' => array('mandatory' => true),
+								'n_first' => array('mandatory' => true),
+								'n_last' => array('mandatory' => true),
+								'email' => array('mandatory' => false),
+								'tel_work' => array('mandatory' => false),
+								'tel_cell' => array('mandatory' => false),
+								'adr_street' => array('mandatory' => false),
+								'adr_extended' => array('mandatory' => false),
+								'adr_post_office_box' => array('mandatory' => false),
+								'adr_zip' => array('mandatory' => false),
+								'adr_city' => array('mandatory' => false),
+								'adr_state' => array('mandatory' => false),
+								'adr_country' => array('mandatory' => false),
+						),
+				),
+				'2nd-column' => array(
+						'title' => 'title_2',
+						'rows' => array(
+								'property_1' => array('mandatory' => false),
+								'property_2' => array('mandatory' => false),
+								'property_3' => array('mandatory' => false),
+								'property_4' => array('mandatory' => false),
+						),
+				),
+				'pdfDetailStyle' => '
+<style>
+table.note-report {
+	font-size: 1em;
+	border: 1px solid gray;
+}
+table.note-report th {
+	color: #FFF;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: center;
+	border: 1px solid gray;
+	background-color: #006169;
+}
+		
+table.note-report td {
+	color: #666;
+	border: 1px solid gray;
+}
+</style>
+',
+		),
+
+	// B2C
+
+	'core_account/b2c/property/property_1' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Reminder to communicate',
+					'fr_FR' => 'Rappel à communiquer',
+			),
+	),
+
+	'core_account/b2c/property/property_2' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'B',
+					'fr_FR' => 'B',
+			),
+	),
+	
+	'core_account/b2c' => array(
+			'statuses' => array(),
+			'properties' => array(
+					'title_1' => array(
+							'definition' => 'inline',
+							'type' => 'title',
+							'labels' => array(
+									'en_US' => 'CLIENT IDENTIFICATION',
+									'fr_FR' => 'IDENTIFICATION DU CLIENT',
+							),
+					),
+					'title_2' => array(
+							'definition' => 'inline',
+							'type' => 'title',
+							'labels' => array(
+									'en_US' => 'REGISTRATION DATA',
+									'fr_FR' => 'DONNEES D\'INSCRIPTION',
+							),
+					),
+					'status' => array('definition' => 'core_account/generic/property/status', 'mandatory' => true),
+					'identifier' => array('definition' => 'core_account/generic/property/identifier', 'mandatory' => true),
+					'n_fn' => array('definition' => 'core_account/generic/property/n_fn', 'mandatory' => true),
+					'photo_link_id' => array('definition' => 'core_account/generic/property/photo_link_id'),
+					'place_id' => array('definition' => 'core_account/generic/property/place_id'),
+					'contact_1_id' => array('definition' => 'core_account/generic/property/contact_id'),
+					'n_title' => array('definition' => 'core_account/generic/property/n_title', 'mandatory' => true),
+					'n_first' => array('definition' => 'core_account/generic/property/n_first', 'mandatory' => true),
+					'n_last' => array('definition' => 'core_account/generic/property/n_last', 'mandatory' => true),
+					'email' => array('definition' => 'core_account/generic/property/email', 'mandatory' => true),
+					'tel_work' => array('definition' => 'core_account/generic/property/tel_work'),
+					'tel_cell' => array('definition' => 'core_account/generic/property/tel_cell'),
+					'adr_street' => array('definition' => 'core_account/generic/property/adr_street'),
+					'adr_zip' => array('definition' => 'core_account/generic/property/adr_zip'),
+					'adr_city' => array('definition' => 'core_account/generic/property/adr_city'),
+					'adr_state' => array('definition' => 'core_account/generic/property/adr_state'),
+					'adr_country' => array('definition' => 'core_account/generic/property/adr_country'),
+					'birth_date' => array('definition' => 'core_account/generic/property/birth_date'),
+					'callback_date' => array('definition' => 'core_account/generic/property/callback_date'),
+					'property_1' => array('definition' => 'core_account/b2c/property/property_1'),
+					'property_2' => array('definition' => 'core_account/b2c/property/property_2'),
+					'contact_history' => array('definition' => 'core_account/generic/property/contact_history'),
+			),
+			'order' => 'name',
+	),
+
+	'core_account/index/b2c' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	'core_account/search/b2c' => array(
+			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
+			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
+			'properties' => array(
+					'place_id' => [],
+					'status' => [],
+					'identifier' => [],
+					'n_fn' => [],
+					'email' => [],
+					'birth_date' => [],
+					'callback_date' => [],
+			),
+	),
+	'core_account/list/b2c' => array(
+			'properties' => array(
+					'n_fn' => [],
+					'status' => [],
+					'identifier' => [],
+					'tel_work' => ['rendering' => 'phone'],
+					'tel_cell' => ['rendering' => 'phone'],
+					'email' => ['rendering' => 'email'],
+					'birth_date' => [],
+					'callback_date' => [],
+					'place_id' => [],
+			),
+	),
+	'core_account/detail/b2c' => array(
+			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
+			'displayAudit' => true,
+			'tabs' => array(
+					'contact_1' => array(
+							'route' => 'account/update',
+							'params' => array('type' => ''),
+							'labels' => array('en_US' => 'Main contact', 'fr_FR' => 'Contact principal'),
+					),
+			),
+	),
+	'core_account/update/b2c' => array(
+			'place_id' => array('mandatory' => true),
+			'status' => array('mandatory' => true),
+			'identifier' => array('mandatory' => true),
+			'n_title' => array('mandatory' => false),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => true),
+			'callback_date' => array('mandatory' => false),
+			'photo_link_id' => array('mandatory' => false),
+			'email' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'tel_cell' => array('mandatory' => false),
+			'birth_date' => array('mandatory' => false),
+			'adr_street' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => false),
+			'adr_city' => array('mandatory' => false),
+			'property_1' => array('mandatory' => false),
+			'property_2' => array('mandatory' => false),
+			'contact_history' => array('mandatory' => false),
+	),
+	'core_account/updateContact/b2c' => array(
+			'n_title' => array('mandatory' => false),
+			'n_first' => array('mandatory' => false),
+			'n_last' => array('mandatory' => false),
+			'tel_work' => array('mandatory' => false),
+			'tel_cell' => array('mandatory' => false),
+			'email' => array('mandatory' => false),
+			'adr_street' => array('mandatory' => false),
+			'adr_zip' => array('mandatory' => false),
+			'adr_city' => array('mandatory' => false),
+			'adr_state' => array('mandatory' => false),
+			'adr_country' => array('mandatory' => false),
+	),
+	'core_account/groupUpdate/b2c' => array(
+			'status' => [],
+			'callback_date' => [],
+			'property_1' => [],
+			'property_2' => [],
+	),
+	'core_account/requestTypes/b2c' => array(
+			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
+			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
+			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
+	),
+	'core_account/export/b2c' => array(
+			'place_id' => array('mandatory' => true),
+			'status' => [],
+			'identifier' => [],
+			'n_fn' => [],
+			'callback_date' => [],
+			'n_title' => [],
+			'n_first' => [],
+			'n_last' => [],
+			'email' => [],
+			'tel_work' => [],
+			'tel_cell' => [],
+			'birth_date' => [],
+			'adr_street' => [],
+			'adr_zip' => [],
+			'adr_city' => [],
+			'adr_state' => [],
+			'adr_country' => [],
+			'property_1' => [],
+			'property_2' => [],
+			'contact_history' => [],
+	),
+
+	'core_account/indexCard/b2c' => array(
+			'title' => array('en_US' => 'Client index card', 'fr_FR' => 'Fiche client'),
 			'header' => array(
 					'place_id' => null,
 					'status' => null,
-					'origine' => null,
 			),
 			'1st-column' => array(
 					'title' => 'title_1',
 					'rows' => array(
-							'n_title' => array('mandatory' => true),
-							'n_first' => array('mandatory' => true),
-							'n_last' => array('mandatory' => true),
-							'email' => array('mandatory' => false),
-							'tel_work' => array('mandatory' => false),
-							'tel_cell' => array('mandatory' => false),
-							'adr_street' => array('mandatory' => false),
-							'adr_extended' => array('mandatory' => false),
-							'adr_post_office_box' => array('mandatory' => false),
-							'adr_zip' => array('mandatory' => false),
-							'adr_city' => array('mandatory' => false),
-							'adr_state' => array('mandatory' => false),
-							'adr_country' => array('mandatory' => false),
+							'identifier' => [],
+							'n_title' => [],
+							'n_first' => [],
+							'n_last' => [],
+							'email' => [],
+							'tel_work' => [],
+							'tel_cell' => [],
+							'birth_date' => [],
+							'adr_street' => [],
+							'adr_zip' => [],
+							'adr_city' => [],
+							'adr_state' => [],
+							'adr_country' => [],
+							'property_1' => [],
 					),
 			),
 			'2nd-column' => array(
 					'title' => 'title_2',
 					'rows' => array(
-							'property_1' => array('mandatory' => false),
-							'property_2' => array('mandatory' => false),
-							'property_3' => array('mandatory' => false),
-							'property_4' => array('mandatory' => false),
 					),
 			),
 			'pdfDetailStyle' => '
@@ -1620,7 +1853,9 @@ table.note-report td {
 </style>
 ',
 	),
-		
+	
+	// Interaction
+	
 	'interaction/type' => array(
 			'modalities' => array(
 					'contact' => array('en_US' => 'Contacts', 'fr_FR' => 'Contacts'),
@@ -1825,6 +2060,18 @@ table.note-report td {
 	),
 
 	'commitment/update/business' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+			'amount' => array('mandatory' => false),
+	),
+		
+	'commitment/update/generic' => array(
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+			'amount' => array('mandatory' => false),
+	),
+
+	'commitment/update/b2c' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
