@@ -1058,6 +1058,15 @@ return array(
 			'type' => 'text',
 			'labels' => array('en_US' => 'Legal mention', 'fr_FR' => 'Mention légale'),
 	),
+
+	'core_account/business/property/property_5' => array(
+			'type' => 'select',
+			'modalities' => array(
+				'vat_on_collection' => array('en_US' => 'VAT on collection', 'fr_FR' => 'TVA sur les encaissements'),
+				'vat_not_applicable' => array('en_US' => 'VAT not applicable', 'fr_FR' => 'TVA non applicable'),
+			),
+			'labels' => array('en_US' => 'VAT mention', 'fr_FR' => 'Mention TVA'),
+	),
 		
 	'core_account/business/property/contact_meeting_context' => array(
 			'type' => 'select',
@@ -1380,34 +1389,14 @@ return array(
 									'fr_FR' => 'Commentaire',
 							),
 					),
-					'property_1' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/property_1',
-					),
-					'property_2' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/property_2',
-					),
-					'property_3' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/property_3',
-					),
-					'property_4' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/property_4',
-					),
-					'property_13' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/contact_meeting_context',
-					),
-					'comment_1' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/comment_1',
-					),
-					'comment_2' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/comment_2',
-					),
+					'property_1' => array('definition' => 'core_account/business/property/property_1'),
+					'property_2' => array('definition' => 'core_account/business/property/property_2'),
+					'property_3' => array('definition' => 'core_account/business/property/property_3'),
+					'property_4' => array('definition' => 'core_account/business/property/property_4'),
+					'property_5' => array('definition' => 'core_account/business/property/property_5'),
+					'property_13' => array('definition' => 'core_account/business/property/contact_meeting_context'),
+					'comment_1' => array('definition' => 'core_account/business/property/comment_1'),
+					'comment_2' => array('definition' => 'core_account/business/property/comment_2'),
 			),
 			'order' => 'name',
 	),
@@ -1448,11 +1437,13 @@ return array(
 			'displayAudit' => true,
 			'tabs' => array(
 					'contact_1' => array(
+							'definition' => 'inline',
 							'route' => 'account/update',
 							'params' => array('type' => ''),
 							'labels' => array('en_US' => 'Main contact', 'fr_FR' => 'Contact principal'),
 					),
 					'contact_2' => array(
+							'definition' => 'inline',
 							'route' => 'account/updateContact',
 							'params' => array('type' => '', 'contactNumber' => 2),
 							'labels' => array('en_US' => 'Invoicing', 'fr_FR' => 'Facturation'),
@@ -1483,6 +1474,7 @@ return array(
 			'property_2' => array('mandatory' => false),
 			'property_3' => array('mandatory' => false),
 			'property_4' => array('mandatory' => false),
+			'property_5' => array('mandatory' => false),
 			'title_3' => null,
 			'comment_1' => array('mandatory' => false),
 			'comment_2' => array('mandatory' => false),
@@ -1535,43 +1527,44 @@ return array(
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
 	'core_account/export/business' => array(
-			'status' => array('mandatory' => true),
-			'identifier' => array('mandatory' => false),
-			'name' => array('mandatory' => true),
-			'basket' => array('mandatory' => true),
-			'opening_date' => array('mandatory' => false),
-			'callback_date' => array('mandatory' => false),
-			'origine' => array('mandatory' => false),
-			'place_id' => array('mandatory' => true),
-			'n_title' => array('mandatory' => false),
-			'n_first' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
-			'email' => array('mandatory' => false),
-			'tel_work' => array('mandatory' => false),
-			'tel_cell' => array('mandatory' => false),
-			'adr_street' => array('mandatory' => false),
-			'adr_zip' => array('mandatory' => true),
-			'adr_city' => array('mandatory' => false),
-			'property_1' => array('mandatory' => false),
-			'property_2' => array('mandatory' => false),
-			'property_3' => array('mandatory' => false),
-			'property_4' => array('mandatory' => false),
+			'status' => [],
+			'identifier' => [],
+			'name' => [],
+			'basket' => [],
+			'opening_date' => [],
+			'callback_date' => [],
+			'origine' => [],
+			'place_id' => [],
+			'n_title' => [],
+			'n_first' => [],
+			'n_last' => [],
+			'email' => [],
+			'tel_work' => [],
+			'tel_cell' => [],
+			'adr_street' => [],
+			'adr_zip' => [],
+			'adr_city' => [],
+			'property_1' => [],
+			'property_2' => [],
+			'property_3' => [],
+			'property_4' => [],
+			'property_5' => [],
 				
-			'n_title_2' => array('mandatory' => false),
-			'n_first_2' => array('mandatory' => true),
-			'n_last_2' => array('mandatory' => true),
-			'tel_work_2' => array('mandatory' => false),
-			'tel_cell_2' => array('mandatory' => false),
-			'email_2' => array('mandatory' => false),
-			'address_2' => array('mandatory' => false),
+			'n_title_2' => [],
+			'n_first_2' => [],
+			'n_last_2' => [],
+			'tel_work_2' => [],
+			'tel_cell_2' => [],
+			'email_2' => [],
+			'address_2' => [],
 			
-			'comment_1' => array('mandatory' => false),
-			'comment_2' => array('mandatory' => false),
+			'comment_1' => [],
+			'comment_2' => [],
 
-			'contact_history' => array('mandatory' => false),
+			'contact_history' => [],
 	),
 
-		'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm'),
+		'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm/trial'),
 		'commitmentAccount/contactForm/generic' => array('definition' => 'customization/flux/commitmentAccount/contactForm'),
 		
 		'core_account/indexCard/business' => array(
@@ -1633,6 +1626,14 @@ table.note-report td {
 
 	// B2C
 
+	'core_account/b2c/property/identifier' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Identifier',
+					'fr_FR' => 'Identifiant',
+			),
+	),
+
 	'core_account/b2c/property/property_1' => array(
 			'type' => 'input',
 			'labels' => array(
@@ -1648,7 +1649,27 @@ table.note-report td {
 					'fr_FR' => 'B',
 			),
 	),
-	
+
+	'core_account/b2c/property/property_3' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'C',
+					'fr_FR' => 'C',
+			),
+	),
+
+	'core_account/b2c/contact/contact_2' => array(
+			'route' => 'account/updateContact',
+			'params' => array('type' => 'b2c', 'contactNumber' => 2),
+			'labels' => array('en_US' => 'Mother', 'fr_FR' => 'Mère'),
+	),
+
+	'core_account/b2c/contact/contact_3' => array(
+			'route' => 'account/updateContact',
+			'params' => array('type' => 'b2c', 'contactNumber' => 2),
+			'labels' => array('en_US' => 'Father', 'fr_FR' => 'Père'),
+	),
+
 	'core_account/b2c' => array(
 			'statuses' => array(),
 			'properties' => array(
@@ -1669,7 +1690,7 @@ table.note-report td {
 							),
 					),
 					'status' => array('definition' => 'core_account/generic/property/status', 'mandatory' => true),
-					'identifier' => array('definition' => 'core_account/generic/property/identifier', 'mandatory' => true),
+					'identifier' => array('definition' => 'core_account/b2c/property/identifier', 'mandatory' => true),
 					'n_fn' => array('definition' => 'core_account/generic/property/n_fn', 'mandatory' => true),
 					'photo_link_id' => array('definition' => 'core_account/generic/property/photo_link_id'),
 					'place_id' => array('definition' => 'core_account/generic/property/place_id'),
@@ -1689,9 +1710,10 @@ table.note-report td {
 					'callback_date' => array('definition' => 'core_account/generic/property/callback_date'),
 					'property_1' => array('definition' => 'core_account/b2c/property/property_1'),
 					'property_2' => array('definition' => 'core_account/b2c/property/property_2'),
+					'property_3' => array('definition' => 'core_account/b2c/property/property_3'),
 					'contact_history' => array('definition' => 'core_account/generic/property/contact_history'),
 			),
-			'order' => 'name',
+			'order' => 'n_fn',
 	),
 
 	'core_account/index/b2c' => array(
@@ -1708,6 +1730,7 @@ table.note-report td {
 					'email' => [],
 					'birth_date' => [],
 					'callback_date' => [],
+					'property_3' => [],
 			),
 	),
 	'core_account/list/b2c' => array(
@@ -1728,17 +1751,19 @@ table.note-report td {
 			'displayAudit' => true,
 			'tabs' => array(
 					'contact_1' => array(
+							'definition' => 'inline',
 							'route' => 'account/update',
 							'params' => array('type' => ''),
 							'labels' => array('en_US' => 'Main contact', 'fr_FR' => 'Contact principal'),
 					),
+					'contact_2' => array('definition' => 'core_account/b2c/contact/contact_2'),
+					'contact_3' => array('definition' => 'core_account/b2c/contact/contact_3'),
 			),
 	),
 	'core_account/update/b2c' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
 			'identifier' => array('mandatory' => true),
-			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'callback_date' => array('mandatory' => false),
@@ -1747,11 +1772,9 @@ table.note-report td {
 			'tel_work' => array('mandatory' => false),
 			'tel_cell' => array('mandatory' => false),
 			'birth_date' => array('mandatory' => false),
-			'adr_street' => array('mandatory' => false),
-			'adr_zip' => array('mandatory' => false),
-			'adr_city' => array('mandatory' => false),
 			'property_1' => array('mandatory' => false),
 			'property_2' => array('mandatory' => false),
+			'property_3' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
 	),
 	'core_account/updateContact/b2c' => array(
@@ -1798,6 +1821,7 @@ table.note-report td {
 			'adr_country' => [],
 			'property_1' => [],
 			'property_2' => [],
+			'property_3' => [],
 			'contact_history' => [],
 	),
 
@@ -1884,7 +1908,9 @@ table.note-report td {
 					'comment' => array('property' => 'comment'),
 			),
 	),
-		
+	
+	// Commitments
+
 	'commitment/types' => array(
 			'type' => 'select',
 			'modalities' => array(
@@ -1896,16 +1922,103 @@ table.note-report td {
 			),
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),
-		
+	'commitment/property/account_id' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Client',
+					'fr_FR' => 'Client',
+			),
+	),
+	'commitment/property/account_name' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Name',
+					'fr_FR' => 'Nom',
+			),
+	),
+	'commitment/property/caption' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Caption',
+					'fr_FR' => 'Libellé',
+			),
+	),
+	'commitment/property/description' => array(
+			'type' => 'textarea',
+			'labels' => array(
+					'en_US' => 'Description',
+					'fr_FR' => 'Description',
+			),
+	),
+	'commitment/property/quantity' => array(
+			'type' => 'number',
+			'labels' => array(
+					'en_US' => 'Quantity',
+					'fr_FR' => 'Quantité',
+			),
+	),
+	'commitment/property/unit_price' => array(
+			'type' => 'number',
+			'labels' => array(
+					'en_US' => 'Unit price',
+					'fr_FR' => 'Prix unitaire',
+			),
+	),
+	'commitment/property/amount' => array(
+			'type' => 'number',
+			'min_value' => 0,
+			'max_value' => 1000000,
+			'labels' => array(
+					'en_US' => 'Amount',
+					'fr_FR' => 'Montant',
+			),
+	),
+	'commitment/property/including_options_amount' => array(
+			'type' => 'number',
+			'labels' => array(
+					'en_US' => 'Including options',
+					'fr_FR' => 'Options incluses',
+			),
+	),
+	'commitment/property/invoice_identifier' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Invoice identifier',
+					'fr_FR' => 'Numéro de facture',
+			),
+	),
+	'commitment/property/invoice_date' => array(
+			'type' => 'date',
+			'labels' => array(
+					'en_US' => 'Invoice date',
+					'fr_FR' => 'Date de facture',
+			),
+	),
+	'commitment/property/tax_amount' => array(
+			'type' => 'number',
+			'labels' => array(
+					'en_US' => 'Tax amount',
+					'fr_FR' => 'Montant TVA',
+			),
+	),
+	'commitment/property/tax_inclusive' => array(
+			'type' => 'number',
+			'labels' => array(
+					'en_US' => 'Tax inclusive',
+					'fr_FR' => 'TTC',
+			),
+	),
+
 	'commitment' => array(
 			'currencySymbol' => '€',
 			'tax' => 'excluding',
 			'properties' => array(
 					'type' => array(
-							'type' => 'repository',
+							'type' => 'repository', // Deprecated
 							'definition' => 'commitment/types',
 					),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
@@ -1921,85 +2034,18 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
-					'account_name' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Name',
-									'fr_FR' => 'Nom',
-							),
-					),
-					'caption' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Caption',
-									'fr_FR' => 'Libellé',
-							),
-					),
-					'description' => array(
-							'type' => 'textarea',
-							'labels' => array(
-									'en_US' => 'Description',
-									'fr_FR' => 'Description',
-							),
-					),
-					'quantity' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Quantity',
-									'fr_FR' => 'Quantité',
-							),
-					),
-					'unit_price' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Unit price',
-									'fr_FR' => 'Prix unitaire',
-							),
-					),
-					'amount' => array(
-							'type' => 'number',
-							'min_value' => 0,
-							'max_value' => 1000000,
-							'labels' => array(
-									'en_US' => 'Amount',
-									'fr_FR' => 'Montant',
-							),
-					),
-					'including_options_amount' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Amount',
-									'fr_FR' => 'Montant',
-							),
-					),
-					'invoice_identifier' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Invoice identifier',
-									'fr_FR' => 'Numéro de facture',
-							),
-					),
-					'invoice_date' => array(
-							'type' => 'date',
-							'labels' => array(
-									'en_US' => 'Invoice date',
-									'fr_FR' => 'Date de facture',
-							),
-					),
-					'tax_amount' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Tax amount',
-									'fr_FR' => 'Montant TVA',
-							),
-					),
-					'tax_inclusive' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Tax inclusive',
-									'fr_FR' => 'TTC',
-							),
-					),
+					'account_id' => array('definition' => 'commitment/property/account_id'),
+					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'caption' => array('definition' => 'commitment/property/caption'),
+					'description' => array('definition' => 'commitment/property/description'),
+					'quantity' => array('definition' => 'commitment/property/quantity'),
+					'unit_price' => array('definition' => 'commitment/property/unit_price'),
+					'amount' => array('definition' => 'commitment/property/amount'),
+					'including_options_amount' => array('definition' => 'commitment/property/including_options_amount'),
+					'invoice_identifier' => array('definition' => 'commitment/property/invoice_identifier'),
+					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
+					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
+					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
 			),
 			'order' => 'account_name ASC',
 			'todo' => array(
@@ -2055,11 +2101,18 @@ table.note-report td {
 	),
 
 	'commitment/list' => array(
+			'type' => 'select',
 			'status' => 'select',
+			'account_name' => 'text',
+			'caption' => 'text',
+			'quantity' => 'number',
+			'unit_price' => 'number',
+			'amount' => 'number',
 			'including_options_amount' => 'number',
 	),
 
 	'commitment/update/business' => array(
+			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
@@ -2078,9 +2131,9 @@ table.note-report td {
 	),
 		
 	'commitment/update' => array(
+			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
-//			'amount' => array('mandatory' => false),
 	),
 
 	'commitment/invoice_identifier_mask' => date('Y-'),
@@ -2275,11 +2328,9 @@ table.note-report td {
 			'currencySymbol' => '€',
 			'tax' => 'excluding',
 			'properties' => array(
-					'type' => array(
-							'type' => 'repository',
-							'definition' => 'commitment/types',
-					),
+					'type' => array('definition' => 'commitment/types'),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
@@ -2292,34 +2343,26 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
-					'name' => array(
+					'account_name' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
 									'fr_FR' => 'Nom',
 							),
 					),
-					'caption' => array(
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Caption',
-									'fr_FR' => 'Libellé',
-							),
-					),
-					'description' => array(
-							'type' => 'textarea',
-							'labels' => array(
-									'en_US' => 'Description',
-									'fr_FR' => 'Description',
-							),
-					),
-					'including_options_amount' => array(
-							'type' => 'number',
-							'labels' => array(
-									'en_US' => 'Amount',
-									'fr_FR' => 'Montant',
-							),
-					),
+					'account_id' => array('definition' => 'commitment/property/account_id'),
+					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'caption' => array('definition' => 'commitment/property/caption'),
+					'description' => array('definition' => 'commitment/property/description'),
+					'quantity' => array('definition' => 'commitment/property/quantity'),
+					'unit_price' => array('definition' => 'commitment/property/unit_price'),
+					'amount' => array('definition' => 'commitment/property/amount'),
+					'including_options_amount' => array('definition' => 'commitment/property/including_options_amount'),
+					'invoice_identifier' => array('definition' => 'commitment/property/invoice_identifier'),
+					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
+					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
+					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
 			),
 			'todo' => array(
 					'sales_manager' => array(
@@ -2338,18 +2381,25 @@ table.note-report td {
 			'main' => array(
 					'type' => 'select',
 					'status' => 'select',
+					'account_name' => 'contains',
+					'caption' => 'contains',
 					'including_options_amount' => 'range',
-					'name' => 'contains',
 			),
 	),
 		
 	'commitment/list/service' => array(
-			'caption' => 'input',
-			'including_options_amount' => 'number',
+			'type' => 'select',
 			'status' => 'select',
+			'account_name' => 'text',
+			'caption' => 'text',
+			'quantity' => 'number',
+			'unit_price' => 'number',
+			'amount' => 'number',
+			'including_options_amount' => 'number',
 	),
 		
 	'commitment/update/service' => array(
+			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),

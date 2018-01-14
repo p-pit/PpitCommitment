@@ -86,7 +86,7 @@ class AccountController extends AbstractActionController
     	$applicationId = 'p-pit-contact';
     	$applicationName = $context->getConfig('ppitApplications')['p-pit-contact']['labels'][$context->getLocale()];
     	$currentEntry = $this->params()->fromQuery('entry', 'contactMessage');
-    
+
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -95,7 +95,7 @@ class AccountController extends AbstractActionController
     	if ($request->isPost()) {
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
-    
+
     		if ($csrfForm->isValid()) { // CSRF check
     			$data = array();
     			$data[$template['index']['actions']['property']] = $action_id;
@@ -141,7 +141,7 @@ class AccountController extends AbstractActionController
     			}
 
     			if ($contact->loadData($data) == 'OK') {
-					if ($account->loadData($type, $data) == 'OK') {
+    				if ($account->loadData($type, $data) == 'OK') {
 						if (!$account->name) $account->name = $contact->n_fn;
 
     					// Link to the place community for the account type

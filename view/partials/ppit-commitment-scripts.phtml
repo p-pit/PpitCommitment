@@ -10,27 +10,27 @@ function getParams() {
 	if (document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
 		var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
 		if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = min_<?php echo $propertyId ?>;
-		if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
+		params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false;
 	}
 
 	if (document.getElementById('search_check_max_<?php echo $propertyId ?>').checked) {
 		var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
 		if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = max_<?php echo $propertyId ?>;
-		if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
+		params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false;
 	}
 
 	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
 
 	if (document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
 		var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-		if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+		params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false;
 	}
 
 	<?php else : ?>
 
 	if (document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
 		var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-		if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
+		params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false;
 	}
 	
 	<?php endif;?>
@@ -106,8 +106,12 @@ function connectCommitmentSearchInputs() {
 		$('.search_check').attr('checked', false);
 		filterCommitmentList();
 	});
+	$('#search-button').click(function () { 
+		getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+	});
 
-<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($searchPage['main'] as $propertyId => $rendering) : ?>
+	<?php $property = $configProperties[$propertyId] ?>
 
 	<?php if ($propertyId == 'type') : ?>
 	$('#search_<?php echo $propertyId ?>').change(function () { 
@@ -118,33 +122,20 @@ function connectCommitmentSearchInputs() {
 
 	$('#search_check_min_<?php echo $propertyId ?>').change(function () {
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		if (!document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
 			$('#search_min_<?php echo $propertyId ?>').val('');
 		}
 	});
-
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { 
-		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { 
-		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		document.getElementById('search_check_max_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 
-		<?php if ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($property['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
 		<?php endif;?>
@@ -153,10 +144,6 @@ function connectCommitmentSearchInputs() {
 
 	$('#search_check_<?php echo $propertyId ?>').change(function () {
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
 			$('#search_<?php echo $propertyId ?>').val('');
 		}
@@ -165,25 +152,17 @@ function connectCommitmentSearchInputs() {
 		<?php if ($rendering == 'select' || $rendering == 'repository') : ?>
 
 	$('#search_<?php echo $propertyId ?>').change(function () { 
-		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 	
 		<?php else : ?>
 	$('#search_<?php echo $propertyId ?>').keyup(function () { 
-		$('#search-button').removeClass('btn-default').addClass('btn-success');
-		$('#search-button').unbind('click');
-		$('#search-button').click(function () { 
-			getCommitmentList(getParams(), 'including_options_amount', 'DESC');
-		});
 		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 
-		<?php if ($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($property['type'] == 'date') : ?>
 	$("#search_<?php echo $propertyId ?>").datepicker();
 	$('#search_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
 		<?php endif;?>
@@ -229,12 +208,52 @@ function getCommitmentList(params, major, dir) {
 					sortCommitmentList($(this).attr('id').split('-')[0]);
 				});
 			});
+
+			// Able the group action button
+			$('.commitment-checkbox').click(function () {
+				$('.group-anchor').removeAttr('disabled');
+			});
+
+			// Connect the check all checkbox
+			$('#commitment-checkbox').click(function () {
+				var current = document.getElementById('commitment-checkbox').checked;
+				var commitmentNumber = $('#commitment-number').val();
+				document.getElementById('down-commitment-checkbox').checked = (current) ? true : false;
+				for (i = 0; i < commitmentNumber; i++) {
+					document.getElementById('commitment-checkbox_' + i).checked = (current) ? true : false;
+				}
+			});
+			$('#down-commitment-checkbox').click(function () {
+				var current = document.getElementById('down-commitment-checkbox').checked;
+				var commitmentNumber = $('#commitment-number').val();
+				document.getElementById('commitment-checkbox').checked = (current) ? true : false;
+				for (i = 0; i < commitmentNumber; i++) {
+					document.getElementById('commitment-checkbox_' + i).checked = (current) ? true : false;
+				}
+			});
+			
+			// Connect the grouped actions anchors
+			$('.group-anchor').each(function () {
+				$(this).click(function () {
+					getGroup();
+				});
+			});
 			
 			// Connect the detail anchors
 			$('.commitment-detail-anchor').each(function () {
 				$(this).click(function () {
 					getCommitmentDetail($(this).attr('id').split('_')[1]);
 				});
+			});
+			
+			// Connect the distribution anchor
+			$('.distribution').hide();
+			var distributionValue = $('#select-distribution').val();
+			$('#distribution_' + distributionValue).show();
+			$('#select-distribution').change(function () {
+				$('.distribution').hide();
+				var distributionValue = $('#select-distribution').val();
+				$('#distribution_' + distributionValue).show();
 			});
 	<?php if (!$config['isTraceActive']) : ?>
 			}
@@ -334,14 +353,12 @@ function getCommitmentSettleForm(id) {
 <?php 
 $properties = array();
 
-foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $def) {
-	if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
-		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+foreach ($updatePage as $propertyId => $updateOptions) {
+	$property = $configProperties[$propertyId];
+	if ($updateOptions && (!array_key_exists('readonly', $updateOptions) || !$updateOptions['readonly']) && $property['type'] != 'title') {
+		if ($property['type'] == 'number') $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $updateOptions['mandatory'], 'minValue' => $property['minValue'], 'maxValue' => $property['maxValue']);
+		else $properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $updateOptions['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 	}
-	else {
-		$property = $context->getConfig('commitment')['properties'][$propertyId];
-	}
-	$properties['commitment-'.$propertyId] = array('type' => $property['type'], 'mandatory' => $def['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
 
 $properties['update_time'] = array('type' => 'hidden');

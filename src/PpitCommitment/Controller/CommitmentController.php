@@ -41,6 +41,16 @@ require_once('vendor/TCPDF-master/tcpdf.php');
 
 class CommitmentController extends AbstractActionController
 {	
+	public function getConfigProperties($type) {
+		$context = Context::getCurrent();
+		$properties = array();
+		foreach($context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'] as $propertyId => $property) {
+			if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+			$properties[$propertyId] = $property;
+		}
+		return $properties;
+	}
+
 	public function indexAction()
     {
     	$context = Context::getCurrent();
@@ -51,7 +61,8 @@ class CommitmentController extends AbstractActionController
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-PIT Engagements';
 		$instance = Instance::get($context->getInstanceId());
-
+		$configProperties = $this->getConfigProperties($type);
+		
 /*    	$url = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['url'];
     	$client = new Client(
     			$url,
@@ -70,10 +81,11 @@ class CommitmentController extends AbstractActionController
 		$applications = json_decode($response->getContent(), true);*/
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
 
-		$params = $this->getFilters($this->params());
+		$params = $this->getFilters($this->params(), $type);
 
     	return new ViewModel(array(
     			'context' => $context,
+				'configProperties' => $configProperties,
     			'config' => $context->getConfig(),
     			'place' => $place,
     			'active' => 'application',
@@ -85,111 +97,33 @@ class CommitmentController extends AbstractActionController
     			'params' => $params,
 	    		'products' => Product::getList(null, array()),
 	    		'options' => ProductOption::getList(null, array()),
+				'indexPage' => $context->getConfig('commitment/index/'.$type),
+    			'searchPage' => $context->getConfig('commitment/search/'.$type),
+				'listPage' => $context->getConfig('commitment/list/'.$type),
+				'detailPage' => $context->getConfig('commitment/detail/'.$type),
+				'updatePage' => $context->getConfig('commitment/update/'.$type),
     	));
     }
 	
-	public function getFilters($params)
+	public function getFilters($params, $type)
 	{
+		// Retrieve the context
+		$context = Context::getCurrent();
+		
 		// Retrieve the query parameters
 		$filters = array();
-
-		$id = ($params()->fromQuery('id', null));
-		if ($id) $filters['id'] = $id;
-
-		$account_id = ($params()->fromQuery('account_id', null));
-		if ($account_id) $filters['account_id'] = $account_id;
-
-		$subscription_id = ($params()->fromQuery('subscription_id', null));
-		if ($subscription_id) $filters['subscription_id'] = $subscription_id;
-
-		$type = ($params()->fromQuery('type', null));
-		if ($type) $filters['type'] = $type;
+		foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $unused) {
 		
-		$status = ($params()->fromQuery('status', null));
-		if ($status) $filters['status'] = $status;
-
-		$min_amount = ($params()->fromQuery('min_amount', null));
-		if ($min_amount) $filters['min_amount'] = $min_amount;
-		
-		$max_amount = ($params()->fromQuery('max_amount', null));
-		if ($max_amount) $filters['max_amount'] = $max_amount;
-
-		$min_including_options_amount = ($params()->fromQuery('min_including_options_amount', null));
-		if ($min_including_options_amount) $filters['min_including_options_amount'] = $min_including_options_amount;
-		
-		$max_including_options_amount = ($params()->fromQuery('max_including_options_amount', null));
-		if ($max_including_options_amount) $filters['max_including_options_amount'] = $max_including_options_amount;
-
-		$account_name = ($params()->fromQuery('account_name', null));
-		if ($account_name) $filters['account_name'] = $account_name;
-		
-		$identifier = ($params()->fromQuery('identifier', null));
-		if ($identifier) $filters['identifier'] = $identifier;
-
-		$quotation_identifier = ($params()->fromQuery('quotation_identifier', null));
-		if ($quotation_identifier) $filters['quotation_identifier'] = $quotation_identifier;
-		
-		$invoice_identifier = ($params()->fromQuery('invoice_identifier', null));
-		if ($invoice_identifier) $filters['invoice_identifier'] = $invoice_identifier;
-		
-		$min_commitment_date = ($params()->fromQuery('min_commitment_date', null));
-		if ($min_commitment_date) $filters['min_commitment_date'] = $min_commitment_date;
-		
-		$max_commitment_date = ($params()->fromQuery('max_commitment_date', null));
-		if ($max_commitment_date) $filters['max_commitment_date'] = $max_commitment_date;
-
-		$min_retraction_limit = ($params()->fromQuery('min_retraction_limit', null));
-		if ($min_retraction_limit) $filters['min_retraction_limit'] = $min_retraction_limit;
-		
-		$max_retraction_limit = ($params()->fromQuery('max_retraction_limit', null));
-		if ($max_retraction_limit) $filters['max_retraction_limit'] = $max_retraction_limit;
-		
-		$min_retraction_date = ($params()->fromQuery('min_retraction_date', null));
-		if ($min_retraction_date) $filters['min_retraction_date'] = $min_retraction_date;
-		
-		$max_retraction_date = ($params()->fromQuery('max_retraction_date', null));
-		if ($max_retraction_date) $filters['max_retraction_date'] = $max_retraction_date;
-
-		$min_expected_delivery_date = ($params()->fromQuery('min_expected_delivery_date', null));
-		if ($min_expected_delivery_date) $filters['min_expected_delivery_date'] = $min_expected_delivery_date;
-		
-		$max_expected_delivery_date = ($params()->fromQuery('max_expected_delivery_date', null));
-		if ($max_expected_delivery_date) $filters['max_expected_delivery_date'] = $max_expected_delivery_date;
-
-		$min_shipment_date = ($params()->fromQuery('min_shipment_date', null));
-		if ($min_shipment_date) $filters['min_shipment_date'] = $min_shipment_date;
-		
-		$max_shipment_date = ($params()->fromQuery('max_shipment_date', null));
-		if ($max_shipment_date) $filters['max_shipment_date'] = $max_shipment_date;
-
-		$min_delivery_date = ($params()->fromQuery('min_delivery_date', null));
-		if ($min_delivery_date) $filters['min_delivery_date'] = $min_delivery_date;
-		
-		$max_delivery_date = ($params()->fromQuery('max_delivery_date', null));
-		if ($max_delivery_date) $filters['max_delivery_date'] = $max_delivery_date;
-
-		$min_commissioning_date = ($params()->fromQuery('min_commissioning_date', null));
-		if ($min_commissioning_date) $filters['min_commissioning_date'] = $min_commissioning_date;
-		
-		$max_commissioning_date = ($params()->fromQuery('max_commissioning_date', null));
-		if ($max_commissioning_date) $filters['max_commissioning_date'] = $max_commissioning_date;
-
-		$min_invoice_date = ($params()->fromQuery('min_invoice_date', null));
-		if ($min_invoice_date) $filters['min_invoice_date'] = $min_invoice_date;
-		
-		$max_invoice_date = ($params()->fromQuery('max_invoice_date', null));
-		if ($max_invoice_date) $filters['max_invoice_date'] = $max_invoice_date;
-
-		for ($i = 1; $i < 20; $i++) {
-		
-			$property = ($params()->fromQuery('property_'.$i, null));
-			if ($property) $filters['property_'.$i] = $property;
-			$min_property = ($params()->fromQuery('min_property_'.$i, null));
-			if ($min_property) $filters['min_property_'.$i] = $min_property;
-			$max_property = ($params()->fromQuery('max_property_'.$i, null));
-			if ($max_property) $filters['max_property_'.$i] = $max_property;
+			$property = ($params()->fromQuery($propertyId, null));
+			if ($property !== null) $filters[$propertyId] = $property;
+			$min_property = ($params()->fromQuery('min_'.$propertyId, null));
+			if ($min_property !== null) $filters['min_'.$propertyId] = $min_property;
+			$max_property = ($params()->fromQuery('max_'.$propertyId, null));
+			if ($max_property !== null) $filters['max_'.$propertyId] = $max_property;
 		}
-		
+		$property = $params()->fromQuery('account_id');
+		if ($property !== null) $filters['account_id'] = $property;
+
 		return $filters;
 	}
 	
@@ -200,16 +134,17 @@ class CommitmentController extends AbstractActionController
 
 		// Retrieve the type
 		$type = $this->params()->fromRoute('type', 0);
-
-		$params = $this->getFilters($this->params());
-
+		$configProperties = $this->getConfigProperties($type);
+		
    		// Return the link list
    		$view = new ViewModel(array(
    				'context' => $context,
-				'config' => $context->getconfig(),
+				'configProperties' => $configProperties,
+   				'config' => $context->getconfig(),
    				'subscriptions' => Subscription::getList(array(), 'product_identifier', 'ASC'),
 //   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'type' => $type,
+    			'searchPage' => $context->getConfig('commitment/search/'.$type),
    		));
 		$view->setTerminal(true);
        	return $view;
@@ -217,46 +152,47 @@ class CommitmentController extends AbstractActionController
 
    	public function getList()
    	{
-		// Retrieve the context
 		$context = Context::getCurrent();
-
-		$params = $this->getFilters($this->params());
-
-		// Retrieve the order type
 		$type = $this->params()->fromRoute('type', null);
-		if ($type != 'p-pit-studies') $type = null;
-
-		$major = ($this->params()->fromQuery('major', 'identifier'));
+		$params = $this->getFilters($this->params(), $type);
+		$major = ($this->params()->fromQuery('major', 'property_1'));
 		$dir = ($this->params()->fromQuery('dir', 'ASC'));
-
+		$configProperties = $this->getConfigProperties($type);
+		
 		if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
 
 		// Retrieve the list
-		$turnover = $quantity = 0;
 		$commitments = Commitment::getList($type, $params, $major, $dir, $mode);
+		$sum = 0;
+		$distribution = array();
 		foreach ($commitments as $commitment) {
-			$quantity += $commitment->quantity;
-			$turnover += $commitment->including_options_amount;
+			$majorSpecification = $configProperties[$major];
+			if ($majorSpecification['type'] == 'number') $sum += $commitment->properties[$major];
+			elseif ($majorSpecification['type'] == 'select') {
+				if (array_key_exists($commitment->properties[$major], $distribution)) $distribution[$commitment->properties[$major]]++;
+				else $distribution[$commitment->properties[$major]] = 1;
+			}
 		}
-
-		// Retrieve the credits
-		$credit = Credit::getTable()->get('p-pit-engagements', 'type'); 
+		$average = (count($commitments)) ? round($sum / count($commitments), 1) : null;
 		
    		// Return the link list
    		$view = new ViewModel(array(
    				'context' => $context,
-				'config' => $context->getconfig(),
+				'configProperties' => $configProperties,
+   				'config' => $context->getconfig(),
    				'type' => $type,
 //   				'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
 //   				'statuses' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['statuses'],
    				'commitments' => $commitments,
-   				'quantity' => $quantity,
-   				'turnover' => $turnover,
    				'mode' => $mode,
    				'params' => $params,
    				'major' => $major,
    				'dir' => $dir,
-   				'credit' => $credit,
+    			'count' => count($commitments),
+    			'sum' => $sum,
+    			'average' => $average,
+				'distribution' => $distribution,
+				'listPage' => $context->getConfig('commitment/list/'.$type),
    		));
 		$view->setTerminal(true);
        	return $view;
@@ -467,7 +403,8 @@ class CommitmentController extends AbstractActionController
     
     	// Retrieve the type
     	$type = $this->params()->fromRoute('type', null);
-    	if ($type != 'p-pit-studies') $type = null;
+    	$configProperties = $this->getConfigProperties($type);
+    	$updatePage = $context->getConfig('commitment/update/'.$type);
 
     	// Retrieve the account
     	$account_id = $this->params()->fromQuery('account_id', null);
@@ -479,6 +416,8 @@ class CommitmentController extends AbstractActionController
     	}
     	else $commitment = Commitment::instanciate($type);
 
+    	$accounts = Account::getList(null, []);
+    	
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -497,9 +436,9 @@ class CommitmentController extends AbstractActionController
     			// Retrieve the data from the request
     			$data = array();
     			if (!$commitment->id) $data['account_id'] = $account_id;
-				if (!$id) $data['type'] = $request->getPost('commitment-type');
-    			foreach ($context->getConfig('commitment/update'.(($type) ? '/'.$type : '')) as $propertyId => $unused) {
-					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+				if (!$id) $data['type'] = $type;
+    			foreach ($updatePage as $propertyId => $unused) {
+					$property = $configProperties[$propertyId];
 					if ($property['type'] == 'file' && array_key_exists($propertyId, $request->getFiles()->toArray())) $files = $request->getFiles()->toArray()[$propertyId];
 					else $data[$propertyId] = $request->getPost('commitment-'.$propertyId);
     			}
@@ -545,15 +484,18 @@ class CommitmentController extends AbstractActionController
 
     	$view = new ViewModel(array(
     			'context' => $context,
+				'configProperties' => $configProperties,
     			'config' => $context->getconfig(),
     			'type' => $commitment->type,
     			'id' => $id,
     			'action' => $action,
+    			'accounts' => $accounts,
     			'properties' => $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'],
     			'commitment' => $commitment,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
-    			'message' => $message
+    			'message' => $message,
+    			'updatePage' => $updatePage,
     	));
     	$view->setTerminal(true);
     	return $view;

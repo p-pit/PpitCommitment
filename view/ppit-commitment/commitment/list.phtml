@@ -34,27 +34,15 @@
 
 <table class="table table-striped ppit_index">
 
-	<tr class="to-mask"><td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) + 1 ?>">&nbsp;</td></tr>	
-	<tr style="font-weight: bold">
-		<td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) + 1 ?>" style="text-align: right">
-			<?php echo $this->translate(($type == 'learning' ? 'Interns' : 'Nbr'), 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
-			<?php echo count($commitments) ?>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<?php echo $this->translate(($type == 'learning' ? 'Hours' : 'Quantity'), 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
-			<?php echo $quantity ?>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<?php echo $this->translate('Sales', 'ppit-commitment', $context->getLocale()) ?>:&nbsp;
-			<?php echo $context->formatFloat($turnover, 2) ?>
-		</td>
-	</tr>
-
 	<tr>
 		<th>&nbsp;</th>
+		<th>&nbsp;</th>
 
-<?php $first = true; foreach ($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
+<?php $first = true; foreach ($listPage as $propertyId => $rendering) : ?>
+	<?php $property = $configProperties[$propertyId] ?>
 		<th align="center">
-	<?php $label = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId]['labels'][$context->getLocale()] ?>
-	<?php if ($label) : ?>
 			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="<?php echo $propertyId ?>-anchor">
-				<span><?php echo $label ?></span>
+				<span><?php echo $context->localize($property['labels']) ?></span>
 <?php if ($major == $propertyId) : ?>
 				<span class="glyphicon glyphicon-triangle-<?php echo ($dir == 'ASC') ? 'top' : 'bottom' ?>"></span>
 <?php endif ?>
@@ -64,22 +52,41 @@
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 		<?php $first=false; endif;?>
-	<?php endif;?>
 		</th>
 <?php endforeach;?>
+	
+			<tr>
+				<td>
+					<input type="checkbox" class="commitment-checkbox" id="commitment-checkbox" title="<?php echo $this->translate('Check all', 'ppit-core', $context->getLocale()) ?>"></input>
+				</td>
+	
+				<td style="text-align: center">
+					<button type="button" class="btn btn-default index-btn group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="group-anchor" disabled="disabled">
+						<span class="glyphicon glyphicon-list-alt" id="group-glyphicon"></span>
+					</button>
+				</td>
+			
+				<td>
+					<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_0">
+						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
+					</button>
+				</td>
+		
+				<td colspan="5">&nbsp;</td>
+			</tr>
+		
+			<tr class="detail-row" id="detail-row_0" rowspan="2"><td colspan="99"><div class="col-md-6 ppit-panel" id="detail-div_0"></div></td></tr>
+			<tr class="invisible"><td colspan="99"></td></tr>
+		
+			<input type="hidden" id="commitment-number" value="<?php echo count($commitments) ?>" />
 	
 <?php $i = 0; foreach ($commitments as $commitment) : ?>
 	<?php if ($context->isAllowed('commitment/detail')) : ?>
 	
-	<tr <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
-		<td colspan="<?php echo 1 + count($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')))?>">
-			<strong><?php echo $commitment->account_name ?></strong> -
-			<?php echo $commitment->caption ?>
-			<?php if ($commitment->credit_status == 'blocked') echo '('.$this->translate($commitment->credit_status, 'ppit-core', $context->getLocale()).')' ?>
-		</td>
-	</tr>
-	
 	<tr class="commitment" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
+		<td>
+			<input type="checkbox" class="commitment-checkbox" id="commitment-checkbox_<?php echo $i ?>"></input>
+		</td>
 		<td >
 			<button type="button" class="btn btn-default index-btn commitment-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-detail-anchor_<?php echo $commitment->id ?>">
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $commitment->id ?>-glyphicon"></span>
@@ -91,11 +98,8 @@
 <?php endif;?>
 		</td>
 
-	<?php foreach ($context->getConfig('commitment/list'.(($type) ? '/'.$type : '')) as $propertyId => $rendering) : ?>
-		<?php 
-		$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-		if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
-		?>
+	<?php foreach ($listPage as $propertyId => $rendering) : ?>
+		<?php $property = $configProperties[$propertyId] ?>
 	
 		<?php if ($propertyId == 'account_name') : ?>
 		<td><?php echo $commitment->account_name ?></td>
@@ -123,6 +127,61 @@
 	<tr class="invisible"><td colspan="99"></td></tr>
 <?php $i++; endforeach; ?>
 
+			<tr>
+				<td>
+					<input type="checkbox" class="commitment-checkbox" id="down-commitment-checkbox"></input>
+				</td>
+		
+				<td style="text-align: center">
+					<button type="button" class="btn btn-default index-btn commitment-group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="commitment-down-group-anchor" disabled="disabled">
+						<span class="glyphicon glyphicon-list-alt" id="down-group-glyphicon"></span>
+					</button>
+				</td>
+
+<?php if ($mode == 'todo' && count($commitments) >= '5') : ?>
+				<td style="text-align: center">
+					<button type="button" class="btn btn-default index-btn" title="<?php echo $this->translate('Display the entire list', 'ppit-core', $context->getLocale())?>" id="more-anchor">
+						<span class="glyphicon glyphicon-option-horizontal" id="more-glyphicon"></span>
+					</button>
+				</td>
+<?php else : ?>
+				<td>&nbsp;</td>
+<?php endif;?>
+				<td colspan="<?php echo count($context->getConfig('commitment/list'.(($type) ? '/'.$type : ''))) ?>">&nbsp;</td>
+			</tr>
+
+	<tr>
+		<th>&nbsp;</th>
+		<th>&nbsp;</th>
+<?php foreach ($listPage as $propertyId => $unused) : ?>
+	<?php $property = $configProperties[$propertyId] ?>
+		<th>
+	<?php if ($propertyId == $major) : ?>
+			<?php echo $this->translate('Number', 'ppit-core', $context->getLocale()) ?>:&nbsp;<?php echo $count.'<br>' ?>
+			<?php if ($sum) echo $this->translate('Sum', 'ppit-core', $context->getLocale()).':&nbsp;'.$context->formatFloat($sum,2).'<br>' ?>
+			<?php if ($average) echo $this->translate('Average', 'ppit-core', $context->getLocale()).':&nbsp;'.$context->formatFloat($average, 2) ?>
+
+		<?php if ($distribution) : ?>
+			<select id="select-distribution">
+			<?php foreach ($distribution as $modality => $value) : ?>
+				<?php 
+				if ($propertyId == 'place_id') if ($modality) $label = $places[$modality]->caption; else $label = '';
+				else $label = $property['modalities'][$modality][$context->getLocale()];
+				?>
+				<option value="<?php echo $modality ?>"><?php echo $label ?></option>
+			<?php endforeach;?>
+			</select>
+			&nbsp;
+			<?php foreach ($distribution as $modality => $value) : ?>
+			<span class="distribution" id="distribution_<?php echo $modality ?>"><?php echo $value ?>&nbsp;/&nbsp;<?php echo $count ?>&nbsp;=&nbsp;<?php echo round($value / $count * 100, 1) ?>%</span>
+			<?php endforeach;?>
+		<?php endif;?>
+	<?php else : ?>
+			&nbsp;
+	<?php endif;?>
+		</th>
+<?php endforeach;?>
+	</tr>
 </table>
 
 </div>

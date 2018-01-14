@@ -410,7 +410,6 @@ class Commitment implements InputFilterAwareInterface
 			// Set the filters
 			foreach ($params as $propertyId => $property) {
 				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
-				elseif ($propertyId == 'subscription_id') $where->equalTo('subscription_id', $params['subscription_id']);
 				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);

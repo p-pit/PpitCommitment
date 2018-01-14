@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/css/main.css') ?>">
   <script src="<?php echo $this->basePath('style/'.$context->getInstance()->caption.'/lib/jquery-3.2.1.min.js') ?>" charset="utf-8"></script>
-  <title>Inscription aux Journées d'Admission</title>
+  <title><?php echo (array_key_exists('title', $template)) ? $context->localize($template['title']) : 'Inscription aux Journées d\'Admission' ?></title>
   <link rel="shortcut icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
   <link rel="icon" href="<?php echo $this->basePath('favicon.ico') ?>" type="image/x-icon">
 </head>
@@ -212,14 +212,14 @@
               <textarea class="input_textarea" name="<?php echo $fieldId ?>" rows="8" cols="80" data-test="<?php echo $mandatory ?>"><?php echo $account->properties[$fieldId] ?></textarea>
 
 				<?php else : ?>
-				<?php
+				<?php 
 				if ($field['type'] == 'text') $type = '';
 				elseif ($field['type'] == 'number') $type = 'number';
 				elseif ($field['type'] == 'email') $type = 'email';
 				elseif ($field['type'] == 'phone') $type = 'number';
 				?>
               <label class="input_label" for="<?php echo $fieldId ?>"><?php if ($mandatory) echo '* '?><?php echo $field['labels'][$context->getLocale()]?></label>
-              <input class="input_text" type="text" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>" value="<?php echo $account->properties[$fieldId] ?>">
+              <input class="input_text" type="text" name="<?php echo $fieldId ?>" id="<?php echo $fieldId ?>" data-test="<?php echo $type ?> <?php echo $mandatory ?>" value="<?php echo $account->properties[$fieldId] ?>" <?php if (array_key_exists('placeholder', $field)) echo 'placeholder="'.$context->localize($field['placeholder']).'"' ?>>
 	
 				<?php endif?>
             </div>
