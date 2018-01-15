@@ -276,7 +276,7 @@ class AccountController extends AbstractActionController
     	$vcard = Vcard::get($data['email'], 'email');
     	if ($vcard) {
     		// Check if the account already exists. No update and the sales manager are notified.
-    		$accounts = Account::getList($interaction->category, array('status' => implode(',', $context->getConfig('core_account/'.$interaction->category)['properties']['status']['perspectives']['contact']), 'contact_1_id' => $vcard->id));
+    		$accounts = Account::getList($interaction->category, array('status' => implode(',', $context->getConfig('core_account/'.$interaction->category.'/property/status')['perspectives']['contact']), 'contact_1_id' => $vcard->id));
     		reset($accounts);
     		if (count($accounts) > 0) $account = Account::get(current($accounts)->id);
     		else $account = null;

@@ -138,6 +138,7 @@ class PdfInvoiceOldViewHelper
 					else {
 						$property = $context->getConfig('commitment')['properties'][$propertyId];
 					}
+					if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
     				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
 	    			if ($propertyId == 'account_name') $arguments[] = $commitment->account_name;
 	    			elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;

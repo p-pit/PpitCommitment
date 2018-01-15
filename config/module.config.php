@@ -929,13 +929,22 @@ return array(
 									'fr_FR' => 'Particuliers',
 							),
 					),
-					'commitment' => array(
+					'service' => array(
 							'route' => 'commitment/index',
-							'params' => array(),
+							'params' => array('type' => 'service'),
 							'glyphicon' => 'glyphicon-link',
 							'label' => array(
-									'en_US' => 'Commitments',
-									'fr_FR' => 'Engagements',
+									'en_US' => 'Services',
+									'fr_FR' => 'Prestations',
+							),
+					),
+					'rental' => array(
+							'route' => 'commitment/index',
+							'params' => array('type' => 'rental'),
+							'glyphicon' => 'glyphicon-link',
+							'label' => array(
+									'en_US' => 'Rental',
+									'fr_FR' => 'Location',
 							),
 					),
 					'term' => array(
@@ -1916,6 +1925,7 @@ table.note-report td {
 			'modalities' => array(
 					'rental' => array('en_US' => 'Rental', 'fr_FR' => 'Location'),
 					'service' => array('en_US' => 'Service', 'fr_FR' => 'Prestation'),
+					'human_service' => array('en_US' => 'Human service', 'fr_FR' => 'Service à la personne'),
 					'learning' => array('en_US' => 'Learning', 'fr_FR' => 'Formation'),
 					'p-pit-studies' => array('en_US' => 'Subscription', 'fr_FR' => 'Inscription'),
 //					'p-pit-stays' => array('en_US' => 'Stay', 'fr_FR' => 'Séjour'),
@@ -2151,14 +2161,14 @@ table.note-report td {
 			),
 			'description' => array(
 					array(
-							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('description'),
-					),
-					array(
 							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
 					),
 /*					array(
 							'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
@@ -2177,14 +2187,14 @@ table.note-report td {
 			),
 			'description' => array(
 					array(
-							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('description'),
-					),
-					array(
 							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
 					),
 					array(
 							'left' => array('en_US' => 'Situation date', 'fr_FR' => 'Date de situation'),
@@ -2248,6 +2258,7 @@ table.note-report td {
 							'definition' => 'commitment/types',
 					),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
@@ -2261,6 +2272,7 @@ table.note-report td {
 							),
 					),
 					'name' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -2268,6 +2280,7 @@ table.note-report td {
 							),
 					),
 					'caption' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Caption',
@@ -2275,6 +2288,7 @@ table.note-report td {
 							),
 					),
 					'description' => array(
+							'definition' => 'inline',
 							'type' => 'textarea',
 							'labels' => array(
 									'en_US' => 'Description',
@@ -2282,6 +2296,7 @@ table.note-report td {
 							),
 					),
 					'including_options_amount' => array(
+							'definition' => 'inline',
 							'type' => 'number',
 							'labels' => array(
 									'en_US' => 'Amount',
@@ -2404,6 +2419,149 @@ table.note-report td {
 			'description' => array('mandatory' => false),
 	),
 
+	// Human service
+	
+	'commitment/human_service' => array(
+			'currencySymbol' => '€',
+			'tax' => 'excluding',
+			'properties' => array(
+					'type' => array('definition' => 'commitment/types'),
+					'status' => array(
+							'definition' => 'inline',
+							'type' => 'select',
+							'modalities' => array(
+									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
+									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
+									'invoiced' => array('en_US' => 'Invoiced', 'fr_FR' => 'Facturé'),
+							),
+							'labels' => array(
+									'en_US' => 'Status',
+									'fr_FR' => 'Statut',
+							),
+					),
+					'account_name' => array(
+							'definition' => 'inline',
+							'type' => 'input',
+							'labels' => array(
+									'en_US' => 'Name',
+									'fr_FR' => 'Nom',
+							),
+					),
+					'account_id' => array('definition' => 'commitment/property/account_id'),
+					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'caption' => array('definition' => 'commitment/property/caption'),
+					'description' => array('definition' => 'commitment/property/description'),
+					'quantity' => array('definition' => 'commitment/property/quantity'),
+					'unit_price' => array('definition' => 'commitment/property/unit_price'),
+					'amount' => array('definition' => 'commitment/property/amount'),
+					'including_options_amount' => array('definition' => 'commitment/property/including_options_amount'),
+					'invoice_identifier' => array('definition' => 'commitment/property/invoice_identifier'),
+					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
+					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
+					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
+			),
+			'todo' => array(
+					'sales_manager' => array(
+							'status' => array('selector' => 'in', 'value' => array('new')),
+					),
+			),
+	),
+	
+	'commitment/index/human_service' => array(
+			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
+	),
+	
+	'commitment/search/human_service' => array(
+			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
+			'main' => array(
+					'type' => 'select',
+					'status' => 'select',
+					'account_name' => 'contains',
+					'caption' => 'contains',
+					'including_options_amount' => 'range',
+			),
+	),
+	
+	'commitment/list/human_service' => array(
+			'type' => 'select',
+			'status' => 'select',
+			'account_name' => 'text',
+			'caption' => 'text',
+			'quantity' => 'number',
+			'unit_price' => 'number',
+			'amount' => 'number',
+			'including_options_amount' => 'number',
+	),
+	
+	'commitment/update/human_service' => array(
+			'account_id' => array('mandatory' => true),
+			'caption' => array('mandatory' => true),
+			'description' => array('mandatory' => false),
+	),
+
+	'commitment/invoice/human_service' => array(
+			'header' => array(
+					array(
+							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('account_name'),
+					),
+			),
+			'description' => array(
+					array(
+							'left' => array('en_US' => 'Beneficiary', 'fr_FR' => 'Bénéficiaire'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('account_name'),
+					),
+					array(
+							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
+					),
+					/*					array(
+					 'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('invoice_date'),
+					),*/
+			),
+	),
+	
+	'commitment/proforma/human_service' => array(
+			'header' => array(
+					array(
+							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('account_name'),
+					),
+			),
+			'description' => array(
+					array(
+							'left' => array('en_US' => 'Beneficiary', 'fr_FR' => 'Bénéficiaire'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('account_name'),
+					),
+					array(
+							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('caption'),
+					),
+					array(
+							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('description'),
+					),
+					array(
+							'left' => array('en_US' => 'Situation date', 'fr_FR' => 'Date de situation'),
+							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
+							'params' => array('date'),
+					),
+			),
+	),
+
 	// Learning
 
 	'commitment/property_10/learning' => array(
@@ -2441,6 +2599,7 @@ table.note-report td {
 							'definition' => 'commitment/types',
 					),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'new' => array('en_US' => 'To be confirmed', 'fr_FR' => 'A confirmer'),
@@ -2454,6 +2613,7 @@ table.note-report td {
 							),
 					),
 					'name' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -2461,6 +2621,7 @@ table.note-report td {
 							),
 					),
 					'caption' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Caption',
@@ -2468,6 +2629,7 @@ table.note-report td {
 							),
 					),
 					'description' => array(
+							'definition' => 'inline',
 							'type' => 'textarea',
 							'labels' => array(
 									'en_US' => 'Description',
@@ -2475,6 +2637,7 @@ table.note-report td {
 							),
 					),
 					'property_1' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'A1' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1 - Entreprise - Formation salarié hors professionalisation'),
@@ -2499,6 +2662,7 @@ table.note-report td {
 							),
 					),
 					'property_2' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'A1a' => array('en_US' => 'Non applicable', 'fr_FR' => 'A1a - Salariés financement employeur hors professionnalisation'),
@@ -2513,6 +2677,7 @@ table.note-report td {
 							),
 					),
 					'property_3' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'B1' => array('en_US' => 'Non applicable', 'fr_FR' => 'B1 - Formés par votre organisme pour son propre compte'),
@@ -2525,6 +2690,7 @@ table.note-report td {
 							),
 					),
 					'property_4' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'C1a' => array('en_US' => 'Non applicable', 'fr_FR' => 'C1a - Certification enregistrée au RNCP - Niveau I et II'),
@@ -2541,6 +2707,7 @@ table.note-report td {
 							),
 					),
 					'property_5' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Non applicable',
@@ -2553,6 +2720,7 @@ table.note-report td {
 					'property_13' => array('type' => 'repository', 'definition' => 'commitment/property_13/learning'),
 					'property_14' => array('type' => 'repository', 'definition' => 'commitment/property_14/learning'),
 					'including_options_amount' => array(
+							'definition' => 'inline',
 							'type' => 'number',
 							'labels' => array(
 									'en_US' => 'Amount',
@@ -2560,6 +2728,7 @@ table.note-report td {
 							),
 					),
 					'invoice_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Invoice date',

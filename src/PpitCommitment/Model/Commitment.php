@@ -560,6 +560,7 @@ class Commitment implements InputFilterAwareInterface
     				else {
     					$property = $context->getConfig('commitment')['properties'][$propertyId];
     				}
+    				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
     				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
     				if ($propertyId == 'account_name') $arguments[] = $this->account_name;
     				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($this->properties[$propertyId]);
