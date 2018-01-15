@@ -2423,7 +2423,7 @@ table.note-report td {
 	
 	'commitment/human_service' => array(
 			'currencySymbol' => '€',
-			'tax' => 'excluding',
+			'tax' => 'none',
 			'properties' => array(
 					'type' => array('definition' => 'commitment/types'),
 					'status' => array(
@@ -3168,7 +3168,7 @@ L\'équipe P-Pit
 	),
 		
 	'demo' => array(
-			'core_account/search/business/title' => array(
+			'core_account/search/title' => array(
 					'en_US' => '
 <h4>Account list</h4>
 <p>As a default, all the accounts with a <em>Active</em> status are presented in the list.</p>
@@ -3234,7 +3234,7 @@ L\'équipe P-Pit
 <p>Par exemple vous pouvez envoyer un emailing en cochant dans la liste les comptes à cibler puis émettre l\'email de façon groupée.</p>
 					',
 			),
-			'core_account/list/business/add' => array(
+			'core_account/list/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un compte</h4>
@@ -3256,14 +3256,14 @@ L\'équipe P-Pit
 	</ul>
 					',
 			),
-			'core_account/list/business/detail' => array(
+			'core_account/list/detail' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Détail d\'un compte</h4>
 <p>Le bouton zoom permet d\'accéder au détail d\'un compte et aux engagements associés.</p>
 					',
 			),
-			'core_account/update/business' => array(
+			'core_account/business' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Gestion des données du compte</h4>
@@ -3272,7 +3272,7 @@ L\'équipe P-Pit
 <p>Il donne enfin un accès centralisé, en ajout ou modification, aux engagements associés à ce compte.</p>
 					',
 			),
-			'commitment/accountList/business/add' => array(
+			'commitment/accountList/add' => array(
 					'en_US' => '',
 					'fr_FR' => '
 <h4>Ajout d\'un engagement</h4>

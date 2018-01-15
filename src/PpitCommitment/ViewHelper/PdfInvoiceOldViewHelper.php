@@ -164,7 +164,9 @@ class PdfInvoiceOldViewHelper
 //    	$pdf->SetFillColor(196, 196, 196);
     	$pdf->SetTextColor(255);
     	$currencySymbol = $context->getConfig('commitment/'.$type)['currencySymbol'];
-    	$taxComputing = (($context->getConfig('commitment/'.$type)['tax'] == 'excluding') ? 'HT' : 'TTC');
+    	if ($context->getConfig('commitment/'.$type)['tax'] == 'excluding') $taxComputing = 'HT';
+    	elseif ($context->getConfig('commitment/'.$type)['tax'] == 'including') $taxComputing = 'TTC';
+    	else $taxComputing = '';
     	$pdf->Cell(110, 7, 'Libellé', 1, 0, 'C', 1);
     	$pdf->Cell(25, 7, 'PU ('.$currencySymbol.' '.$taxComputing.')', 1, 0, 'C', 1);
     	$pdf->Cell(20, 7, 'Quantité', 1, 0, 'C', 1);
@@ -263,7 +265,7 @@ class PdfInvoiceOldViewHelper
     	}
     	$pdf->Ln();
     	$pdf->SetFont('', 'B');
-    	$pdf->Cell(155, 6, 'Total TTC :', 'LR', 0, 'R', false);
+    	$pdf->Cell(155, 6, 'Total '.(($context->getConfig('commitment/'.$type)['tax'] != 'none') ? 'TTC' : '').' :', 'LR', 0, 'R', false);
     	$pdf->Cell(25, 6, $context->formatFloat($commitment->tax_inclusive, 2).' '.$currencySymbol, 'LR', 0, 'R', false);
 
     	// Terms
