@@ -902,15 +902,6 @@ return array(
 	),
 
 	'menus/p-pit-engagements' => array(
-					'contact' => array(
-							'route' => 'account/contactIndex',
-							'params' => array('entry' => 'contact', 'type' => 'business'),
-							'glyphicon' => 'glyphicon-user',
-							'label' => array(
-									'en_US' => 'Contacts',
-									'fr_FR' => 'Contacts',
-							),
-					),
 					'account' => array(
 							'route' => 'account/index',
 							'params' => array('entry' => 'account', 'type' => 'business'),
@@ -965,7 +956,7 @@ return array(
 									'fr_FR' => 'Catalogue',
 							),
 					),
-					'interaction' => array(
+/*					'interaction' => array(
 							'route' => 'commitmentMessage/index',
 							'params' => array(),
 							'urlParams' => array(),
@@ -974,7 +965,7 @@ return array(
 									'en_US' => 'Interactions',
 									'fr_FR' => 'Interactions',
 							),
-					),
+					),*/
 	),
 
 	'creditConsumers' => array(
@@ -1148,8 +1139,7 @@ return array(
 									'fr_FR' => 'Statut',
 							),
 							'perspectives' => array(
-									'contact' => array('new', 'prospect', 'gone'),
-									'account' => array('committed', 'active'),
+									'account' => array('new', 'prospect', 'gone', 'committed', 'active'),
 							),
 							'mandatory' => true,
 					),

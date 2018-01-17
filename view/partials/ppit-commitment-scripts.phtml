@@ -965,6 +965,7 @@ function getCommitmentDetail(id) {
 
 	// Highlight the clicked button (and only it in its class)
 	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('.index-btn').attr('disabled', 'disabled');
 	$('#commitment-detail-anchor_' + id).removeClass("btn-default").addClass("btn-primary");
 }
 
