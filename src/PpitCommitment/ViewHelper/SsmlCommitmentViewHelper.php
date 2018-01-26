@@ -28,7 +28,7 @@ class SsmlCommitmentViewHelper
 
 		foreach($context->getConfig('commitment/update'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 			$property = $context->getConfig('commitment'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
-			if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+			if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
 			$i++;
 			$sheet->setCellValue($colNames[$i].'1', $property['labels'][$context->getLocale()]);
 		}
@@ -69,7 +69,7 @@ class SsmlCommitmentViewHelper
 			$i = 0;
 			foreach($context->getConfig('commitment/update'.(($view->type) ? '/'.$view->type: '')) as $propertyId => $unused) {
 				$property = $context->getConfig('commitment'.(($view->type) ? '/'.$view->type: ''))['properties'][$propertyId];
-				if ($property['type'] == 'repository') $property = $context->getConfig($property['definition']);
+				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
 				$i++;
 				if ($property['type'] == 'date') $sheet->setCellValue($colNames[$i].$j, $context->decodeDate($commitment->properties[$propertyId]));
 				elseif ($property['type'] == 'number') $sheet->setCellValue($colNames[$i].$j, $context->formatFloat($commitment->properties[$propertyId], 2));

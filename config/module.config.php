@@ -1409,20 +1409,20 @@ return array(
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'properties' => array(
 				'place_id' => [],
-				'status' => [],
+				'status' => ['multiple' => true],
 				'name' => [],
 				'basket' => [],
 				'property_1' => [],
 				'opening_date' => [],
 				'callback_date' => [],
-				'origine' => [],
+				'origine' => ['multiple' => true],
 				'email' => [],
 			),
 	),
 	'core_account/list/business' => array(
 			'properties' => array(
+					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
 					'place_id' => [],
-					'status' => [],
 					'name' => [],
 					'basket' => [],
 					'property_1' => [],
@@ -1723,7 +1723,7 @@ table.note-report td {
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'properties' => array(
 					'place_id' => [],
-					'status' => [],
+					'status' => ['multiple' => true],
 					'identifier' => [],
 					'n_fn' => [],
 					'email' => [],
@@ -1734,8 +1734,8 @@ table.note-report td {
 	),
 	'core_account/list/b2c' => array(
 			'properties' => array(
+					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
 					'n_fn' => [],
-					'status' => [],
 					'identifier' => [],
 					'tel_work' => ['rendering' => 'phone'],
 					'tel_cell' => ['rendering' => 'phone'],

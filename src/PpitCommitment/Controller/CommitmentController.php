@@ -155,8 +155,8 @@ class CommitmentController extends AbstractActionController
 		$context = Context::getCurrent();
 		$type = $this->params()->fromRoute('type', null);
 		$params = $this->getFilters($this->params(), $type);
-		$major = ($this->params()->fromQuery('major', 'property_1'));
-		$dir = ($this->params()->fromQuery('dir', 'ASC'));
+		$major = ($this->params()->fromQuery('major', 'including_options_amount'));
+		$dir = ($this->params()->fromQuery('dir', 'DESC'));
 		$configProperties = $this->getConfigProperties($type);
 		
 		if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
