@@ -1563,8 +1563,8 @@ return array(
 			'contact_history' => [],
 	),
 
-		'commitmentAccount/contactForm/business' => array('definition' => 'customization/p-pit/commitmentAccount/contactForm/trial'),
-		'commitmentAccount/contactForm/generic' => array('definition' => 'customization/flux/commitmentAccount/contactForm'),
+		'core_account/subscription/business' => array('definition' => 'customization/p-pit/core_account/subscription/p-pit-commitments'),
+		'core_account/subscription/b2c' => array('definition' => 'customization/p-pit/core_account/subscription/b2c'),
 		
 		'core_account/indexCard/business' => array(
 				'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
