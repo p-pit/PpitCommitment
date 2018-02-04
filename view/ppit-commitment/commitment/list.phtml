@@ -83,6 +83,8 @@
 <?php $i = 0; foreach ($commitments as $commitment) : ?>
 	<?php if ($context->isAllowed('commitment/detail')) : ?>
 	
+	<input type="hidden"  id="commitment_<?php echo $i ?>" value="<?php echo $commitment->id ?>" />
+	
 	<tr class="commitment" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'style="font-style: italic"' ?>>
 		<td>
 			<input type="checkbox" class="commitment-checkbox" id="commitment-checkbox_<?php echo $i ?>"></input>
@@ -100,8 +102,11 @@
 
 	<?php foreach ($listPage as $propertyId => $rendering) : ?>
 		<?php $property = $configProperties[$propertyId] ?>
+			
+		<?php if ($propertyId == 'place_id') : ?>
+				<td><?php if ($commitment->properties[$propertyId]) echo $places[$commitment->properties[$propertyId]]->caption ?></td>
 	
-		<?php if ($propertyId == 'account_name') : ?>
+		<?php elseif ($propertyId == 'account_name') : ?>
 		<td><?php echo $commitment->account_name ?></td>
 	
 		<?php elseif ($rendering == 'text') : ?>

@@ -49,7 +49,10 @@
 
 	<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
 	
-		<?php if ($propertyId == 'name') : ?>
+		<?php if ($propertyId == 'place_id') : ?>
+		<td><?php if ($term->properties[$propertyId]) echo $places[$term->properties[$propertyId]]->caption ?></td>
+	
+		<?php elseif ($propertyId == 'name') : ?>
 		<td><?php echo $term->name ?></td>
 
 		<?php elseif ($rendering == 'date') : ?>

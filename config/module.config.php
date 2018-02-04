@@ -178,6 +178,15 @@ return array(
         								),
         						),
         				),
+						'group' => array(
+								'type' => 'segment',
+								'options' => array(
+										'route' => '/group[/:type]',
+										'defaults' => array(
+												'action' => 'group',
+										),
+								),
+        				),
         				'invoice' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -793,6 +802,7 @@ return array(
             	array('route' => 'commitment/xmlUblInvoice', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/settle', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/update', 'roles' => array('sales_manager')),
+            	array('route' => 'commitment/group', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateProduct', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateOption', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/updateTerm', 'roles' => array('sales_manager')),
@@ -990,7 +1000,7 @@ return array(
 			'type' => 'select',
 			'modalities' => array(
 					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
-					'inscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
+					'subscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
 					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
 					'cooptation' => array('en_US' => 'Cooptation', 'fr_FR' => 'Cooptation'),
 					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
@@ -1922,6 +1932,15 @@ table.note-report td {
 			),
 			'labels' => array('en_US' => 'Type', 'fr_FR' => 'Type'),
 	),
+	'commitment/property/place_id' => array(
+			'type' => 'select',
+			'modalities' => array(
+			),
+			'labels' => array(
+					'en_US' => 'Place',
+					'fr_FR' => 'Etablissement',
+			),
+	),
 	'commitment/property/account_id' => array(
 			'type' => 'input',
 			'labels' => array(
@@ -1952,6 +1971,8 @@ table.note-report td {
 	),
 	'commitment/property/quantity' => array(
 			'type' => 'number',
+			'minValue' => 0,
+			'maxValue' => 1000000,
 			'labels' => array(
 					'en_US' => 'Quantity',
 					'fr_FR' => 'Quantité',
@@ -1959,6 +1980,8 @@ table.note-report td {
 	),
 	'commitment/property/unit_price' => array(
 			'type' => 'number',
+			'minValue' => 0,
+			'maxValue' => 1000000,
 			'labels' => array(
 					'en_US' => 'Unit price',
 					'fr_FR' => 'Prix unitaire',
@@ -2034,6 +2057,7 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
+					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
 					'caption' => array('definition' => 'commitment/property/caption'),
@@ -2093,6 +2117,7 @@ table.note-report td {
 			'title' => array('en_US' => 'Commitments', 'fr_FR' => 'Engagements'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
+					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
@@ -2101,6 +2126,7 @@ table.note-report td {
 	),
 
 	'commitment/list' => array(
+			'place_id' => 'select',
 			'type' => 'select',
 			'status' => 'select',
 			'account_name' => 'text',
@@ -2135,7 +2161,22 @@ table.note-report td {
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
-
+	'commitment/group/generic' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
+	),
+	'commitment/group/business' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
+	),
+	'commitment/group/b2c' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
+	),
+		
 	'commitment/invoice_identifier_mask' => date('Y-'),
 	'commitment/invoice_tax_mention' => '',
 	'commitment/invoice_bank_details' => null,
@@ -2261,7 +2302,8 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
-					'name' => array(
+					'place_id' => array('definition' => 'commitment/property/place_id'),
+					'account_name' => array(
 							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
@@ -2309,14 +2351,16 @@ table.note-report td {
 			'title' => array('en_US' => 'Rental', 'fr_FR' => 'Location'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
+					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
 					'including_options_amount' => 'range',
-					'name' => 'contains',
+					'account_name' => 'contains',
 			),
 	),
 	
 	'commitment/list/rental' => array(
+			'place_id' => 'input',
 			'caption' => 'input',
 			'including_options_amount' => 'number',
 			'status' => 'select',
@@ -2325,6 +2369,12 @@ table.note-report td {
 	'commitment/update/rental' => array(
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
+	),
+
+	'commitment/group/rental' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
 	),
 
 	// Service
@@ -2356,6 +2406,7 @@ table.note-report td {
 									'fr_FR' => 'Nom',
 							),
 					),
+					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
 					'caption' => array('definition' => 'commitment/property/caption'),
@@ -2384,6 +2435,7 @@ table.note-report td {
 			'title' => array('en_US' => 'Learning', 'fr_FR' => 'Formations'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
+					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
 					'account_name' => 'contains',
@@ -2393,6 +2445,7 @@ table.note-report td {
 	),
 		
 	'commitment/list/service' => array(
+			'place_id' => 'select',
 			'type' => 'select',
 			'status' => 'select',
 			'account_name' => 'text',
@@ -2407,6 +2460,11 @@ table.note-report td {
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
+	),
+	'commitment/group/service' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
 	),
 
 	// Human service
@@ -2438,6 +2496,7 @@ table.note-report td {
 									'fr_FR' => 'Nom',
 							),
 					),
+					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
 					'caption' => array('definition' => 'commitment/property/caption'),
@@ -2465,6 +2524,7 @@ table.note-report td {
 	'commitment/search/human_service' => array(
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
+					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
 					'account_name' => 'contains',
@@ -2474,6 +2534,7 @@ table.note-report td {
 	),
 	
 	'commitment/list/human_service' => array(
+			'place_id' => 'select',
 			'type' => 'select',
 			'status' => 'select',
 			'account_name' => 'text',
@@ -2489,7 +2550,12 @@ table.note-report td {
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
-
+	'commitment/group/human_service' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
+	),
+		
 	'commitment/invoice/human_service' => array(
 			'header' => array(
 					array(
@@ -2796,6 +2862,15 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
+					'place_id' => array(
+							'type' => 'select',
+							'modalities' => array(
+							),
+							'labels' => array(
+									'en_US' => 'Place',
+									'fr_FR' => 'Etablissement',
+							),
+					),
 					'caption' => array(
 							'type' => 'input',
 							'labels' => array(
@@ -2876,6 +2951,7 @@ table.note-report td {
 			'title' => array('en_US' => 'Terms', 'fr_FR' => 'Echéances'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'main' => array(
+				'place_id' => 'select',
 				'name' => 'contains',
 				'status' => 'select',
 				'collection_date' => 'range',
@@ -2889,6 +2965,7 @@ table.note-report td {
 			),
 	),
 	'commitmentTerm/list' => array(
+//			'place_id' => 'select',
 			'name' => 'text',
 			'status' => 'select',
 			'collection_date' => 'date',

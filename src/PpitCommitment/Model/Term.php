@@ -36,6 +36,9 @@ class Term implements InputFilterAwareInterface
     // Joined properties
     public $name;
     public $commitment_caption;
+    public $place_id;
+    public $place_caption;
+    public $place_identifier;
     
     // Transient properties
     public $properties;
@@ -73,9 +76,12 @@ class Term implements InputFilterAwareInterface
         // Joined properties
         $this->name = (isset($data['name'])) ? $data['name'] : null;
         $this->commitment_caption = (isset($data['commitment_caption'])) ? $data['commitment_caption'] : null;
+        $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
+        $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
+        $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
     }
     
-    public function toArray($flat = false)
+    public function getProperties()
     {
     	$data = array();
     	$data['id'] = (int) $this->id;
@@ -84,29 +90,57 @@ class Term implements InputFilterAwareInterface
     	$data['subscription_id'] = (int) $this->subscription_id;
     	$data['caption'] = $this->caption;
     	$data['due_date'] =  ($this->due_date) ? $this->due_date : null;
-    	$data['settlement_date'] = ($this->settlement_date) ? $this->settlement_date : (($flat) ? null : '9999-12-31');
-    	$data['collection_date'] = ($this->collection_date) ? $this->collection_date : (($flat) ? null : '9999-12-31');
+    	$data['settlement_date'] = ($this->settlement_date) ? $this->settlement_date : null;
+    	$data['collection_date'] = ($this->collection_date) ? $this->collection_date : null;
     	$data['amount'] = $this->amount;
     	$data['means_of_payment'] = $this->means_of_payment;
     	$data['reference'] = $this->reference;
     	$data['comment'] = $this->comment;
     	$data['document'] = $this->document;
     	$data['invoice_id'] = (int) $this->invoice_id;
-    	$data['audit'] = json_encode($this->audit);
+    	$data['audit'] = $this->audit;
+
+    	$data['name'] = $this->name;
+    	$data['commitment_caption'] = $this->commitment_caption;
+    	$data['place_caption'] = $this->place_caption;
+    	$data['place_identifier'] = $this->place_identifier;
+    	$data['place_id'] = $this->place_id;
+    	
+    	return $data;
+    }
+
+    public function toArray()
+    {
+    	$data = $this->getProperties();
+    	if (!$data['settlement_date']) $data['settlement_date'] = '9999-12-31';
+    	if (!$data['collection_date']) $data['collection_date'] = '9999-12-31';
+    	$data['audit'] = json_encode($data['audit']);
+    	unset($data['name']);
+    	unset($data['commitment_caption']);
+    	unset($data['place_caption']);
+    	unset($data['place_identifier']);
+    	unset($data['place_id']);
     	return $data;
     }
     
-    public static function getList($params, $major, $dir, $mode = 'todo')
+    public static function getList($params, $major = 'due_date', $dir = 'DESC', $mode = 'search')
     {
     	$context = Context::getCurrent();
 
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
-    		->join('core_account', 'core_account.id = commitment.account_id', array('name'), 'left')
-			->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
+    		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name'), 'left')
+			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left')
+    		->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
 		$where->notEqualTo('commitment_term.status', 'deleted');
 
+		// Filter on place
+		$keep = true;
+		if (array_key_exists('p-pit-admin', $context->getPerimeters()) && array_key_exists('place_id', $context->getPerimeters()['p-pit-admin'])) {
+			$where->in('core_account.place_id', $context->getPerimeters()['p-pit-admin']['place_id']);
+		}
+		
     	// Todo list vs search modes
     	if ($mode == 'todo') {
     		$where->notEqualTo('commitment_term.status', 'collected');
@@ -115,7 +149,8 @@ class Term implements InputFilterAwareInterface
     	else {
     		// Set the filters
     		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
+    			if ($propertyId == 'place_id') $where->equalTo('core_account.place_id', $params['place_id']);
+				elseif ($propertyId == 'name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
@@ -126,7 +161,7 @@ class Term implements InputFilterAwareInterface
 		$terms = array();
 
 		foreach ($cursor as $term) {
-			$term->properties = $term->toArray('flat');
+			$term->properties = $term->getProperties();
 			$terms[] = $term;
 		}
 		return $terms;
@@ -144,7 +179,7 @@ class Term implements InputFilterAwareInterface
 				$term->name = $account->name;
 			}
     	}
-    	$term->properties = $term->toArray('flat');
+    	$term->properties = $term->getProperties();
     	return $term;
     }
 

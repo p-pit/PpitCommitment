@@ -83,6 +83,7 @@ class TermController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
+    			'places' => Place::getList(array()),
     	));
     	$view->setTerminal(true);
     	return $view;
@@ -106,6 +107,7 @@ class TermController extends AbstractActionController
     	$view = new ViewModel(array(
     			'context' => $context,
     			'config' => $context->getconfig(),
+    			'places' => Place::getList(array()),
     			'terms' => $terms,
     			'mode' => $mode,
     			'params' => $params,

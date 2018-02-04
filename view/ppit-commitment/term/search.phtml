@@ -70,7 +70,10 @@
 		<?php
 		$modalities = array();
 		
-		if ($property['type'] == 'select') {
+		if ($propertyId == 'place_id') foreach ($places as $place) {
+			$modalities[$place->id] = $place->caption;
+		} 
+		elseif ($property['type'] == 'select') {
 			foreach ($property['modalities'] as $modalityId => $modality) {
 				$modalities[$modalityId] = $modality[$context->getLocale()];
 			}

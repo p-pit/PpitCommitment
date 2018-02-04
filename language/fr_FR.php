@@ -98,6 +98,7 @@
 			'Sales' => 'CA',
 			'Schedule' => 'Echéancier',
 			'Selected accounts' => 'Comptes sélectionnés',
+			'Selected commitments' => 'Engagements sélectionnés',
 			'Settle' => 'Régler',
 			'Settlement' => 'Règlement',
 			'Specific informations' => 'Informations spécifiques',

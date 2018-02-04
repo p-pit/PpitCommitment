@@ -131,6 +131,9 @@ class Commitment implements InputFilterAwareInterface
 
 	// Additional field from joined tables
 	public $account_name;
+	public $place_id;
+    public $place_caption;
+    public $place_identifier;
 	public $properties;
 	
 	// Transient properties
@@ -264,7 +267,10 @@ class Commitment implements InputFilterAwareInterface
 
         // Additional properties from joined tables
         $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
-
+        $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
+        $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
+        $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
+        
         // Denormalized properties
         $this->site_id = (isset($data['site_id'])) ? $data['site_id'] : null;
         $this->site_identifier = (isset($data['site_identifier'])) ? $data['site_identifier'] : null;
@@ -272,7 +278,7 @@ class Commitment implements InputFilterAwareInterface
         $this->area_caption = (isset($data['area_caption'])) ? $data['area_caption'] : null;
     }
 
-    public function toArray() {
+    public function getProperties() {
     	$data = array();
     	$data['id'] = (int) $this->id;
     	$data['credit_status'] = $this->credit_status;
@@ -375,15 +381,30 @@ class Commitment implements InputFilterAwareInterface
     	$data['settlement_message_id'] = $this->settlement_message_id;
     	$data['notification_time'] = ($this->notification_time) ? $this->notification_time : null;
 
+    	$data['account_name'] = $this->account_name;
+    	$data['place_caption'] = $this->place_caption;
+    	$data['place_identifier'] = $this->place_identifier;
+    	$data['place_id'] = $this->place_id;
+        
     	return $data;
     }
 
+    public function toArray() 
+    {
+    	$data = $this->getProperties();
+    	unset($data['account_name']);
+    	unset($data['place_caption']);
+    	unset($data['place_identifier']);
+    	unset($data['place_id']);
+    	return $data;
+    }
+    
     public static function getList($type, $params, $major, $dir, $mode)
     {
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
-    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name'), 'left');
-//    		->join('commitment_subscription', 'commitment.subscription_id = commitment_subscription.id', array('product_identifier'), 'left');
+    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'place_id'), 'left')
+			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left');
     	
     	$where = new Where();
     	$where->notEqualTo('commitment.status', 'deleted');
@@ -391,6 +412,12 @@ class Commitment implements InputFilterAwareInterface
     	// Filter on type
 		if ($type) $where->equalTo('commitment.type', $type);
 
+		// Filter on place
+		$keep = true;
+		if (array_key_exists('p-pit-admin', $context->getPerimeters()) && array_key_exists('place_id', $context->getPerimeters()['p-pit-admin'])) {
+			$where->in('core_account.place_id', $context->getPerimeters()['p-pit-admin']['place_id']);
+		}
+		
 		// Todo list vs search modes
 		if ($mode == 'todo') {
 
@@ -409,7 +436,8 @@ class Commitment implements InputFilterAwareInterface
 
 			// Set the filters
 			foreach ($params as $propertyId => $property) {
-				if ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
+				if ($propertyId == 'place_id') $where->equalTo('core_account.place_id', $params['place_id']);
+				elseif ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -424,7 +452,7 @@ class Commitment implements InputFilterAwareInterface
     	$cursor = Commitment::getTable()->selectWith($select);
     	$orders = array();
     	foreach ($cursor as $order) {
-    		$order->properties = $order->toArray();
+    		$order->properties = $order->getProperties();
     		$orders[] = $order;
     	}
 
@@ -439,7 +467,7 @@ class Commitment implements InputFilterAwareInterface
 	    	$commitment->account = Account::get($commitment->account_id);
 	    	$commitment->account_name = $commitment->account->name;
     	}
-    	$commitment->properties = $commitment->toArray();
+    	$commitment->properties = $commitment->getProperties();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 
     	$commitment->terms = Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search');

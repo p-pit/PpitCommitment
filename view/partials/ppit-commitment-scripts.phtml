@@ -1003,6 +1003,143 @@ function getSearch()
 	xhttp.send();
 }
 
+// Grouped actions
+
+<?php 
+$properties = array();
+
+foreach ($groupPage as $propertyId => $options) {
+	$property = $configProperties[$propertyId];
+	if ((!$options || !array_key_exists('readonly', $options) || !$options['readonly']) && $property['type'] != 'title') {
+		if ($property['type'] == 'number') $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $updateOptions['mandatory'], 'minValue' => $property['minValue'], 'maxValue' => $property['maxValue']);
+		else $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => false, 'maxSize' => ($property['type'] == 'textarea' || $property['type'] == 'log') ? 2047 : 255);
+	}
+}
+echo $this->partial('/partials/check-update-properties', array('entity' => 'Group', 'context' => $context, 'properties' => $properties)) 
+?>
+
+function postGroup()
+{
+
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if ($property['type'] == 'date') : ?>
+		$('#input_<?php echo $propertyId ?>').datepicker();
+	<?php elseif ($property['type'] == 'time') : ?>
+		$('#<?php echo $propertyId ?>').timepicker({ 'timeFormat': 'H:i:s' });
+	<?php endif;?>
+
+	<?php 
+	if (in_array($property['type'], ['date', 'number'])) $inputId = 'input_'.$propertyId;
+	else $inputId = $propertyId;
+	?>
+	$('#<?php echo $inputId ?>').change(function() {
+		document.getElementById('<?php echo $propertyId ?>_check').checked = true;
+	});
+	$('#<?php echo $inputId ?>').keyup(function() {
+		document.getElementById('<?php echo $propertyId ?>_check').checked = true;
+	});
+<?php endforeach ?>
+
+	var form = document.getElementById('group-form');
+	form.onsubmit = function(event) {
+		event.preventDefault();
+	
+		// Check validity
+		var validity;
+		validity = checkGroupUpdateProperties();
+
+		if (validity) {
+		
+			// Create a new FormData object.
+			var formData = new FormData();
+			formData.append('action', 'update');
+			var nbCommitment = $('#group-nb-commitment').val();
+			formData.append('nb-commitment', nbCommitment);
+			for (i = 0; i < nbCommitment; i++) formData.append('commitment_' + i, $('#group-commitment_' + i).val());
+			
+			// Get the properties values
+<?php foreach ($properties as $propertyId => $property) : ?>
+	<?php if (in_array($property['type'], array('input', 'date', 'time', 'textarea', 'log', 'select', 'number', 'email', 'phone', 'hidden'))) : ?>
+			formData.append('<?php echo $propertyId ?>', document.getElementById('<?php echo $propertyId ?>').value);
+			formData.append('<?php echo $propertyId ?>_check', ((document.getElementById('<?php echo $propertyId ?>_check').checked) ? 1 : 0));
+
+	<?php elseif ($property['type'] == 'checkbox') : ?>
+			formData.append('<?php echo $propertyId ?>', ((document.getElementById('<?php echo $propertyId ?>').checked) ? 1 : 0));
+
+	<?php endif ?>
+
+<?php endforeach ?>
+			formData.append('update_time', document.getElementById('update_time').value);
+
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitment/group', array('type' => $type)) ?>';
+			xhttp.open('POST', route, true);
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					document.getElementById('detail-div_0').innerHTML = xhttp.responseText;
+				}
+
+				$('#remove-anchor').click(function () {
+					$('.detail-row').hide();
+					filterCommitmentList();
+				});
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getGroup() {
+
+	// Ensure the target is displayed
+	$('#detail-row_0').show();
+	$(location).attr('hash', 'detail-row_0');
+
+	// Disabled the list checkboxes
+	$('.commitment-checkbox').attr('disabled', 'disabled');
+	var route = '<?php echo $this->url('commitment/group', array('type' => $type)) ?>';
+	var formData = new FormData();
+
+	var commitmentNumber = $('#commitment-number').val();
+	for (i = 0, j = 0; i < commitmentNumber; i++) {
+		if (document.getElementById('commitment-checkbox_' + i).checked) {
+			formData.append('commitment_' + j, $('#commitment_' + i).val());
+			j++;
+		}
+	}
+	formData.append('nb-commitment', j);
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("POST", route, true);
+	xhttp.onreadystatechange = function() {
+			if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+
+			document.getElementById('detail-div_0').innerHTML = xhttp.responseText;
+			postGroup();
+			
+			$('#remove-anchor').click(function () {
+				$('.detail-row').hide();
+				filterCommitmentList();
+			});
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send(formData);
+
+	// Highlight the clicked button (and only it in its class)
+	$('.index-btn').removeClass("btn-primary").addClass("btn-default");
+	$('.commitment-group-anchor').removeClass("btn-default").addClass("btn-primary");
+}
+
 function activateCommitment() {
 	getSearch();
 }

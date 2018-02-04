@@ -191,7 +191,7 @@ class PdfInvoiceViewHelper
 	    	$pdf->SetTextColor(0);
 	    	// Data
 	    	foreach($invoice['terms'] as $term) {
-	    		if ($term['status'] == 'expected' && $term['due_date'] < date('Y-m-d')) $pdf->SetTextColor(255, 0, 0); else $pdf->SetTextColor(0);
+	    		if ($term['status'] == 'expected' && $term['due_date'] < $invoice['date']) $pdf->SetTextColor(255, 0, 0); else $pdf->SetTextColor(0);
 		    	$pdf->Ln();
 		    	$pdf->Cell(60, 6, $term['caption'], 'LR', 0, 'L', $color);
 		    	$pdf->Cell(30, 6, $context->decodeDate($term['due_date']), 'LR', 0, 'C', $color);
@@ -215,7 +215,7 @@ class PdfInvoiceViewHelper
 	    	$pdf->Ln();
 	    	$pdf->SetDrawColor(255, 255, 255);
 	    	$pdf->Cell(155, 6, 'Restant dû :', 'LR', 0, 'R', false);
-	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['tax_inclusive'] - $invoice['settled_amount'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
+	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['still_due'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
     	}
 
     	$pdf->Ln();
