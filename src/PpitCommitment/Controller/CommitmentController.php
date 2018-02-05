@@ -418,7 +418,7 @@ class CommitmentController extends AbstractActionController
     	}
     	else $commitment = Commitment::instanciate($type);
 
-    	$accounts = Account::getList(null, []);
+    	$accounts = Account::getList(null, [], '+name', null);
     	
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();

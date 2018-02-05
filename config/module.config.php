@@ -1920,6 +1920,15 @@ table.note-report td {
 	
 	// Commitments
 
+	'commitment/property/year' => array(
+			'type' => 'number',
+			'minValue' => 2000,
+			'maxValue' => 9999,
+			'labels' => array(
+					'en_US' => 'Accounting year',
+					'fr_FR' => 'Année comptable',
+			),
+	),
 	'commitment/types' => array(
 			'type' => 'select',
 			'modalities' => array(
@@ -2036,6 +2045,7 @@ table.note-report td {
 			'currencySymbol' => '€',
 			'tax' => 'excluding',
 			'properties' => array(
+					'year' => array('definition' => 'commitment/property/year'),
 					'type' => array(
 							'type' => 'repository', // Deprecated
 							'definition' => 'commitment/types',
@@ -2120,6 +2130,7 @@ table.note-report td {
 					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
+					'year' => 'range',
 					'including_options_amount' => 'range',
 					'account_name' => 'contains',
 			),
@@ -2128,6 +2139,7 @@ table.note-report td {
 	'commitment/list' => array(
 			'place_id' => 'select',
 			'type' => 'select',
+			'year' => 'text',
 			'status' => 'select',
 			'account_name' => 'text',
 			'caption' => 'text',
@@ -2138,6 +2150,7 @@ table.note-report td {
 	),
 
 	'commitment/update/business' => array(
+			'year' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2145,18 +2158,21 @@ table.note-report td {
 	),
 		
 	'commitment/update/generic' => array(
+			'year' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
 	),
 
 	'commitment/update/b2c' => array(
+			'year' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
 	),
 		
 	'commitment/update' => array(
+			'year' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2167,6 +2183,11 @@ table.note-report td {
 			'description' => [],
 	),
 	'commitment/group/business' => array(
+			'status' => [],
+			'caption' => [],
+			'description' => [],
+	),
+	'commitment/group/learning' => array(
 			'status' => [],
 			'caption' => [],
 			'description' => [],
@@ -2302,6 +2323,7 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
+					'year' => array('definition' => 'commitment/property/year'),
 					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_name' => array(
 							'definition' => 'inline',
@@ -2354,6 +2376,7 @@ table.note-report td {
 					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
+					'year' => 'range',
 					'including_options_amount' => 'range',
 					'account_name' => 'contains',
 			),
@@ -2361,12 +2384,14 @@ table.note-report td {
 	
 	'commitment/list/rental' => array(
 			'place_id' => 'input',
+			'year' => 'text',
 			'caption' => 'input',
 			'including_options_amount' => 'number',
 			'status' => 'select',
 	),
 		
 	'commitment/update/rental' => array(
+			'year' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),
@@ -2406,6 +2431,7 @@ table.note-report td {
 									'fr_FR' => 'Nom',
 							),
 					),
+					'year' => array('definition' => 'commitment/property/year'),
 					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
@@ -2438,6 +2464,7 @@ table.note-report td {
 					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
+					'year' => 'range',
 					'account_name' => 'contains',
 					'caption' => 'contains',
 					'including_options_amount' => 'range',
@@ -2448,6 +2475,7 @@ table.note-report td {
 			'place_id' => 'select',
 			'type' => 'select',
 			'status' => 'select',
+			'year' => 'text',
 			'account_name' => 'text',
 			'caption' => 'text',
 			'quantity' => 'number',
@@ -2457,6 +2485,7 @@ table.note-report td {
 	),
 		
 	'commitment/update/service' => array(
+			'year' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2496,6 +2525,7 @@ table.note-report td {
 									'fr_FR' => 'Nom',
 							),
 					),
+					'year' => array('definition' => 'commitment/property/year'),
 					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
@@ -2527,6 +2557,7 @@ table.note-report td {
 					'place_id' => 'select',
 					'type' => 'select',
 					'status' => 'select',
+					'year' => 'range',
 					'account_name' => 'contains',
 					'caption' => 'contains',
 					'including_options_amount' => 'range',
@@ -2537,6 +2568,7 @@ table.note-report td {
 			'place_id' => 'select',
 			'type' => 'select',
 			'status' => 'select',
+			'year' => 'text',
 			'account_name' => 'text',
 			'caption' => 'text',
 			'quantity' => 'number',
@@ -2546,6 +2578,7 @@ table.note-report td {
 	),
 	
 	'commitment/update/human_service' => array(
+			'year' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2668,6 +2701,7 @@ table.note-report td {
 									'fr_FR' => 'Statut',
 							),
 					),
+					'year' => array('definition' => 'commitment/property/year'),
 					'name' => array(
 							'definition' => 'inline',
 							'type' => 'input',
@@ -2809,6 +2843,7 @@ table.note-report td {
 			'main' => array(
 					'type' => 'select',
 					'status' => 'select',
+					'year' => 'range',
 					'including_options_amount' => 'range',
 					'name' => 'contains',
 					'property_1' => 'select',
@@ -2825,9 +2860,11 @@ table.note-report td {
 			'caption' => 'input',
 			'including_options_amount' => 'number',
 			'status' => 'select',
+			'year' => 'text',
 	),
 	
 	'commitment/update/learning' => array(
+			'year' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'property_1' => array('mandatory' => false),

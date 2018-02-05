@@ -4,6 +4,7 @@ namespace PpitCommitment\Model;
 use PpitAccounting\Model\Journal;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
+use PpitCommitment\Model\Year;
 use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Vcard;
@@ -31,6 +32,7 @@ class Commitment implements InputFilterAwareInterface
     public $credit_status;
     public $next_credit_consumption_date;
     public $last_credit_consumption_date;
+    public $year;
     public $type;
 	public $subscription_id;
 	public $account_id;
@@ -167,6 +169,7 @@ class Commitment implements InputFilterAwareInterface
         $this->credit_status = (isset($data['credit_status'])) ? $data['credit_status'] : null;
         $this->next_credit_consumption_date = (isset($data['next_credit_consumption_date'])) ? $data['next_credit_consumption_date'] : null;
         $this->last_credit_consumption_date = (isset($data['last_credit_consumption_date'])) ? $data['last_credit_consumption_date'] : null;
+        $this->year = (isset($data['year'])) ? $data['year'] : null;
         $this->type = (isset($data['type'])) ? $data['type'] : null;
         $this->account_id = (isset($data['account_id'])) ? $data['account_id'] : null;
         $this->subscription_id = (isset($data['subscription_id'])) ? $data['subscription_id'] : null;
@@ -284,6 +287,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['credit_status'] = $this->credit_status;
     	$data['next_credit_consumption_date'] = ($this->next_credit_consumption_date) ? $this->next_credit_consumption_date : null;
     	$data['last_credit_consumption_date'] = ($this->last_credit_consumption_date) ? $this->last_credit_consumption_date : null;
+    	$data['year'] = $this->year;
     	$data['type'] = $this->type;
     	$data['account_id'] = $this->account_id;
     	$data['subscription_id'] = $this->subscription_id;
@@ -526,6 +530,8 @@ class Commitment implements InputFilterAwareInterface
     		$commitment->subscription = $subscription;
     		$commitment->description = $subscription->description;
     	}
+    	$commitmentYear = CommitmentYear::getCurrent();
+    	$commitment->year = $commitmentYear->year;
     	$commitment->status = 'new';
     	$commitment->quantity = 1;
     	$commitment->properties = $commitment->toArray();
@@ -671,6 +677,11 @@ class Commitment implements InputFilterAwareInterface
 
     	// Retrieve the data from the request
 
+		if (array_key_exists('year', $data)) {
+			$this->year = trim(strip_tags($data['year']));
+			if (strlen($this->year) > 255) return 'Integrity';
+		}
+		
 		if (array_key_exists('status', $data)) {
 			$this->status = trim(strip_tags($data['status']));
 			if (strlen($this->status) > 255) return 'Integrity';
