@@ -21,7 +21,8 @@ class PdfInvoiceViewHelper
     	
     	// create new PDF document
     	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];
-    	
+    	$pdf->footer_2 = ($place->legal_footer_2) ? $place->legal_footer_2 : ((array_key_exists('footer_2', $context->getConfig('headerParams'))) ? $context->getConfig('headerParams')['footer_2']['value'] : null);
+    	 
     	// set document information
     	$pdf->SetCreator(PDF_CREATOR);
     	$pdf->SetAuthor('P-Pit');
@@ -69,17 +70,22 @@ class PdfInvoiceViewHelper
     	
     	// add a page
     	$pdf->AddPage();
-    	 
+
     	// Invoice header
+    	if (array_key_exists('header', $invoice)) {
+    		$pdf->SetFont('', 'B', 8);
+    		$pdf->writeHTML($invoice['header'], true, 0, true, 0);
+    	}
+    	 
     	$pdf->MultiCell(100, 5, '', 0, 'L', 0, 0, '', '', true);
     	$pdf->SetTextColor(0);
     	$pdf->SetFont('', '', 12);
     	
-    	$addressee = "\n"."\n";
+    	$addressee = "";
     	if (array_key_exists('customer_invoice_name', $invoice)) $addressee .= $invoice['customer_invoice_name']."\n";
     	if (array_key_exists('customer_n_fn', $invoice)) $addressee .= $invoice['customer_n_fn']."\n";
     	if (array_key_exists('customer_adr_street', $invoice)) $addressee .= $invoice['customer_adr_street']."\n";
-    	if (array_key_exists('customer_adr_extended', $invoice)) $addressee .= $invoice['adr_extended']."\n";
+    	if (array_key_exists('customer_adr_extended', $invoice)) $addressee .= $invoice['customer_adr_extended']."\n";
     	if (array_key_exists('customer_adr_post_office_box', $invoice)) $addressee .= $invoice['customer_adr_post_office_box']."\n";
     	if (array_key_exists('customer_adr_zip', $invoice) || array_key_exists('customer_city', $invoice)) {
 	    	if (array_key_exists('customer_adr_zip', $invoice)) $addressee .= $invoice['customer_adr_zip'].' ';
@@ -134,8 +140,10 @@ class PdfInvoiceViewHelper
     	foreach ($invoice['lines'] as $line) {
     		$pdf->Ln();
     		$caption = $line['caption'];
-    		if ($line['tax_rate'] == 0) $caption .= ' (exonéré)';
-    		else $caption .= ' (TVA '.sprintf('%d', round($line['tax_rate']*100, 1)).'%)';
+    		if (!$proforma) {
+    			if ($line['tax_rate'] == 0) $caption .= ' (exonéré)';
+	    		else $caption .= ' (TVA '.sprintf('%d', round($line['tax_rate']*100, 1)).'%)';
+    		}
     		$pdf->Cell(110, 6, $caption, 'LR', 0, 'L', $color);
     		$pdf->Cell(25, 6, $context->formatFloat($line['unit_price'], 2), 'LR', 0, 'R', $color);
     		$pdf->Cell(20, 6, $line['quantity'], 'LR', 0, 'C', $color);

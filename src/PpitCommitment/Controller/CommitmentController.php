@@ -9,7 +9,7 @@ use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Subscription;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlCommitmentViewHelper;
-use PpitCommitment\ViewHelper\PdfInvoiceOldViewHelper;
+use PpitCommitment\ViewHelper\PdfInvoiceViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
 use PpitCommitment\ViewHelper\XmlUblInvoiceViewHelper;
 use PpitCommitment\ViewHelper\XmlXcblOrderViewHelper;
@@ -667,6 +667,191 @@ class CommitmentController extends AbstractActionController
     	return $view;
     }
 
+    private function generateInvoice($type, $account, $commitment, $proforma = false)
+    {
+    	$context = Context::getCurrent();
+    	
+    	// Header
+    	$invoice['header'] = $context->getConfig('commitment/invoice_header');
+    	
+    	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
+    	$invoice['customer_invoice_name'] = $account->name;
+    	$invoicingContact = null;
+    	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
+    	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
+    	elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
+    	elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
+    	elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
+    	 
+    	if (!$invoicingContact) {
+    		if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
+    		elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
+    		elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
+    		elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
+    		elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
+    	}
+    	if (!$invoicingContact) $invoicingContact = $account->contact_1;
+    	
+    	$invoice['customer_n_fn'] = '';
+    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
+    		if ($invoicingContact->n_title) $invoice['customer_n_fn'] .= $invoicingContact->n_title.' ';
+    		$invoice['customer_n_fn'] .= $invoicingContact->n_last.' ';
+    		$invoice['customer_n_fn'] .= $invoicingContact->n_first;
+    	}
+    	if ($invoicingContact->adr_street) $invoice['customer_adr_street'] = $invoicingContact->adr_street;
+    	if ($invoicingContact->adr_extended) $invoice['customer_adr_extended'] = $invoicingContact->adr_extended;
+    	if ($invoicingContact->adr_post_office_box) $invoice['customer_adr_post_office_box'] = $invoicingContact->adr_post_office_box;
+    	if ($invoicingContact->adr_zip) $invoice['customer_adr_zip'] = $invoicingContact->adr_zip;
+    	if ($invoicingContact->adr_city) $invoice['customer_adr_city'] = $invoicingContact->adr_city;
+    	if ($invoicingContact->adr_state) $invoice['customer_adr_state'] = $invoicingContact->adr_state;
+    	if ($invoicingContact->adr_street) $invoice['customer_adr_country'] = $invoicingContact->adr_country;
+    	
+    	$invoice['identifier'] = ($proforma) ? null : $commitment->invoice_identifier;
+    	$invoice['date'] = date('Y-m-d');
+    	$invoice['description'] = array();
+    	foreach($invoiceSpecs['description'] as $line) {
+    		$arguments = array();
+    		foreach($line['params'] as $propertyId) {
+    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
+    			else {
+    				if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
+    					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
+    				}
+    				else {
+    					$property = $context->getConfig('commitment')['properties'][$propertyId];
+    				}
+    				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+    				if ($propertyId == 'account_name') $arguments[] = $commitment->account_name;
+    				elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;
+    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
+    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
+    				elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
+    				else $arguments[] = $commitment->properties[$propertyId];
+    			}
+    		}
+    		$value = vsprintf($line['right'][$context->getLocale()], $arguments);
+    		if ($value) $invoice['description'][]  = array('title' => $context->localize($line['left']), 'value' => $value);
+    	}
+    	
+    	$invoice['currency_symbol'] = $context->getConfig('commitment')['currencySymbol'];
+    	$invoice['tax'] = $context->getConfig('commitment/'.$type)['tax'];
+    	 
+    	// Lines
+    	
+    	$product = Product::get($commitment->product_identifier, 'reference');
+    	$taxExemptAmount = $commitment->amount - $commitment->taxable_1_amount - $commitment->taxable_2_amount - $commitment->taxable_3_amount;
+    	if ($commitment->product_caption) $caption = $commitment->product_caption;
+    	else $caption = $commitment->description;
+    	 
+    	$invoice['lines'] = array();
+    	if ($proforma) {
+    		$line = array();
+    		$line['caption'] = $caption;
+    		$line['unit_price'] = $commitment->unit_price;
+    		$line['quantity'] = $commitment->quantity;
+    		$line['amount'] = $commitment->amount;
+    		$invoice['lines'][] = $line;
+    	}
+    	else {
+	    	if ($commitment->taxable_1_amount != 0) {
+	    		$line = array();
+	    		$line['caption'] = $caption;
+	    		$line['tax_rate'] = 0.2;
+	    		$line['unit_price'] = round($commitment->taxable_1_amount / $commitment->quantity, 2);
+	    		$line['quantity'] = $commitment->quantity;
+	    		$line['amount'] = $commitment->taxable_1_amount;
+	    		$invoice['lines'][] = $line;
+	    	}
+	    	if ($commitment->taxable_2_amount != 0) {
+	    		$line = array();
+	    		$line['caption'] = $caption;
+	    		$line['tax_rate'] = 0.1;
+	    		$line['unit_price'] = round($commitment->taxable_2_amount / $commitment->quantity, 2);
+	    		$line['quantity'] = $commitment->quantity;
+	    		$line['amount'] = $commitment->taxable_2_amount;
+	    		$invoice['lines'][] = $line;
+	    	}
+	    	if ($commitment->taxable_3_amount != 0) {
+	    		$line = array();
+	    		$line['caption'] = $caption;
+	    		$line['tax_rate'] = 0.055;
+	    		$line['unit_price'] = round($commitment->taxable_3_amount / $commitment->quantity, 2);
+	    		$line['quantity'] = $commitment->quantity;
+	    		$line['amount'] = $commitment->taxable_3_amount;
+	    		$invoice['lines'][] = $line;
+	    	}
+	    	if ($taxExemptAmount != 0) {
+	    		$line = array();
+	    		$line['caption'] = $caption;
+	    		$line['tax_rate'] = 0;
+	    		$line['unit_price'] = $taxExemptAmount;
+	    		$line['quantity'] = $commitment->quantity;
+	    		$line['amount'] = $taxExemptAmount * $commitment->quantity;
+	    		$invoice['lines'] = $line;
+	    	}
+    	}
+	    	 
+    	if (is_array($commitment->options)) foreach ($commitment->options as $option) {
+    		$line['caption'] = $option['caption'];
+    		if (!$proforma) {
+	    		if ($option['vat_id'] == 0) $line['tax_rate'] = 0;
+	    		elseif ($option['vat_id'] == 1) $line['tax_rate'] = 0.2;
+	    		elseif ($option['vat_id'] == 2) $line['tax_rate'] = 0.1;
+	    		elseif ($option['vat_id'] == 3) $line['tax_rate'] = 0.055;
+    		}
+    		$line['unit_price'] = $option['unit_price'];
+    		$line['quantity'] = $option['quantity'];
+    		$line['amount'] = $option['amount'];
+    		$invoice['lines'][] = $line;
+    	}
+    	
+    	// Sums
+		if (!$proforma) {
+	    	$invoice['excluding_tax'] = $commitment->excluding_tax;
+	    	if ($commitment->tax_1_amount != 0) {
+	    		$invoice['taxable_1_total'] = $commitment->taxable_1_total;
+	    		$invoice['tax_1_amount'] = $commitment->tax_1_amount;
+	    	}
+	    	if ($commitment->tax_2_amount != 0) {
+	    		$invoice['taxable_2_total'] = $commitment->taxable_2_total;
+	    		$invoice['tax_2_amount'] = $commitment->tax_2_amount;
+	    	}
+	    	if ($commitment->tax_3_amount != 0) {
+	    		$invoice['taxable_3_total'] = $commitment->taxable_3_total;
+	    		$invoice['tax_3_amount'] = $commitment->tax_3_amount;
+	    	}
+		}
+    	$invoice['tax_inclusive'] = $commitment->tax_inclusive;
+    	 
+    	// Terms
+    	
+    	$invoice['terms'] = array();
+    	$settledAmount = 0;
+    	foreach(Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search') as $term) {
+    		$line[] = array();
+    		$line['caption'] = $term->caption;
+    		$line['status'] = ($term->status == 'collected') ? 'settled' : $term->status;
+    		$line['due_date'] = $term->due_date;
+    		$line['settlement_date'] = $term->settlement_date;
+    		$line['means_of_payment'] = $term->means_of_payment;
+    		$line['amount'] = $term->amount;
+    		$invoice['terms'][] = $line;
+    	}
+    	
+    	$invoice['settled_amount'] = $settledAmount;
+    	$invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
+    	
+    	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
+    		$invoice['bank_details'] = $context->getConfig('commitment/invoice_bank_details');
+    		$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
+    		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
+    		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
+    	}
+    	
+    	return $invoice;
+    }
+    
     public function invoiceAction()
     {
     	// Retrieve the context
@@ -698,176 +883,13 @@ class CommitmentController extends AbstractActionController
 				
 				$commitmentMessage = CommitmentMessage::instanciate('invoice');
 				$account = $commitment->account;
+				$invoice = $this->generateInvoice($type, $account, $commitment);
+				$commitmentMessage->status = 'new';
+				$commitmentMessage->account_id = $account->id;
+				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
+				$commitmentMessage->direction = 'O';
+				$commitmentMessage->format = 'application/json';
 				
-				// Header
-				
-				$invoiceSpecs = $context->getConfig('commitment/invoice');
-				$invoice['customer_invoice_name'] = $account->name;
-				$invoicingContact = null;
-				if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
-				elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
-				elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
-				elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
-				elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
-		    	
-		    	if (!$invoicingContact) {
-		    		if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
-		    		elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
-		    		elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
-		    		elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
-		    		elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
-		    	}
-		    	if (!$invoicingContact) $invoicingContact = $account->contact_1;
-		    	 
-		    	$invoice['customer_n_fn'] = '';
-		    	if ($invoicingContact->n_title || $invoicingContact->n_last || $invoicingContact->n_first) {
-		    		if ($invoicingContact->n_title) $invoice['customer_n_fn'] .= $invoicingContact->n_title.' ';
-		    		$invoice['customer_n_fn'] .= $invoicingContact->n_last.' ';
-		    		$invoice['customer_n_fn'] .= $invoicingContact->n_first;
-		    	}
-		    	if ($invoicingContact->adr_street) $invoice['customer_adr_street'] = $invoicingContact->adr_street;
-		    	if ($invoicingContact->adr_extended) $invoice['customer_adr_extended'] = $invoicingContact->adr_extended;
-		    	if ($invoicingContact->adr_post_office_box) $invoice['customer_adr_post_office_box'] = $invoicingContact->adr_post_office_box;
-		    	if ($invoicingContact->adr_zip) $invoice['customer_adr_zip'] = $invoicingContact->adr_zip;
-		    	if ($invoicingContact->adr_city) $invoice['customer_adr_city'] = $invoicingContact->adr_city;
-		    	if ($invoicingContact->adr_state) $invoice['customer_adr_state'] = $invoicingContact->adr_state;
-		    	if ($invoicingContact->adr_street) $invoice['customer_adr_country'] = $invoicingContact->adr_country;
-
-		    	$invoice['identifier'] = $commitment->invoice_identifier;
-		    	$commitmentMessage->status = 'new';
-		    	$commitmentMessage->account_id = $account->id;
-		    	$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
-		    	$commitmentMessage->direction = 'O';
-		    	$commitmentMessage->format = 'application/json';
-		    	$invoice['date'] = date('Y-m-d');
-		    	$invoice['description'] = array();
-		    	foreach($invoiceSpecs['description'] as $line) {
-		    		$arguments = array();
-		    		foreach($line['params'] as $propertyId) {
-		    			if ($propertyId == 'date') $arguments[] = $context->decodeDate(date('Y-m-d'));
-		    			else {
-		    				if (array_key_exists($propertyId, $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'])) {
-		    					$property = $context->getConfig('commitment'.(($type) ? '/'.$type : ''))['properties'][$propertyId];
-		    				}
-		    				else {
-		    					$property = $context->getConfig('commitment')['properties'][$propertyId];
-		    				}
-		    				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
-		    				if ($propertyId == 'account_name') $arguments[] = $commitment->account_name;
-		    				elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;
-		    				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
-		    				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-		    				elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
-		    				else $arguments[] = $commitment->properties[$propertyId];
-		    			}
-		    		}
-		    		$value = vsprintf($line['right'][$context->getLocale()], $arguments);
-		    		if ($value) $invoice['description'][]  = array('title' => $context->localize($line['left']), 'value' => $value);
-		    	}
-		    	 
-		    	$invoice['currency_symbol'] = $context->getConfig('commitment')['currencySymbol'];
-		    	$invoice['tax'] = $context->getConfig('commitment/'.$type)['tax'];
-		    	
-		    	// Lines
-		    	 
-		    	$product = Product::get($commitment->product_identifier, 'reference');
-		    	$taxExemptAmount = $commitment->amount - $commitment->taxable_1_amount - $commitment->taxable_2_amount - $commitment->taxable_3_amount;
-		    	if ($commitment->product_caption) $caption = $commitment->product_caption;
-		    	else $caption = $commitment->description;
-		    	
-		    	$invoice['lines'] = array();
-		    	if ($commitment->taxable_1_amount != 0) {
-		    		$line = array();
-		    		$line['caption'] = $caption;
-		    		$line['tax_rate'] = 0.2;
-		    		$line['unit_price'] = round($commitment->taxable_1_amount / $commitment->quantity, 2);
-		    		$line['quantity'] = $commitment->quantity;
-		    		$line['amount'] = $commitment->taxable_1_amount;
-		    		$invoice['lines'][] = array($line);
-		    	}
-		    	if ($commitment->taxable_2_amount != 0) {
-		    		$line = array();
-		    		$line['caption'] = $caption;
-		    		$line['tax_rate'] = 0.1;
-		    		$line['unit_price'] = round($commitment->taxable_2_amount / $commitment->quantity, 2);
-		    		$line['quantity'] = $commitment->quantity;
-		    		$line['amount'] = $commitment->taxable_2_amount;
-		    		$invoice['lines'][] = array($line);
-		    	}
-		    	if ($commitment->taxable_3_amount != 0) {
-		    		$line = array();
-		    		$line['caption'] = $caption;
-		    		$line['tax_rate'] = 0.055;
-		    		$line['unit_price'] = round($commitment->taxable_3_amount / $commitment->quantity, 2);
-		    		$line['quantity'] = $commitment->quantity;
-		    		$line['amount'] = $commitment->taxable_3_amount;
-		    		$invoice['lines'][] = array($line);
-		    	}
-		    	if ($taxExemptAmount != 0) {
-		    		$line = array();
-		    		$line['caption'] = $caption;
-		    		$line['tax_rate'] = 0;
-		    		$line['unit_price'] = $taxExemptAmount;
-		    		$line['quantity'] = $commitment->quantity;
-		    		$line['amount'] = $taxExemptAmount * $commitment->quantity;
-		    		$invoice['lines'] = array($line);
-		    	}
-		    	
-		    	if (is_array($commitment->options)) foreach ($commitment->options as $option) {
-		    		$line['caption'] = $option['caption'];
-		    		if ($option['vat_id'] == 0) $line['tax_rate'] = 0;
-		    		elseif ($option['vat_id'] == 1) $line['tax_rate'] = 0.2;
-		    		elseif ($option['vat_id'] == 2) $line['tax_rate'] = 0.1;
-		    		elseif ($option['vat_id'] == 3) $line['tax_rate'] = 0.055;
-		    		$line['unit_price'] = $option['unit_price'];
-		    		$line['quantity'] = $option['quantity'];
-		    		$line['amount'] = $option['amount'];
-		    		$invoice['lines'][] = array($line);
-		    	}
-		    	 
-		    	// Sums
-		    	 
-		    	$invoice['excluding_tax'] = $commitment->excluding_tax;
-		    	if ($commitment->tax_1_amount != 0) {
-		    		$invoice['taxable_1_total'] = $commitment->taxable_1_total;
-		    		$invoice['tax_1_amount'] = $commitment->tax_1_amount;
-		    	}
-		    	if ($commitment->tax_2_amount != 0) {
-		    		$invoice['taxable_2_total'] = $commitment->taxable_2_total;
-		    		$invoice['tax_2_amount'] = $commitment->tax_2_amount;
-		    	}
-		    	if ($commitment->tax_3_amount != 0) {
-		    		$invoice['taxable_3_total'] = $commitment->taxable_3_total;
-		    		$invoice['tax_3_amount'] = $commitment->tax_3_amount;
-		    	}
-		    	$invoice['tax_inclusive'] = $commitment->tax_inclusive;
-		    	
-		    	// Terms
-		    	 
-		    	$invoice['terms'] = array();
-		    	$settledAmount = 0;
-		    	foreach(Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search') as $term) {
-		    		$line[] = array();
-		    		$line['caption'] = $term->caption;
-		    		$line['status'] = ($term->status == 'collected') ? 'settled' : $term->status;
-		    		$line['due_date'] = $term->due_date;
-		    		$line['settlement_date'] = $term->settlement_date;
-		    		$line['means_of_payment'] = $term->means_of_payment;
-		    		$line['amount'] = $term->amount;
-		    		$invoice['terms'][] = $line;
-		    	}
-
-		    	$invoice['settled_amount'] = $settledAmount;
-		    	$invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
-
-		    	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
-		    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
-			    	$invoice['bank_details'] = $context->getConfig('commitment/invoice_bank_details');
-			    	$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
-			    	$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
-			    	$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
-		    	}
-    			
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
@@ -1426,20 +1448,14 @@ class CommitmentController extends AbstractActionController
     	if (!$id) return $this->redirect()->toRoute('index');
     	$commitment = Commitment::get($id);
 
-    	$proforma = $this->params()->fromQuery('proforma', null);
+    	$invoice = $this->generateInvoice($commitment->type, $commitment->account, $commitment, true);
 
     	// create new PDF document
     	$pdf = new PpitPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-    	PdfInvoiceOldViewHelper::render($pdf, $commitment, $proforma);
-    	
-    	// Close and output PDF document
-    	// This method has several options, check the source code documentation for more information.
-/*    	$document = Document::instanciate(0);
-    	$document->type = 'application/pdf';
-    	$document->add();
-    	$handle = fopen('data/documents/'.$document->id.'.pdf', 'I');*/
-    	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$commitment->invoice_identifier.'.pdf', 'I');
+    	PdfInvoiceViewHelper::render($pdf, $invoice, $commitment->account->place);
+ 
+    	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$commitment->account->name.'.pdf', 'I');
     	return $this->response;
     }
     

@@ -1362,6 +1362,7 @@ return array(
 									'fr_FR' => 'Centre',
 							),
 					),
+					'place_caption' => array('definition' => 'core_account/properties/place_caption'),
 					'opening_date' => array(
 							'definition' => 'inline',
 							'type' => 'date',
@@ -1432,7 +1433,7 @@ return array(
 	'core_account/list/business' => array(
 			'properties' => array(
 					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
-					'place_id' => [],
+					'place_caption' => [],
 					'name' => [],
 					'basket' => [],
 					'property_1' => [],
@@ -1921,9 +1922,7 @@ table.note-report td {
 	// Commitments
 
 	'commitment/property/year' => array(
-			'type' => 'number',
-			'minValue' => 2000,
-			'maxValue' => 9999,
+			'type' => 'text',
 			'labels' => array(
 					'en_US' => 'Accounting year',
 					'fr_FR' => 'Année comptable',
@@ -2694,7 +2693,7 @@ table.note-report td {
 									'new' => array('en_US' => 'To be confirmed', 'fr_FR' => 'A confirmer'),
 									'confirmed' => array('en_US' => 'Confirmed', 'fr_FR' => 'Confirmé'),
 									'settled' => array('en_US' => 'Settled', 'fr_FR' => 'Réglé'),
-									'closed' => array('en_US' => 'Closed', 'fr_FR' => 'Clôturé'),
+									'invoiced' => array('en_US' => 'Invoiced', 'fr_FR' => 'Facturé'),
 							),
 							'labels' => array(
 									'en_US' => 'Status',
@@ -2702,6 +2701,12 @@ table.note-report td {
 							),
 					),
 					'year' => array('definition' => 'commitment/property/year'),
+					'place_id' => array('definition' => 'commitment/property/place_id'),
+					'account_id' => array('definition' => 'commitment/property/account_id'),
+					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'quantity' => array('definition' => 'commitment/property/quantity'),
+					'unit_price' => array('definition' => 'commitment/property/unit_price'),
+					'amount' => array('definition' => 'commitment/property/amount'),
 					'name' => array(
 							'definition' => 'inline',
 							'type' => 'input',
@@ -2828,7 +2833,7 @@ table.note-report td {
 			),
 			'todo' => array(
 					'sales_manager' => array(
-							'status' => array('selector' => 'in', 'value' => array('new')),
+//							'status' => array('selector' => 'in', 'value' => array('new')),
 					),
 			),
 	),
@@ -2841,30 +2846,37 @@ table.note-report td {
 			'title' => array('en_US' => 'Learning', 'fr_FR' => 'Formations'),
 			'todoTitle' => array('en_US' => 'active', 'fr_FR' => 'actifs'),
 			'main' => array(
-					'type' => 'select',
 					'status' => 'select',
+					'property_10' => 'select',
 					'year' => 'range',
 					'including_options_amount' => 'range',
 					'name' => 'contains',
+					'account_name' => 'contains',
 					'property_1' => 'select',
 					'property_2' => 'select',
 					'property_3' => 'select',
 					'property_4' => 'select',
 					'property_5' => 'contains',
-					'property_10' => 'select',
-					'property_11' => 'contains',
 			),
 	),
 	
 	'commitment/list/learning' => array(
-			'caption' => 'input',
-			'including_options_amount' => 'number',
-			'status' => 'select',
+			'place_id' => 'select',
+			'property_10' => 'select',
 			'year' => 'text',
+			'status' => 'select',
+			'account_name' => 'text',
+			'caption' => 'text',
+			'quantity' => 'number',
+			'unit_price' => 'number',
+			'amount' => 'number',
+			'including_options_amount' => 'number',
 	),
 	
 	'commitment/update/learning' => array(
 			'year' => array('mandatory' => true),
+			'property_10' => array('mandatory' => false),
+			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'property_1' => array('mandatory' => false),
@@ -2872,7 +2884,6 @@ table.note-report td {
 			'property_3' => array('mandatory' => false),
 			'property_4' => array('mandatory' => false),
 			'property_5' => array('mandatory' => false),
-			'property_10' => array('mandatory' => false),
 			'property_11' => array('mandatory' => false),
 	),
 		
