@@ -68,7 +68,7 @@ function eraseCommitmentSearch() {
 
 <?php endforeach;?>
 
-	getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+	getCommitmentList(getParams(), 'update_time', 'DESC');
 }
 
 function sortCommitmentList(criterion) {
@@ -93,7 +93,7 @@ function filterCommitmentList() {
 		dir = 'DESC';
 	}
 	else {
-		criterion = 'including_options_amount';
+		criterion = 'update_time';
 		dir = 'DESC';
 	}
 	getCommitmentList(getParams(), criterion, dir);
@@ -107,7 +107,7 @@ function connectCommitmentSearchInputs() {
 		filterCommitmentList();
 	});
 	$('#search-button').click(function () { 
-		getCommitmentList(getParams(), 'including_options_amount', 'DESC');
+		getCommitmentList(getParams(), 'update_time', 'DESC');
 	});
 
 <?php foreach ($searchPage['main'] as $propertyId => $rendering) : ?>
@@ -994,7 +994,7 @@ function getSearch()
 	<?php foreach ($params as $id => $value) : ?>	
 				params += '<?php echo $id?>=<?php echo $value ?>&'
 	<?php endforeach;?>
-				getCommitmentList(params, 'including_options_amount', 'DESC');
+				getCommitmentList(params, 'update_time', 'DESC');
 	<?php if (!$context->getConfig()['isTraceActive']) : ?>
 			}
 	<?php endif;?>

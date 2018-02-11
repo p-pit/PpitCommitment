@@ -2039,6 +2039,13 @@ table.note-report td {
 					'fr_FR' => 'TTC',
 			),
 	),
+	'commitment/property/update_time' => array(
+			'type' => 'datetime',
+			'labels' => array(
+					'en_US' => 'Update time',
+					'fr_FR' => 'Date de mise à jour',
+			),
+	),
 
 	'commitment' => array(
 			'currencySymbol' => '€',
@@ -2079,6 +2086,7 @@ table.note-report td {
 					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
 					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
 					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
+					'update_time' => array('definition' => 'commitment/property/update_time'),
 			),
 			'order' => 'account_name ASC',
 			'todo' => array(
@@ -2146,6 +2154,7 @@ table.note-report td {
 			'unit_price' => 'number',
 			'amount' => 'number',
 			'including_options_amount' => 'number',
+			'update_time' => 'datetime',
 	),
 
 	'commitment/update/business' => array(
@@ -2356,6 +2365,7 @@ table.note-report td {
 									'fr_FR' => 'Montant',
 							),
 					),
+					'update_time' => array('definition' => 'commitment/property/update_time'),
 			),
 			'todo' => array(
 					'sales_manager' => array(
@@ -2387,6 +2397,7 @@ table.note-report td {
 			'caption' => 'input',
 			'including_options_amount' => 'number',
 			'status' => 'select',
+			'update_time' => 'datetime',
 	),
 		
 	'commitment/update/rental' => array(
@@ -2444,6 +2455,7 @@ table.note-report td {
 					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
 					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
 					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
+					'update_time' => array('definition' => 'commitment/property/update_time'),
 			),
 			'todo' => array(
 					'sales_manager' => array(
@@ -2481,6 +2493,7 @@ table.note-report td {
 			'unit_price' => 'number',
 			'amount' => 'number',
 			'including_options_amount' => 'number',
+			'update_time' => 'datetime',
 	),
 		
 	'commitment/update/service' => array(
@@ -2538,6 +2551,7 @@ table.note-report td {
 					'invoice_date' => array('definition' => 'commitment/property/invoice_date'),
 					'tax_amount' => array('definition' => 'commitment/property/tax_amount'),
 					'tax_inclusive' => array('definition' => 'commitment/property/tax_inclusive'),
+					'update_time' => array('definition' => 'commitment/property/update_time'),
 			),
 			'todo' => array(
 					'sales_manager' => array(
@@ -2574,6 +2588,7 @@ table.note-report td {
 			'unit_price' => 'number',
 			'amount' => 'number',
 			'including_options_amount' => 'number',
+			'update_time' => 'datetime',
 	),
 	
 	'commitment/update/human_service' => array(
@@ -2830,6 +2845,7 @@ table.note-report td {
 									'fr_FR' => 'Date de facture',
 							),
 					),
+					'update_time' => array('definition' => 'commitment/property/update_time'),
 			),
 			'todo' => array(
 					'sales_manager' => array(
@@ -2869,8 +2885,8 @@ table.note-report td {
 			'caption' => 'text',
 			'quantity' => 'number',
 			'unit_price' => 'number',
-			'amount' => 'number',
 			'including_options_amount' => 'number',
+			'update_time' => 'datetime',
 	),
 	
 	'commitment/update/learning' => array(

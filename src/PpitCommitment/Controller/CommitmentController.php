@@ -848,7 +848,7 @@ class CommitmentController extends AbstractActionController
     		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
     		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
     	}
-    	
+
     	return $invoice;
     }
     

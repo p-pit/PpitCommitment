@@ -234,11 +234,11 @@ class PdfInvoiceViewHelper
 	    	$pdf->writeHTML($invoice['tax_mention'], true, 0, true, 0);
     	}
 
-    	if (array_key_exists('bank_detail', $invoice)) {
+    	if (array_key_exists('bank_details', $invoice)) {
 	    	$pdf->SetFont('', '', 8);
 	    	$pdf->Ln();
 	    	$pdf->SetDrawColor(0, 0, 0);
-	    	$pdf->writeHTML($invoice['bank_detail'], true, 0, true, 0);
+	    	$pdf->writeHTML($invoice['bank_details'], true, 0, true, 0);
     	}
 
     	if (array_key_exists('footer_mention_1', $invoice)) {

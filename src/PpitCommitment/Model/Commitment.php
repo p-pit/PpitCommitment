@@ -384,7 +384,8 @@ class Commitment implements InputFilterAwareInterface
     	$data['invoice_message_id'] = $this->invoice_message_id;
     	$data['settlement_message_id'] = $this->settlement_message_id;
     	$data['notification_time'] = ($this->notification_time) ? $this->notification_time : null;
-
+    	$data['update_time'] = ($this->update_time) ? $this->update_time : null;
+    	 
     	$data['account_name'] = $this->account_name;
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
