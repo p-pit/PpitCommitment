@@ -1963,6 +1963,13 @@ table.note-report td {
 					'fr_FR' => 'Nom',
 			),
 	),
+	'commitment/property/account_identifier' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Client identifier',
+					'fr_FR' => 'Référence client',
+			),
+	),
 	'commitment/property/caption' => array(
 			'type' => 'input',
 			'labels' => array(
@@ -2076,6 +2083,7 @@ table.note-report td {
 					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'account_identifier' => array('definition' => 'commitment/property/account_identifier'),
 					'caption' => array('definition' => 'commitment/property/caption'),
 					'description' => array('definition' => 'commitment/property/description'),
 					'quantity' => array('definition' => 'commitment/property/quantity'),
@@ -2977,6 +2985,7 @@ table.note-report td {
 							'modalities' => array(
 									'bank_card' => array('fr_FR' => 'CB', 'en_US' => 'Bank card'),
 									'transfer' => array('fr_FR' => 'Virement', 'en_US' => 'Transfer'),
+									'direct_debit' => array('fr_FR' => 'Prélèvement', 'en_US' => 'Direct debit'),
 									'check' => array('fr_FR' => 'Chèque', 'en_US' => 'Check'),
 									'cash' => array('fr_FR' => 'Espèces', 'en_US' => 'Cash'),
 							),

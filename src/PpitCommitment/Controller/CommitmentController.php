@@ -675,7 +675,7 @@ class CommitmentController extends AbstractActionController
     	$invoice['header'] = $context->getConfig('commitment/invoice_header');
     	
     	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
-    	$invoice['customer_invoice_name'] = $account->name;
+//    	$invoice['customer_invoice_name'] = $account->name;
     	$invoicingContact = null;
     	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
     	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
@@ -725,11 +725,11 @@ class CommitmentController extends AbstractActionController
     				elseif ($propertyId == 'caption') $arguments[] = $commitment->caption;
     				elseif ($property['type'] == 'date') $arguments[] = $context->decodeDate($commitment->properties[$propertyId]);
     				elseif ($property['type'] == 'number') $arguments[] = $context->formatFloat($commitment->properties[$propertyId], 2);
-    				elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $property['modalities'][$commitment->properties[$propertyId]][$context->getLocale()];
+    				elseif ($property['type'] == 'select' && array_key_exists($commitment->properties[$propertyId], $property['modalities'])) $arguments[] = $context->localize($property['modalities'][$commitment->properties[$propertyId]]);
     				else $arguments[] = $commitment->properties[$propertyId];
     			}
     		}
-    		$value = vsprintf($line['right'][$context->getLocale()], $arguments);
+    		$value = vsprintf($context->localize($line['right']), $arguments);
     		if ($value) $invoice['description'][]  = array('title' => $context->localize($line['left']), 'value' => $value);
     	}
     	
@@ -824,22 +824,25 @@ class CommitmentController extends AbstractActionController
     	$invoice['tax_inclusive'] = $commitment->tax_inclusive;
     	 
     	// Terms
-    	
-    	$invoice['terms'] = array();
-    	$settledAmount = 0;
-    	foreach(Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search') as $term) {
-    		$line[] = array();
-    		$line['caption'] = $term->caption;
-    		$line['status'] = ($term->status == 'collected') ? 'settled' : $term->status;
-    		$line['due_date'] = $term->due_date;
-    		$line['settlement_date'] = $term->settlement_date;
-    		$line['means_of_payment'] = $term->means_of_payment;
-    		$line['amount'] = $term->amount;
-    		$invoice['terms'][] = $line;
-    	}
-    	
-    	$invoice['settled_amount'] = $settledAmount;
-    	$invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
+
+    	if ($invoiceSpecs['terms']) $invoice['terms'] = array();
+	    $settledAmount = 0;
+	    foreach(Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search') as $term) {
+	    	if ($term->status != 'expected') $settledAmount += $term->amount;
+	    	if ($invoiceSpecs['terms']) {
+		    	$line[] = array();
+	    		$line['caption'] = $term->caption;
+	    		$line['status'] = ($term->status == 'collected') ? 'settled' : $term->status;
+	    		$line['due_date'] = $term->due_date;
+	    		$line['settlement_date'] = $term->settlement_date;
+	    		$line['means_of_payment'] = $term->means_of_payment;
+	    		$line['amount'] = $term->amount;
+		    	$invoice['terms'][] = $line;
+	    	}
+		}
+
+	    $invoice['settled_amount'] = $settledAmount;
+	    $invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
     	
     	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
     	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
@@ -848,7 +851,6 @@ class CommitmentController extends AbstractActionController
     		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
     		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
     	}
-
     	return $invoice;
     }
     

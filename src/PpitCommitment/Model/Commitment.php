@@ -133,6 +133,7 @@ class Commitment implements InputFilterAwareInterface
 
 	// Additional field from joined tables
 	public $account_name;
+	public $account_identifier;
 	public $place_id;
     public $place_caption;
     public $place_identifier;
@@ -270,6 +271,7 @@ class Commitment implements InputFilterAwareInterface
 
         // Additional properties from joined tables
         $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
+        $this->account_identifier = (isset($data['account_identifier'])) ? $data['account_identifier'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
@@ -387,6 +389,7 @@ class Commitment implements InputFilterAwareInterface
     	$data['update_time'] = ($this->update_time) ? $this->update_time : null;
     	 
     	$data['account_name'] = $this->account_name;
+    	$data['account_identifier'] = $this->account_identifier;
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
     	$data['place_id'] = $this->place_id;
@@ -398,6 +401,7 @@ class Commitment implements InputFilterAwareInterface
     {
     	$data = $this->getProperties();
     	unset($data['account_name']);
+    	unset($data['account_identifier']);
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
     	unset($data['place_id']);
@@ -408,7 +412,7 @@ class Commitment implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
-    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'place_id'), 'left')
+    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'account_identifier' => 'identifier', 'place_id'), 'left')
 			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left');
     	
     	$where = new Where();
@@ -471,7 +475,8 @@ class Commitment implements InputFilterAwareInterface
         if ($commitment->account_id) {
 	    	$commitment->account = Account::get($commitment->account_id);
 	    	$commitment->account_name = $commitment->account->name;
-    	}
+	    	$commitment->account_identifier = $commitment->account->identifier;
+        }
     	$commitment->properties = $commitment->getProperties();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
 

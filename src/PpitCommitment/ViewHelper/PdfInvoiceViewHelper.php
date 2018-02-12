@@ -14,11 +14,12 @@ require_once('vendor/TCPDF-master/tcpdf.php');
 
 class PdfInvoiceViewHelper
 {	
-    public static function render($pdf, $invoice, $place)
+    public static function render($pdf, $invoice, $place, $proforma = true)
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    	
+    	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
+
     	// create new PDF document
     	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];
     	$pdf->footer_2 = ($place->legal_footer_2) ? $place->legal_footer_2 : ((array_key_exists('footer_2', $context->getConfig('headerParams'))) ? $context->getConfig('headerParams')['footer_2']['value'] : null);
@@ -130,9 +131,9 @@ class PdfInvoiceViewHelper
     	$pdf->SetFont('', '', 8);
     	$pdf->SetTextColor(255);
     	$pdf->Cell(110, 7, 'Libellé', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'PU ('.$invoice['currency_symbol'].' '.$taxComputing.')', 1, 0, 'C', 1);
+    	$pdf->Cell(25, 7, 'PU ('.$invoice['currency_symbol'].(($invoiceSpecs['tax']) ? ' '.$taxComputing : '').')', 1, 0, 'C', 1);
     	$pdf->Cell(20, 7, 'Quantité', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Montant ('.$invoice['currency_symbol'].' '.$taxComputing.')', 1, 0, 'R', 1);
+    	$pdf->Cell(25, 7, 'Montant ('.$invoice['currency_symbol'].(($invoiceSpecs['tax']) ? ' '.$taxComputing : '').')', 1, 0, 'R', 1);
     	// Color and font restoration
     	$pdf->SetFillColor(239, 239, 239);
     	$pdf->SetTextColor(0);
@@ -176,7 +177,7 @@ class PdfInvoiceViewHelper
     	}
     	$pdf->Ln();
     	$pdf->SetFont('', 'B');
-    	$pdf->Cell(155, 6, 'Total TTC :', 'LR', 0, 'R', false);
+    	$pdf->Cell(155, 6, 'Total '.(($invoiceSpecs['tax']) ? 'TTC ' : '').':', 'LR', 0, 'R', false);
     	$pdf->Cell(25, 6, $context->formatFloat($invoice['tax_inclusive'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
 
     	// Terms
@@ -214,17 +215,17 @@ class PdfInvoiceViewHelper
 	
 	    	$pdf->SetTextColor(0);
 	    	$pdf->SetFont('', 'B');
-	
-	    	$pdf->Ln();
-	    	$pdf->SetDrawColor(255, 255, 255);
-	    	$pdf->Cell(155, 6, 'Total réglé :', 'LR', 0, 'R', false);
-	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['settled_amount'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
-	
-	    	$pdf->Ln();
-	    	$pdf->SetDrawColor(255, 255, 255);
-	    	$pdf->Cell(155, 6, 'Restant dû :', 'LR', 0, 'R', false);
-	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['still_due'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
     	}
+
+		$pdf->Ln();
+		$pdf->SetDrawColor(255, 255, 255);
+		$pdf->Cell(155, 6, 'Total réglé :', 'LR', 0, 'R', false);
+		$pdf->Cell(25, 6, $context->formatFloat($invoice['settled_amount'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
+
+		$pdf->Ln();
+		$pdf->SetDrawColor(255, 255, 255);
+		$pdf->Cell(155, 6, 'Restant dû :', 'LR', 0, 'R', false);
+		$pdf->Cell(25, 6, $context->formatFloat($invoice['still_due'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
 
     	$pdf->Ln();
 
