@@ -2270,6 +2270,8 @@ table.note-report td {
 							'params' => array('date'),
 					),
 			),
+			'tax' => false,
+			'terms' => true,
 	),
 		
 	'commitment/supplierIdentificationSheet' => array(
