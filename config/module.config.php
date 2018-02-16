@@ -1036,7 +1036,7 @@ return array(
 					'services' => array('en_US' => 'To be translated', 'fr_FR' => 'Services aux entreprises'),
 					'textile' => array('en_US' => 'To be translated', 'fr_FR' => 'Textile / Habillement / Chaussure'),
 					'transport' => array('en_US' => 'To be translated', 'fr_FR' => 'Transports / Logistique'),
-					'autres' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres'),
+					'autre' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres'),
 			),
 			'labels' => array(
 					'en_US' => 'Sector',

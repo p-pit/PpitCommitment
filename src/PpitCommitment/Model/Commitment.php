@@ -537,7 +537,7 @@ class Commitment implements InputFilterAwareInterface
     		$commitment->description = $subscription->description;
     	}
     	$commitmentYear = CommitmentYear::getCurrent();
-    	$commitment->year = $commitmentYear->year;
+    	if ($commitmentYear) $commitment->year = $commitmentYear->year;
     	$commitment->status = 'new';
     	$commitment->quantity = 1;
     	$commitment->properties = $commitment->toArray();
