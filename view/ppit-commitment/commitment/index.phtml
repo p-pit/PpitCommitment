@@ -11,7 +11,7 @@ echo $this->partial('/partials/header');
 	
 	<div class="row" id="main_menu">
 
-<?php foreach ($context->getConfig('menus/p-pit-engagements') as $entryId => $entryDef) : ?>
+<?php foreach ($context->getConfig('menus/p-pit-engagements')['entries'] as $entryId => $entryDef) : ?>
 
 		<div class="col-md-2">
 	<?php if (array_key_exists('type', $entryDef['params']) && $type == $entryDef['params']['type'] && !array_key_exists('entry', $entryDef['params'])) $color = 'btn-primary'; else $color = 'btn-default' ?>
@@ -50,7 +50,7 @@ echo $this->partial('/partials/ppit-term-scripts');
 echo $this->partial('/partials/ppit-controller') 
 ?>
 
-<?php foreach ($context->getConfig('menus/p-pit-engagements') as $entryId => $entryDef) : ?>
+<?php foreach ($context->getConfig('menus/p-pit-engagements')['entries'] as $entryId => $entryDef) : ?>
 $('#<?php echo $entryId ?>-anchor').click(function () { $(location).attr('href', '<?php echo $this->url($entryDef['route'], $entryDef['params']) ?>'); });
 <?php endforeach;?>
 

@@ -912,6 +912,7 @@ return array(
 	),
 
 	'menus/p-pit-engagements' => array(
+		'entries' => array(
 					'account' => array(
 							'route' => 'account/index',
 							'params' => array('entry' => 'account', 'type' => 'business'),
@@ -976,6 +977,11 @@ return array(
 									'fr_FR' => 'Interactions',
 							),
 					),*/
+		),
+		'labels' => array(
+			'default' => '2pit Commitments',
+			'fr_FR' => 'P-Pit Engagements',
+		),
 	),
 
 	'creditConsumers' => array(
@@ -1058,14 +1064,14 @@ return array(
 	),
 
 	'core_account/business/property/property_3' => array(
-			'type' => 'text',
+			'type' => 'input',
 			'labels' => array(
 					'en_US' => 'Web site', 'fr_FR' => 'Site web'
 			),
 	),
 
 	'core_account/business/property/property_4' => array(
-			'type' => 'text',
+			'type' => 'input',
 			'labels' => array('en_US' => 'Legal mention', 'fr_FR' => 'Mention légale'),
 	),
 
@@ -1422,7 +1428,7 @@ return array(
 				'place_id' => [],
 				'status' => ['multiple' => true],
 				'name' => [],
-				'basket' => [],
+				'basket' => ['multiple' => true],
 				'property_1' => [],
 				'opening_date' => [],
 				'callback_date' => [],
@@ -1573,9 +1579,6 @@ return array(
 
 			'contact_history' => [],
 	),
-
-		'core_account/subscription/business' => array('definition' => 'customization/p-pit/core_account/subscription/p-pit-commitments'),
-		'core_account/subscription/b2c' => array('definition' => 'customization/p-pit/core_account/subscription/b2c'),
 		
 		'core_account/indexCard/business' => array(
 				'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
@@ -2343,6 +2346,7 @@ table.note-report td {
 					),
 					'year' => array('definition' => 'commitment/property/year'),
 					'place_id' => array('definition' => 'commitment/property/place_id'),
+					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array(
 							'definition' => 'inline',
 							'type' => 'input',
@@ -2403,6 +2407,7 @@ table.note-report td {
 	
 	'commitment/list/rental' => array(
 			'place_id' => 'input',
+			'account_name' => 'text',
 			'year' => 'text',
 			'caption' => 'input',
 			'including_options_amount' => 'number',
@@ -2412,6 +2417,7 @@ table.note-report td {
 		
 	'commitment/update/rental' => array(
 			'year' => array('mandatory' => true),
+			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 	),

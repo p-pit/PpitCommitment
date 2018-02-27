@@ -254,7 +254,7 @@ class AccountController extends AbstractActionController
     	$type = $interaction->category;
     	$reference = $interaction->reference;
     	$place = Place::get($data['place_identifier'], 'identifier');
-    	$data['place_id'] = $place->id;
+    	if ($place) $data['place_id'] = $place->id;
     	$data['origine'] = 'web';
     	$data['opening_date'] = date('Y-m-d');
 
@@ -420,14 +420,16 @@ class AccountController extends AbstractActionController
     			$rc = $interaction->add();
     			return $this->getResponse();
     		}
-    		$place = Place::get($data['place_identifier'], 'identifier');
-    	   	if (!$place /* || !$context->hasAccessTo('place', $place) */) {
-    			$this->getResponse()->setStatusCode('400');
-    			$logger->info('account/postAction;'.date('Y-m-d H:i:s').';400;The place identified by '.$data['place_identifier'].' does not exist;');
-    			echo 'The place identified by '.$data['place_identifier'].' does not exist';
-				$interaction->http_status = '400 - The place identified by '.$data['place_identifier'].' does not exist';
-    			$rc = $interaction->add();
-    			return $this->getResponse();
+    		if ($data['place_identifier']) {
+	    		$place = Place::get($data['place_identifier'], 'identifier');
+	    	   	if (!$place /* || !$context->hasAccessTo('place', $place) */) {
+	    			$this->getResponse()->setStatusCode('400');
+	    			$logger->info('account/postAction;'.date('Y-m-d H:i:s').';400;The place identified by '.$data['place_identifier'].' does not exist;');
+	    			echo 'The place identified by '.$data['place_identifier'].' does not exist';
+					$interaction->http_status = '400 - The place identified by '.$data['place_identifier'].' does not exist';
+	    			$rc = $interaction->add();
+	    			return $this->getResponse();
+	    		}
     		}
 			$interaction->http_status = '200';
 			$rc = $interaction->add();

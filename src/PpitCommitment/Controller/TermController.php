@@ -336,7 +336,7 @@ class TermController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
     			
 				$invoiceSpecs = $context->getConfig('commitment/invoice');
-				$invoice['customer_name'] = $account->name;
+				if ($account->type == 'business') $invoice['customer_invoice_name'] = $account->name;
 				$invoicingContact = null;
 		    	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
 		    	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
@@ -366,7 +366,6 @@ class TermController extends AbstractActionController
 		    	if ($invoicingContact->adr_city) $invoice['customer_adr_city'] = $invoicingContact->adr_city;
 		    	if ($invoicingContact->adr_state) $invoice['customer_adr_state'] = $invoicingContact->adr_state;
 		    	if ($invoicingContact->adr_street) $invoice['customer_adr_country'] = $invoicingContact->adr_country;
-    			$term->status = 'invoiced';
 
     			// Atomically save
     			$connection = CommitmentMessage::getTable()->getAdapter()->getDriver()->getConnection();
@@ -398,7 +397,21 @@ class TermController extends AbstractActionController
 			    	$invoice['taxable_1_total'] = $line['amount'];
 			    	$invoice['tax_1_amount'] = $term->amount - $line['unit_price'];
 			    	$invoice['tax_inclusive'] = $term->amount;
-					$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+    			    if ($term->status == 'expected' && $context->getConfig('commitment/invoice_bank_details')) {
+					    $invoice['settled_amount'] = 0;
+    			    	$invoice['still_due'] = $term->amount;
+    			    }
+    			    else {
+    			    	$invoice['settled_amount'] = $term->amount;
+    			    	$invoice['still_due'] = 0;
+    			    }
+				    $invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+    			    if ($term->status == 'expected' && $context->getConfig('commitment/invoice_bank_details')) {
+			    		$invoice['bank_details'] = $context->getConfig('commitment/invoice_bank_details');
+			    		$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
+			    		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
+			    		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
+			    	}
 					$commitmentMessage->content = json_encode($invoice, JSON_PRETTY_PRINT);
 			    	$rc = $commitmentMessage->add();
     				if ($rc != 'OK') {
@@ -407,6 +420,7 @@ class TermController extends AbstractActionController
     				}
     				else {
     					$term->status = 'invoiced';
+    					$term->invoice_id = $commitmentMessage->id;
     					$rc = $term->update($request->getPost('update_time'));
 	    				if ($rc != 'OK') {
 	    					$connection->rollback();

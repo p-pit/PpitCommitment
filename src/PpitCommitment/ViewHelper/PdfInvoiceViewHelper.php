@@ -206,7 +206,7 @@ class PdfInvoiceViewHelper
 		    	$pdf->Cell(30, 6, $context->decodeDate($term['due_date']), 'LR', 0, 'C', $color);
 		    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term['status']][$context->getLocale()];
 		    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']).((array_key_exists('means_of_payment', $term)) ? ' ('.$term['means_of_payment'].')' : ''), 'LR', 0, 'L', $color);
+		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']).(($term['means_of_payment']) ? ' ('.$term['means_of_payment'].')' : ''), 'LR', 0, 'L', $color);
 		    	$pdf->Cell(30, 6, $context->formatFloat($term['amount'], 2), 'LR', 0, 'R', $color);
 		    	$color = ($color+1)%2;
 	    	}

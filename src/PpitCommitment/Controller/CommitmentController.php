@@ -675,7 +675,7 @@ class CommitmentController extends AbstractActionController
     	$invoice['header'] = $context->getConfig('commitment/invoice_header');
     	
     	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
-//    	$invoice['customer_invoice_name'] = $account->name;
+    	if ($account->type == 'business') $invoice['customer_invoice_name'] = $account->name;
     	$invoicingContact = null;
     	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
     	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
