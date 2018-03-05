@@ -101,13 +101,11 @@ class PdfInvoiceViewHelper
     	if ($invoice['identifier']) $proforma = false; else $proforma = true;
 
     	// Title
-    	if ($proforma) $text = '<div style="text-align: center"><strong>Facture proforma'.'</strong></div>';
-    	else {
-    		$text = '<div style="text-align: center"><strong>';
-    		$text .= 'Facture n° '.$invoice['identifier'];
-    		$text .= ' au '.$context->decodeDate($invoice['date']);
-    		$text .= '</strong></div>';
-    	}
+    	$text = '<div style="text-align: center"><strong>';
+    	if ($proforma) $text .= 'Facture proforma';
+    	else $text .= 'Facture n° '.$invoice['identifier'];
+    	$text .= ' au '.$context->decodeDate($invoice['date']);
+    	$text .= '</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(5);
 
@@ -206,7 +204,7 @@ class PdfInvoiceViewHelper
 		    	$pdf->Cell(30, 6, $context->decodeDate($term['due_date']), 'LR', 0, 'C', $color);
 		    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term['status']][$context->getLocale()];
 		    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']).(($term['means_of_payment']) ? ' ('.$term['means_of_payment'].')' : ''), 'LR', 0, 'L', $color);
+		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']).(($term['settlement_date'] && $term['means_of_payment']) ? ' ('.$context->localize($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term['means_of_payment']]).')' : ''), 'LR', 0, 'L', $color);
 		    	$pdf->Cell(30, 6, $context->formatFloat($term['amount'], 2), 'LR', 0, 'R', $color);
 		    	$color = ($color+1)%2;
 	    	}

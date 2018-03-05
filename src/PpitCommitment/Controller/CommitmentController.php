@@ -55,7 +55,7 @@ class CommitmentController extends AbstractActionController
     	$context = Context::getCurrent();
 //		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::get($context->getPlaceId());
-    	
+
     	$type = $this->params()->fromRoute('type', null);
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-PIT Engagements';
@@ -672,7 +672,8 @@ class CommitmentController extends AbstractActionController
     	$context = Context::getCurrent();
     	
     	// Header
-    	$invoice['header'] = $context->getConfig('commitment/invoice_header');
+    	if ($commitment->account->place->getConfig('commitment/invoice_header')) $invoice['header'] = $commitment->account->place->getConfig('commitment/invoice_header');
+    	else $invoice['header'] = $context->getConfig('commitment/invoice_header');
     	
     	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
     	if ($account->type == 'business') $invoice['customer_invoice_name'] = $account->name;
@@ -825,11 +826,11 @@ class CommitmentController extends AbstractActionController
     	 
     	// Terms
 
-    	if ($invoiceSpecs['terms']) $invoice['terms'] = array();
+    	if (array_key_exists('terms', $invoiceSpecs)) $invoice['terms'] = array();
 	    $settledAmount = 0;
 	    foreach(Term::getList(array('commitment_id' => $commitment->id), 'due_date', 'ASC', 'search') as $term) {
 	    	if ($term->status != 'expected') $settledAmount += $term->amount;
-	    	if ($invoiceSpecs['terms']) {
+	    	if (array_key_exists('terms', $invoiceSpecs)) {
 		    	$line[] = array();
 	    		$line['caption'] = $term->caption;
 	    		$line['status'] = ($term->status == 'collected') ? 'settled' : $term->status;
@@ -881,8 +882,15 @@ class CommitmentController extends AbstractActionController
 				$commitment->status = 'invoiced';
 				$year = CommitmentYear::getcurrent();
 				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
-				$commitment->invoice_identifier = $context->getConfig('commitment/invoice_identifier_mask').sprintf("%'.05d", $year->next_value);
-				
+				$mask = $context->getConfig('commitment/invoice_identifier_mask');
+				$arguments = array();
+				foreach ($mask['params'] as $param) {
+					if ($param == 'year') $arguments[] = substr($commitment->invoice_date, 0, 4);
+					elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
+					elseif ($param == 'counter') $arguments[] = sprintf("%'.03d", $year->next_value);
+				}
+				$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
+var_dump($commitment->invoice_identifier); return $this->response;				
 				$commitmentMessage = CommitmentMessage::instanciate('invoice');
 				$account = $commitment->account;
 				$invoice = $this->generateInvoice($type, $account, $commitment);
@@ -924,6 +932,8 @@ class CommitmentController extends AbstractActionController
     			$action = null;
     		}
     	}
+    	if ($error) echo $error."\n";
+    	echo $message;
     	return $this->response;
     }
 

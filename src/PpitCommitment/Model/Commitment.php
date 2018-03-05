@@ -1113,7 +1113,7 @@ class Commitment implements InputFilterAwareInterface
     	// Consistency check
 	    $select = Commitment::getTable()->getSelect()->columns(array('id'))->where(array('identifier' => $this->identifier, 'id <> ?' => $this->id));
 	    $cursor = Commitment::getTable()->selectWith($select);
-	    if (count($cursor) > 0) return 'Duplicate';
+//	    if (count($cursor) > 0) return 'Duplicate';
 
     	// Save the order form and the commitment
     	if ($this->files) {

@@ -79,7 +79,7 @@ if ($commitment->id && $action != 'update' || $message == 'OK') $isDisabled = tr
 <?php foreach ($updatePage as $propertyId => $options) : ?>
 	<?php $property = $configProperties[$propertyId] ?>
 	
-		<div class="form-group" id="commitment-<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').'commitment-'.$propertyId ?>_group">
 			<label class="col-sm-5 control-label"><?php if ($options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?></label>
 			<div class="col-sm-7">
 

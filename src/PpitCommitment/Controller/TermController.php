@@ -373,7 +373,14 @@ class TermController extends AbstractActionController
     			try {
     				$year = CommitmentYear::getcurrent();
     				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
-    				$invoice['identifier'] = $context->getConfig('commitment/invoice_identifier_mask').sprintf("%'.05d", $year->next_value);
+					$mask = $context->getConfig('commitment/invoice_identifier_mask');
+					$arguments = array();
+					foreach ($mask['params'] as $param) {
+						if ($param == 'year') $arguments[] = substr($commitment->invoice_date, 0, 4);
+						elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
+						elseif ($param == 'counter') $arguments[] = sprintf("%'.03d", $year->next_value);
+					}
+					$invoice['identifier'] = vsprintf($context->localize($mask['format']), $arguments);
     				$commitmentMessage->status = 'new';
     				$commitmentMessage->account_id = $account->id;
     				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];

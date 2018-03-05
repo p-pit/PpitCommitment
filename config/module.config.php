@@ -1516,7 +1516,7 @@ return array(
 			'status' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 	),
-
+/*
 	'core_account/post/business' => array(
 			'place_identifier' => array('mandatory' => false),
 			'n_title' => array('mandatory' => false),
@@ -1536,7 +1536,7 @@ return array(
 			'adr_country' => array('mandatory' => false),
 			'place_identifier' => array('mandatory' => false),
 			'locale' => array('mandatory' => false),
-	),
+	),*/
 	'core_account/requestTypes/business' => array(
 			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
 			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
@@ -2170,6 +2170,7 @@ table.note-report td {
 
 	'commitment/update/business' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2178,6 +2179,7 @@ table.note-report td {
 		
 	'commitment/update/generic' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
@@ -2185,6 +2187,7 @@ table.note-report td {
 
 	'commitment/update/b2c' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
 			'amount' => array('mandatory' => false),
@@ -2192,6 +2195,7 @@ table.note-report td {
 		
 	'commitment/update' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2216,8 +2220,15 @@ table.note-report td {
 			'caption' => [],
 			'description' => [],
 	),
-		
-	'commitment/invoice_identifier_mask' => date('Y-'),
+
+	'place_config/default' => array(
+			'commitment/invoice_header' => null,
+	),
+	
+	'commitment/invoice_identifier_mask' => array(
+		'format' => array('default' => '%s-%s'),
+		'params' => array('year', 'counter'),
+	),
 	'commitment/invoice_tax_mention' => '',
 	'commitment/invoice_bank_details' => null,
 	'commitment/invoice_footer_mention_1' => null,
@@ -2417,6 +2428,7 @@ table.note-report td {
 		
 	'commitment/update/rental' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2514,6 +2526,7 @@ table.note-report td {
 		
 	'commitment/update/service' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2609,6 +2622,7 @@ table.note-report td {
 	
 	'commitment/update/human_service' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
 			'description' => array('mandatory' => false),
@@ -2981,7 +2995,7 @@ table.note-report td {
 					),
 					'amount' => array(
 							'type' => 'number',
-							'minValue' => 0,
+							'minValue' => -99999999,
 							'maxValue' => 99999999,
 							'labels' => array(
 									'en_US' => 'Amount',
