@@ -890,7 +890,6 @@ class CommitmentController extends AbstractActionController
 					elseif ($param == 'counter') $arguments[] = sprintf("%'.03d", $year->next_value);
 				}
 				$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
-var_dump($commitment->invoice_identifier); return $this->response;				
 				$commitmentMessage = CommitmentMessage::instanciate('invoice');
 				$account = $commitment->account;
 				$invoice = $this->generateInvoice($type, $account, $commitment);
