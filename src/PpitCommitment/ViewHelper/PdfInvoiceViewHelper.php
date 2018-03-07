@@ -190,8 +190,9 @@ class PdfInvoiceViewHelper
 	    	$pdf->SetTextColor(255);
 	    	$pdf->Cell(60, 7, 'Echéance', 1, 0, 'C', 1);
 	    	$pdf->Cell(30, 7, 'Prévue le', 1, 0, 'C', 1);
-	    	$pdf->Cell(30, 7, 'Statut', 1, 0, 'C', 1);
+//	    	$pdf->Cell(30, 7, 'Statut', 1, 0, 'C', 1);
 	    	$pdf->Cell(30, 7, 'Réglée le', 1, 0, 'C', 1);
+	    	$pdf->Cell(30, 7, 'Moyen de paiement', 1, 0, 'C', 1);
 	    	$pdf->Cell(30, 7, 'Montant', 1, 0, 'R', 1);
 	    	// Color and font restoration
 	    	$pdf->SetFillColor(239, 239, 239);
@@ -203,8 +204,9 @@ class PdfInvoiceViewHelper
 		    	$pdf->Cell(60, 6, $term['caption'], 'LR', 0, 'L', $color);
 		    	$pdf->Cell(30, 6, $context->decodeDate($term['due_date']), 'LR', 0, 'C', $color);
 		    	$status = $context->getConfig('commitmentTerm')['properties']['status']['modalities'][$term['status']][$context->getLocale()];
-		    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
-		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']).(($term['settlement_date'] && $term['means_of_payment']) ? ' ('.$context->localize($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term['means_of_payment']]).')' : ''), 'LR', 0, 'L', $color);
+//		    	$pdf->Cell(30, 6, $status, 'LR', 0, 'C', $color);
+		    	$pdf->Cell(30, 6, $context->decodeDate($term['settlement_date']), 'LR', 0, 'L', $color);
+		    	$pdf->Cell(30, 6, ($term['means_of_payment']) ? $context->localize($context->getConfig('commitmentTerm')['properties']['means_of_payment']['modalities'][$term['means_of_payment']]) : '', 'LR', 0, 'L', $color);
 		    	$pdf->Cell(30, 6, $context->formatFloat($term['amount'], 2), 'LR', 0, 'R', $color);
 		    	$color = ($color+1)%2;
 	    	}
