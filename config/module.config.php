@@ -2285,37 +2285,6 @@ table.note-report td {
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('description'),
 					),
-/*					array(
-							'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('invoice_date'),
-					),*/
-			),
-	),
-
-	'commitment/proforma' => array(
-			'header' => array(
-					array(
-							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('account_name'),
-					),
-			),
-			'description' => array(
-					array(
-							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('caption'),
-					),
-					array(
-							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('description'),
-					),
-					array(
-							'left' => array('en_US' => 'Situation date', 'fr_FR' => 'Date de situation'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('date'),
-					),
 			),
 			'tax' => false,
 			'terms' => true,
@@ -2689,42 +2658,6 @@ table.note-report td {
 							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
 							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
 							'params' => array('description'),
-					),
-					/*					array(
-					 'left' => array('en_US' => 'Invoice date', 'fr_FR' => 'Date de facture'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('invoice_date'),
-					),*/
-			),
-	),
-	
-	'commitment/proforma/human_service' => array(
-			'header' => array(
-					array(
-							'format' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('account_name'),
-					),
-			),
-			'description' => array(
-					array(
-							'left' => array('en_US' => 'Beneficiary', 'fr_FR' => 'Bénéficiaire'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('account_name'),
-					),
-					array(
-							'left' => array('en_US' => 'Caption', 'fr_FR' => 'Libellé'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('caption'),
-					),
-					array(
-							'left' => array('en_US' => 'Description', 'fr_FR' => 'Description'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('description'),
-					),
-					array(
-							'left' => array('en_US' => 'Situation date', 'fr_FR' => 'Date de situation'),
-							'right' => array('en_US' => '%s', 'fr_FR' => '%s'),
-							'params' => array('date'),
 					),
 			),
 	),

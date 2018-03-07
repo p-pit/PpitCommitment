@@ -18,7 +18,7 @@ class PdfInvoiceViewHelper
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-    	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
+    	$invoiceSpecs = $context->getConfig('commitment/invoice');
 
     	// create new PDF document
     	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];

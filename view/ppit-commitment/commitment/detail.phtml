@@ -104,7 +104,7 @@
 <?php if ($commitment->product_identifier) : ?>
 	<div>
 	<?php if (in_array($commitment->status, array('invoiced', 'settled'))) : ?>
-		<a target="_blank" href="<?php echo $this->url('commitment/downloadInvoice', array('type' => $type, 'id' => $commitment->id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
+		<a target="_blank" href="<?php echo $this->url('commitmentMessage/downloadInvoice', array('id' => $commitment->invoice_message_id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>
 		&nbsp;&nbsp;|&nbsp;&nbsp;
 	<?php endif;?>
 		<a target="_blank" href="<?php echo $this->url('commitment/downloadInvoice', array('type' => $type, 'id' => $commitment->id)) ?>?proforma=true"><?php echo $this->translate('Proforma', 'ppit-commitment', $context->getLocale()) ?></a>

@@ -371,7 +371,7 @@ class TermController extends AbstractActionController
     			$connection = CommitmentMessage::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				$year = CommitmentYear::getcurrent();
+    				$year = CommitmentYear::getcurrent($commitment->place_id);
     				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
 					$mask = $context->getConfig('commitment/invoice_identifier_mask');
 					$arguments = array();

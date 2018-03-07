@@ -19,7 +19,7 @@ class PdfInvoiceOldViewHelper
     	// Retrieve the context
     	$context = Context::getCurrent();
 		$place = Place::get($commitment->account->place_id);
-    	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
+    	$specsId = 'commitment/invoice';
     	$type = $commitment->type;
     	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
     	else $invoiceSpecs = $context->getConfig($specsId);

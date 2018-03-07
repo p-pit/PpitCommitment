@@ -132,12 +132,28 @@ class Commitment implements InputFilterAwareInterface
 	public $update_time;
 
 	// Additional field from joined tables
-	public $account_name;
-	public $account_identifier;
 	public $place_id;
     public $place_caption;
     public $place_identifier;
 	public $properties;
+	public $account_name;
+	public $account_identifier;
+	public $account_property_1;
+	public $account_property_2;
+	public $account_property_3;
+	public $account_property_4;
+	public $account_property_5;
+	public $account_property_6;
+	public $account_property_7;
+	public $account_property_8;
+	public $account_property_9;
+	public $account_property_10;
+	public $account_property_11;
+	public $account_property_12;
+	public $account_property_13;
+	public $account_property_14;
+	public $account_property_15;
+	public $account_property_16;
 	
 	// Transient properties
 //	public $properties;
@@ -270,11 +286,27 @@ class Commitment implements InputFilterAwareInterface
         $this->update_time = (isset($data['update_time'])) ? $data['update_time'] : null;
 
         // Additional properties from joined tables
-        $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
-        $this->account_identifier = (isset($data['account_identifier'])) ? $data['account_identifier'] : null;
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
+        $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
+        $this->account_identifier = (isset($data['account_identifier'])) ? $data['account_identifier'] : null;
+        $this->account_property_1 = (isset($data['account_property_1'])) ? $data['account_property_1'] : null;
+        $this->account_property_2 = (isset($data['account_property_2'])) ? $data['account_property_2'] : null;
+        $this->account_property_3 = (isset($data['account_property_3'])) ? $data['account_property_3'] : null;
+        $this->account_property_4 = (isset($data['account_property_4'])) ? $data['account_property_4'] : null;
+        $this->account_property_5 = (isset($data['account_property_5'])) ? $data['account_property_5'] : null;
+        $this->account_property_6 = (isset($data['account_property_6'])) ? $data['account_property_6'] : null;
+        $this->account_property_7 = (isset($data['account_property_7'])) ? $data['account_property_7'] : null;
+        $this->account_property_8 = (isset($data['account_property_8'])) ? $data['account_property_8'] : null;
+        $this->account_property_9 = (isset($data['account_property_9'])) ? $data['account_property_9'] : null;
+        $this->account_property_10 = (isset($data['account_property_10'])) ? $data['account_property_10'] : null;
+        $this->account_property_11 = (isset($data['account_property_11'])) ? $data['account_property_11'] : null;
+        $this->account_property_12 = (isset($data['account_property_12'])) ? $data['account_property_12'] : null;
+        $this->account_property_13 = (isset($data['account_property_13'])) ? $data['account_property_13'] : null;
+        $this->account_property_14 = (isset($data['account_property_14'])) ? $data['account_property_14'] : null;
+        $this->account_property_15 = (isset($data['account_property_15'])) ? $data['account_property_15'] : null;
+        $this->account_property_16 = (isset($data['account_property_16'])) ? $data['account_property_16'] : null;
         
         // Denormalized properties
         $this->site_id = (isset($data['site_id'])) ? $data['site_id'] : null;
@@ -388,23 +420,55 @@ class Commitment implements InputFilterAwareInterface
     	$data['notification_time'] = ($this->notification_time) ? $this->notification_time : null;
     	$data['update_time'] = ($this->update_time) ? $this->update_time : null;
     	 
-    	$data['account_name'] = $this->account_name;
-    	$data['account_identifier'] = $this->account_identifier;
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
     	$data['place_id'] = $this->place_id;
-        
+    	$data['account_name'] = $this->account_name;
+    	$data['account_identifier'] = $this->account_identifier;
+    	$data['account_property_1'] = $this->account_property_1;
+    	$data['account_property_2'] = $this->account_property_2;
+    	$data['account_property_3'] = $this->account_property_3;
+    	$data['account_property_4'] = $this->account_property_4;
+    	$data['account_property_5'] = $this->account_property_5;
+    	$data['account_property_6'] = $this->account_property_6;
+    	$data['account_property_7'] = $this->account_property_7;
+    	$data['account_property_8'] = $this->account_property_8;
+    	$data['account_property_9'] = $this->account_property_9;
+    	$data['account_property_10'] = $this->account_property_10;
+    	$data['account_property_11'] = $this->account_property_11;
+    	$data['account_property_12'] = $this->account_property_12;
+    	$data['account_property_13'] = $this->account_property_13;
+    	$data['account_property_14'] = $this->account_property_14;
+    	$data['account_property_15'] = $this->account_property_15;
+    	$data['account_property_16'] = $this->account_property_16;
+    	 
     	return $data;
     }
 
     public function toArray() 
     {
     	$data = $this->getProperties();
-    	unset($data['account_name']);
-    	unset($data['account_identifier']);
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
     	unset($data['place_id']);
+    	unset($data['account_name']);
+    	unset($data['account_identifier']);
+    	unset($data['account_property_1']);
+    	unset($data['account_property_2']);
+    	unset($data['account_property_3']);
+    	unset($data['account_property_4']);
+    	unset($data['account_property_5']);
+    	unset($data['account_property_6']);
+    	unset($data['account_property_7']);
+    	unset($data['account_property_8']);
+    	unset($data['account_property_9']);
+    	unset($data['account_property_10']);
+    	unset($data['account_property_11']);
+    	unset($data['account_property_12']);
+    	unset($data['account_property_13']);
+    	unset($data['account_property_14']);
+    	unset($data['account_property_15']);
+    	unset($data['account_property_16']);
     	return $data;
     }
     
@@ -412,7 +476,7 @@ class Commitment implements InputFilterAwareInterface
     {
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
-    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'account_identifier' => 'identifier', 'place_id'), 'left')
+    		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'account_identifier' => 'identifier', 'place_id', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
 			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left');
     	
     	$where = new Where();
@@ -451,6 +515,7 @@ class Commitment implements InputFilterAwareInterface
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
+				elseif (substr($propertyId, 0, 8) == 'account_') $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
 				else $where->like('commitment.'.$propertyId, '%'.$params[$propertyId].'%');
 			}
 		}
@@ -476,6 +541,22 @@ class Commitment implements InputFilterAwareInterface
 	    	$commitment->account = Account::get($commitment->account_id);
 	    	$commitment->account_name = $commitment->account->name;
 	    	$commitment->account_identifier = $commitment->account->identifier;
+	    	$commitment->account_property_1 = $commitment->account->property_1;
+	    	$commitment->account_property_2 = $commitment->account->property_2;
+	    	$commitment->account_property_3 = $commitment->account->property_3;
+	    	$commitment->account_property_4 = $commitment->account->property_4;
+	    	$commitment->account_property_5 = $commitment->account->property_5;
+	    	$commitment->account_property_6 = $commitment->account->property_6;
+	    	$commitment->account_property_7 = $commitment->account->property_7;
+	    	$commitment->account_property_8 = $commitment->account->property_8;
+	    	$commitment->account_property_9 = $commitment->account->property_9;
+	    	$commitment->account_property_10 = $commitment->account->property_10;
+	    	$commitment->account_property_11 = $commitment->account->property_11;
+	    	$commitment->account_property_12 = $commitment->account->property_12;
+	    	$commitment->account_property_13 = $commitment->account->property_13;
+	    	$commitment->account_property_14 = $commitment->account->property_14;
+	    	$commitment->account_property_15 = $commitment->account->property_15;
+	    	$commitment->account_property_16 = $commitment->account->property_16;
         }
     	$commitment->properties = $commitment->getProperties();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
@@ -583,7 +664,7 @@ class Commitment implements InputFilterAwareInterface
     public function computeHeader($proforma = false)
     {
     	$context = Context::getCurrent();
-    	$specsId = ($proforma) ? 'commitment/proforma' : 'commitment/invoice';
+    	$specsId = 'commitment/invoice';
     	$type = $this->type;
     	if ($context->getConfig($specsId.(($type) ? '/'.$type : ''))) $invoiceSpecs = $context->getConfig($specsId.(($type) ? '/'.$type : ''));
     	else $invoiceSpecs = $context->getConfig($specsId);

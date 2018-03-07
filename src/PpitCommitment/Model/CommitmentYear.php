@@ -10,6 +10,7 @@ use Zend\InputFilter\InputFilterInterface;
 class CommitmentYear implements InputFilterAwareInterface
 {
     public $id;
+    public $place_id;
     public $status;
     public $year;
     public $digits;
@@ -28,6 +29,7 @@ class CommitmentYear implements InputFilterAwareInterface
     public function exchangeArray($data)
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
+        $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->status = (isset($data['status'])) ? $data['status'] : null;
         $this->year = (isset($data['year'])) ? $data['year'] : null;
         $this->digits = (isset($data['digits'])) ? $data['digits'] : null;
@@ -37,6 +39,7 @@ class CommitmentYear implements InputFilterAwareInterface
     public function toArray() {
     	$data = array();
     	$data['id'] = (int) $this->id;
+    	$data['place_id'] = (int) $this->place_id;
     	$data['status'] = $this->status;
     	$data['year'] = $this->year;
     	$data['digits'] = $this->digits;
@@ -44,17 +47,23 @@ class CommitmentYear implements InputFilterAwareInterface
     	return $data;
     }
    
-    public static function getCurrent()
+    public static function getCurrent($place_id = null)
     {
-    	$year = CommitmentYear::getTable()->get('current', 'status');
+    	$year = null;
+    	if ($place_id) {
+	    	$select = CommitmentYear::getTable()->getSelect()->where(array('place_id' => $place_id, 'status' => 'current'));
+	    	$cursor = CommitmentYear::getTable()->selectWith($select);
+	    	foreach ($cursor as $year);
+    	}
+    	if (!$year) $year = CommitmentYear::getTable()->get('current', 'status');
     	return $year;
     }
-
+/*
     public static function getNext($current)
     {
     	$year = CommitmentYear::getTable()->get($current->year + 1);
     	return $year;
-    }
+    }*/
     
     public static function instanciate($year)
     {
@@ -73,6 +82,7 @@ class CommitmentYear implements InputFilterAwareInterface
     	CommitmentYear::getTable()->save($this);
     	return $this->next_value;
     }
+    
     public function setInputFilter(InputFilterInterface $inputFilter)
     {
         throw new \Exception("Not used");

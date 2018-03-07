@@ -675,7 +675,7 @@ class CommitmentController extends AbstractActionController
     	if ($commitment->account->place->getConfig('commitment/invoice_header')) $invoice['header'] = $commitment->account->place->getConfig('commitment/invoice_header');
     	else $invoice['header'] = $context->getConfig('commitment/invoice_header');
     	
-    	$invoiceSpecs = ($proforma) ? $context->getConfig('commitment/proforma') : $context->getConfig('commitment/invoice');
+    	$invoiceSpecs = $context->getConfig('commitment/invoice');
     	if ($account->type == 'business') $invoice['customer_invoice_name'] = $account->name;
     	$invoicingContact = null;
     	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
@@ -788,7 +788,7 @@ class CommitmentController extends AbstractActionController
 	    		$line['unit_price'] = $taxExemptAmount;
 	    		$line['quantity'] = $commitment->quantity;
 	    		$line['amount'] = $taxExemptAmount * $commitment->quantity;
-	    		$invoice['lines'] = $line;
+	    		$invoice['lines'][] = $line;
 	    	}
     	}
 	    	 
@@ -878,9 +878,10 @@ class CommitmentController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
 
 				$type = $commitment->type;
+				$account = $commitment->account;
 				$commitment->computeHeader();
 				$commitment->status = 'invoiced';
-				$year = CommitmentYear::getcurrent();
+				$year = CommitmentYear::getcurrent($account->place_id);
 				if (!$year) $year = CommitmentYear::instanciate(date('Y'));
 				$mask = $context->getConfig('commitment/invoice_identifier_mask');
 				$arguments = array();
@@ -891,8 +892,8 @@ class CommitmentController extends AbstractActionController
 				}
 				$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
 				$commitmentMessage = CommitmentMessage::instanciate('invoice');
-				$account = $commitment->account;
 				$invoice = $this->generateInvoice($type, $account, $commitment);
+				
 				$commitmentMessage->status = 'new';
 				$commitmentMessage->account_id = $account->id;
 				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
@@ -904,16 +905,17 @@ class CommitmentController extends AbstractActionController
     			$connection->beginTransaction();
     			try {
     				$year->increment();
-    				$rc = $commitment->update($request->getPost('update_time'));
+					$commitmentMessage->content = json_encode($invoice, JSON_PRETTY_PRINT);
+				    $rc = $commitmentMessage->add();
     
     				if ($rc != 'OK') {
     					$connection->rollback();
     					$error = $rc;
     				}
     				if (!$error) {
-						$commitmentMessage->content = json_encode($invoice, JSON_PRETTY_PRINT);
-				    	$rc = $commitmentMessage->add();
-	    				if ($rc != 'OK') {
+    					$commitment->invoice_message_id = $commitmentMessage->id;
+	    				$rc = $commitment->update($request->getPost('update_time'));
+    					if ($rc != 'OK') {
 	    					$connection->rollback();
 	    					$error = $rc;
 	    				}
