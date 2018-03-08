@@ -18,21 +18,31 @@ use Zend\View\Model\ViewModel;
 
 class TermController extends AbstractActionController
 {
-    public function indexAction()
+	public function getConfigProperties() {
+		$context = Context::getCurrent();
+		$properties = array();
+		foreach($context->getConfig('commitmentTerm')['properties'] as $propertyId => $property) {
+			if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+			$properties[$propertyId] = $property;
+		}
+		return $properties;
+	}
+
+	public function indexAction()
     {
     	$context = Context::getCurrent();
 		if (!$context->isAuthenticated()) $this->redirect()->toRoute('home');
     	$place = Place::get($context->getPlaceId());
-		
-    	$type = $this->params()->fromRoute('type', 0);
 
 		$applicationId = 'p-pit-engagements';
 		$applicationName = 'P-Pit Engagements';
 		$currentEntry = $this->params()->fromQuery('entry', 'term');
 		$types = Context::getCurrent()->getConfig('commitment/types')['modalities'];
-		
+		$configProperties = $this->getConfigProperties();
+
     	return new ViewModel(array(
     			'context' => $context,
+				'termProperties' => $configProperties,
     			'config' => $context->getConfig(),
     			'place' => $place,
     			'active' => 'application',
@@ -40,7 +50,11 @@ class TermController extends AbstractActionController
     			'applicationName' => $applicationName,
     			'types' => $types,
     			'currentEntry' => $currentEntry,
-    			'type' => $type,
+				'indexPage' => $context->getConfig('commitmentTerm/index'),
+    			'termSearchPage' => $context->getConfig('commitmentTerm/search'),
+				'listPage' => $context->getConfig('commitmentTerm/list'),
+				'detailPage' => $context->getConfig('commitmentTerm/detail'),
+				'termUpdatePage' => $context->getConfig('commitmentTerm/update'),
     	));
     }
 
@@ -51,18 +65,8 @@ class TermController extends AbstractActionController
     	// Retrieve the query parameters
     	$filters = array();
 
-    	foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) {
+    	foreach ($context->getConfig('commitmentTerm/search')['properties'] as $propertyId => $rendering) {
     
-    		$property = ($params()->fromQuery($propertyId, null));
-    		if ($property) $filters[$propertyId] = $property;
-    		$min_property = ($params()->fromQuery('min_'.$propertyId, null));
-    		if ($min_property) $filters['min_'.$propertyId] = $min_property;
-    		$max_property = ($params()->fromQuery('max_'.$propertyId, null));
-    		if ($max_property) $filters['max_'.$propertyId] = $max_property;
-    	}
-
-    	foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) {
-    	
     		$property = ($params()->fromQuery($propertyId, null));
     		if ($property) $filters[$propertyId] = $property;
     		$min_property = ($params()->fromQuery('min_'.$propertyId, null));
@@ -78,12 +82,15 @@ class TermController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-
+    	$configProperties = $this->getConfigProperties();
+    	 
     	// Return the link list
     	$view = new ViewModel(array(
     			'context' => $context,
+				'termProperties' => $configProperties,
     			'config' => $context->getconfig(),
     			'places' => Place::getList(array()),
+    			'searchPage' => $context->getConfig('commitmentTerm/search'),
     	));
     	$view->setTerminal(true);
     	return $view;
@@ -97,7 +104,8 @@ class TermController extends AbstractActionController
     	$params = $this->getFilters($this->params());
     	$major = ($this->params()->fromQuery('major', 'due_date'));
     	$dir = ($this->params()->fromQuery('dir', 'ASC'));
-    
+    	$configProperties = $this->getConfigProperties();
+    	 
     	if (count($params) == 0) $mode = 'todo'; else $mode = 'search';
 
     	// Retrieve the list
@@ -106,6 +114,7 @@ class TermController extends AbstractActionController
     	// Return the link list
     	$view = new ViewModel(array(
     			'context' => $context,
+				'termProperties' => $configProperties,
     			'config' => $context->getconfig(),
     			'places' => Place::getList(array()),
     			'terms' => $terms,
@@ -113,6 +122,7 @@ class TermController extends AbstractActionController
     			'params' => $params,
     			'major' => $major,
     			'dir' => $dir,
+				'listPage' => $context->getConfig('commitmentTerm/list'),
     	));
     	$view->setTerminal(true);
     	return $view;
@@ -166,6 +176,8 @@ class TermController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
+    	$configProperties = $this->getConfigProperties();
+    	$updatePage = $context->getConfig('commitmentTerm/update');
 
     	$commitment_id = (int) $this->params()->fromRoute('commitment_id', 0);
     	$id = (int) $this->params()->fromRoute('id', 0);
@@ -208,7 +220,8 @@ class TermController extends AbstractActionController
 
     			// Load the input data
 		    	$data = array();
-		    	foreach($context->getConfig('commitmentTerm/update') as $propertyId => $unused) {
+		    	foreach($updatePage as $propertyId => $unused) {
+					$property = $configProperties[$propertyId];
 		    		$data[$propertyId] = $request->getPost(($propertyId));
 		    	}
 				if ($term->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
@@ -237,6 +250,7 @@ class TermController extends AbstractActionController
     
     	$view = new ViewModel(array(
     			'context' => $context,
+				'termProperties' => $configProperties,
     			'config' => $context->getconfig(),
     			'id' => $id,
     			'action' => $action,
@@ -245,7 +259,8 @@ class TermController extends AbstractActionController
 	    		'documentList' => $documentList,
     			'csrfForm' => $csrfForm,
     			'error' => $error,
-    			'message' => $message
+    			'message' => $message,
+    			'updatePage' => $updatePage,
     	));
     	$view->setTerminal(true);
     	return $view;

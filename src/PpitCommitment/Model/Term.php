@@ -39,6 +39,22 @@ class Term implements InputFilterAwareInterface
     public $place_id;
     public $place_caption;
     public $place_identifier;
+    public $account_property_1;
+    public $account_property_2;
+    public $account_property_3;
+    public $account_property_4;
+    public $account_property_5;
+    public $account_property_6;
+    public $account_property_7;
+    public $account_property_8;
+    public $account_property_9;
+    public $account_property_10;
+    public $account_property_11;
+    public $account_property_12;
+    public $account_property_13;
+    public $account_property_14;
+    public $account_property_15;
+    public $account_property_16;
     
     // Transient properties
     public $properties;
@@ -79,6 +95,22 @@ class Term implements InputFilterAwareInterface
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
+        $this->account_property_1 = (isset($data['account_property_1'])) ? $data['account_property_1'] : null;
+        $this->account_property_2 = (isset($data['account_property_2'])) ? $data['account_property_2'] : null;
+        $this->account_property_3 = (isset($data['account_property_3'])) ? $data['account_property_3'] : null;
+        $this->account_property_4 = (isset($data['account_property_4'])) ? $data['account_property_4'] : null;
+        $this->account_property_5 = (isset($data['account_property_5'])) ? $data['account_property_5'] : null;
+        $this->account_property_6 = (isset($data['account_property_6'])) ? $data['account_property_6'] : null;
+        $this->account_property_7 = (isset($data['account_property_7'])) ? $data['account_property_7'] : null;
+        $this->account_property_8 = (isset($data['account_property_8'])) ? $data['account_property_8'] : null;
+        $this->account_property_9 = (isset($data['account_property_9'])) ? $data['account_property_9'] : null;
+        $this->account_property_10 = (isset($data['account_property_10'])) ? $data['account_property_10'] : null;
+        $this->account_property_11 = (isset($data['account_property_11'])) ? $data['account_property_11'] : null;
+        $this->account_property_12 = (isset($data['account_property_12'])) ? $data['account_property_12'] : null;
+        $this->account_property_13 = (isset($data['account_property_13'])) ? $data['account_property_13'] : null;
+        $this->account_property_14 = (isset($data['account_property_14'])) ? $data['account_property_14'] : null;
+        $this->account_property_15 = (isset($data['account_property_15'])) ? $data['account_property_15'] : null;
+        $this->account_property_16 = (isset($data['account_property_16'])) ? $data['account_property_16'] : null;
     }
     
     public function getProperties()
@@ -105,7 +137,23 @@ class Term implements InputFilterAwareInterface
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
     	$data['place_id'] = $this->place_id;
-    	
+    	$data['account_property_1'] = $this->account_property_1;
+    	$data['account_property_2'] = $this->account_property_2;
+    	$data['account_property_3'] = $this->account_property_3;
+    	$data['account_property_4'] = $this->account_property_4;
+    	$data['account_property_5'] = $this->account_property_5;
+    	$data['account_property_6'] = $this->account_property_6;
+    	$data['account_property_7'] = $this->account_property_7;
+    	$data['account_property_8'] = $this->account_property_8;
+    	$data['account_property_9'] = $this->account_property_9;
+    	$data['account_property_10'] = $this->account_property_10;
+    	$data['account_property_11'] = $this->account_property_11;
+    	$data['account_property_12'] = $this->account_property_12;
+    	$data['account_property_13'] = $this->account_property_13;
+    	$data['account_property_14'] = $this->account_property_14;
+    	$data['account_property_15'] = $this->account_property_15;
+    	$data['account_property_16'] = $this->account_property_16;
+    	 
     	return $data;
     }
 
@@ -120,6 +168,22 @@ class Term implements InputFilterAwareInterface
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
     	unset($data['place_id']);
+    	unset($data['account_property_1']);
+    	unset($data['account_property_2']);
+    	unset($data['account_property_3']);
+    	unset($data['account_property_4']);
+    	unset($data['account_property_5']);
+    	unset($data['account_property_6']);
+    	unset($data['account_property_7']);
+    	unset($data['account_property_8']);
+    	unset($data['account_property_9']);
+    	unset($data['account_property_10']);
+    	unset($data['account_property_11']);
+    	unset($data['account_property_12']);
+    	unset($data['account_property_13']);
+    	unset($data['account_property_14']);
+    	unset($data['account_property_15']);
+    	unset($data['account_property_16']);
     	return $data;
     }
     
@@ -129,7 +193,7 @@ class Term implements InputFilterAwareInterface
 
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
-    		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name'), 'left')
+    		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
 			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left')
     		->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
@@ -153,6 +217,7 @@ class Term implements InputFilterAwareInterface
 				elseif ($propertyId == 'name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
+				elseif (substr($propertyId, 0, 8) == 'account_') $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
     			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
     	}
@@ -177,6 +242,22 @@ class Term implements InputFilterAwareInterface
 			$account = Account::get($commitment->account_id);
 			if ($account) {
 				$term->name = $account->name;
+		    	$term->account_property_1 = $account->property_1;
+		    	$term->account_property_2 = $account->property_2;
+		    	$term->account_property_3 = $account->property_3;
+		    	$term->account_property_4 = $account->property_4;
+		    	$term->account_property_5 = $account->property_5;
+		    	$term->account_property_6 = $account->property_6;
+		    	$term->account_property_7 = $account->property_7;
+		    	$term->account_property_8 = $account->property_8;
+		    	$term->account_property_9 = $account->property_9;
+		    	$term->account_property_10 = $account->property_10;
+		    	$term->account_property_11 = $account->property_11;
+		    	$term->account_property_12 = $account->property_12;
+		    	$term->account_property_13 = $account->property_13;
+		    	$term->account_property_14 = $account->property_14;
+		    	$term->account_property_15 = $account->property_15;
+		    	$term->account_property_16 = $account->property_16;
 			}
     	}
     	$term->properties = $term->getProperties();

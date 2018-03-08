@@ -1,10 +1,12 @@
 <table class="table table-striped ppit_index">
 	<tr>
 		<th>&nbsp;</th>
+	
+<?php $first = true; foreach ($listPage['properties'] as $propertyId => $options) : ?>
+	<?php $property = $termProperties[$propertyId] ?>
 
-<?php $first = true; foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
 		<th align="center">
-	<?php $label = $context->getConfig('commitmentTerm')['properties'][$propertyId]['labels'][$context->getLocale()] ?>
+	<?php $label = $context->localize($property['labels']) ?>
 	<?php if ($label) : ?>
 			<button type="button" class="btn btn-default btn-xs ppit-sort-anchor" id="<?php echo $propertyId ?>-anchor">
 				<span><?php echo $label ?></span>
@@ -25,7 +27,7 @@
 	<tr>
 		<td style="text-align: center">&nbsp;</td>
 	<?php $total=0; foreach($terms as $term) $total += $term->amount; ?>
-		<td colspan="<?php echo count($context->getConfig('commitmentTerm/list')) ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
+		<td colspan="<?php echo count($termProperties) ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
 			<?php echo $this->translate('Total', 'ppit-core', $context->getLocale()) ?>: 
 			<?php echo $context->formatFloat($total, 2) ?>
 		</td>		
@@ -47,7 +49,8 @@
 <?php endif;?>
 		</td>
 
-	<?php foreach ($context->getConfig('commitmentTerm/list') as $propertyId => $rendering) : ?>
+	<?php foreach ($listPage['properties'] as $propertyId => $options) : ?>
+		<?php $property = $termProperties[$propertyId] ?>
 	
 		<?php if ($propertyId == 'place_id') : ?>
 		<td><?php if ($term->properties[$propertyId]) echo $places[$term->properties[$propertyId]]->caption ?></td>
@@ -55,15 +58,17 @@
 		<?php elseif ($propertyId == 'name') : ?>
 		<td><?php echo $term->name ?></td>
 
-		<?php elseif ($rendering == 'date') : ?>
+		<?php elseif ($property['type'] == 'text') : ?>
+		<td><?php echo $term->properties[$propertyId] ?></td>
+
+		<?php elseif ($property['type'] == 'select') : ?>
+		<td><?php echo $property['modalities'][$term->properties[$propertyId]][$context->getLocale()] ?></td>
+	
+		<?php elseif ($property['type'] == 'date') : ?>
 		<td><?php echo $context->decodeDate($term->properties[$propertyId]) ?></td>
 
-		<?php elseif ($rendering == 'number') : ?>
+		<?php elseif ($property['type'] == 'number') : ?>
 		<td style="text-align: right"><?php echo $context->formatFloat($term->properties[$propertyId], 2) ?></td>
-
-		<?php elseif ($rendering =='select') : ?>
-			<?php $property = $context->getConfig('commitmentTerm')['properties'][$propertyId] ?>
-		<td><?php echo $property['modalities'][$term->properties[$propertyId]][$context->getLocale()] ?></td>
 
 		<?php else : ?>
 		<td><?php echo $term->properties[$propertyId] ?></td>

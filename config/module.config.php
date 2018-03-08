@@ -2904,6 +2904,7 @@ table.note-report td {
 			'statuses' => array(),
 			'properties' => array(
 					'name' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Name',
@@ -2911,6 +2912,7 @@ table.note-report td {
 							),
 					),
 					'status' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'expected' => array('fr_FR' => 'Attendu', 'en_US' => 'Expected'),
@@ -2924,6 +2926,7 @@ table.note-report td {
 							),
 					),
 					'place_id' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 							),
@@ -2933,6 +2936,7 @@ table.note-report td {
 							),
 					),
 					'caption' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Caption',
@@ -2940,6 +2944,7 @@ table.note-report td {
 							),
 					),
 					'due_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Due date',
@@ -2947,6 +2952,7 @@ table.note-report td {
 							),
 					),
 					'settlement_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Settlement date',
@@ -2954,6 +2960,7 @@ table.note-report td {
 							),
 					),
 					'collection_date' => array(
+							'definition' => 'inline',
 							'type' => 'date',
 							'labels' => array(
 									'en_US' => 'Collection date',
@@ -2961,6 +2968,7 @@ table.note-report td {
 							),
 					),
 					'amount' => array(
+							'definition' => 'inline',
 							'type' => 'number',
 							'minValue' => -99999999,
 							'maxValue' => 99999999,
@@ -2970,6 +2978,7 @@ table.note-report td {
 							),
 					),
 					'means_of_payment' => array(
+							'definition' => 'inline',
 							'type' => 'select',
 							'modalities' => array(
 									'bank_card' => array('fr_FR' => 'CB', 'en_US' => 'Bank card'),
@@ -2984,6 +2993,7 @@ table.note-report td {
 							),
 					),
 					'reference' => array(
+							'definition' => 'inline',
 							'type' => 'input',
 							'labels' => array(
 									'en_US' => 'Reference',
@@ -2991,6 +3001,7 @@ table.note-report td {
 							),
 					),
 					'comment' => array(
+							'definition' => 'inline',
 							'type' => 'textarea',
 							'labels' => array(
 									'en_US' => 'Comment',
@@ -2998,12 +3009,29 @@ table.note-report td {
 							),
 					),
 					'document' => array(
+							'definition' => 'inline',
 							'type' => 'dropbox',
 							'labels' => array(
 									'en_US' => 'Attachment',
 									'fr_FR' => 'Justificatif',
 							),
 					),
+					'account_property_1' => array('definition' => 'core_account/generic/property/property_1'),
+					'account_property_2' => array('definition' => 'core_account/generic/property/property_2'),
+					'account_property_3' => array('definition' => 'core_account/generic/property/property_3'),
+					'account_property_4' => array('definition' => 'core_account/generic/property/property_4'),
+					'account_property_5' => array('definition' => 'core_account/generic/property/property_5'),
+					'account_property_6' => array('definition' => 'core_account/generic/property/property_6'),
+					'account_property_7' => array('definition' => 'core_account/generic/property/property_7'),
+					'account_property_8' => array('definition' => 'core_account/generic/property/property_8'),
+					'account_property_9' => array('definition' => 'core_account/generic/property/property_9'),
+					'account_property_10' => array('definition' => 'core_account/generic/property/property_10'),
+					'account_property_11' => array('definition' => 'core_account/generic/property/property_11'),
+					'account_property_12' => array('definition' => 'core_account/generic/property/property_12'),
+					'account_property_13' => array('definition' => 'core_account/generic/property/property_13'),
+					'account_property_14' => array('definition' => 'core_account/generic/property/property_14'),
+					'account_property_15' => array('definition' => 'core_account/generic/property/property_15'),
+					'account_property_16' => array('definition' => 'core_account/generic/property/property_16'),
 			),
 	),
 	'commitmentTerm/index' => array(
@@ -3012,42 +3040,39 @@ table.note-report td {
 	'commitmentTerm/search' => array(
 			'title' => array('en_US' => 'Terms', 'fr_FR' => 'Echéances'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
-			'main' => array(
-				'place_id' => 'select',
-				'name' => 'contains',
-				'status' => 'select',
-				'collection_date' => 'range',
-				'amount' => 'range',
-				'reference' => 'contains',
-				'comment' => 'contains',
-			),
-			'more' => array(
-				'caption' => 'contains',
-				'means_of_payment' => 'select',
+			'properties' => array(
+				'place_id' => [],
+				'name' => [],
+				'status' => [],
+				'collection_date' => [],
+				'amount' => [],
+				'reference' => [],
+				'comment' => [],
 			),
 	),
 	'commitmentTerm/list' => array(
-//			'place_id' => 'select',
-			'name' => 'text',
-			'status' => 'select',
-			'collection_date' => 'date',
-			'amount' => 'number',
+			'properties' => array(
+				'name' => [],
+				'status' => [],
+				'collection_date' => [],
+				'amount' => [],
+			),
 	),
 	'commitmentTerm/detail' => array(
 			'title' => array('en_US' => 'Term detail', 'fr_FR' => 'Détail de l\'échéance'),
 			'displayAudit' => true,
 	),
 	'commitmentTerm/update' => array(
-			'status' => array('mandatory' => true),
-			'caption' => array('mandatory' => true),
-			'due_date' => array('mandatory' => true),
-			'settlement_date' => array('mandatory' => false),
-			'collection_date' => array('mandatory' => false),
-			'amount' => array('mandatory' => true),
-			'means_of_payment' => array('mandatory' => false),
-			'reference' => array('mandatory' => false),
-			'comment' => array('mandatory' => false),
-			'document' => array('mandatory' => false),
+			'status' => ['mandatory' => true],
+			'caption' => ['mandatory' => true],
+			'due_date' => ['mandatory' => true],
+			'settlement_date' => ['mandatory' => false],
+			'collection_date' => ['mandatory' => false],
+			'amount' => ['mandatory' => true],
+			'means_of_payment' => ['mandatory' => false],
+			'reference' => ['mandatory' => false],
+			'comment' => ['mandatory' => false],
+			'document' => ['mandatory' => false],
 	),
 	'commitmentMessage' => array(
 			'importMaxRows' => 100,

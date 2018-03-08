@@ -103,10 +103,13 @@ function connectCommitmentSearchInputs() {
 
 	$('#erase-button').click(function () { 
 		$('.search_input').val('');
+		$('.selectpicker').selectpicker('deselectAll');
 		$('.search_check').attr('checked', false);
+		$('#limit').val('50');
 		filterCommitmentList();
 	});
 	$('#search-button').click(function () { 
+		$('#search-button').removeClass('btn-success').addClass('btn-default');
 		getCommitmentList(getParams(), 'update_time', 'DESC');
 	});
 
@@ -118,7 +121,7 @@ function connectCommitmentSearchInputs() {
 		document.location.href = '<?php echo $this->url('commitment/index') ?>/' + $('#search_type').val(); 
 	});
 
-	<?php elseif ($rendering == 'range') : ?>
+	<?php elseif (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
 
 	$('#search_check_min_<?php echo $propertyId ?>').change(function () {
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
@@ -126,8 +129,22 @@ function connectCommitmentSearchInputs() {
 			$('#search_min_<?php echo $propertyId ?>').val('');
 		}
 	});
+	$('#search_min_<?php echo $propertyId ?>').change(function () { 
+		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { 
 		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
+	$('#search_check_max_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_max_<?php echo $propertyId ?>').checked) {
+			$('#search_max_<?php echo $propertyId ?>').val('');
+		}
+	});
+	$('#search_max_<?php echo $propertyId ?>').change(function () { 
+		document.getElementById('search_check_max_<?php echo $propertyId ?>').checked = true;	
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { 
@@ -140,34 +157,31 @@ function connectCommitmentSearchInputs() {
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
 		<?php endif;?>
 	
-	<?php else : ?>
-
+	<?php elseif ($property['type'] == 'select') : ?>
 	$('#search_check_<?php echo $propertyId ?>').change(function () {
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
 		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
 			$('#search_<?php echo $propertyId ?>').val('');
 		}
 	});
-	
-		<?php if ($rendering == 'select' || $rendering == 'repository') : ?>
 
 	$('#search_<?php echo $propertyId ?>').change(function () { 
 		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 	
-		<?php else : ?>
+	<?php else : ?>
+	$('#search_check_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+			$('#search_<?php echo $propertyId ?>').val('');
+		}
+	});
 	$('#search_<?php echo $propertyId ?>').keyup(function () { 
 		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;	
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
 	});
 
-		<?php if ($property['type'] == 'date') : ?>
-	$("#search_<?php echo $propertyId ?>").datepicker();
-	$('#search_<?php echo $propertyId ?>').change(function () { filterCommitmentList(); });
-		<?php endif;?>
-
-		<?php endif;?>
 	<?php endif;?>
 
 <?php endforeach;?>
@@ -261,7 +275,6 @@ function getCommitmentList(params, major, dir) {
 		}
 	}
 	xhttp.send();
-	$('#search-button').removeClass('btn-success').addClass('btn-default');
 }
 
 function connectAuditPanel()

@@ -24,7 +24,25 @@
 	<?php $property = $configProperties[$propertyId] ?>
 	<?php $label = $property['labels'][$context->getLocale()] ?>
 
-	<?php if ($property['type'] == 'select') : ?>
+	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
+
+		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_min_<?php echo $propertyId ?>">
+			</span>
+	    	<input class="form-control" type="text" class="search_input" id="search_min_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Min', 'ppit-core', $context->getLocale()) ?>" />
+		</div>
+
+		<label class="col-sm-6 control-label search">&nbsp;</label>
+		<div class="input-group search">
+		    <span class="input-group-addon">
+				<input type="checkbox" class="search_check" id="search_check_max_<?php echo $propertyId ?>">
+			</span>
+	    	<input class="form-control" type="text" class="search_input" id="search_max_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Max', 'ppit-core', $context->getLocale()) ?>" />
+		</div>
+
+	<?php elseif ($property['type'] == 'select') : ?>
 
 		<?php
 		$modalities = array();
@@ -57,31 +75,13 @@
 		    </select>
 		</div>
 	
-	<?php elseif ($rendering == 'contains') : ?>
+	<?php else : ?>
 		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
 		<div class="input-group search">
 		    <span class="input-group-addon">
 				<input type="checkbox" class="search_check" id="search_check_<?php echo $propertyId ?>">
 			</span>
 			<input class="form-control" type="text" class="search_input" id="search_<?php echo $propertyId ?>" placeholder="<?php echo $this->translate('Contains', 'ppit-core', $context->getLocale()) ?>" />
-		</div>
-
-	<?php elseif ($rendering == 'range') : ?>
-
-		<label class="col-sm-6 control-label search"><?php echo $property['labels'][$context->getLocale()] ?></label>
-		<div class="input-group search">
-		    <span class="input-group-addon">
-				<input type="checkbox" class="search_check" id="search_check_min_<?php echo $propertyId ?>">
-			</span>
-	    	<input class="form-control" type="text" class="search_input" id="search_min_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Min', 'ppit-core', $context->getLocale()) ?>" />
-		</div>
-
-		<label class="col-sm-6 control-label search">&nbsp;</label>
-		<div class="input-group search">
-		    <span class="input-group-addon">
-				<input type="checkbox" class="search_check" id="search_check_max_<?php echo $propertyId ?>">
-			</span>
-	    	<input class="form-control" type="text" class="search_input" id="search_max_<?php echo $propertyId ?>" class="form-control" placeholder="<?php echo $this->translate('Max', 'ppit-core', $context->getLocale()) ?>" />
 		</div>
 
 	<?php endif;?>

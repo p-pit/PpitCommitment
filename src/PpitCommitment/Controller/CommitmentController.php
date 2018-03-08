@@ -50,6 +50,16 @@ class CommitmentController extends AbstractActionController
 		return $properties;
 	}
 
+	public function getTermProperties() {
+		$context = Context::getCurrent();
+		$properties = array();
+		foreach($context->getConfig('commitmentTerm')['properties'] as $propertyId => $property) {
+			if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+			$properties[$propertyId] = $property;
+		}
+		return $properties;
+	}
+
 	public function indexAction()
     {
     	$context = Context::getCurrent();
@@ -61,6 +71,7 @@ class CommitmentController extends AbstractActionController
 		$applicationName = 'P-PIT Engagements';
 		$instance = Instance::get($context->getInstanceId());
 		$configProperties = $this->getConfigProperties($type);
+		$termProperties = $this->getTermProperties($type);
 		
 /*    	$url = $context->getConfig()['ppitCommitment/P-Pit']['userGetApplicationsMessage']['url'];
     	$client = new Client(
@@ -85,7 +96,8 @@ class CommitmentController extends AbstractActionController
     	return new ViewModel(array(
     			'context' => $context,
 				'configProperties' => $configProperties,
-    			'config' => $context->getConfig(),
+				'termProperties' => $termProperties,
+	    		'config' => $context->getConfig(),
     			'place' => $place,
     			'active' => 'application',
     			'applicationId' => $applicationId,
@@ -102,6 +114,8 @@ class CommitmentController extends AbstractActionController
 				'detailPage' => $context->getConfig('commitment/detail/'.$type),
 				'updatePage' => $context->getConfig('commitment/update/'.$type),
     			'groupPage' => $context->getConfig('commitment/group/'.$type),
+    			'termSearchPage' => $context->getConfig('commitmentTerm/search'),
+				'termUpdatePage' => $context->getConfig('commitmentTerm/update'),
     	));
     }
 	

@@ -11,9 +11,10 @@ function termGetParams() {
 
 	var params = '?', todo = true;
 
-<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($termSearchPage['properties'] as $propertyId => $unused) : ?>
+	<?php $property = $termProperties[$propertyId] ?>
 
-	<?php if ($rendering == 'range') : ?>
+	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
 	
 	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
 	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
@@ -23,37 +24,11 @@ function termGetParams() {
 	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
 	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
 
-	<?php elseif ($rendering == 'select') : ?>
+	<?php elseif ($property['type'] == 'select') : ?>
 
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
 	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
 
-	<?php else : ?>
-
-	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-	if (<?php echo $propertyId ?>.length >= 2) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
-	
-	<?php endif;?>
-
-<?php endforeach;?>
-
-<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
-
-	<?php if ($rendering == 'range') : ?>
-	
-	var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
-	if (min_<?php echo $propertyId ?>) min_<?php echo $propertyId ?> = encodeDate(min_<?php echo $propertyId ?>);
-	if (min_<?php echo $propertyId ?>.length >= 2) { params += 'min_<?php echo $propertyId ?>=' + min_<?php echo $propertyId ?> + '&'; todo = false; }
-
-	var max_<?php echo $propertyId ?> = document.getElementById('search_max_<?php echo $propertyId ?>').value;
-	if (max_<?php echo $propertyId ?>) max_<?php echo $propertyId ?> = encodeDate(max_<?php echo $propertyId ?>);
-	if (max_<?php echo $propertyId ?>.length >= 2) { params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false; }
-
-	<?php elseif ($rendering == 'select') : ?>
-
-	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
-	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
-	
 	<?php else : ?>
 
 	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
@@ -64,8 +39,8 @@ function termGetParams() {
 <?php endforeach;?>
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
-	$searchTitle = (isset ($context->getConfig('commitmentTerm/search')['searchTitle']) ? $context->getConfig('commitmentTerm/search'.(($type) ? '/'.$type : ''))['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($termSearchPage['todoTitle']) ? $termSearchPage['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
+	$searchTitle = (isset ($termSearchPage['searchTitle']) ? $termSearchPage['searchTitle'][$context->getLocale()] : $this->translate('search', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text((todo) ? '<?php echo $todoTitle ?>' : '<?php echo $searchTitle ?>');
 
@@ -81,22 +56,10 @@ function exportTermList() {
 
 function eraseTermSearch() {
 
-<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($termSearchPage['properties'] as $propertyId => $unused) : ?>
+	<?php $property = $termProperties[$propertyId] ?>
 
-	<?php if ($rendering == 'range') : ?>
-	$('#search_min_<?php echo $propertyId ?>').val('');
-	$('#search_max_<?php echo $propertyId ?>').val('');
-
-	<?php else : ?>
-	$('#search_<?php echo $propertyId ?>').val('');
-	
-	<?php endif;?>
-
-<?php endforeach;?>
-
-<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
-
-	<?php if ($rendering == 'range') : ?>
+	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
 	$('#search_min_<?php echo $propertyId ?>').val('');
 	$('#search_max_<?php echo $propertyId ?>').val('');
 
@@ -141,58 +104,27 @@ function connectTermSearchInputs() {
 	$('#erase-button').unbind();
 	$('#erase-button').click(function () { eraseTermSearch(); });
 
-<?php foreach ($context->getConfig('commitmentTerm/search')['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($termSearchPage['properties'] as $propertyId => $unused) : ?>
+	<?php $property = $termProperties[$propertyId] ?>
 
-	<?php if ($rendering == 'range') : ?>
+	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
+
 	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
 	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
 
-		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
+		<?php if ($property['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
 	$('#search_min_<?php echo $propertyId ?>').change(function () { filterTermList(); });
 	$('#search_max_<?php echo $propertyId ?>').change(function () { filterTermList(); });
 		<?php endif;?>
 	
-	<?php elseif ($rendering == 'select') : ?>
+	<?php elseif ($property['type'] == 'select') : ?>
 		$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
 	
 	<?php else : ?>
 		$('#search_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
 
-		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
-	$("#search_<?php echo $propertyId ?>").datepicker();
-	$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-		<?php endif;?>
-
-	<?php endif;?>
-
-<?php endforeach;?>
-
-<?php foreach ($context->getConfig('commitmentTerm/search')['more'] as $propertyId => $rendering) : ?>
-
-	<?php if ($rendering == 'range') : ?>
-	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
-	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
-
-		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
-	$("#search_min_<?php echo $propertyId ?>").datepicker();
-	$("#search_max_<?php echo $propertyId ?>").datepicker();
-	$('#search_min_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-	$('#search_max_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-		<?php endif;?>
-	
-	<?php elseif ($rendering == 'select') : ?>
-		$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-
-	<?php else : ?>
-		$('#search_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
-
-		<?php if ($context->getConfig('commitmentTerm')['properties'][$propertyId]['type'] == 'date') : ?>
-	$("#search_<?php echo $propertyId ?>").datepicker();
-	$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-		<?php endif;?>
-		
 	<?php endif;?>
 
 <?php endforeach;?>
@@ -282,8 +214,8 @@ function invoice(id, requestType) {
 <?php 
 $properties = array();
 
-foreach ($context->getConfig('commitmentTerm/update') as $propertyId => $options) {
-	$property = $context->getConfig('commitmentTerm')['properties'][$propertyId];
+foreach ($termUpdatePage as $propertyId => $options) {
+	$property = $termProperties[$propertyId];
 	if ($property['type'] == 'number') $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'minValue' => $property['minValue'], 'maxValue' => $property['maxValue']);
 	else $properties[$propertyId] = array('type' => $property['type'], 'mandatory' => $options['mandatory'], 'maxSize' => ($property['type'] == 'textarea') ? 2047 : 255);
 }
@@ -442,7 +374,7 @@ function activateTerm() {
 	loadPanel('index_action', '<?php echo $this->url('commitmentTerm/search') ?>');
 
 	<?php
-	$todoTitle = (isset ($context->getConfig('commitmentTerm/search')['todoTitle']) ? $context->getConfig('commitmentTerm/search')['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
+	$todoTitle = (isset ($termSearchPage['todoTitle']) ? $termSearchPage['todoTitle'][$context->getLocale()] : $this->translate('todo list', 'ppit-core', $context->getLocale()));
 	?>
 	$('#mode-text').text('<?php echo $todoTitle ?>');
 		
@@ -450,17 +382,4 @@ function activateTerm() {
 	connectTermSearchInputs();
 	
 	getTermList('?', 'collection_date', 'ASC');
-	
-	$('#add-criteria').click(function () {
-		mode = $('#add-criteria').text();
-		if (mode == '<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>') {
-			$('#add-criteria').text('<?php echo $this->translate('Less criteria', 'ppit-core', $context->getLocale()) ?>');
-			$('#search-area').show();
-		}
-		else {
-			$('#add-criteria').text('<?php echo $this->translate('More criteria', 'ppit-core', $context->getLocale()) ?>');
-			$('#search-area').hide();
-		}
-	});
-	$('#search-area').hide();
 }
