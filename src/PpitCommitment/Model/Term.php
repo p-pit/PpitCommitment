@@ -39,6 +39,38 @@ class Term implements InputFilterAwareInterface
     public $place_id;
     public $place_caption;
     public $place_identifier;
+
+    public $commitment_property_1;
+    public $commitment_property_2;
+    public $commitment_property_3;
+    public $commitment_property_4;
+    public $commitment_property_5;
+    public $commitment_property_6;
+    public $commitment_property_7;
+    public $commitment_property_8;
+    public $commitment_property_9;
+    public $commitment_property_10;
+    public $commitment_property_11;
+    public $commitment_property_12;
+    public $commitment_property_13;
+    public $commitment_property_14;
+    public $commitment_property_15;
+    public $commitment_property_16;
+    public $commitment_property_17;
+    public $commitment_property_18;
+    public $commitment_property_19;
+    public $commitment_property_20;
+    public $commitment_property_21;
+    public $commitment_property_22;
+    public $commitment_property_23;
+    public $commitment_property_24;
+    public $commitment_property_25;
+    public $commitment_property_26;
+    public $commitment_property_27;
+    public $commitment_property_28;
+    public $commitment_property_29;
+    public $commitment_property_30;
+    
     public $account_property_1;
     public $account_property_2;
     public $account_property_3;
@@ -95,6 +127,38 @@ class Term implements InputFilterAwareInterface
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
+
+        $this->commitment_property_1 = (isset($data['commitment_property_1'])) ? $data['commitment_property_1'] : null;
+        $this->commitment_property_2 = (isset($data['commitment_property_2'])) ? $data['commitment_property_2'] : null;
+        $this->commitment_property_3 = (isset($data['commitment_property_3'])) ? $data['commitment_property_3'] : null;
+        $this->commitment_property_4 = (isset($data['commitment_property_4'])) ? $data['commitment_property_4'] : null;
+        $this->commitment_property_5 = (isset($data['commitment_property_5'])) ? $data['commitment_property_5'] : null;
+        $this->commitment_property_6 = (isset($data['commitment_property_6'])) ? $data['commitment_property_6'] : null;
+        $this->commitment_property_7 = (isset($data['commitment_property_7'])) ? $data['commitment_property_7'] : null;
+        $this->commitment_property_8 = (isset($data['commitment_property_8'])) ? $data['commitment_property_8'] : null;
+        $this->commitment_property_9 = (isset($data['commitment_property_9'])) ? $data['commitment_property_9'] : null;
+        $this->commitment_property_10 = (isset($data['commitment_property_10'])) ? $data['commitment_property_10'] : null;
+        $this->commitment_property_11 = (isset($data['commitment_property_11'])) ? $data['commitment_property_11'] : null;
+        $this->commitment_property_12 = (isset($data['commitment_property_12'])) ? $data['commitment_property_12'] : null;
+        $this->commitment_property_13 = (isset($data['commitment_property_13'])) ? $data['commitment_property_13'] : null;
+        $this->commitment_property_14 = (isset($data['commitment_property_14'])) ? $data['commitment_property_14'] : null;
+        $this->commitment_property_15 = (isset($data['commitment_property_15'])) ? $data['commitment_property_15'] : null;
+        $this->commitment_property_16 = (isset($data['commitment_property_16'])) ? $data['commitment_property_16'] : null;
+        $this->commitment_property_17 = (isset($data['commitment_property_17'])) ? $data['commitment_property_17'] : null;
+        $this->commitment_property_18 = (isset($data['commitment_property_18'])) ? $data['commitment_property_18'] : null;
+        $this->commitment_property_19 = (isset($data['commitment_property_19'])) ? $data['commitment_property_19'] : null;
+        $this->commitment_property_20 = (isset($data['commitment_property_20'])) ? $data['commitment_property_20'] : null;
+        $this->commitment_property_21 = (isset($data['commitment_property_21'])) ? $data['commitment_property_21'] : null;
+        $this->commitment_property_22 = (isset($data['commitment_property_22'])) ? $data['commitment_property_22'] : null;
+        $this->commitment_property_23 = (isset($data['commitment_property_23'])) ? $data['commitment_property_23'] : null;
+        $this->commitment_property_24 = (isset($data['commitment_property_24'])) ? $data['commitment_property_24'] : null;
+        $this->commitment_property_25 = (isset($data['commitment_property_25'])) ? $data['commitment_property_25'] : null;
+        $this->commitment_property_26 = (isset($data['commitment_property_26'])) ? $data['commitment_property_26'] : null;
+        $this->commitment_property_27 = (isset($data['commitment_property_27'])) ? $data['commitment_property_27'] : null;
+        $this->commitment_property_28 = (isset($data['commitment_property_28'])) ? $data['commitment_property_28'] : null;
+        $this->commitment_property_29 = (isset($data['commitment_property_29'])) ? $data['commitment_property_29'] : null;
+        $this->commitment_property_30 = (isset($data['commitment_property_30'])) ? $data['commitment_property_30'] : null;
+        
         $this->account_property_1 = (isset($data['account_property_1'])) ? $data['account_property_1'] : null;
         $this->account_property_2 = (isset($data['account_property_2'])) ? $data['account_property_2'] : null;
         $this->account_property_3 = (isset($data['account_property_3'])) ? $data['account_property_3'] : null;
@@ -137,6 +201,38 @@ class Term implements InputFilterAwareInterface
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
     	$data['place_id'] = $this->place_id;
+
+    	$data['commitment_property_1'] = $this->commitment_property_1;
+    	$data['commitment_property_2'] = $this->commitment_property_2;
+    	$data['commitment_property_3'] = $this->commitment_property_3;
+    	$data['commitment_property_4'] = $this->commitment_property_4;
+    	$data['commitment_property_5'] = $this->commitment_property_5;
+    	$data['commitment_property_6'] = $this->commitment_property_6;
+    	$data['commitment_property_7'] = $this->commitment_property_7;
+    	$data['commitment_property_8'] = $this->commitment_property_8;
+    	$data['commitment_property_9'] = $this->commitment_property_9;
+    	$data['commitment_property_10'] = $this->commitment_property_10;
+    	$data['commitment_property_11'] = $this->commitment_property_11;
+    	$data['commitment_property_12'] = $this->commitment_property_12;
+    	$data['commitment_property_13'] = $this->commitment_property_13;
+    	$data['commitment_property_14'] = $this->commitment_property_14;
+    	$data['commitment_property_15'] = $this->commitment_property_15;
+    	$data['commitment_property_16'] = $this->commitment_property_16;
+    	$data['commitment_property_17'] = $this->commitment_property_17;
+    	$data['commitment_property_18'] = $this->commitment_property_18;
+    	$data['commitment_property_19'] = $this->commitment_property_19;
+    	$data['commitment_property_20'] = $this->commitment_property_20;
+    	$data['commitment_property_21'] = $this->commitment_property_21;
+    	$data['commitment_property_22'] = $this->commitment_property_22;
+    	$data['commitment_property_23'] = $this->commitment_property_23;
+    	$data['commitment_property_24'] = $this->commitment_property_24;
+    	$data['commitment_property_25'] = $this->commitment_property_25;
+    	$data['commitment_property_26'] = $this->commitment_property_26;
+    	$data['commitment_property_27'] = $this->commitment_property_27;
+    	$data['commitment_property_28'] = $this->commitment_property_28;
+    	$data['commitment_property_29'] = $this->commitment_property_29;
+    	$data['commitment_property_30'] = $this->commitment_property_30;
+    	 
     	$data['account_property_1'] = $this->account_property_1;
     	$data['account_property_2'] = $this->account_property_2;
     	$data['account_property_3'] = $this->account_property_3;
@@ -168,6 +264,38 @@ class Term implements InputFilterAwareInterface
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
     	unset($data['place_id']);
+
+    	unset($data['commitment_property_1']);
+    	unset($data['commitment_property_2']);
+    	unset($data['commitment_property_3']);
+    	unset($data['commitment_property_4']);
+    	unset($data['commitment_property_5']);
+    	unset($data['commitment_property_6']);
+    	unset($data['commitment_property_7']);
+    	unset($data['commitment_property_8']);
+    	unset($data['commitment_property_9']);
+    	unset($data['commitment_property_10']);
+    	unset($data['commitment_property_11']);
+    	unset($data['commitment_property_12']);
+    	unset($data['commitment_property_13']);
+    	unset($data['commitment_property_14']);
+    	unset($data['commitment_property_15']);
+    	unset($data['commitment_property_16']);
+    	unset($data['commitment_property_17']);
+    	unset($data['commitment_property_18']);
+    	unset($data['commitment_property_19']);
+    	unset($data['commitment_property_20']);
+    	unset($data['commitment_property_21']);
+    	unset($data['commitment_property_22']);
+    	unset($data['commitment_property_23']);
+    	unset($data['commitment_property_24']);
+    	unset($data['commitment_property_25']);
+    	unset($data['commitment_property_26']);
+    	unset($data['commitment_property_27']);
+    	unset($data['commitment_property_28']);
+    	unset($data['commitment_property_29']);
+    	unset($data['commitment_property_30']);
+    	 
     	unset($data['account_property_1']);
     	unset($data['account_property_2']);
     	unset($data['account_property_3']);
@@ -192,7 +320,7 @@ class Term implements InputFilterAwareInterface
     	$context = Context::getCurrent();
 
     	$select = Term::getTable()->getSelect()
-    		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption'), 'left')
+    		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption', 'commitment_property_1' => 'property_1', 'commitment_property_2' => 'property_2', 'commitment_property_3' => 'property_3', 'commitment_property_4' => 'property_4', 'commitment_property_5' => 'property_5', 'commitment_property_6' => 'property_6', 'commitment_property_7' => 'property_7', 'commitment_property_8' => 'property_8', 'commitment_property_9' => 'property_9', 'commitment_property_10' => 'property_10', 'commitment_property_11' => 'property_11', 'commitment_property_12' => 'property_12', 'commitment_property_13' => 'property_13', 'commitment_property_14' => 'property_14', 'commitment_property_15' => 'property_15', 'commitment_property_16' => 'property_16', 'commitment_property_17' => 'property_17', 'commitment_property_18' => 'property_18', 'commitment_property_19' => 'property_19', 'commitment_property_20' => 'property_20', 'commitment_property_21' => 'property_21', 'commitment_property_22' => 'property_22', 'commitment_property_23' => 'property_23', 'commitment_property_24' => 'property_24', 'commitment_property_25' => 'property_25', 'commitment_property_26' => 'property_26', 'commitment_property_27' => 'property_27', 'commitment_property_28' => 'property_28', 'commitment_property_29' => 'property_29', 'commitment_property_30' => 'property_30'), 'left')
     		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
 			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left')
     		->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
@@ -218,7 +346,8 @@ class Term implements InputFilterAwareInterface
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 8) == 'account_') $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
-    			else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
+				elseif (substr($propertyId, 0, 11) == 'commitment_') $where->like('commitment.'.substr($propertyId, 11), '%'.$params[$propertyId].'%');
+				else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
     		}
     	}
     	$select->where($where);
@@ -242,7 +371,39 @@ class Term implements InputFilterAwareInterface
 			$account = Account::get($commitment->account_id);
 			if ($account) {
 				$term->name = $account->name;
-		    	$term->account_property_1 = $account->property_1;
+				
+				$term->commitment_property_1 = $commitment->property_1;
+				$term->commitment_property_2 = $commitment->property_2;
+				$term->commitment_property_3 = $commitment->property_3;
+				$term->commitment_property_4 = $commitment->property_4;
+				$term->commitment_property_5 = $commitment->property_5;
+				$term->commitment_property_6 = $commitment->property_6;
+				$term->commitment_property_7 = $commitment->property_7;
+				$term->commitment_property_8 = $commitment->property_8;
+				$term->commitment_property_9 = $commitment->property_9;
+				$term->commitment_property_10 = $commitment->property_10;
+				$term->commitment_property_11 = $commitment->property_11;
+				$term->commitment_property_12 = $commitment->property_12;
+				$term->commitment_property_13 = $commitment->property_13;
+				$term->commitment_property_14 = $commitment->property_14;
+				$term->commitment_property_15 = $commitment->property_15;
+				$term->commitment_property_16 = $commitment->property_16;
+				$term->commitment_property_17 = $commitment->property_17;
+				$term->commitment_property_18 = $commitment->property_18;
+				$term->commitment_property_19 = $commitment->property_19;
+				$term->commitment_property_20 = $commitment->property_20;
+				$term->commitment_property_21 = $commitment->property_21;
+				$term->commitment_property_22 = $commitment->property_22;
+				$term->commitment_property_23 = $commitment->property_23;
+				$term->commitment_property_24 = $commitment->property_24;
+				$term->commitment_property_25 = $commitment->property_25;
+				$term->commitment_property_26 = $commitment->property_26;
+				$term->commitment_property_27 = $commitment->property_27;
+				$term->commitment_property_28 = $commitment->property_28;
+				$term->commitment_property_29 = $commitment->property_29;
+				$term->commitment_property_30 = $commitment->property_30;
+				
+				$term->account_property_1 = $account->property_1;
 		    	$term->account_property_2 = $account->property_2;
 		    	$term->account_property_3 = $account->property_3;
 		    	$term->account_property_4 = $account->property_4;

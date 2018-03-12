@@ -862,10 +862,10 @@ class CommitmentController extends AbstractActionController
     	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
     	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
     		$invoice['bank_details'] = $context->getConfig('commitment/invoice_bank_details');
-    		$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
-    		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
-    		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
     	}
+		$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
+		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');
+		$invoice['footer_mention_3'] = $context->getConfig('commitment/invoice_footer_mention_3');
     	return $invoice;
     }
     
