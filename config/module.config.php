@@ -3042,9 +3042,9 @@ table.note-report td {
 			'title' => array('en_US' => 'Terms', 'fr_FR' => 'Echéances'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
 			'properties' => array(
-				'place_id' => [],
+				'place_id' => ['multiple' => true],
 				'name' => [],
-				'status' => [],
+				'status' => ['multiple' => true],
 				'collection_date' => [],
 				'amount' => [],
 				'reference' => [],

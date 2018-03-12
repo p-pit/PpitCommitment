@@ -3,9 +3,10 @@ function getParams() {
 	// Create a new FormData object.
 	var params = '?', todo = true;
 
-<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($context->getConfig('commitment/search'.(($type) ? '/'.$type : ''))['main'] as $propertyId => $unused) : ?>
+	<?php $property = $configProperties[$propertyId] ?>
 
-	<?php if ($rendering == 'range') : ?>
+	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
 	
 	if (document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
 		var min_<?php echo $propertyId ?> = document.getElementById('search_min_<?php echo $propertyId ?>').value;
@@ -19,10 +20,10 @@ function getParams() {
 		params += 'max_<?php echo $propertyId ?>=' + max_<?php echo $propertyId ?> + '&'; todo = false;
 	}
 
-	<?php elseif ($rendering == 'select' || $rendering == 'repository') : ?>
+	<?php elseif ($property['type'] == 'select') : ?>
 
 	if (document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
-		var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+		var <?php echo $propertyId ?> = $('#search_<?php echo $propertyId ?>').val();
 		params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false;
 	}
 
@@ -162,6 +163,7 @@ function connectCommitmentSearchInputs() {
 		$('#search-button').removeClass('btn-default').addClass('btn-success');
 		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
 			$('#search_<?php echo $propertyId ?>').val('');
+			$('#search_<?php echo $propertyId ?>').selectpicker('deselectAll');
 		}
 	});
 

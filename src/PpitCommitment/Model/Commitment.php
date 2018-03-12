@@ -508,15 +508,24 @@ class Commitment implements InputFilterAwareInterface
 		else {
 
 			// Set the filters
-			foreach ($params as $propertyId => $property) {
-				if ($propertyId == 'place_id') $where->equalTo('core_account.place_id', $params['place_id']);
+			foreach ($params as $propertyId => $value) {
+				if ($propertyId == 'place_id') {
+					if (strpos($value, ',')) $where->in('core_account.'.$propertyId, array_map('trim', explode(',', $value)));
+					else $where->equalTo('core_account.place_id', $params['place_id']);
+				}
 				elseif ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
-				elseif (substr($propertyId, 0, 8) == 'account_') $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
-				else $where->like('commitment.'.$propertyId, '%'.$params[$propertyId].'%');
+				elseif (substr($propertyId, 0, 8) == 'account_') {
+					if (strpos($value, ',')) $where->in('core_account.'.$propertyId, array_map('trim', explode(',', $value)));
+					else $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
+				}
+				else {
+					if (strpos($value, ',')) $where->in('commitment.'.$propertyId, array_map('trim', explode(',', $value)));
+					else $where->like('commitment.'.$propertyId, '%'.$params[$propertyId].'%');
+				}
 			}
 		}
 

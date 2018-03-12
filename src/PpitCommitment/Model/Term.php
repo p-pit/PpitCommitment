@@ -340,14 +340,26 @@ class Term implements InputFilterAwareInterface
     	}
     	else {
     		// Set the filters
-    		foreach ($params as $propertyId => $property) {
-    			if ($propertyId == 'place_id') $where->equalTo('core_account.place_id', $params['place_id']);
+    		foreach ($params as $propertyId => $value) {
+    			if ($propertyId == 'place_id') {
+					if (strpos($value, ',')) $where->in('core_account.'.$propertyId, array_map('trim', explode(',', $value)));
+    				$where->equalTo('core_account.place_id', $params['place_id']);
+    			}
 				elseif ($propertyId == 'name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
     			elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
     			elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment_term.'.substr($propertyId, 4), $params[$propertyId]);
-				elseif (substr($propertyId, 0, 8) == 'account_') $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
-				elseif (substr($propertyId, 0, 11) == 'commitment_') $where->like('commitment.'.substr($propertyId, 11), '%'.$params[$propertyId].'%');
-				else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
+				elseif (substr($propertyId, 0, 8) == 'account_') {
+					if (strpos($value, ',')) $where->in('core_account.'.substr($propertyId, 8), array_map('trim', explode(',', $value)));
+					else $where->like('core_account.'.substr($propertyId, 8), '%'.$params[$propertyId].'%');
+				}
+				elseif (substr($propertyId, 0, 11) == 'commitment_') {
+					if (strpos($value, ',')) $where->in('commitment.'.substr($propertyId, 11), array_map('trim', explode(',', $value)));
+					else $where->like('commitment.'.substr($propertyId, 11), '%'.$params[$propertyId].'%');
+				}
+				else {
+					if (strpos($value, ',')) $where->in('commitment_term.'.$propertyId, array_map('trim', explode(',', $value)));
+					else $where->like('commitment_term.'.$propertyId, '%'.$params[$propertyId].'%');
+				}
     		}
     	}
     	$select->where($where);

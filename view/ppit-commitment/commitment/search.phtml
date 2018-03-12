@@ -20,7 +20,7 @@
 
 <!-- Filters -->
 		
-<?php foreach ($searchPage['main'] as $propertyId => $rendering) : ?>
+<?php foreach ($searchPage['main'] as $propertyId => $options) : ?>
 	<?php $property = $configProperties[$propertyId] ?>
 	<?php $label = $property['labels'][$context->getLocale()] ?>
 
@@ -67,7 +67,7 @@
 		    <span class="input-group-addon">
 				<input type="checkbox" class="search_check" id="search_check_<?php echo $propertyId ?>">
 			</span>
-			<select id="search_<?php echo $propertyId ?>" class="form-control search_input">
+			<select id="search_<?php echo $propertyId ?>" class="selectpicker" <?php if (array_key_exists('multiple', $options) && $options['multiple']) echo 'multiple' ?>>
 				<option value=""></option>
 		<?php var_dump($type); foreach ($modalities as $modalityId => $modalityLabel) : ?>
 		    	<option value="<?php echo $modalityId ?>" <?php if ($propertyId == 'type' && $modalityId === $type) echo 'selected="selected"' ?>><?php echo $modalityLabel ?></option>

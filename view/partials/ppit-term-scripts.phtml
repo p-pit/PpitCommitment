@@ -26,7 +26,7 @@ function termGetParams() {
 
 	<?php elseif ($property['type'] == 'select') : ?>
 
-	var <?php echo $propertyId ?> = document.getElementById('search_<?php echo $propertyId ?>').value;
+	var <?php echo $propertyId ?> = $('#search_<?php echo $propertyId ?>').val();
 	if (<?php echo $propertyId ?>) { params += '<?php echo $propertyId ?>=' + <?php echo $propertyId ?> + '&'; todo = false; }
 
 	<?php else : ?>
@@ -54,25 +54,6 @@ function exportTermList() {
 	document.location.href = '<?php echo $this->url('commitmentTerm/export') ?>' + params;
 }
 
-function eraseTermSearch() {
-
-<?php foreach ($termSearchPage['properties'] as $propertyId => $unused) : ?>
-	<?php $property = $termProperties[$propertyId] ?>
-
-	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
-	$('#search_min_<?php echo $propertyId ?>').val('');
-	$('#search_max_<?php echo $propertyId ?>').val('');
-
-	<?php else : ?>
-	$('#search_<?php echo $propertyId ?>').val('');
-	
-	<?php endif;?>
-
-<?php endforeach;?>
-
-	getTermList(termGetParams(), 'collection_date', 'DESC');
-}
-
 function sortTermList(criterion) {
 
 	var dir;
@@ -90,40 +71,94 @@ function filterTermList() {
 		criterion = ascCriterion.split('-')[0];
 		dir = 'ASC';
 	}
-	else {
+	else if (descCriterion) {
 		criterion = descCriterion.split('-')[0];
+		dir = 'DESC';
+	}
+	else {
+		criterion = 'collection_date';
 		dir = 'ASC';
 	}
 	getTermList(termGetParams(), criterion, dir);
 }
 
 function connectTermSearchInputs() {
-
-	$('#export-button').click(function () { exportTermList(); });
 	
-	$('#erase-button').unbind();
-	$('#erase-button').click(function () { eraseTermSearch(); });
+	$('#erase-button').click(function () { 
+		$('.search_input').val('');
+		$('.selectpicker').selectpicker('deselectAll');
+		$('.search_check').attr('checked', false);
+		$('#limit').val('50');
+		filterTermList();
+	});
+	$('#search-button').click(function () {
+		$('#search-button').removeClass('btn-success').addClass('btn-default');
+		getTermList(termGetParams(), 'collection_date', 'ASC');
+	});
 
 <?php foreach ($termSearchPage['properties'] as $propertyId => $unused) : ?>
 	<?php $property = $termProperties[$propertyId] ?>
 
 	<?php if (in_array($property['type'], array('date', 'time', 'datetime', 'number'))) : ?>
 
-	$('#search_min_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
-	$('#search_max_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+	$('#search_check_min_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_min_<?php echo $propertyId ?>').checked) {
+			$('#search_min_<?php echo $propertyId ?>').val('');
+		}
+	});
+	$('#search_min_<?php echo $propertyId ?>').change(function () { 
+		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
+	$('#search_min_<?php echo $propertyId ?>').keyup(function () { 
+		document.getElementById('search_check_min_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
+	$('#search_check_max_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_max_<?php echo $propertyId ?>').checked) {
+			$('#search_max_<?php echo $propertyId ?>').val('');
+		}
+	});
+	$('#search_max_<?php echo $propertyId ?>').change(function () { 
+		document.getElementById('search_check_max_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
+	$('#search_max_<?php echo $propertyId ?>').keyup(function () { 
+		document.getElementById('search_check_max_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
 
 		<?php if ($property['type'] == 'date') : ?>
 	$("#search_min_<?php echo $propertyId ?>").datepicker();
 	$("#search_max_<?php echo $propertyId ?>").datepicker();
-	$('#search_min_<?php echo $propertyId ?>').change(function () { filterTermList(); });
-	$('#search_max_<?php echo $propertyId ?>').change(function () { filterTermList(); });
 		<?php endif;?>
 	
 	<?php elseif ($property['type'] == 'select') : ?>
-		$('#search_<?php echo $propertyId ?>').change(function () { filterTermList(); });
+	$('#search_check_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+			$('#search_<?php echo $propertyId ?>').val('');
+			$('#search_<?php echo $propertyId ?>').selectpicker('deselectAll');
+		}
+	});
+	$('#search_<?php echo $propertyId ?>').change(function () { 
+		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
 	
 	<?php else : ?>
-		$('#search_<?php echo $propertyId ?>').keyup(function () { filterTermList(); });
+	$('#search_check_<?php echo $propertyId ?>').change(function () {
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+		if (!document.getElementById('search_check_<?php echo $propertyId ?>').checked) {
+			$('#search_<?php echo $propertyId ?>').val('');
+		}
+	});
+	$('#search_<?php echo $propertyId ?>').keyup(function () { 
+		document.getElementById('search_check_<?php echo $propertyId ?>').checked = true;	
+		$('#search-button').removeClass('btn-default').addClass('btn-success');
+	});
 
 	<?php endif;?>
 
@@ -144,6 +179,8 @@ function getTermList(params, major, dir) {
 			if (xhttp.status == 200) {
 	<?php endif;?>
 			document.getElementById('term-list-panel').innerHTML = xhttp.responseText;
+
+			$('#export-button').click(function () { exportTermList(); });
 			
 			$(function () {
 			    $('.tip').tooltip({
