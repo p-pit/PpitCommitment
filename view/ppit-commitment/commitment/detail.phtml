@@ -154,8 +154,8 @@
 
 			<tr class="row row-tr" id="row-tr" style="display: none">
 				<td>
-					<button type="button" class="btn btn-warning action-btn btn-xs" title="<?php echo $this->translate('update', 'ppit-core', $context->getLocale()) ?>" id="row-action">
-						<span class="glyphicon glyphicon-edit" id="row-edit-glyphicon"></span>
+					<button type="button" class="btn btn-danger action-btn btn-xs" title="<?php echo $this->translate('update', 'ppit-core', $context->getLocale()) ?>" id="row-action">
+						<?php echo $this->translate('Confirm', 'ppit-core', $context->getLocale())?>
 					</button>
 				</td>
 				<td>&nbsp;</td>
@@ -207,12 +207,11 @@
 				<td style="text-align: right"><?php echo $context->formatFloat($option['amount'], 2) ?></td>
 			</tr>
 			<tr class="row row-tr" id="row-tr_<?php echo $i ?>" style="display: none">
-				<td>
-					<button type="button" class="btn btn-warning action-btn btn-xs option-action" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="option-action_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-edit" id="option-edit-glyphicon_<?php echo $i ?>"></span>
+				<td colspan="2">
+					<button type="button" class="btn btn-danger action-btn btn-xs option-action" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" id="option-action_<?php echo $i ?>">
+						<?php echo $this->translate('Confirm', 'ppit-core', $context->getLocale())?>
 					</button>
 				</td>
-				<td>&nbsp;</td>
 				<td style="text-align: left">
 					<select class="form-control option_identifier" id="option_identifier-<?php echo $i ?>">
 						<option/>
@@ -245,8 +244,8 @@
 			</tr>
 			<tr class="row row-tr" id="row-tr-add" style="display: none">
 				<td>
-					<button type="button" class="btn btn-warning action-btn btn-xs option-action" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>" id="option-action_<?php echo $i ?>">
-						<span class="glyphicon glyphicon-plus"></span>
+					<button type="button" class="btn btn-danger action-btn btn-xs option-action" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?>" id="option-action_<?php echo $i ?>">
+						<?php echo $this->translate('Confirm', 'ppit-core', $context->getLocale())?>
 					</button>
 				</td>
 				<td>&nbsp;</td>

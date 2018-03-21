@@ -914,19 +914,39 @@ function getCommitmentDetail(id) {
 			});
 
 			$('#row-anchor').click(function () {
+				$('.row-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-update-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-delete-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-add-anchor').removeClass('btn-warning').addClass('btn-default');
+				$(this).removeClass('btn-default').addClass('btn-warning');
 				$('.row-tr').hide();
 				$('#row-tr').show();
 			});
 			$('.row-update-anchor').click(function () {
+				$('.row-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-update-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-delete-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-add-anchor').removeClass('btn-warning').addClass('btn-default');
+				$(this).removeClass('btn-default').addClass('btn-warning');
 				$('.row-tr').hide();
 				i = $(this).attr('id').split('_')[1]
 				$('#row-tr_' + i).show();
 			});
 			$('#row-add-anchor').click(function () {
+				$('.row-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-update-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-delete-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-add-anchor').removeClass('btn-warning').addClass('btn-default');
+				$(this).removeClass('btn-default').addClass('btn-warning');
 				$('.row-tr').hide();
 				$('#row-tr-add').show();
 			});
 			$('.row-delete-anchor').click(function () {
+				$('.row-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-update-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-delete-anchor').removeClass('btn-warning').addClass('btn-default');
+				$('.row-add-anchor').removeClass('btn-warning').addClass('btn-default');
+				$(this).removeClass('btn-default').addClass('btn-warning');
 				$('.row-tr').hide();
 				i = $(this).attr('id').split('_')[1]
 				$('#option_identifier-' + i).val('');

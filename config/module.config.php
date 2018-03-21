@@ -787,11 +787,11 @@ return array(
             	array('route' => 'commitmentAccount/processPost', 'roles' => array('admin', 'ws-incoming')),
             		
             	array('route' => 'commitment', 'roles' => array('sales_manager')),
-            	array('route' => 'commitment/accountlist', 'roles' => array('sales_manager', 'manager')),
             	array('route' => 'commitment/index', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/search', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/list', 'roles' => array('sales_manager')),
-            	array('route' => 'commitment/accountList', 'roles' => array('sales_manager', 'manager')),
+            	array('route' => 'commitment/accountlist', 'roles' => array('operational_management', 'sales_manager', 'manager')),
+            	array('route' => 'commitment/accountList', 'roles' => array('operational_management', 'sales_manager', 'manager')),
             	array('route' => 'commitment/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/detail', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/dropboxLink', 'roles' => array('guest')),
@@ -2631,7 +2631,9 @@ table.note-report td {
 			'description' => array('mandatory' => false),
 	),
 	'commitment/group/human_service' => array(
+			'year' => [],
 			'status' => [],
+			'invoice_date' => [],
 			'caption' => [],
 			'description' => [],
 	),

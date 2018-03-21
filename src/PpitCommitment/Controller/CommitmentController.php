@@ -722,7 +722,7 @@ class CommitmentController extends AbstractActionController
     	if ($invoicingContact->adr_street) $invoice['customer_adr_country'] = $invoicingContact->adr_country;
     	
     	$invoice['identifier'] = ($proforma) ? null : $commitment->invoice_identifier;
-    	$invoice['date'] = date('Y-m-d');
+    	$invoice['date'] = ($commitment->invoice_date) ? $commitment->invoice_date : date('Y-m-d');
     	$invoice['description'] = array();
     	foreach($invoiceSpecs['description'] as $line) {
     		$arguments = array();
@@ -799,9 +799,9 @@ class CommitmentController extends AbstractActionController
 	    		$line = array();
 	    		$line['caption'] = $caption;
 	    		$line['tax_rate'] = 0;
-	    		$line['unit_price'] = $taxExemptAmount;
+	    		$line['unit_price'] = round($taxExemptAmount / $commitment->quantity, 2);
 	    		$line['quantity'] = $commitment->quantity;
-	    		$line['amount'] = $taxExemptAmount * $commitment->quantity;
+	    		$line['amount'] = $taxExemptAmount;
 	    		$invoice['lines'][] = $line;
 	    	}
     	}
@@ -860,8 +860,13 @@ class CommitmentController extends AbstractActionController
 	    $invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
     	
     	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
-    	if ($commitment->status != 'settled' && $context->getConfig('commitment/invoice_bank_details')) {
-    		$invoice['bank_details'] = $context->getConfig('commitment/invoice_bank_details');
+    	if ($commitment->status != 'settled') {
+	    	if ($commitment->account->place->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $commitment->account->place->getConfig('commitment/invoice_bank_details');
+    		elseif ($context->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $context->getConfig('commitment/invoice_bank_details');
+    		else $invoiceBankDetails = null;
+	    	if ($invoiceBankDetails) {
+    			$invoice['bank_details'] = $invoiceBankDetails;
+	    	}
     	}
 		$invoice['footer_mention_1'] = $context->getConfig('commitment/invoice_footer_mention_1');
 		$invoice['footer_mention_2'] = $context->getConfig('commitment/invoice_footer_mention_2');

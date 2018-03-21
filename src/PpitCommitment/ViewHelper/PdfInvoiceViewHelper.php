@@ -139,7 +139,7 @@ class PdfInvoiceViewHelper
     	foreach ($invoice['lines'] as $line) {
     		$pdf->Ln();
     		$caption = $line['caption'];
-    		if (!$proforma) {
+    		if (!$proforma && $invoiceSpecs['tax']) {
     			if ($line['tax_rate'] == 0) $caption .= ' (exonéré)';
 	    		else $caption .= ' (TVA '.sprintf('%d', round($line['tax_rate']*100, 1)).'%)';
     		}
@@ -153,7 +153,7 @@ class PdfInvoiceViewHelper
     	$pdf->Ln();
     	$pdf->Cell(180, 0, '', 'T');
     	$pdf->SetDrawColor(255, 255, 255);
-    	if (!$proforma) {
+    	if (!$proforma && $invoiceSpecs['tax']) {
     		$pdf->Ln();
     		$pdf->Cell(155, 6, 'Total HT :', 'LR', 0, 'R', false);
 	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['excluding_tax'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);

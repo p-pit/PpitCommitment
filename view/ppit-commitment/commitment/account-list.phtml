@@ -1,7 +1,6 @@
 <h4 style="text-align: center"></h4>
 
 <?php $colspan = count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['properties'])
-//	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['glyphicons'])
 	   		   + count($context->getConfig('commitment/accountList'.(($type) ? '/'.$type : ''))['anchors']) 
 			   + 2 ?>
 
@@ -13,17 +12,16 @@
 	</tr>
 	<tr>
 		<td colspan="<?php echo $colspan ?>">
-<!--			<button type="button" class="btn btn-default action-btn btn-xs commitment-add-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="commitment-add">
-				<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
-			</button> -->
 <?php if ($context->isDemoModeActive()) : ?>
 			<a class="tip" href="#" title="<?php echo $context->getConfig('demo')['commitment/accountList'.(($type) ? '/'.$type : '').'/add'][$context->getLocale()] ?>">
 			    <img src="<?php echo $this->basePath('img/tip.png') ?>" width="20" />
 			</a>
 <?php endif;?>
+<?php if ($context->isAllowed('commitment/list')) : ?>
 			<button type="button" class="btn btn-default action-btn btn-xs account-list-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="<?php echo $this->url('commitment/index', array('type' => $type)) ?>?account_id=<?php echo $params['account_id'] ?>">
 				<?php echo $this->translate('Invoices', 'ppit-commitment', $context->getLocale()) ?>
 			</button>
+<?php endif;?>
 		</td>
 	</tr>
 
