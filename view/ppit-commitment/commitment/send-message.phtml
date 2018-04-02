@@ -1,0 +1,65 @@
+<!-- 
+/**
+ * PpitCore V1.0 (https://github.com/p-pit/PpitCore)
+ *
+ * @link      https://github.com/p-pit/PpitCore
+ * @copyright Copyright (c) 2016 Bruno Lartillot
+ * @license   https://github.com/p-pit/PpitCore/blob/master/license.txt GNU-GPL license
+ */
+-->
+
+<h4 style="text-align: center">
+	<strong><?php echo $this->translate('Send the invoice by email', 'ppit-commitment', $context->getLocale()) ?></strong>
+</h4>
+
+<!-- Form header -->
+<form action="" id="ppit-form" method="post" class="form-horizontal" enctype="multipart/form-data">
+			
+<!-- Global message -->
+<?php if ($message == 'OK') : ?>
+	<div id="message">
+			<div class="alert alert-success"><h4><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4></div>
+	</div>
+<?php endif;?>
+
+<?php 
+if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
+?>
+	<div class="panel-body">
+		
+<?php foreach ($emails as $commitment_id => $email) : ?>
+
+	<div class="form-group">
+		<div class="col-sm-12">
+			<input class="form-control" disabled="disabled" value="<?php echo $email['account_name'] ?> - <?php echo $email['caption'] ?>" />
+		</div>
+	</div>
+
+	<div class="email-template" id="email-template_<?php echo $commitment_id ?>">
+		<p>
+			<div><strong><?php echo $this->translate('From', 'ppit-contact', $context->getLocale()).': ' ?></strong><?php echo $email['from_name'] ?> (<?php echo $email['from_mail'] ?>)</div>
+			<div><strong><?php echo $this->translate('To', 'ppit-contact', $context->getLocale()).': ' ?></strong><?php echo implode(', ', $email['to']) ?></div>
+			<div><strong><?php echo $this->translate('Subject', 'ppit-contact', $context->getLocale()).': '.$email['subject'] ?></strong></div>
+		</p>
+		<?php echo $email['body'] ?>
+	</div>
+	<hr>
+<?php endforeach;?>
+
+<?php if ($message != 'OK') : ?>
+    <div class="form-group">
+		<div class="col-sm-5">&nbsp;</div>
+		<div class="col-sm-7">
+			<input id="send-message-button" class="btn btn-default" value="<?php echo $this->translate('Send', 'ppit-core', $context->getLocale()) ?>">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-12">
+			<div class="alert alert-warning" id="send-message-alert" style="text-align: center">
+				<strong><?php echo $this->translate('Please confirm', 'ppit-core', $context->getLocale()) ?></strong>
+			</div>
+		</div>
+	</div>
+<?php endif;?>
+	</div>
+</form>

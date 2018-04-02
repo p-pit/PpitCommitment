@@ -101,7 +101,7 @@
 
 		<div id="commitment-update-panel"></div>
 
-<?php if ($commitment->product_identifier) : ?>
+<?php if ($commitment->id) : ?>
 	<div>
 	<?php if (in_array($commitment->status, array('invoiced', 'settled'))) : ?>
 		<a target="_blank" href="<?php echo $this->url('commitmentMessage/downloadInvoice', array('id' => $commitment->invoice_message_id)) ?>"><?php echo $this->translate('Invoice', 'ppit-commitment', $context->getLocale()) ?></a>

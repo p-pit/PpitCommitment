@@ -135,7 +135,11 @@ class Commitment implements InputFilterAwareInterface
 	public $place_id;
     public $place_caption;
     public $place_identifier;
-	public $properties;
+    public $place_support_email;
+    public $place_config;
+    public $properties;
+	public $n_fn;
+	public $email;
 	public $account_name;
 	public $account_identifier;
 	public $account_property_1;
@@ -289,6 +293,12 @@ class Commitment implements InputFilterAwareInterface
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
+        $this->place_support_email = (isset($data['place_support_email'])) ? $data['place_support_email'] : null;
+        $this->place_logo_height = (isset($data['place_logo_height'])) ? $data['place_logo_height'] : null;
+        $this->place_logo_src = (isset($data['place_logo_src'])) ? $data['place_logo_src'] : null;
+        $this->place_config = (isset($data['place_config'])) ? json_decode($data['place_config'], true) : [];
+        $this->n_fn = (isset($data['n_fn'])) ? $data['n_fn'] : null;
+        $this->email = (isset($data['email'])) ? $data['email'] : null;
         $this->account_name = (isset($data['account_name'])) ? $data['account_name'] : null;
         $this->account_identifier = (isset($data['account_identifier'])) ? $data['account_identifier'] : null;
         $this->account_property_1 = (isset($data['account_property_1'])) ? $data['account_property_1'] : null;
@@ -422,8 +432,14 @@ class Commitment implements InputFilterAwareInterface
     	 
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
+    	$data['place_support_email'] = $this->place_support_email;
+    	$data['place_logo_height'] = $this->place_logo_height;
+    	$data['place_logo_src'] = $this->place_logo_src;
+    	$data['place_config'] = $this->place_config;
     	$data['place_id'] = $this->place_id;
     	$data['account_name'] = $this->account_name;
+    	$data['n_fn'] = $this->n_fn;
+    	$data['email'] = $this->email;
     	$data['account_identifier'] = $this->account_identifier;
     	$data['account_property_1'] = $this->account_property_1;
     	$data['account_property_2'] = $this->account_property_2;
@@ -450,8 +466,14 @@ class Commitment implements InputFilterAwareInterface
     	$data = $this->getProperties();
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
+    	unset($data['place_support_email']);
+    	unset($data['place_logo_height']);
+    	unset($data['place_logo_src']);
+    	unset($data['place_config']);
     	unset($data['place_id']);
     	unset($data['account_name']);
+    	unset($data['n_fn']);
+    	unset($data['email']);
     	unset($data['account_identifier']);
     	unset($data['account_property_1']);
     	unset($data['account_property_2']);
@@ -477,7 +499,8 @@ class Commitment implements InputFilterAwareInterface
     	$context = Context::getCurrent();
     	$select = Commitment::getTable()->getSelect()
     		->join('core_account', 'commitment.account_id = core_account.id', array('account_name' => 'name', 'account_identifier' => 'identifier', 'place_id', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
-			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left');
+    		->join('core_vcard', 'core_account.contact_1_id = core_vcard.id', array('n_fn', 'email'), 'left')
+    		->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier', 'place_support_email' => 'support_email', 'place_logo_height' => 'logo_height', 'place_logo_src' => 'logo_src', 'place_config' => 'config'), 'left');
     	
     	$where = new Where();
     	$where->notEqualTo('commitment.status', 'deleted');
@@ -515,6 +538,7 @@ class Commitment implements InputFilterAwareInterface
 				}
 				elseif ($propertyId == 'account_id') $where->equalTo('account_id', $params['account_id']);
 				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'n_fn') $where->like('core_vcard.n_fn', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
@@ -566,6 +590,16 @@ class Commitment implements InputFilterAwareInterface
 	    	$commitment->account_property_14 = $commitment->account->property_14;
 	    	$commitment->account_property_15 = $commitment->account->property_15;
 	    	$commitment->account_property_16 = $commitment->account->property_16;
+	    	$commitment->account->contact_1 = Vcard::get($commitment->account->contact_1_id);
+	    	$commitment->n_fn = $commitment->account->contact_1->n_fn;
+	    	$commitment->email = $commitment->account->contact_1->email;
+	    	$place = Place::get($commitment->account->place_id);
+	    	$commitment->place_caption = $place->caption;
+	    	$commitment->place_identifier = $place->identifier;
+	    	$commitment->place_support_email = $place->support_email;
+	    	$commitment->place_logo_height = $place->logo_height;
+	    	$commitment->place_logo_src = $place->logo_src;
+	    	$commitment->place_config = $place->config;
         }
     	$commitment->properties = $commitment->getProperties();
     	$commitment->subscriptions = Subscription::getList(array(), 'product_identifier', 'ASC');
@@ -1175,7 +1209,7 @@ class Commitment implements InputFilterAwareInterface
 
     	// Check consistency
     	$commitment = Commitment::getTable()->get($this->identifier, 'identifier');
-    	if ($commitment) return 'Duplicate'; // Already exists
+//    	if ($commitment) return 'Duplicate'; // Already exists
 
     	if (!$this->commitment_date) $this->commitment_date = date('Y-m-d');
     	$this->id = Commitment::getTable()->save($this);

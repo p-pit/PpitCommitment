@@ -3,6 +3,7 @@ namespace PpitCommitment\Controller;
 
 use DateInterval;
 use Date;
+use PpitContact\Model\ContactMessage;
 use PpitCommitment\Model\Commitment;
 use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentYear;
@@ -689,7 +690,12 @@ class CommitmentController extends AbstractActionController
     	if ($commitment->account->place->getConfig('commitment/invoice_header')) $invoice['header'] = $commitment->account->place->getConfig('commitment/invoice_header');
     	else $invoice['header'] = $context->getConfig('commitment/invoice_header');
     	
-    	$invoiceSpecs = $context->getConfig('commitment/invoice');
+    	if ($context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''))) {
+	    	$invoiceSpecs = $context->getConfig('commitment/invoice'.(($type) ? '/'.$type : ''));
+    	}
+	    else {
+    		$invoiceSpecs = $context->getConfig('commitment/invoice');
+	    }
     	if ($account->type == 'business') $invoice['customer_invoice_name'] = $account->name;
     	$invoicingContact = null;
     	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
@@ -759,54 +765,57 @@ class CommitmentController extends AbstractActionController
     	else $caption = $commitment->description;
     	 
     	$invoice['lines'] = array();
-    	if ($proforma) {
-    		$line = array();
-    		$line['caption'] = $caption;
-    		$line['unit_price'] = $commitment->unit_price;
-    		$line['quantity'] = $commitment->quantity;
-    		$line['amount'] = $commitment->amount;
-    		$invoice['lines'][] = $line;
-    	}
-    	else {
-	    	if ($commitment->taxable_1_amount != 0) {
+    	if ($caption) {
+	    	if ($proforma) {
 	    		$line = array();
 	    		$line['caption'] = $caption;
-	    		$line['tax_rate'] = 0.2;
-	    		$line['unit_price'] = round($commitment->taxable_1_amount / $commitment->quantity, 2);
+	    		$line['unit_price'] = $commitment->unit_price;
 	    		$line['quantity'] = $commitment->quantity;
-	    		$line['amount'] = $commitment->taxable_1_amount;
+	    		$line['amount'] = $commitment->amount;
 	    		$invoice['lines'][] = $line;
 	    	}
-	    	if ($commitment->taxable_2_amount != 0) {
-	    		$line = array();
-	    		$line['caption'] = $caption;
-	    		$line['tax_rate'] = 0.1;
-	    		$line['unit_price'] = round($commitment->taxable_2_amount / $commitment->quantity, 2);
-	    		$line['quantity'] = $commitment->quantity;
-	    		$line['amount'] = $commitment->taxable_2_amount;
-	    		$invoice['lines'][] = $line;
-	    	}
-	    	if ($commitment->taxable_3_amount != 0) {
-	    		$line = array();
-	    		$line['caption'] = $caption;
-	    		$line['tax_rate'] = 0.055;
-	    		$line['unit_price'] = round($commitment->taxable_3_amount / $commitment->quantity, 2);
-	    		$line['quantity'] = $commitment->quantity;
-	    		$line['amount'] = $commitment->taxable_3_amount;
-	    		$invoice['lines'][] = $line;
-	    	}
-	    	if ($taxExemptAmount != 0) {
-	    		$line = array();
-	    		$line['caption'] = $caption;
-	    		$line['tax_rate'] = 0;
-	    		$line['unit_price'] = round($taxExemptAmount / $commitment->quantity, 2);
-	    		$line['quantity'] = $commitment->quantity;
-	    		$line['amount'] = $taxExemptAmount;
-	    		$invoice['lines'][] = $line;
+	    	else {
+		    	if ($commitment->taxable_1_amount != 0) {
+		    		$line = array();
+		    		$line['caption'] = $caption;
+		    		$line['tax_rate'] = 0.2;
+		    		$line['unit_price'] = round($commitment->taxable_1_amount / $commitment->quantity, 2);
+		    		$line['quantity'] = $commitment->quantity;
+		    		$line['amount'] = $commitment->taxable_1_amount;
+		    		$invoice['lines'][] = $line;
+		    	}
+		    	if ($commitment->taxable_2_amount != 0) {
+		    		$line = array();
+		    		$line['caption'] = $caption;
+		    		$line['tax_rate'] = 0.1;
+		    		$line['unit_price'] = round($commitment->taxable_2_amount / $commitment->quantity, 2);
+		    		$line['quantity'] = $commitment->quantity;
+		    		$line['amount'] = $commitment->taxable_2_amount;
+		    		$invoice['lines'][] = $line;
+		    	}
+		    	if ($commitment->taxable_3_amount != 0) {
+		    		$line = array();
+		    		$line['caption'] = $caption;
+		    		$line['tax_rate'] = 0.055;
+		    		$line['unit_price'] = round($commitment->taxable_3_amount / $commitment->quantity, 2);
+		    		$line['quantity'] = $commitment->quantity;
+		    		$line['amount'] = $commitment->taxable_3_amount;
+		    		$invoice['lines'][] = $line;
+		    	}
+		    	if ($taxExemptAmount != 0) {
+		    		$line = array();
+		    		$line['caption'] = $caption;
+		    		$line['tax_rate'] = 0;
+		    		$line['unit_price'] = round($taxExemptAmount / $commitment->quantity, 2);
+		    		$line['quantity'] = $commitment->quantity;
+		    		$line['amount'] = $taxExemptAmount;
+		    		$invoice['lines'][] = $line;
+		    	}
 	    	}
     	}
 	    	 
     	if (is_array($commitment->options)) foreach ($commitment->options as $option) {
+    		$line = array();
     		$line['caption'] = $option['caption'];
     		if (!$proforma) {
 	    		if ($option['vat_id'] == 0) $line['tax_rate'] = 0;
@@ -814,9 +823,11 @@ class CommitmentController extends AbstractActionController
 	    		elseif ($option['vat_id'] == 2) $line['tax_rate'] = 0.1;
 	    		elseif ($option['vat_id'] == 3) $line['tax_rate'] = 0.055;
     		}
-    		$line['unit_price'] = $option['unit_price'];
-    		$line['quantity'] = $option['quantity'];
-    		$line['amount'] = $option['amount'];
+    		if ($option['quantity']) {
+	    		$line['unit_price'] = $option['unit_price'];
+	    		$line['quantity'] = $option['quantity'];
+	    		$line['amount'] = $option['amount'];
+    		}
     		$invoice['lines'][] = $line;
     	}
     	
@@ -1489,6 +1500,113 @@ class CommitmentController extends AbstractActionController
  
     	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$commitment->account->name.'.pdf', 'I');
     	return $this->response;
+    }
+
+    public function sendMessageAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Retrieve the type
+    	$type = $this->params()->fromRoute('type');
+    	$template_id = $this->params()->fromRoute('template_id');
+
+    	$template = $context->getConfig('commitment/send-message'.(($type) ? '/'.$type : ''))['templates'][$template_id];
+    	if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
+
+    	$commitmentIds = explode(',', $this->params()->fromQuery('commitments'));
+		$emails = array();
+    	foreach ($commitmentIds as $commitment_id) {
+	    	$commitment = Commitment::get($commitment_id);
+    		if ($commitment->email) {
+    			if ($commitment->place_logo_src) {
+    				$logo_src = $commitment->place_logo_src;
+    			}
+    			else {
+    				$logo_src = $context->getConfig('headerParams')['logo'];
+    				$commitment->properties['logo_height'] = $context->getConfig('headerParams')['logo-height'];
+    			}
+    			$basePath = $context->getServiceManager()->get('viewhelpermanager')->get('basePath');
+    			$link = $context->getConfig()['ppitCoreSettings']['domainName'].$basePath('logos/');
+    			$commitment->properties['logo_src'] = $link.$context->getInstance()->caption.'/'.$logo_src;
+//    			$commitment->properties['logo_src'] = 'https://www.p-pit.fr/logos/'.$context->getInstance()->caption.'/'.$logo_src;
+
+    			if ($commitment->invoice_message_id) $commitment->properties['invoice_route'] = $this->url()->fromRoute('commitmentMessage/downloadInvoice', ['id' => $commitment->invoice_message_id]);
+    			else $commitment->properties['invoice_route'] = $this->url()->fromRoute('commitment/downloadInvoice', ['type' => $type, 'id' => $commitment->id]);
+
+    			$data = array();
+    			$data['account_name'] = $commitment->account_name;
+    			$data['caption'] = $commitment->caption;
+    			$data['type'] = 'email';
+	    		$data['to'] = [$commitment->email => $commitment->email];
+	    		if (array_key_exists('cci', $template)) $data['cci'] = $template['cci'];
+	    		$data['from_mail'] = ($commitment->place_support_email) ? $commitment->place_support_email : $template['from_mail'];
+	    		$data['from_name'] = ($commitment->place_support_email) ? $commitment->place_caption : $template['from_name'];
+	    		 
+	    		$data['subject'] = $template['subject'];
+	    		$arguments = array();
+	    		foreach ($template['subject']['params'] as $param) $arguments[] = $commitment->properties[$param];
+	    		$data['subject'] = vsprintf($context->localize($data['subject']['text']), $arguments);
+	    		 
+	    		$data['body'] = $context->localize($template['body']['text']);
+	    		$arguments = array();
+	    		foreach ($template['body']['params'] as $param) $arguments[] = $commitment->properties[$param];
+	    		$data['body'] = vsprintf($data['body'], $arguments);
+				$data['body'] .= '<br><br>';
+	    		if (array_key_exists('commitment/invoice_header', $commitment->place_config)) $data['body'] .= $commitment->place_config['commitment/invoice_header'];
+	    		else $data['body'] .= $context->getConfig('commitment/invoice_header');
+
+	    		$emails[$commitment_id] = $data;
+    		}
+    	}	 
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		if ($csrfForm->isValid()) { // CSRF check
+				foreach ($emails as $data) {
+	    			$mail = ContactMessage::instanciate();
+	    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+	    
+	    			// Atomicity
+	    			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
+	    			$connection->beginTransaction();
+	    			try {
+	    				$rc = $mail->add();
+	    				if ($rc != 'OK') {
+	    					$connection->rollback();
+	    					$error = $rc;
+	    				}
+	    				else {
+	    					$connection->commit();
+	    					$message = 'OK';
+	    				}
+	    			}
+	    			catch (\Exception $e) {
+	    				$connection->rollback();
+	    				throw $e;
+	    			}
+				}
+    		}
+    	}
+    
+    	$view = new ViewModel(array(
+    		'context' => $context,
+    		'type' => $type,
+    		'template' => $template,
+    		'emails' => $emails,
+    		'csrfForm' => $csrfForm,
+    		'message' => $message,
+    		'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
     }
     
     public function serviceSettleAction()

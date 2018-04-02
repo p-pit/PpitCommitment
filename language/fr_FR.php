@@ -99,6 +99,7 @@
 			'Schedule' => 'Echéancier',
 			'Selected accounts' => 'Comptes sélectionnés',
 			'Selected commitments' => 'Engagements sélectionnés',
+			'Send the invoice by email' => 'Envoyer la facture par email',
 			'Settle' => 'Régler',
 			'Settlement' => 'Règlement',
 			'Specific informations' => 'Informations spécifiques',

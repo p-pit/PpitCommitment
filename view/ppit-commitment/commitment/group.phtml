@@ -13,7 +13,7 @@
 <!-- Global message -->
 <?php if ($message == 'OK') : ?>
 			<div id="message">
-					<div class="alert alert-success"><h4><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4></div>
+				<div class="alert alert-success"><h4><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4></div>
 			</div>
 <?php endif;?>
 
@@ -51,19 +51,25 @@
 			</div>
 
 			<input type="hidden" id="group-nb-commitment" value="<?php echo count($commitments) ?>" />
+			
+			<ul class="nav nav-tabs">
+			  <li data-toggle="tab" class="group-tab active" id="update-tab"><a><?php echo $this->translate('Duplicate', 'ppit-core', $context->getLocale()) ?></a></li>
+			  <li data-toggle="tab" class="group-tab" id="send-message-tab"><a><?php echo $this->translate('Send the invoice by email', 'ppit-commitment', $context->getLocale()) ?></a></li>
+			</ul>
+
+			<div class="group-panel" id="update-panel">
 
 <?php $i = 0; foreach ($commitments as $commitment) : ?>
+				<input type="hidden"  id="group-commitment_<?php echo $i ?>" value="<?php echo $commitment->id ?>" />
 	
-			<input type="hidden"  id="group-commitment_<?php echo $i ?>" value="<?php echo $commitment->id ?>" />
-
-			<div class="form-group">
-				<div class="col-sm-12">
-					<input class="form-control" disabled="disabled" value="<?php echo $commitment->account_name ?> - <?php echo $commitment->caption ?>" />
+				<div class="form-group">
+					<div class="col-sm-12">
+						<input class="form-control" disabled="disabled" value="<?php echo $commitment->account_name ?> - <?php echo $commitment->caption ?>" />
+					</div>
 				</div>
-			</div>
-
 <?php $i++; endforeach;?>
 
+				<div>&nbsp;</div>
 <?php 
 if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 ?>
@@ -71,71 +77,73 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 <?php foreach ($groupPage as $propertyId => $options) : ?>
 
 	<?php if (array_key_exists('type', $options) && $options['type'] == 'separator') : ?>
-		<hr>
-		<div class="form-group">
-			<label class="col-sm-12 control-label">
-				<?php echo $options['label'][$context->getLocale()] ?>
-			</label>
-		</div>
+				<hr>
+				<div class="form-group">
+					<label class="col-sm-12 control-label">
+						<?php echo $options['label'][$context->getLocale()] ?>
+					</label>
+				</div>
 		
 	<?php else : ?>
 
 		<?php $property = $configProperties[$propertyId] ?>
 
-		<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
-				<label class="col-sm-5 control-label">
+				<div class="form-group" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_group">
+					<label class="col-sm-5 control-label">
 			<?php if (array_key_exists('mandatory', $options) && 	$options['mandatory']) echo '* ' ?><?php echo $property['labels'][$context->getLocale()] ?>
-				</label>
-			<div class="col-sm-1">
-					<input type="checkbox" class="form-control" id="<?php echo $propertyId ?>_check" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
-			</div>
-
-			<div class="col-sm-6">
+					</label>
+					<div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="<?php echo $propertyId ?>_check" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+					</div>
+			
+					<div class="col-sm-6">
 			<?php if ($propertyId == 'place_id') : ?>
-					<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
-		    			<option />
+						<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+				    		<option />
 			<?php foreach ($places as $place) : ?>
-		    			<option value="<?php echo $place->id ?>" <?php if ($input->place_id == $place->id) echo 'selected="selected"' ?>><?php echo $place->caption ?></option>
+				    		<option value="<?php echo $place->id ?>" <?php if ($input->place_id == $place->id) echo 'selected="selected"' ?>><?php echo $place->caption ?></option>
 			<?php endforeach;?>
-					</select>
+						</select>
 
 			<?php elseif ($property['type'] == 'date') : ?>
-					<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
-					<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($input->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+						<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+						<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->decodeDate($input->properties[$propertyId]) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 			<?php elseif ($property['type'] == 'number') : ?>
-					<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
-					<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($input->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+						<input type="hidden" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" />
+						<input class="form-control" id="input_<?php echo $propertyId ?>" name="input_<?php echo $propertyId ?>" value="<?php echo $context->formatFloat($input->properties[$propertyId], 2) ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 			<?php elseif ($property['type'] == 'textarea') : ?>
-					<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $input->properties[$propertyId] ?></textarea>
+						<textarea class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>><?php echo $input->properties[$propertyId] ?></textarea>
 
 			<?php elseif ($property['type'] == 'select') : ?>
-					<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
-		    			<option />
+						<select class="form-control" id="<?php echo $propertyId ?>" name="<?php echo $propertyId ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?>>
+			    			<option />
 				<?php foreach ($property['modalities'] as $key => $labels) : ?>
-		    			<option value="<?php echo $key ?>" <?php if ($input->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
+				    		<option value="<?php echo $key ?>" <?php if ($input->properties[$propertyId] == $key) echo 'selected="selected"' ?>><?php echo $labels[$context->getLocale()] ?></option>
 				<?php endforeach;?>
-					</select>
+						</select>
 	
 			<?php else : ?>
-					<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $input->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
+						<input class="form-control" id="<?php echo $propertyId ?>" value="<?php echo $input->properties[$propertyId] ?>" <?php if ($isDisabled) echo 'disabled="disabled"'?> />
 
 			<?php endif;?>
+					</div>
+					<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
 				</div>
-				<div class="col-sm-12"><p class="help-block" id="<?php echo (($property['type'] == 'date' || $property['type'] == 'number') ? 'input_' : '').$propertyId ?>_error"></p></div>
-			</div>
 
 	<?php endif;?>
 <?php endforeach;?>
 	
-		    <div class="form-group">
-				<div class="col-sm-5">&nbsp;</div>
-				<div class="col-sm-7">
-					<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Duplicate', 'ppit-core', $context->getLocale()) ?>">
+			    <div class="form-group">
+					<div class="col-sm-5">&nbsp;</div>
+					<div class="col-sm-7">
+						<input name="submit" type="submit" id="submit-button" class="btn btn-warning" value="<?php echo $this->translate('Duplicate', 'ppit-core', $context->getLocale()) ?>">
+					</div>
 				</div>
 			</div>
-
+			
+			<div class="group-panel" id="send-message-panel"></div>
 		</form>
 	</div>
 </div>

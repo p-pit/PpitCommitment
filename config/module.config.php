@@ -327,6 +327,15 @@ return array(
         								),
         						),
         				),
+        				'sendMessage' => array(
+        						'type' => 'segment',
+        						'options' => array(
+        								'route' => '/send-message[/:type][/:template_id]',
+        								'defaults' => array(
+        										'action' => 'sendMessage',
+        								),
+        						),
+        				),
         				'paymentResponse' => array(
         						'type' => 'segment',
         						'options' => array(
@@ -811,6 +820,7 @@ return array(
 //            	array('route' => 'commitment/workflow', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/serviceSettle', 'roles' => array('accountant')),
             	array('route' => 'commitment/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
+            	array('route' => 'commitment/sendMessage', 'roles' => array('sales_manager', 'accountant')),
             	array('route' => 'commitment/paymentResponse', 'roles' => array('accountant')),
             	array('route' => 'commitment/delete', 'roles' => array('sales_manager')),
             	array('route' => 'commitment/notify', 'roles' => array('admin')),
@@ -1647,6 +1657,14 @@ table.note-report td {
 			),
 	),
 
+	'core_account/b2c/property/name' => array(
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Formatted name',
+			'fr_FR' => 'Nom formaté',
+		),
+	),
+	
 	'core_account/b2c/property/property_1' => array(
 			'type' => 'input',
 			'labels' => array(
@@ -1704,6 +1722,7 @@ table.note-report td {
 					),
 					'status' => array('definition' => 'core_account/generic/property/status', 'mandatory' => true),
 					'identifier' => array('definition' => 'core_account/b2c/property/identifier', 'mandatory' => true),
+					'name' => array('definition' => 'core_account/b2c/property/name', 'mandatory' => true),
 					'n_fn' => array('definition' => 'core_account/generic/property/n_fn', 'mandatory' => true),
 					'photo_link_id' => array('definition' => 'core_account/generic/property/photo_link_id'),
 					'place_id' => array('definition' => 'core_account/generic/property/place_id'),
@@ -1750,7 +1769,7 @@ table.note-report td {
 					'place_id' => [],
 					'status' => ['multiple' => true],
 					'identifier' => [],
-					'n_fn' => [],
+					'name' => [],
 					'email' => [],
 					'birth_date' => [],
 					'callback_date' => [],
@@ -1760,7 +1779,7 @@ table.note-report td {
 	'core_account/list/b2c' => array(
 			'properties' => array(
 					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
-					'n_fn' => [],
+					'name' => [],
 					'identifier' => [],
 					'tel_work' => ['rendering' => 'phone'],
 					'tel_cell' => ['rendering' => 'phone'],
@@ -1787,7 +1806,7 @@ table.note-report td {
 	'core_account/update/b2c' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
-			'identifier' => array('mandatory' => true),
+			'name' => array('mandatory' => true),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'callback_date' => array('mandatory' => false),
@@ -1829,7 +1848,7 @@ table.note-report td {
 			'place_id' => array('mandatory' => true),
 			'status' => [],
 			'identifier' => [],
-			'n_fn' => [],
+			'name' => [],
 			'callback_date' => [],
 			'n_title' => [],
 			'n_first' => [],
@@ -2573,6 +2592,7 @@ table.note-report td {
 					'place_id' => array('definition' => 'commitment/property/place_id'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
+					'n_fn' => array('definition' => 'commitment/property/n_fn'),
 					'caption' => array('definition' => 'commitment/property/caption'),
 					'description' => array('definition' => 'commitment/property/description'),
 					'quantity' => array('definition' => 'commitment/property/quantity'),
@@ -2664,6 +2684,44 @@ table.note-report td {
 			),
 	),
 
+	'commitment/send-message/human_service' => array(
+		'templates' => array(
+			'generic' => array('definition' => 'commitment/template/generic'),
+		),
+		'signature' => array('definition' => 'commitment/signature/generic'),
+	),
+
+	'commitment/template/generic' => array(
+		'labels' => array(
+			'en_US' => 'Generic',
+			'fr_FR' => 'Générique',
+		),
+		'cci' => ['contact@p-pit.fr'],
+		'from_mail' => 'contact@p-pit.fr',
+		'from_name' => 'Le support P-Pit',
+		'subject' => array(
+			'text' => array('default' => '%s - Your invoice', 'fr_FR' => '%s - Votre facture'),
+			'params' => array('place_caption'),
+		),
+		'body' => array(
+			'text' => array(
+				'default' => '<p>Hello,</p>
+<p>Your online invoice is available. Please click on <a target="_blank" href="/~bruno/p-pit.fr/public/commitment-message/download-invoice/%s">Facture</a>%s to get your invoice.</p>
+<p>Best regards,</p>
+<p>%s</p>
+',
+				'fr_FR' => '<p>Bonjour,</p>
+<p>Nous vous informons que votre facture est disponible : <a target="_blank" href="%s">Télécharger votre facture</a>.</p>
+<p>Nous vous remercions de votre confiance et restons à votre disposition.</p>
+<p>Bien cordialement,</p>
+<br>
+<img height="%s" src="%s" alt="%s logo" />				
+',
+			),
+			'params' => array('invoice_route', 'place_logo_height', 'logo_src', 'place_caption'),
+		),
+	),
+	
 	// Learning
 
 	'commitment/property_10/learning' => array(

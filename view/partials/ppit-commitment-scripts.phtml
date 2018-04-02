@@ -1053,6 +1053,81 @@ foreach ($groupPage as $propertyId => $options) {
 echo $this->partial('/partials/check-update-properties', array('entity' => 'Group', 'context' => $context, 'properties' => $properties)) 
 ?>
 
+function connectSendMessageForm()
+{
+	var xhttp = new XMLHttpRequest();
+
+	var commitmentNumber = $('#commitment-number').val(), commitments = '';
+	first = true;
+	for (i = 0, j = 0; i < commitmentNumber; i++) {
+		if (document.getElementById('commitment-checkbox_' + i).checked) {
+			if (!first) commitments += ',';
+			first = false;
+			commitments += $('#commitment_' + i).val();
+			j++;
+		}
+	}
+
+	var route = '<?php echo $this->url('commitment/sendMessage', ['type' => $type, 'template_id' => 'generic']) ?>' + '?commitments=' + commitments;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("POST", route, true);
+	xhttp.onreadystatechange = function() {
+		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			document.getElementById('send-message-panel').innerHTML = xhttp.responseText;
+		}
+	}
+	xhttp.send();
+}
+
+function getSendMessageForm() {
+	$('#send-message-button').removeClass('btn-default').addClass('btn-warning');
+	$('#send-message-alert').show();
+	$('#send-message-button').click(function () { connectSendMessageForm(); });
+}
+
+function getSendMessage() {
+
+	var xhttp = new XMLHttpRequest();
+
+	var commitmentNumber = $('#commitment-number').val(), commitments = '';
+	first = true;
+	for (i = 0, j = 0; i < commitmentNumber; i++) {
+		if (document.getElementById('commitment-checkbox_' + i).checked) {
+			if (!first) commitments += ',';
+			first = false;
+			commitments += $('#commitment_' + i).val();
+			j++;
+		}
+	}
+
+	var route = '<?php echo $this->url('commitment/sendMessage', ['type' => $type, 'template_id' => 'generic']) ?>' + '?commitments=' + commitments;
+
+	// Execute the ajax request
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", route, true);
+	xhttp.onreadystatechange = function() {
+			if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+		if (xhttp.readyState == 4) {
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			if (xhttp.status == 200) {
+	<?php endif;?>
+
+			document.getElementById('send-message-panel').innerHTML = xhttp.responseText;
+			connectRemoveIcon('remove-anchor', 'form_action');
+			$('#send-message-alert').hide();
+			$('#send-message-button').click(function () { getSendMessageForm(); });
+			
+	<?php if (!$context->getConfig()['isTraceActive']) : ?>
+			}
+	<?php endif;?>
+		}
+	}
+	xhttp.send();
+}
+
 function postGroup()
 {
 
@@ -1158,11 +1233,31 @@ function getGroup() {
 
 			document.getElementById('detail-div_0').innerHTML = xhttp.responseText;
 			postGroup();
+			getSendMessage();
 			
 			$('#remove-anchor').click(function () {
 				$('.detail-row').hide();
 				filterCommitmentList();
 			});
+
+			$('.group-panel').hide();
+			$('#update-tab').addClass('active');
+			$('#update-panel').show();
+			
+			$('#update-tab').click(function () {
+				$('.group-tab').removeClass('active');
+				$('#update-tab').addClass('active');
+				$('.group-panel').hide();
+				$('#update-panel').show();
+			});
+			
+			$('#send-message-tab').click(function () {
+				$('.group-tab').removeClass('active');
+				$('#send-message-tab').addClass('active');
+				$('.group-panel').hide();
+				$('#send-message-panel').show();
+			});
+
 	<?php if (!$context->getConfig()['isTraceActive']) : ?>
 			}
 	<?php endif;?>

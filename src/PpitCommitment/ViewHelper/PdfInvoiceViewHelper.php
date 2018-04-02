@@ -144,9 +144,16 @@ class PdfInvoiceViewHelper
 	    		else $caption .= ' (TVA '.sprintf('%d', round($line['tax_rate']*100, 1)).'%)';
     		}
     		$pdf->Cell(110, 6, $caption, 'LR', 0, 'L', $color);
-    		$pdf->Cell(25, 6, $context->formatFloat($line['unit_price'], 2), 'LR', 0, 'R', $color);
-    		$pdf->Cell(20, 6, $line['quantity'], 'LR', 0, 'C', $color);
-    		$pdf->Cell(25, 6, $context->formatFloat($line['amount'], 2), 'LR', 0, 'R', $color);
+    		if (array_key_exists('quantity', $line)) {
+	    		$pdf->Cell(25, 6, $context->formatFloat($line['unit_price'], 2), 'LR', 0, 'R', $color);
+	    		$pdf->Cell(20, 6, $line['quantity'], 'LR', 0, 'C', $color);
+	    		$pdf->Cell(25, 6, $context->formatFloat($line['amount'], 2), 'LR', 0, 'R', $color);
+    		}
+    		else {
+    			$pdf->Cell(25, 6, '', 'LR', 0, 'R', $color);
+    			$pdf->Cell(20, 6, '', 'LR', 0, 'C', $color);
+    			$pdf->Cell(25, 6, '', 'LR', 0, 'R', $color);
+    		}
     		$color = ($color+1)%2;
     	}
 
