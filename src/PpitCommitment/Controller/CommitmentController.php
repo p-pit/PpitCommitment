@@ -918,13 +918,14 @@ class CommitmentController extends AbstractActionController
 				foreach ($mask['params'] as $param) {
 					if ($param == 'year') $arguments[] = substr($commitment->invoice_date, 0, 4);
 					elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
-					elseif ($param == 'counter') $arguments[] = sprintf("%'.03d", $year->next_value);
+					elseif ($param == 'counter') $arguments[] = $year->next_value;
 				}
 				$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
 				$commitmentMessage = CommitmentMessage::instanciate('invoice');
 				$invoice = $this->generateInvoice($type, $account, $commitment);
 				
 				$commitmentMessage->status = 'new';
+				$commitmentMessage->authentication_token = md5(uniqid(rand(), true));
 				$commitmentMessage->account_id = $account->id;
 				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
 				$commitmentMessage->direction = 'O';
@@ -1518,7 +1519,7 @@ class CommitmentController extends AbstractActionController
 		$emails = array();
     	foreach ($commitmentIds as $commitment_id) {
 	    	$commitment = Commitment::get($commitment_id);
-    		if ($commitment->email) {
+    		if ($commitment->email && $commitment->invoice_message_id) {
     			if ($commitment->place_logo_src) {
     				$logo_src = $commitment->place_logo_src;
     			}
@@ -1529,10 +1530,9 @@ class CommitmentController extends AbstractActionController
     			$basePath = $context->getServiceManager()->get('viewhelpermanager')->get('basePath');
     			$link = $context->getConfig()['ppitCoreSettings']['domainName'].$basePath('logos/');
     			$commitment->properties['logo_src'] = $link.$context->getInstance()->caption.'/'.$logo_src;
-//    			$commitment->properties['logo_src'] = 'https://www.p-pit.fr/logos/'.$context->getInstance()->caption.'/'.$logo_src;
 
-    			if ($commitment->invoice_message_id) $commitment->properties['invoice_route'] = $this->url()->fromRoute('commitmentMessage/downloadInvoice', ['id' => $commitment->invoice_message_id]);
-    			else $commitment->properties['invoice_route'] = $this->url()->fromRoute('commitment/downloadInvoice', ['type' => $type, 'id' => $commitment->id]);
+				$commitmentMessage = CommitmentMessage::get($commitment->invoice_message_id);
+				$commitment->properties['invoice_route'] = $context->getConfig()['ppitCoreSettings']['domainName'].$this->url()->fromRoute('commitmentMessage/guestDownloadInvoice', ['id' => $commitment->invoice_message_id]).'?hash='.$commitmentMessage->authentication_token;
 
     			$data = array();
     			$data['account_name'] = $commitment->account_name;
@@ -1572,6 +1572,7 @@ class CommitmentController extends AbstractActionController
     		if ($csrfForm->isValid()) { // CSRF check
 				foreach ($emails as $data) {
 	    			$mail = ContactMessage::instanciate();
+			    	$mail->type = 'email';
 	    			if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
 	    
 	    			// Atomicity

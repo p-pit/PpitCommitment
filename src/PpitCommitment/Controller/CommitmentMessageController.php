@@ -1208,12 +1208,38 @@ class CommitmentMessageController extends AbstractActionController
     	$content = $pdf->Output('invoice-'.$context->getInstance()->caption.'-'.$invoice['identifier'].'.pdf', 'I');
     	return $this->response;
     }
+
+    public function guestDownloadInvoiceAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
     
+    	$id = $this->params()->fromRoute('id', null);
+    	if (!$id) return $this->redirect()->toRoute('index');
+    	$message = CommitmentMessage::get($id);
+
+    	$token = null;
+    	if (!$message->authentication_token) return $this->redirect()->toRoute('user/expired');
+    	$token = $this->params()->fromQuery('hash', null);
+    	if ($token != $message->authentication_token) return $this->redirect()->toRoute('user/expired');
+
+    	return $this->downloadInvoiceAction();
+    }
+
     public function serializeAction()
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
     	echo json_encode($context->getConfig('poc/p-pit-commitment/invoice'), JSON_PRETTY_PRINT);
     	return $this->response;
+    }
+    
+    public function repairAction() {
+    	foreach (CommitmentMessage::getList('id', 'ASC', ['type' => 'invoice']) as $commitmentMessage) {
+    		if (!$commitmentMessage->authentication_token) {
+    			$commitmentMessage->authentication_token = md5(uniqid(rand(), true));
+    			$commitmentMessage->update(null);
+    		}
+    	}
     }
 }

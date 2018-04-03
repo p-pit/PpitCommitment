@@ -393,7 +393,7 @@ class TermController extends AbstractActionController
 					foreach ($mask['params'] as $param) {
 						if ($param == 'year') $arguments[] = substr($commitment->invoice_date, 0, 4);
 						elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
-						elseif ($param == 'counter') $arguments[] = sprintf("%'.03d", $year->next_value);
+						elseif ($param == 'counter') $arguments[] = $year->next_value;
 					}
 					$invoice['identifier'] = vsprintf($context->localize($mask['format']), $arguments);
     				$commitmentMessage->status = 'new';

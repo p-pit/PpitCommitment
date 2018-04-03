@@ -20,6 +20,7 @@ class CommitmentMessage implements InputFilterAwareInterface
 	public $id;
     public $instance_id;
     public $status;
+    public $authentication_token;
     public $account_id;
     public $identifier;
     public $direction;
@@ -49,6 +50,7 @@ class CommitmentMessage implements InputFilterAwareInterface
     {
         $this->id = (isset($data['id'])) ? $data['id'] : null;
         $this->status = (isset($data['status'])) ? $data['status'] : null;
+        $this->authentication_token = (isset($data['authentication_token'])) ? $data['authentication_token'] : null;
         $this->account_id = (isset($data['account_id'])) ? $data['account_id'] : null;
         $this->identifier = (isset($data['identifier'])) ? $data['identifier'] : null;
         $this->direction = (isset($data['direction'])) ? $data['direction'] : null;
@@ -67,6 +69,7 @@ class CommitmentMessage implements InputFilterAwareInterface
     	$data = array();
     	$data['id'] = (int) $this->id;
     	$data['status'] = $this->status;
+    	$data['authentication_token'] = $this->authentication_token;
     	$data['account_id'] = (int) $this->account_id;
     	$data['identifier'] = $this->identifier;
     	$data['direction'] = $this->direction;

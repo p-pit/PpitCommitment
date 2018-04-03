@@ -659,12 +659,33 @@ return array(
 	        								),
 	        						),
 	        				),
-	        				'serialize' => array(
+	        				'guestDownloadInvoice' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/guest-download-invoice[/:id]',
+	        								'constraints' => array(
+	        										'id'     => '[0-9]*',
+	        								),
+	        								'defaults' => array(
+	        										'action' => 'guestDownloadInvoice',
+	        								),
+	        						),
+	        				),
+            				'serialize' => array(
 	        						'type' => 'segment',
 	        						'options' => array(
 	        								'route' => '/serialize',
 	        								'defaults' => array(
 	        										'action' => 'serialize',
+	        								),
+	        						),
+	        				),
+            				'repair' => array(
+	        						'type' => 'segment',
+	        						'options' => array(
+	        								'route' => '/repair',
+	        								'defaults' => array(
+	        										'action' => 'repair',
 	        								),
 	        						),
 	        				),
@@ -852,8 +873,10 @@ return array(
             	array('route' => 'commitmentMessage/process', 'roles' => array('admin')),
             	array('route' => 'commitmentMessage/submit', 'roles' => array('admin')),
 				array('route' => 'commitmentMessage/downloadInvoice', 'roles' => array('sales_manager', 'accountant')),
-				array('route' => 'commitmentMessage/serialize', 'roles' => array('admin')),
-            		
+				array('route' => 'commitmentMessage/guestDownloadInvoice', 'roles' => array('guest')),
+            	array('route' => 'commitmentMessage/serialize', 'roles' => array('admin')),
+            	array('route' => 'commitmentMessage/repair', 'roles' => array('admin')),
+            	 
             	array('route' => 'commitmentTerm', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/index', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/search', 'roles' => array('sales_manager')),
@@ -2278,7 +2301,7 @@ table.note-report td {
 	),
 	
 	'commitment/invoice_identifier_mask' => array(
-		'format' => array('default' => '%s-%s'),
+		'format' => array('default' => '%s-%5d'),
 		'params' => array('year', 'counter'),
 	),
 	'commitment/invoice_tax_mention' => '',
@@ -2554,7 +2577,9 @@ table.note-report td {
 			'description' => array('mandatory' => false),
 	),
 	'commitment/group/service' => array(
+			'year' => [],
 			'status' => [],
+			'invoice_date' => [],
 			'caption' => [],
 			'description' => [],
 	),
@@ -2696,7 +2721,7 @@ table.note-report td {
 			'en_US' => 'Generic',
 			'fr_FR' => 'Générique',
 		),
-		'cci' => ['contact@p-pit.fr'],
+		'cci' => ['contact@p-pit.fr' => 'contact@p-pit.fr'],
 		'from_mail' => 'contact@p-pit.fr',
 		'from_name' => 'Le support P-Pit',
 		'subject' => array(
@@ -2706,12 +2731,14 @@ table.note-report td {
 		'body' => array(
 			'text' => array(
 				'default' => '<p>Hello,</p>
-<p>Your online invoice is available. Please click on <a target="_blank" href="/~bruno/p-pit.fr/public/commitment-message/download-invoice/%s">Facture</a>%s to get your invoice.</p>
+<p>We inform you that your online invoice is available: <a href="%s">Download your invoice</a>.</p>
+<p>We thank you for using our services et remain at your disposal.</p> 
 <p>Best regards,</p>
-<p>%s</p>
+<br>
+<img height="%s" src="%s" alt="%s logo" />				
 ',
 				'fr_FR' => '<p>Bonjour,</p>
-<p>Nous vous informons que votre facture est disponible : <a target="_blank" href="%s">Télécharger votre facture</a>.</p>
+<p>Nous vous informons que votre facture est disponible : <a href="%s">Télécharger votre facture</a>.</p>
 <p>Nous vous remercions de votre confiance et restons à votre disposition.</p>
 <p>Bien cordialement,</p>
 <br>
