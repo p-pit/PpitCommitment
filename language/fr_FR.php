@@ -7,6 +7,7 @@
 			'Actual delivery' => 'Livraison réelle',
 			'Actual settlement' => 'Règlement réel',
 			'Actual shipment' => 'Expédition réelle',
+			'Actualize the invoice' => 'Actualiser la facture',
 			'Add a commitment' => 'Ajouter un engagement',
 			'Add a photograph' => 'Ajouter une photo',
 			'ALREADY EXISTING ACCOUNT' => 'COMPTE DEJA EXISTANT',
@@ -131,4 +132,5 @@
 			'VAT 3' => 'TVA réduite',
 			'Welcome on your fresh-installed version of P-Pit application. You have received a registering email. To start, please click on the link inside.' => "Bienvenue sur votre nouvelle application P-Pit. Vous avez reçu un email d'enregistrement. Pour démarrer, veuillez cliquer sur le lien inclus dans cet email.",
 			'Width in pixels' => 'Largeur en pixels',
+			'You should have destroyed any previous version of this invoice. Please confirm.' => 'Vous devez avoir détruit toute version antérieure de cette facture. Veuillez confirmer.',
 	);

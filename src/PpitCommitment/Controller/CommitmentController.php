@@ -920,36 +920,43 @@ class CommitmentController extends AbstractActionController
 					elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
 					elseif ($param == 'counter') $arguments[] = $year->next_value;
 				}
-				$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
-				$commitmentMessage = CommitmentMessage::instanciate('invoice');
+				if ($commitment->invoice_message_id) {
+					$commitmentMessage = CommitmentMessage::get($commitment->invoice_message_id);
+				}
+				else {
+					$commitment->invoice_identifier = vsprintf($context->localize($mask['format']), $arguments);
+					$commitmentMessage = CommitmentMessage::instanciate('invoice');
+					$commitmentMessage->status = 'new';
+					$commitmentMessage->authentication_token = md5(uniqid(rand(), true));
+					$commitmentMessage->account_id = $account->id;
+					$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
+					$commitmentMessage->direction = 'O';
+					$commitmentMessage->format = 'application/json';
+				}
 				$invoice = $this->generateInvoice($type, $account, $commitment);
-				
-				$commitmentMessage->status = 'new';
-				$commitmentMessage->authentication_token = md5(uniqid(rand(), true));
-				$commitmentMessage->account_id = $account->id;
-				$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
-				$commitmentMessage->direction = 'O';
-				$commitmentMessage->format = 'application/json';
-				
+
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
     			$connection->beginTransaction();
     			try {
-    				$year->increment();
+    				if (!$commitment->invoice_message_id) $year->increment();
 					$commitmentMessage->content = json_encode($invoice, JSON_PRETTY_PRINT);
-				    $rc = $commitmentMessage->add();
-    
+				    if (!$commitmentMessage->id) $rc = $commitmentMessage->add();
+				    else $rc = $commitmentMessage->update(null);
+
     				if ($rc != 'OK') {
     					$connection->rollback();
     					$error = $rc;
     				}
     				if (!$error) {
-    					$commitment->invoice_message_id = $commitmentMessage->id;
-	    				$rc = $commitment->update($request->getPost('update_time'));
-    					if ($rc != 'OK') {
-	    					$connection->rollback();
-	    					$error = $rc;
-	    				}
+    					if (!$commitment->invoice_message_id) {
+    						$commitment->invoice_message_id = $commitmentMessage->id;
+		    				$rc = $commitment->update($request->getPost('update_time'));
+	    					if ($rc != 'OK') {
+		    					$connection->rollback();
+		    					$error = $rc;
+		    				}
+    					}
     				}
     				if (!$error) {
     					if (array_key_exists('p-pit-finance', $context->getApplications())) $commitment->record('registration');
@@ -1532,7 +1539,7 @@ class CommitmentController extends AbstractActionController
     			$commitment->properties['logo_src'] = $link.$context->getInstance()->caption.'/'.$logo_src;
 
 				$commitmentMessage = CommitmentMessage::get($commitment->invoice_message_id);
-				$commitment->properties['invoice_route'] = $context->getConfig()['ppitCoreSettings']['domainName'].$this->url()->fromRoute('commitmentMessage/guestDownloadInvoice', ['id' => $commitment->invoice_message_id]).'?hash='.$commitmentMessage->authentication_token;
+				$commitment->properties['invoice_route'] = 'https://'.$context->getInstance()->fqdn.$this->url()->fromRoute('commitmentMessage/guestDownloadInvoice', ['id' => $commitment->invoice_message_id]).'?hash='.$commitmentMessage->authentication_token;
 
     			$data = array();
     			$data['account_name'] = $commitment->account_name;

@@ -5,7 +5,7 @@
 <?php endif;?>
 
 <?php if ($commitment->id && !$message) : ?>
-		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || in_array($commitment->status, array('invoiced', 'settled'))) echo 'disabled="disabled"' ?>>
+		<button type="button" class="btn btn-default action-btn" id="commitment-update-anchor" title="<?php echo $this->translate('Update', 'ppit-core', $context->getLocale()) ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || in_array($commitment->status, array('invoiced', 'settled')) && !$context->hasRole('admin')) echo 'disabled="disabled"' ?>>
 			<span class="glyphicon glyphicon-edit"></span>
 		</button>
 
@@ -20,6 +20,15 @@
 		<div class="form-group">
 			<div class="alert alert-danger" id="commitment-invoice-alert" style="text-align: center">
 				<strong><?php echo $this->translate('This action is irreversible. Please confirm.', 'ppit-core', $context->getLocale()) ?></strong>
+			</div>
+		</div>
+	<?php elseif ($context->hasRole('admin')) : ?>
+		<button type="button" class="btn btn-danger action-btn" id="commitment-invoice-anchor" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed'))) echo 'disabled="disabled"' ?>>
+			<?php echo $this->translate('Actualize the invoice', 'ppit-commitment', $context->getLocale()) ?>
+		</button>
+		<div class="form-group">
+			<div class="alert alert-danger" id="commitment-invoice-alert" style="text-align: center">
+				<strong><?php echo $this->translate('You should have destroyed any previous version of this invoice. Please confirm.', 'ppit-core', $context->getLocale()) ?></strong>
 			</div>
 		</div>
 	<?php endif;?>
