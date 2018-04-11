@@ -1830,6 +1830,7 @@ table.note-report td {
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
 			'name' => array('mandatory' => true),
+			'identifier' => array('mandatory' => true),
 			'n_first' => array('mandatory' => false),
 			'n_last' => array('mandatory' => true),
 			'callback_date' => array('mandatory' => false),
@@ -2738,8 +2739,8 @@ table.note-report td {
 <img height="%s" src="%s" alt="%s logo" />				
 ',
 				'fr_FR' => '<p>Bonjour,</p>
-<p>Nous vous informons que votre facture est disponible : <a href="%s">Télécharger votre facture</a>.</p>
-<p>Nous vous remercions de votre confiance et restons à votre disposition.</p>
+<p>Nous vous informons que votre facture est disponible : <a href="%s">T&eacute;l&eacute;charger votre facture</a>.</p>
+<p>Nous vous remercions de votre confiance et restons &agrave; votre disposition.</p>
 <p>Bien cordialement,</p>
 <br>
 <img height="%s" src="%s" alt="%s logo" />				

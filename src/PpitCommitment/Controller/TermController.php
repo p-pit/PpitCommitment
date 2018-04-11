@@ -391,8 +391,8 @@ class TermController extends AbstractActionController
 					$mask = $context->getConfig('commitment/invoice_identifier_mask');
 					$arguments = array();
 					foreach ($mask['params'] as $param) {
-						if ($param == 'year') $arguments[] = substr($commitment->invoice_date, 0, 4);
-						elseif ($param == 'month') $arguments[] = substr($commitment->invoice_date, 5, 2);
+						if ($param == 'year') $arguments[] = date('Y');
+						elseif ($param == 'month') $arguments[] = date('m');
 						elseif ($param == 'counter') $arguments[] = $year->next_value;
 					}
 					$invoice['identifier'] = vsprintf($context->localize($mask['format']), $arguments);

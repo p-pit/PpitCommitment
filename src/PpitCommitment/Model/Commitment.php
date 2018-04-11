@@ -136,6 +136,8 @@ class Commitment implements InputFilterAwareInterface
     public $place_caption;
     public $place_identifier;
     public $place_support_email;
+	public $place_logo_height;
+	public $place_logo_src;
     public $place_config;
     public $properties;
 	public $n_fn;
