@@ -685,7 +685,8 @@ class CommitmentController extends AbstractActionController
     private function generateInvoice($type, $account, $commitment, $proforma = false)
     {
     	$context = Context::getCurrent();
-    	
+    	$invoice['type'] = $type;
+
     	// Header
     	if ($commitment->account->place->getConfig('commitment/invoice_header')) $invoice['header'] = $commitment->account->place->getConfig('commitment/invoice_header');
     	else $invoice['header'] = $context->getConfig('commitment/invoice_header');
@@ -870,7 +871,7 @@ class CommitmentController extends AbstractActionController
 	    $invoice['settled_amount'] = $settledAmount;
 	    $invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
     	
-    	$invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+    	if (array_key_exists('commitment/invoice_tax_mention', $commitment->place_config)) $invoice['tax_mention'] = $commitment->place_config['commitment/invoice_tax_mention'];
     	if ($commitment->status != 'settled') {
 	    	if ($commitment->account->place->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $commitment->account->place->getConfig('commitment/invoice_bank_details');
     		elseif ($context->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $context->getConfig('commitment/invoice_bank_details');

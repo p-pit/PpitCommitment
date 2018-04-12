@@ -19,6 +19,7 @@ class PdfInvoiceViewHelper
     	// Retrieve the context
     	$context = Context::getCurrent();
     	$invoiceSpecs = $context->getConfig('commitment/invoice');
+    	$taxRegime = $place->tax_regime;
 
     	// create new PDF document
     	$pdf->footer = ($place->legal_footer) ? $place->legal_footer : $context->getConfig('headerParams')['footer']['value'];
@@ -129,9 +130,9 @@ class PdfInvoiceViewHelper
     	$pdf->SetFont('', '', 8);
     	$pdf->SetTextColor(255);
     	$pdf->Cell(110, 7, 'Libellé', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'PU ('.$invoice['currency_symbol'].(($invoiceSpecs['tax']) ? ' '.$taxComputing : '').')', 1, 0, 'C', 1);
+    	$pdf->Cell(25, 7, 'PU ('.$invoice['currency_symbol'].(($taxRegime) ? ' '.$taxComputing : '').')', 1, 0, 'C', 1);
     	$pdf->Cell(20, 7, 'Quantité', 1, 0, 'C', 1);
-    	$pdf->Cell(25, 7, 'Montant ('.$invoice['currency_symbol'].(($invoiceSpecs['tax']) ? ' '.$taxComputing : '').')', 1, 0, 'R', 1);
+    	$pdf->Cell(25, 7, 'Montant ('.$invoice['currency_symbol'].(($taxRegime) ? ' '.$taxComputing : '').')', 1, 0, 'R', 1);
     	// Color and font restoration
     	$pdf->SetFillColor(239, 239, 239);
     	$pdf->SetTextColor(0);
@@ -139,7 +140,7 @@ class PdfInvoiceViewHelper
     	foreach ($invoice['lines'] as $line) {
     		$pdf->Ln();
     		$caption = $line['caption'];
-    		if (!$proforma && $invoiceSpecs['tax']) {
+    		if (!$proforma && $taxRegime) {
     			if ($line['tax_rate'] == 0) $caption .= ' (exonéré)';
 	    		else $caption .= ' (TVA '.sprintf('%d', round($line['tax_rate']*100, 1)).'%)';
     		}
@@ -160,7 +161,7 @@ class PdfInvoiceViewHelper
     	$pdf->Ln();
     	$pdf->Cell(180, 0, '', 'T');
     	$pdf->SetDrawColor(255, 255, 255);
-    	if (!$proforma && $invoiceSpecs['tax']) {
+    	if (!$proforma && $taxRegime) {
     		$pdf->Ln();
     		$pdf->Cell(155, 6, 'Total HT :', 'LR', 0, 'R', false);
 	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['excluding_tax'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
@@ -182,7 +183,7 @@ class PdfInvoiceViewHelper
     	}
     	$pdf->Ln();
     	$pdf->SetFont('', 'B');
-    	$pdf->Cell(155, 6, 'Total '.(($invoiceSpecs['tax']) ? 'TTC ' : '').':', 'LR', 0, 'R', false);
+    	$pdf->Cell(155, 6, 'Total '.(($taxRegime) ? 'TTC ' : '').':', 'LR', 0, 'R', false);
     	$pdf->Cell(25, 6, $context->formatFloat($invoice['tax_inclusive'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);
 
     	// Terms
