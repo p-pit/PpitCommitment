@@ -833,7 +833,7 @@ class CommitmentController extends AbstractActionController
     	}
     	
     	// Sums
-		if (!$proforma) {
+//		if (!$proforma) {
 	    	$invoice['excluding_tax'] = $commitment->excluding_tax;
 	    	if ($commitment->tax_1_amount != 0) {
 	    		$invoice['taxable_1_total'] = $commitment->taxable_1_total;
@@ -847,7 +847,7 @@ class CommitmentController extends AbstractActionController
 	    		$invoice['taxable_3_total'] = $commitment->taxable_3_total;
 	    		$invoice['tax_3_amount'] = $commitment->tax_3_amount;
 	    	}
-		}
+//		}
     	$invoice['tax_inclusive'] = $commitment->tax_inclusive;
     	 
     	// Terms

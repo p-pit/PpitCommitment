@@ -161,7 +161,7 @@ class PdfInvoiceViewHelper
     	$pdf->Ln();
     	$pdf->Cell(180, 0, '', 'T');
     	$pdf->SetDrawColor(255, 255, 255);
-    	if (!$proforma && $taxRegime) {
+    	if ($taxRegime) {
     		$pdf->Ln();
     		$pdf->Cell(155, 6, 'Total HT :', 'LR', 0, 'R', false);
 	    	$pdf->Cell(25, 6, $context->formatFloat($invoice['excluding_tax'], 2).' '.$invoice['currency_symbol'], 'LR', 0, 'R', false);

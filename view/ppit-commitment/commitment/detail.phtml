@@ -354,6 +354,9 @@
 					<button type="button" class="btn btn-default action-btn btn-xs term-update-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-update-anchor_<?php echo $i ?>" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || in_array($commitment->status, array('invoiced', 'settled')) && !$context->hasRole('admin')) echo 'disabled="disabled"' ?>>
 						<span class="glyphicon glyphicon-plus" id="add-glyphicon"></span>
 					</button>
+					<button type="button" class="btn btn-default action-btn btn-xs term-generate-anchor" title="<?php echo $this->translate('Add', 'ppit-core', $context->getLocale())?>" id="term-generate-anchor" <?php if (in_array($commitment->credit_status, array('blocked', 'suspended', 'closed')) || in_array($commitment->status, array('invoiced', 'settled')) && !$context->hasRole('admin')) echo 'disabled="disabled"' ?>>
+						<?php echo $this->translate('Generate schedule', 'ppit-commitment', $context->getLocale())?>
+					</button>
 				</td>
 			</tr>
 			<tr class="term term-tr" id="term-tr_<?php echo $i ?>" style="display: none">
@@ -369,6 +372,21 @@
 						</div>
 						<input type="hidden" id="term_id-<?php echo $i ?>" value="0" />
 						<div class="panel-body" id="term-update-panel_<?php echo $i ?>"></div>
+					<div>
+				</td>
+			</tr>
+			<tr class="term term-tr" id="term-tr" style="display: none">
+				<td colspan="8">
+					<div class="panel panel-default">
+						<div class="panel-heading" style="background: <?php echo $context->getConfig('styleSheet')['panelHeadingBackground'] ?>; color: <?php echo $context->getConfig('styleSheet')['panelHeadingColor'] ?>">
+							<strong><?php echo $this->translate('Generate schedule', 'ppit-commitment', $context->getLocale()) ?></strong>
+					 		<div class="btn-group pull-right">
+								<button type="button" class="btn btn-default detail-remove-anchor" title="<?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?>">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+					 		 </div>
+						</div>
+						<div class="panel-body" id="term-generate-panel"></div>
 					<div>
 				</td>
 			</tr>

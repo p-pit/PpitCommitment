@@ -172,6 +172,82 @@ class TermController extends AbstractActionController
     	return $view;
     }
 
+    public function generateAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	$configProperties = $this->getConfigProperties();
+    	$commitment_id = (int) $this->params()->fromRoute('commitment_id', 0);
+    	$commitment = Commitment::get($commitment_id);
+    	$term = Term::instanciate($commitment_id);
+    	$term->commitment_caption = $commitment->caption;
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		if ($csrfForm->isValid()) { // CSRF check
+    
+    			// Load the input data
+    			$numberOfTerms = $request->getPost('number_of_terms');
+    			$termDate = $request->getPost('first_term_date');
+    			$periodicity = $request->getPost('periodicity');
+    			$paymentMean = $request->getPost('means_of_payment');
+    			$termAmount = round($commitment->tax_inclusive / $numberOfTerms, 2);
+    			$cumulativeAmount = 0;
+    			// Atomically save
+    			$connection = Term::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+		    	$data = array();
+		    	$data['status'] = 'expected';
+    			$data['means_of_payment'] = $paymentMean;
+		    	try {
+    				for ($i = 0; $i < $numberOfTerms; $i++) {
+				    	$data['caption'] = 'Echéance '.($i + 1);
+    					$data['due_date'] = $termDate;
+    					$termDate = date('Y-m-d', strtotime($termDate.' + '.$periodicity.' days'));
+    					if ($i == $numberOfTerms - 1) $data['amount'] = $commitment->tax_inclusive - $cumulativeAmount;
+    					else {
+	    					$data['amount'] = $termAmount;
+	    					$cumulativeAmount += $termAmount;
+    					}
+    					if ($term->loadData($data, $request->getFiles()->toArray()) != 'OK') throw new \Exception('View error');
+	    				$term->id = null;
+		    			$rc = $term->add();
+	    				if ($rc != 'OK') {
+	    					$error = $rc;
+	    					break;
+	    				}
+    				}
+					if ($error) $connection->rollback();
+					else {
+						$connection->commit();
+						$message = 'OK';
+					}
+				}
+				catch (\Exception $e) {
+					$connection->rollback();
+					throw $e;
+				}
+			}
+		}
+    
+    	$view = new ViewModel(array(
+    		'context' => $context,
+    		'term' => $term,
+    		'csrfForm' => $csrfForm,
+    		'error' => $error,
+    		'message' => $message,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+    
     public function updateAction()
     {
     	// Retrieve the context

@@ -683,6 +683,115 @@ function connectCommitmentUpdateOptionForm(id)
 	}
 }
 
+function connectCommitmentGenerateTermForm(id)
+{
+	var form = document.getElementById('generate-term-form');
+	form.onsubmit = function(event) {
+		
+		event.preventDefault();
+
+		var validity = true;
+			
+	// Number of terms
+		var numberOfTerms = $('#number_of_terms').val();
+		error = checkNumber(numberOfTerms, 0, 99);
+		if (error) {
+			$('#number_of_terms-error').text(error);
+			$('#number_of_terms-error').show();
+			document.getElementById('number_of_terms').focus();
+			validity = false;
+		}
+	
+	// First term date	
+	 	first_term_date = $('#input_first_term_date').val();
+		if (first_term_date == "") {
+			$('#input_first_term_date-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+			$('#input_first_term_date-error').show();
+			document.getElementById('input_first_term_date').focus();
+			validity = false;
+		}
+	 	else {
+			error = checkDate(first_term_date);
+			if (error) {
+				$('#input_first_term_date-error').text(error);
+				$('#input_first_term_date-error').show();
+				document.getElementById('input_first_term_date').focus();
+				validity = false;
+			}
+			else {
+				first_term_date = encodeDate(first_term_date);
+				$('#first_term_date').val(first_term_date);
+			}
+		}
+			
+	// Means of payment
+		val = $('#means_of_payment').val();
+		if (!val) {
+			$('#means_of_payment-error').text('<?php echo $this->translate('Please input a value', 'ppit-core', $context->getLocale()) ?>');
+			$('#means_of_payment-error').show();
+			document.getElementById('means_of_payment').focus();
+			validity = false;
+		}
+		else {
+		    if (val.length > 255) {
+				$('#means_of_payment-error').text('<?php echo $this->translate('The input is too long', 'ppit-core', $context->getLocale()) ?>');
+				$('#means_of_payment-error').show();
+				document.getElementById('means_of_payment').focus();
+				validity = false;
+			}
+		}
+			
+	// Periodicity
+		var periodicity = $('#periodicity').val();
+		error = checkNumber(periodicity, 0, 99);
+		if (error) {
+			$('#periodicity-error').text(error);
+			$('#periodicity-error').show();
+			document.getElementById('periodicity').focus();
+			validity = false;
+		}
+	
+		if (validity) {
+	
+			// Create a new FormData object.
+			var formData = new FormData();
+			formData.append('number_of_terms', $('#number_of_terms').val());
+			formData.append('first_term_date', $('#first_term_date').val());
+			formData.append('means_of_payment', $('#means_of_payment').val());
+			formData.append('periodicity', $('#periodicity').val());
+		
+			var xhttp = new XMLHttpRequest();
+			var route, target;
+			route = '<?php echo $this->url('commitmentTerm/generate') ?>/' + id;
+			xhttp.open('POST', route, true);
+			xhttp.onload = function () {
+				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+					getCommitmentDetail(id);
+				}
+			};
+			xhttp.send(formData);
+		}
+		else return false;
+	}
+}
+
+function getCommitmentGenerateTerm(id)
+{
+	var xhttp = new XMLHttpRequest();
+	var route, target;
+	route = '<?php echo $this->url('commitmentTerm/generate') ?>/' + id;
+	xhttp.open('GET', route, true);
+	xhttp.onload = function () {
+		if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
+			document.getElementById('term-generate-panel').innerHTML = xhttp.responseText;
+			$('#input_first_term_date').datepicker();
+			
+			connectCommitmentGenerateTermForm(id);
+		}
+	};
+	xhttp.send();
+}
+
 function connectCommitmentUpdateTermForm(id)
 {
 	var count, validity = true, error, number, val, i;
@@ -959,6 +1068,11 @@ function getCommitmentDetail(id) {
 				i = $(this).attr('id').split('_')[1]
 				$('#term-tr_' + i).show();
 				getTermUpdate($('#term_commitment_id').val(), $('#term_id-' + i).val(), '', 'term-update-panel_' + i);
+			});
+			$('#term-generate-anchor').click(function () {
+				$('.term-tr').hide();
+				$('#term-tr').show();
+				getCommitmentGenerateTerm($('#term_commitment_id').val());
 			});
 			$('#product_identifier').change(fillRowPrice);
 			$('.option_identifier').each(function () {

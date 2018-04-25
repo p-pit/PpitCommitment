@@ -750,7 +750,16 @@ return array(
         										),
         								),
         						),
-		        				'update' => array(
+		        				'generate' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/generate[/:commitment_id]',
+		        								'defaults' => array(
+		        										'action' => 'generate',
+		        								),
+		        						),
+		        				),
+	       						'update' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/update[/:commitment_id][/:id][/:act]',
@@ -884,7 +893,8 @@ return array(
 				array('route' => 'commitmentTerm/delete', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/export', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/list', 'roles' => array('sales_manager')),
-				array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
+				array('route' => 'commitmentTerm/generate', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/invoice', 'roles' => array('sales_manager', 'accountant')),
             )
         )
@@ -1084,39 +1094,37 @@ return array(
 	),
 
 	'core_account/business/property/property_2' => array(
-			'type' => 'select',
-			'modalities' => array(
-					'p-pit-learning' => array('en_US' => 'P-Pit Learning', 'fr_FR' => 'P-Pit Learning'),
-					'p-pit-commitment' => array('en_US' => 'P-Pit Commitment', 'fr_FR' => 'P-Pit Engagements'),
-					'p-pit-studies' => array('en_US' => 'P-Pit Studies', 'fr_FR' => 'P-Pit Studies'),
-			),
-			'labels' => array(
-					'en_US' => 'Subscribed product',
-					'fr_FR' => 'Produit souscrit',
-			),
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Available field 1',
+			'fr_FR' => 'Champs libre 1',
+		),
 	),
 
 	'core_account/business/property/property_3' => array(
-			'type' => 'input',
-			'labels' => array(
-					'en_US' => 'Web site', 'fr_FR' => 'Site web'
-			),
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Available field 2',
+			'fr_FR' => 'Champs libre 2',
+		),
 	),
-
+	
 	'core_account/business/property/property_4' => array(
-			'type' => 'input',
-			'labels' => array('en_US' => 'Legal mention', 'fr_FR' => 'Mention légale'),
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Available field 3',
+			'fr_FR' => 'Champs libre 3',
+		),
 	),
 
 	'core_account/business/property/property_5' => array(
-			'type' => 'select',
-			'modalities' => array(
-				'vat_on_collection' => array('en_US' => 'VAT on collection', 'fr_FR' => 'TVA sur les encaissements'),
-				'vat_not_applicable' => array('en_US' => 'VAT not applicable', 'fr_FR' => 'TVA non applicable'),
-			),
-			'labels' => array('en_US' => 'VAT mention', 'fr_FR' => 'Mention TVA'),
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Available field 4',
+			'fr_FR' => 'Champs libre 4',
+		),
 	),
-		
+	
 	'core_account/business/property/contact_meeting_context' => array(
 			'type' => 'select',
 			'modalities' => array(
@@ -1511,7 +1519,7 @@ return array(
 			'title_1' => null,
 			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
+			'n_last' => array('mandatory' => false),
 			'email' => array('mandatory' => false),
 			'tel_work' => array('mandatory' => false),
 			'tel_cell' => array('mandatory' => false),
@@ -2976,6 +2984,7 @@ table.note-report td {
 	
 	'commitment/update/learning' => array(
 			'year' => array('mandatory' => true),
+			'invoice_date' => array('mandatory' => true),
 			'property_10' => array('mandatory' => false),
 			'account_id' => array('mandatory' => true),
 			'caption' => array('mandatory' => true),
@@ -3222,6 +3231,7 @@ table.note-report td {
 				'templates' => array(
 						'generic' => array('definition' => 'core_account/sendMessage/generic'),
 //						'wishes_2018' => array('definition' => 'customization/flux/send-message/wishes_2018'),
+						'probonocorpo' => array('definition' => 'customization/pbc/send-message/survey_isc'),
 				),
 				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
 		),
