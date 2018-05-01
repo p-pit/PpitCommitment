@@ -1044,56 +1044,345 @@ return array(
 	'ppitCommitmentDependencies' => array(
 	),
 
-	// Business
+	// Account business
+
+	'core_account/business/property/title_1' => array(
+		'definition' => 'inline',
+		'type' => 'title',
+		'labels' => array(
+			'en_US' => 'ENTERPRISE IDENTIFICATION',
+			'fr_FR' => 'IDENTIFICATION DE L\'ENTREPRISE',
+		),
+	),
+	'core_account/business/property/title_2' => array(
+		'definition' => 'inline',
+		'type' => 'title',
+		'labels' => array(
+			'en_US' => 'REGISTRATION DATA',
+			'fr_FR' => 'DONNEES D\'INSCRIPTION',
+		),
+	),
+	'core_account/business/property/title_3' => array(
+		'definition' => 'inline',
+		'type' => 'title',
+		'labels' => array(
+			'en_US' => 'COMMENTS',
+			'fr_FR' => 'COMMENTAIRES',
+		),
+	),
+	'core_account/business/property/status' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+			'prospect' => array('en_US' => 'Prospect', 'fr_FR' => 'Prospect'),
+			'committed' => array('en_US' => 'Committed', 'fr_FR' => 'Engagé'),
+			'active' => array('en_US' => 'Customer', 'fr_FR' => 'Client'),
+			'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
+		),
+		'labels' => array(
+			'en_US' => 'Status',
+			'fr_FR' => 'Statut',
+		),
+		'perspectives' => array(
+			'account' => array('new', 'prospect', 'gone', 'committed', 'active'),
+		),
+		'mandatory' => true,
+	),
+	'core_account/business/property/identifier' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Identifier',
+			'fr_FR' => 'Identifiant',
+		),
+	),
+	'core_account/business/property/name' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Name',
+			'fr_FR' => 'Dénomination',
+		),
+	),
+	'core_account/business/property/basket' => array('definition' => 'core_account/generic/property/basket'),
+	'core_account/business/property/contact_1_id' => array(
+		'definition' => 'inline',
+		'type' => 'photo',
+		'labels' => array(
+			'en_US' => '',
+			'fr_FR' => '',
+		),
+	),
+	'core_account/business/property/n_title' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
+			'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
+			'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
+			'mr-mrs' => array('fr_FR' => 'Mr et Mme', 'en_US' => 'Mr & Mrs'),
+			'Maître' => array('fr_FR' => 'Maître', 'en_US' => 'Maître'),
+		),
+		'labels' => array(
+			'en_US' => 'Title',
+			'fr_FR' => 'Titre',
+		),
+	),
+	'core_account/business/property/n_first' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - First name',
+			'fr_FR' => 'Contact - Prénom',
+		),
+	),
+	'core_account/business/property/n_last' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Last name',
+			'fr_FR' => 'Contact - Nom',
+		),
+		'mandatory' => true,
+	),
+	'core_account/business/property/email' => array(
+		'definition' => 'inline',
+		'type' => 'email',
+		'labels' => array(
+			'en_US' => 'Contact - Email',
+			'fr_FR' => 'Contact - Email',
+		),
+	),
+	'core_account/business/property/tel_work' => array(
+		'definition' => 'inline',
+		'type' => 'phone',
+		'labels' => array(
+			'en_US' => 'Contact - Phone',
+			'fr_FR' => 'Contact - Téléphone',
+		),
+	),
+	'core_account/business/property/tel_cell' => array(
+		'definition' => 'inline',
+		'type' => 'phone',
+		'labels' => array(
+			'en_US' => 'Contact - Cellular',
+			'fr_FR' => 'Contact - Mobile',
+		),
+	),
+	'core_account/business/property/adr_street' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Address',
+			'fr_FR' => 'Contact - Adresse',
+		),
+	),
+	'core_account/business/property/adr_extended' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Complement',
+			'fr_FR' => 'Contact - Complément',
+		),
+	),
+	'core_account/business/property/adr_post_office_box' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Post office box',
+			'fr_FR' => 'Contact - Boîte postale',
+		),
+	),
+	'core_account/business/property/adr_zip' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Zip code',
+			'fr_FR' => 'Contact - Code postal',
+		),
+	),
+	'core_account/business/property/adr_city' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - City',
+			'fr_FR' => 'Contact - Ville',
+		),
+	),
+	'core_account/business/property/adr_state' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - State',
+			'fr_FR' => 'Contact - Etat',
+		),
+	),
+	'core_account/business/property/adr_country' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Country',
+			'fr_FR' => 'Contact - Pays',
+		),
+	),
+	'core_account/business/property/n_title_2' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
+			'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
+			'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
+		),
+		'labels' => array(
+			'en_US' => 'Title',
+			'fr_FR' => 'Titre',
+		),
+	),
+	'core_account/business/property/n_first_2' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - First name',
+			'fr_FR' => 'Contact - Prénom',
+		),
+	),
+	'core_account/business/property/n_last_2' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Last name',
+			'fr_FR' => 'Contact - Nom',
+		),
+	),
+	'core_account/business/property/email_2' => array(
+		'definition' => 'inline',
+		'type' => 'email',
+		'labels' => array(
+			'en_US' => 'Contact - Email',
+			'fr_FR' => 'Contact - Email',
+		),
+	),
+	'core_account/business/property/tel_work_2' => array(
+		'definition' => 'inline',
+		'type' => 'phone',
+		'labels' => array(
+			'en_US' => 'Contact - Phone',
+			'fr_FR' => 'Contact - Téléphone',
+		),
+	),
+	'core_account/business/property/tel_cell_2' => array(
+		'definition' => 'inline',
+		'type' => 'phone',
+		'labels' => array(
+			'en_US' => 'Contact - Cellular',
+			'fr_FR' => 'Contact - Mobile',
+		),
+	),
+	'core_account/business/property/address_2' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Contact - Address',
+			'fr_FR' => 'Contact - Adresse',
+		),
+	),
+	'core_account/business/property/place_id' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'2pit' => array('fr_FR' => 'P-PIT', 'en_US' => '2PIT'),
+		),
+		'labels' => array(
+			'en_US' => 'Center',
+			'fr_FR' => 'Centre',
+		),
+	),
+	'core_account/business/property/place_caption' => array('definition' => 'core_account/properties/place_caption'),
+	'core_account/business/property/opening_date' => array(
+		'definition' => 'inline',
+		'type' => 'date',
+		'labels' => array(
+			'en_US' => '1st contact date',
+			'fr_FR' => 'Date 1er contact',
+		),
+	),
+	'core_account/business/property/closing_date' => array(
+		'definition' => 'inline',
+		'type' => 'date',
+		'labels' => array(
+			'en_US' => 'Closing date',
+			'fr_FR' => 'Date de fermeture',
+		),
+	),
+	'core_account/business/property/callback_date' => array(
+		'definition' => 'inline',
+		'type' => 'date',
+		'labels' => array(
+			'en_US' => 'Callback date',
+			'fr_FR' => 'Date de rappel',
+		),
+	),
+	'core_account/business/property/contact_history' => array(
+		'definition' => 'inline',
+		'type' => 'log',
+		'labels' => array(
+			'en_US' => 'Comment',
+			'fr_FR' => 'Commentaire',
+		),
+	),
+	
 	'core_account/business/property/origine' => array(
-			'type' => 'select',
-			'modalities' => array(
-					'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
-					'subscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
-					'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
-					'cooptation' => array('en_US' => 'Cooptation', 'fr_FR' => 'Cooptation'),
-					'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
-					'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
-					'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
-					'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
-//					'address_book' => array('en_US' => 'Address book', 'fr_FR' => 'Carnet d\'adresse'),
-			),
-			'labels' => array(
-					'en_US' => 'Origine',
-					'fr_FR' => 'Origine',
-			),
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'web' => array('en_US' => 'Web site', 'fr_FR' => 'Site web'),
+			'subscription' => array('en_US' => 'Online subscription', 'fr_FR' => 'Inscription en ligne'),
+			'show' => array('en_US' => 'Show', 'fr_FR' => 'Salon'),
+			'cooptation' => array('en_US' => 'Cooptation', 'fr_FR' => 'Cooptation'),
+			'incoming' => array('en_US' => 'Incoming call', 'fr_FR' => 'Appel entrant'),
+			'outcoming' => array('en_US' => 'Outcoming call', 'fr_FR' => 'Appel sortant'),
+			'file' => array('en_US' => 'File', 'fr_FR' => 'Fichier'),
+			'agency' => array('en_US' => 'Agency', 'fr_FR' => 'Agence'),
+		),
+		'labels' => array(
+			'en_US' => 'Origine',
+			'fr_FR' => 'Origine',
+		),
 	),
 
 	'core_account/business/property/property_1' => array(
-			'type' => 'select',
-			'modalities' => array(
-					'agro' => array('en_US' => 'To be translated', 'fr_FR' => 'Agroalimentaire'),
-					'banque' => array('en_US' => 'To be translated', 'fr_FR' => 'Banque / Assurance'),
-					'bois' => array('en_US' => 'To be translated', 'fr_FR' => 'Bois / Papier / Carton / Imprimerie'),
-					'btp' => array('en_US' => 'To be translated', 'fr_FR' => 'BTP / Matériaux de construction'),
-					'chimie' => array('en_US' => 'To be translated', 'fr_FR' => 'Chimie / Parachimie'),
-					'commerce' => array('en_US' => 'To be translated', 'fr_FR' => 'Commerce / Négoce / Distribution'),
-					'edition' => array('en_US' => 'To be translated', 'fr_FR' => 'Édition / Communication / Multimédia'),
-					'electricite' => array('en_US' => 'To be translated', 'fr_FR' => 'Électronique / Électricité'),
-					'environnement' => array('en_US' => 'To be translated', 'fr_FR' => 'Environnement'),
-					'conseil' => array('en_US' => 'To be translated', 'fr_FR' => 'Études et conseils'),
-					'pharmacie' => array('en_US' => 'To be translated', 'fr_FR' => 'Industrie pharmaceutique'),
-					'informatique' => array('en_US' => 'To be translated', 'fr_FR' => 'Informatique / Télécoms'),
-					'equipement' => array('en_US' => 'To be translated', 'fr_FR' => 'Machines et équipements / Automobile'),
-					'metallurgie' => array('en_US' => 'To be translated', 'fr_FR' => 'Métallurgie / Travail du métal'),
-					'plastique' => array('en_US' => 'To be translated', 'fr_FR' => 'Plastique / Caoutchouc'),
-					'services' => array('en_US' => 'To be translated', 'fr_FR' => 'Services aux entreprises'),
-					'textile' => array('en_US' => 'To be translated', 'fr_FR' => 'Textile / Habillement / Chaussure'),
-					'transport' => array('en_US' => 'To be translated', 'fr_FR' => 'Transports / Logistique'),
-					'autre' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres'),
-			),
-			'labels' => array(
-					'en_US' => 'Sector',
-					'fr_FR' => 'Secteur',
-			),
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'agro' => array('en_US' => 'To be translated', 'fr_FR' => 'Agroalimentaire'),
+			'banque' => array('en_US' => 'To be translated', 'fr_FR' => 'Banque / Assurance'),
+			'bois' => array('en_US' => 'To be translated', 'fr_FR' => 'Bois / Papier / Carton / Imprimerie'),
+			'btp' => array('en_US' => 'To be translated', 'fr_FR' => 'BTP / Matériaux de construction'),
+			'chimie' => array('en_US' => 'To be translated', 'fr_FR' => 'Chimie / Parachimie'),
+			'commerce' => array('en_US' => 'To be translated', 'fr_FR' => 'Commerce / Négoce / Distribution'),
+			'edition' => array('en_US' => 'To be translated', 'fr_FR' => 'Édition / Communication / Multimédia'),
+			'electricite' => array('en_US' => 'To be translated', 'fr_FR' => 'Électronique / Électricité'),
+			'environnement' => array('en_US' => 'To be translated', 'fr_FR' => 'Environnement'),
+			'conseil' => array('en_US' => 'To be translated', 'fr_FR' => 'Études et conseils'),
+			'pharmacie' => array('en_US' => 'To be translated', 'fr_FR' => 'Industrie pharmaceutique'),
+			'informatique' => array('en_US' => 'To be translated', 'fr_FR' => 'Informatique / Télécoms'),
+			'equipement' => array('en_US' => 'To be translated', 'fr_FR' => 'Machines et équipements / Automobile'),
+			'metallurgie' => array('en_US' => 'To be translated', 'fr_FR' => 'Métallurgie / Travail du métal'),
+			'plastique' => array('en_US' => 'To be translated', 'fr_FR' => 'Plastique / Caoutchouc'),
+			'services' => array('en_US' => 'To be translated', 'fr_FR' => 'Services aux entreprises'),
+			'textile' => array('en_US' => 'To be translated', 'fr_FR' => 'Textile / Habillement / Chaussure'),
+			'transport' => array('en_US' => 'To be translated', 'fr_FR' => 'Transports / Logistique'),
+			'autre' => array('en_US' => 'To be translated', 'fr_FR' => 'Autres'),
+		),
+		'labels' => array(
+			'en_US' => 'Sector',
+			'fr_FR' => 'Secteur',
+		),
 	),
 
 	'core_account/business/property/property_2' => array(
+		'definition' => 'inline',
 		'type' => 'input',
 		'labels' => array(
 			'en_US' => 'Available field 1',
@@ -1102,6 +1391,7 @@ return array(
 	),
 
 	'core_account/business/property/property_3' => array(
+		'definition' => 'inline',
 		'type' => 'input',
 		'labels' => array(
 			'en_US' => 'Available field 2',
@@ -1110,6 +1400,7 @@ return array(
 	),
 	
 	'core_account/business/property/property_4' => array(
+		'definition' => 'inline',
 		'type' => 'input',
 		'labels' => array(
 			'en_US' => 'Available field 3',
@@ -1118,6 +1409,7 @@ return array(
 	),
 
 	'core_account/business/property/property_5' => array(
+		'definition' => 'inline',
 		'type' => 'input',
 		'labels' => array(
 			'en_US' => 'Available field 4',
@@ -1125,343 +1417,55 @@ return array(
 		),
 	),
 	
-	'core_account/business/property/contact_meeting_context' => array(
-			'type' => 'select',
-			'modalities' => array(
-					'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Prise de contact'),
-			),
-			'labels' => array(
-					'en_US' => 'Next meeting context',
-					'fr_FR' => 'Cadre prochaine rencontre',
-			),
+	'core_account/business/property/property_13' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Prise de contact'),
+		),
+		'labels' => array(
+			'en_US' => 'Next meeting context',
+			'fr_FR' => 'Cadre prochaine rencontre',
+		),
 	),
 	
 	'core_account/business/property/comment_1' => array(
-			'type' => 'textarea',
-			'labels' => array(
-					'en_US' => 'Enterprise description',
-					'fr_FR' => 'Description de l\'entreprise',
-			),
-			'max_length' => 65535,
+		'definition' => 'inline',
+		'type' => 'textarea',
+		'labels' => array(
+			'en_US' => 'Enterprise description',
+			'fr_FR' => 'Description de l\'entreprise',
+		),
+		'max_length' => 65535,
 	),
 
 	'core_account/business/property/comment_2' => array(
-			'type' => 'textarea',
-			'labels' => array(
-					'en_US' => 'Offer description',
-					'fr_FR' => 'Description de l\'offre',
-			),
-			'max_length' => 65535,
+		'definition' => 'inline',
+		'type' => 'textarea',
+		'labels' => array(
+			'en_US' => 'Offer description',
+			'fr_FR' => 'Description de l\'offre',
+		),
+		'max_length' => 65535,
 	),
 		
 	'core_account/business' => array(
-			'statuses' => array(),
-			'properties' => array(
-					'title_1' => array(
-							'definition' => 'inline',
-							'type' => 'title',
-							'labels' => array(
-									'en_US' => 'ENTERPRISE IDENTIFICATION',
-									'fr_FR' => 'IDENTIFICATION DE L\'ENTREPRISE',
-							),
-					),
-					'title_2' => array(
-							'definition' => 'inline',
-							'type' => 'title',
-							'labels' => array(
-									'en_US' => 'REGISTRATION DATA',
-									'fr_FR' => 'DONNEES D\'INSCRIPTION',
-							),
-					),
-					'title_3' => array(
-							'definition' => 'inline',
-							'type' => 'title',
-							'labels' => array(
-									'en_US' => 'COMMENTS',
-									'fr_FR' => 'COMMENTAIRES',
-							),
-					),
-					'status' => array(
-							'definition' => 'inline',
-							'type' => 'select',
-							'modalities' => array(
-									'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
-									'prospect' => array('en_US' => 'Prospect', 'fr_FR' => 'Prospect'),
-									'committed' => array('en_US' => 'Committed', 'fr_FR' => 'Engagé'),
-									'active' => array('en_US' => 'Customer', 'fr_FR' => 'Client'),
-									'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
-							),
-							'labels' => array(
-									'en_US' => 'Status',
-									'fr_FR' => 'Statut',
-							),
-							'perspectives' => array(
-									'account' => array('new', 'prospect', 'gone', 'committed', 'active'),
-							),
-							'mandatory' => true,
-					),
-					'identifier' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Identifier',
-									'fr_FR' => 'Identifiant',
-							),
-					),
-					'name' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Name',
-									'fr_FR' => 'Dénomination',
-							),
-					),
-					'basket' => array('definition' => 'core_account/generic/property/basket'),
-					'contact_1_id' => array(
-							'definition' => 'inline',
-							'type' => 'photo',
-							'labels' => array(
-									'en_US' => '',
-									'fr_FR' => '',
-							),
-					),
-					'n_title' => array(
-							'definition' => 'inline',
-							'type' => 'select',
-							'modalities' => array(
-									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
-									'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
-									'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
-                                    'mr-mrs' => array('fr_FR' => 'Mr et Mme', 'en_US' => 'Mr & Mrs'),
-									'Maître' => array('fr_FR' => 'Maître', 'en_US' => 'Maître'),
-							),
-							'labels' => array(
-									'en_US' => 'Title',
-									'fr_FR' => 'Titre',
-							),
-					),
-					'n_first' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - First name',
-									'fr_FR' => 'Contact - Prénom',
-							),
-					),
-					'n_last' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Last name',
-									'fr_FR' => 'Contact - Nom',
-							),
-							'mandatory' => true,
-					),
-					'email' => array(
-							'definition' => 'inline',
-							'type' => 'email',
-							'labels' => array(
-									'en_US' => 'Contact - Email',
-									'fr_FR' => 'Contact - Email',
-							),
-					),
-					'tel_work' => array(
-							'definition' => 'inline',
-							'type' => 'phone',
-							'labels' => array(
-									'en_US' => 'Contact - Phone',
-									'fr_FR' => 'Contact - Téléphone',
-							),
-					),
-					'tel_cell' => array(
-							'definition' => 'inline',
-							'type' => 'phone',
-							'labels' => array(
-									'en_US' => 'Contact - Cellular',
-									'fr_FR' => 'Contact - Mobile',
-							),
-					),
-					'adr_street' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Address',
-									'fr_FR' => 'Contact - Adresse',
-							),
-					),
-					'adr_extended' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Complement',
-									'fr_FR' => 'Contact - Complément',
-							),
-					),
-					'adr_post_office_box' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Post office box',
-									'fr_FR' => 'Contact - Boîte postale',
-							),
-					),
-					'adr_zip' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Zip code',
-									'fr_FR' => 'Contact - Code postal',
-							),
-					),
-					'adr_city' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - City',
-									'fr_FR' => 'Contact - Ville',
-							),
-					),
-					'adr_state' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - State',
-									'fr_FR' => 'Contact - Etat',
-							),
-					),
-					'adr_country' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Country',
-									'fr_FR' => 'Contact - Pays',
-							),
-					),
-					'n_title_2' => array(
-							'definition' => 'inline',
-							'type' => 'select',
-							'modalities' => array(
-									'Mr' => array('fr_FR' => 'M.', 'en_US' => 'Mr'),
-									'Mrs' => array('fr_FR' => 'Mme', 'en_US' => 'Mrs'),
-									'Ms' => array('fr_FR' => 'Melle', 'en_US' => 'Ms'),
-							),
-							'labels' => array(
-									'en_US' => 'Title',
-									'fr_FR' => 'Titre',
-							),
-					),
-					'n_first_2' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - First name',
-									'fr_FR' => 'Contact - Prénom',
-							),
-					),
-					'n_last_2' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Last name',
-									'fr_FR' => 'Contact - Nom',
-							),
-					),
-					'email_2' => array(
-							'definition' => 'inline',
-							'type' => 'email',
-							'labels' => array(
-									'en_US' => 'Contact - Email',
-									'fr_FR' => 'Contact - Email',
-							),
-					),
-					'tel_work_2' => array(
-							'definition' => 'inline',
-							'type' => 'phone',
-							'labels' => array(
-									'en_US' => 'Contact - Phone',
-									'fr_FR' => 'Contact - Téléphone',
-							),
-					),
-					'tel_cell_2' => array(
-							'definition' => 'inline',
-							'type' => 'phone',
-							'labels' => array(
-									'en_US' => 'Contact - Cellular',
-									'fr_FR' => 'Contact - Mobile',
-							),
-					),
-					'address_2' => array(
-							'definition' => 'inline',
-							'type' => 'input',
-							'labels' => array(
-									'en_US' => 'Contact - Address',
-									'fr_FR' => 'Contact - Adresse',
-							),
-					),
-					'place_id' => array(
-							'definition' => 'inline',
-							'type' => 'select',
-							'modalities' => array(
-									'2pit' => array('fr_FR' => 'P-PIT', 'en_US' => '2PIT'),
-							),
-							'labels' => array(
-									'en_US' => 'Center',
-									'fr_FR' => 'Centre',
-							),
-					),
-					'place_caption' => array('definition' => 'core_account/properties/place_caption'),
-					'opening_date' => array(
-							'definition' => 'inline',
-							'type' => 'date',
-							'labels' => array(
-									'en_US' => '1st contact date',
-									'fr_FR' => 'Date 1er contact',
-							),
-					),
-					'closing_date' => array(
-							'definition' => 'inline',
-							'type' => 'date',
-							'labels' => array(
-									'en_US' => 'Closing date',
-									'fr_FR' => 'Date de fermeture',
-							),
-					),
-					'callback_date' => array(
-							'definition' => 'inline',
-							'type' => 'date',
-							'labels' => array(
-									'en_US' => 'Callback date',
-									'fr_FR' => 'Date de rappel',
-							),
-					),
-					'origine' => array(
-							'type' => 'repository',
-							'definition' => 'core_account/business/property/origine',
-					),
-					'contact_history' => array(
-							'definition' => 'inline',
-							'type' => 'log',
-							'labels' => array(
-									'en_US' => 'Comment',
-									'fr_FR' => 'Commentaire',
-							),
-					),
-					'property_1' => array('definition' => 'core_account/business/property/property_1'),
-					'property_2' => array('definition' => 'core_account/business/property/property_2'),
-					'property_3' => array('definition' => 'core_account/business/property/property_3'),
-					'property_4' => array('definition' => 'core_account/business/property/property_4'),
-					'property_5' => array('definition' => 'core_account/business/property/property_5'),
-					'property_13' => array('definition' => 'core_account/business/property/contact_meeting_context'),
-					'comment_1' => array('definition' => 'core_account/business/property/comment_1'),
-					'comment_2' => array('definition' => 'core_account/business/property/comment_2'),
-			),
-			'order' => 'name',
+		'statuses' => array(),
+		'properties' => array(
+			'title_1', 'title_2', 'title_3', 'status', 'identifier', 'name', 'basket', 'n_title',
+			'n_first', 'n_last', 'email', 'tel_work', 'tel_cell', 
+			'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country', 
+			'n_title_2', 'n_first_2', 'n_last_2', 'email_2', 'tel_work_2', 'tel_cell_2', 'address_2', 
+			'place_id', 'place_caption', 'opening_date', 'closing_date', 'callback_date', 'origine', 'contact_history',
+			'property_1', 'property_2', 'property_3', 'property_4', 'property_5', 'property_13',
+			'comment_1', 'comment_2'),
+		'order' => 'name',
 	),
-
-	// Account
+	
 	'core_account/index/business' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
+	
 	'core_account/search/business' => array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
@@ -1477,6 +1481,7 @@ return array(
 				'email' => [],
 			),
 	),
+	
 	'core_account/list/business' => array(
 			'properties' => array(
 					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
@@ -1489,6 +1494,7 @@ return array(
 					'origine' => [],
 			),
 	),
+	
 	'core_account/detail/business' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
@@ -1507,6 +1513,7 @@ return array(
 					),
 			),
 	),
+	
 	'core_account/update/business' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
@@ -1537,6 +1544,7 @@ return array(
 			'comment_2' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
 	),
+	
 	'core_account/updateContact/business' => array(
 			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
@@ -1553,36 +1561,18 @@ return array(
 			'adr_country' => array('mandatory' => false),
 			'locale' => array('mandatory' => true),
 	),
+	
 	'core_account/groupUpdate/business' => array(
 			'status' => array('mandatory' => false),
 			'callback_date' => array('mandatory' => false),
 	),
-/*
-	'core_account/post/business' => array(
-			'place_identifier' => array('mandatory' => false),
-			'n_title' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
-			'n_first' => array('mandatory' => true),
-			'email' => array('mandatory' => true),
-			'request' => array('mandatory' => true),
-			'request_comment' => array('mandatory' => false),
-			'tel_work' => array('mandatory' => false),
-			'tel_cell' => array('mandatory' => false),
-			'adr_street' => array('mandatory' => false),
-			'adr_extended' => array('mandatory' => false),
-			'adr_zip' => array('mandatory' => false),
-			'adr_post_office_box' => array('mandatory' => false),
-			'adr_city' => array('mandatory' => false),
-			'adr_state' => array('mandatory' => false),
-			'adr_country' => array('mandatory' => false),
-			'place_identifier' => array('mandatory' => false),
-			'locale' => array('mandatory' => false),
-	),*/
+
 	'core_account/requestTypes/business' => array(
 			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
 			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
+
 	'core_account/export/business' => array(
 			'status' => [],
 			'identifier' => [],
@@ -1620,42 +1610,42 @@ return array(
 
 			'contact_history' => [],
 	),
-		
-		'core_account/indexCard/business' => array(
-				'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
-				'header' => array(
-						'place_id' => null,
-						'status' => null,
-						'origine' => null,
-				),
-				'1st-column' => array(
-						'title' => 'title_1',
-						'rows' => array(
-								'n_title' => array('mandatory' => true),
-								'n_first' => array('mandatory' => true),
-								'n_last' => array('mandatory' => true),
-								'email' => array('mandatory' => false),
-								'tel_work' => array('mandatory' => false),
-								'tel_cell' => array('mandatory' => false),
-								'adr_street' => array('mandatory' => false),
-								'adr_extended' => array('mandatory' => false),
-								'adr_post_office_box' => array('mandatory' => false),
-								'adr_zip' => array('mandatory' => false),
-								'adr_city' => array('mandatory' => false),
-								'adr_state' => array('mandatory' => false),
-								'adr_country' => array('mandatory' => false),
-						),
-				),
-				'2nd-column' => array(
-						'title' => 'title_2',
-						'rows' => array(
-								'property_1' => array('mandatory' => false),
-								'property_2' => array('mandatory' => false),
-								'property_3' => array('mandatory' => false),
-								'property_4' => array('mandatory' => false),
-						),
-				),
-				'pdfDetailStyle' => '
+	
+	'core_account/indexCard/business' => array(
+			'title' => array('en_US' => 'Enterprise index card', 'fr_FR' => 'Fiche entreprise'),
+			'header' => array(
+					'place_id' => null,
+					'status' => null,
+					'origine' => null,
+			),
+			'1st-column' => array(
+					'title' => 'title_1',
+					'rows' => array(
+							'n_title' => array('mandatory' => true),
+							'n_first' => array('mandatory' => true),
+							'n_last' => array('mandatory' => true),
+							'email' => array('mandatory' => false),
+							'tel_work' => array('mandatory' => false),
+							'tel_cell' => array('mandatory' => false),
+							'adr_street' => array('mandatory' => false),
+							'adr_extended' => array('mandatory' => false),
+							'adr_post_office_box' => array('mandatory' => false),
+							'adr_zip' => array('mandatory' => false),
+							'adr_city' => array('mandatory' => false),
+							'adr_state' => array('mandatory' => false),
+							'adr_country' => array('mandatory' => false),
+					),
+			),
+			'2nd-column' => array(
+					'title' => 'title_2',
+					'rows' => array(
+							'property_1' => array('mandatory' => false),
+							'property_2' => array('mandatory' => false),
+							'property_3' => array('mandatory' => false),
+							'property_4' => array('mandatory' => false),
+					),
+			),
+			'pdfDetailStyle' => '
 <style>
 table.note-report {
 	font-size: 1em;
@@ -1676,19 +1666,41 @@ table.note-report td {
 }
 </style>
 ',
+	),
+
+	// Account B2C
+	
+	'core_account/b2c/property/title_1' => array(
+		'definition' => 'inline',
+		'type' => 'title',
+		'labels' => array(
+			'en_US' => 'CLIENT IDENTIFICATION',
+			'fr_FR' => 'IDENTIFICATION DU CLIENT',
 		),
-
-	// B2C
-
+	),
+	
+	'core_account/b2c/property/title_2' => array(
+		'definition' => 'inline',
+		'type' => 'title',
+		'labels' => array(
+			'en_US' => 'INVOICING DATA',
+			'fr_FR' => 'DONNEES DE FACTURATION',
+		),
+	),
+	
+	'core_account/b2c/property/status' => array('definition' => 'core_account/generic/property/status', 'mandatory' => true),
+	
 	'core_account/b2c/property/identifier' => array(
-			'type' => 'input',
-			'labels' => array(
-					'en_US' => 'Identifier',
-					'fr_FR' => 'Identifiant',
-			),
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Identifier',
+			'fr_FR' => 'Identifiant',
+		),
 	),
 
 	'core_account/b2c/property/name' => array(
+		'definition' => 'inline',
 		'type' => 'input',
 		'labels' => array(
 			'en_US' => 'Formatted name',
@@ -1696,30 +1708,67 @@ table.note-report td {
 		),
 	),
 	
+	'core_account/b2c/property/n_fn' => array('definition' => 'core_account/generic/property/n_fn', 'mandatory' => true),
+	'core_account/b2c/property/photo_link_id' => array('definition' => 'core_account/generic/property/photo_link_id'),
+	'core_account/b2c/property/place_id' => array('definition' => 'core_account/generic/property/place_id'),
+	'core_account/b2c/property/contact_1_id' => array('definition' => 'core_account/generic/property/contact_id'),
+	'core_account/b2c/property/n_title' => array('definition' => 'core_account/generic/property/n_title', 'mandatory' => true),
+	'core_account/b2c/property/n_first' => array('definition' => 'core_account/generic/property/n_first', 'mandatory' => true),
+	'core_account/b2c/property/n_last' => array('definition' => 'core_account/generic/property/n_last', 'mandatory' => true),
+	'core_account/b2c/property/email' => array('definition' => 'core_account/generic/property/email', 'mandatory' => true),
+	'core_account/b2c/property/tel_work' => array('definition' => 'core_account/generic/property/tel_work'),
+	'core_account/b2c/property/tel_cell' => array('definition' => 'core_account/generic/property/tel_cell'),
+	'core_account/b2c/property/adr_street' => array('definition' => 'core_account/generic/property/adr_street'),
+	'core_account/b2c/property/adr_zip' => array('definition' => 'core_account/generic/property/adr_zip'),
+	'core_account/b2c/property/adr_city' => array('definition' => 'core_account/generic/property/adr_city'),
+	'core_account/b2c/property/adr_state' => array('definition' => 'core_account/generic/property/adr_state'),
+	'core_account/b2c/property/adr_country' => array('definition' => 'core_account/generic/property/adr_country'),
+	'core_account/b2c/property/birth_date' => array('definition' => 'core_account/generic/property/birth_date'),
+	'core_account/b2c/property/callback_date' => array('definition' => 'core_account/generic/property/callback_date'),
+	'core_account/b2c/property/invoice_n_title' => array('definition' => 'core_account/generic/property/invoice_n_title', 'mandatory' => true),
+	'core_account/b2c/property/invoice_n_first' => array('definition' => 'core_account/generic/property/invoice_n_first', 'mandatory' => true),
+	'core_account/b2c/property/invoice_n_last' => array('definition' => 'core_account/generic/property/invoice_n_last', 'mandatory' => true),
+	'core_account/b2c/property/invoice_email' => array('definition' => 'core_account/generic/property/invoice_email', 'mandatory' => true),
+	'core_account/b2c/property/invoice_tel_work' => array('definition' => 'core_account/generic/property/invoice_tel_work'),
+	'core_account/b2c/property/invoice_tel_cell' => array('definition' => 'core_account/generic/property/invoice_tel_cell'),
+	'core_account/b2c/property/invoice_adr_street' => array('definition' => 'core_account/generic/property/invoice_adr_street'),
+	'core_account/b2c/property/invoice_adr_zip' => array('definition' => 'core_account/generic/property/invoice_adr_zip'),
+	'core_account/b2c/property/invoice_adr_city' => array('definition' => 'core_account/generic/property/invoice_adr_city'),
+	'core_account/b2c/property/invoice_adr_state' => array('definition' => 'core_account/generic/property/invoice_adr_state'),
+	'core_account/b2c/property/invoice_adr_country' => array('definition' => 'core_account/generic/property/invoice_adr_country'),
+	'core_account/b2c/property/property_1' => array('definition' => 'core_account/b2c/property/property_1'),
+	'core_account/b2c/property/property_2' => array('definition' => 'core_account/b2c/property/property_2'),
+	'core_account/b2c/property/property_3' => array('definition' => 'core_account/b2c/property/property_3'),
+	
 	'core_account/b2c/property/property_1' => array(
-			'type' => 'input',
-			'labels' => array(
-					'en_US' => 'Reminder to communicate',
-					'fr_FR' => 'Rappel à communiquer',
-			),
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Reminder to communicate',
+			'fr_FR' => 'Rappel à communiquer',
+		),
 	),
 
 	'core_account/b2c/property/property_2' => array(
-			'type' => 'input',
-			'labels' => array(
-					'en_US' => 'B',
-					'fr_FR' => 'B',
-			),
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'B',
+			'fr_FR' => 'B',
+		),
 	),
 
 	'core_account/b2c/property/property_3' => array(
-			'type' => 'input',
-			'labels' => array(
-					'en_US' => 'C',
-					'fr_FR' => 'C',
-			),
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'C',
+			'fr_FR' => 'C',
+		),
 	),
 
+	'core_account/b2c/property/contact_history' => array('definition' => 'core_account/generic/property/contact_history'),
+	
 	'core_account/b2c/contact/contact_2' => array(
 			'route' => 'account/updateContact',
 			'params' => array('type' => 'b2c', 'contactNumber' => 2),
@@ -1733,66 +1782,22 @@ table.note-report td {
 	),
 
 	'core_account/b2c' => array(
-			'statuses' => array(),
-			'properties' => array(
-					'title_1' => array(
-							'definition' => 'inline',
-							'type' => 'title',
-							'labels' => array(
-									'en_US' => 'CLIENT IDENTIFICATION',
-									'fr_FR' => 'IDENTIFICATION DU CLIENT',
-							),
-					),
-					'title_2' => array(
-							'definition' => 'inline',
-							'type' => 'title',
-							'labels' => array(
-									'en_US' => 'INVOICING DATA',
-									'fr_FR' => 'DONNEES DE FACTURATION',
-							),
-					),
-					'status' => array('definition' => 'core_account/generic/property/status', 'mandatory' => true),
-					'identifier' => array('definition' => 'core_account/b2c/property/identifier', 'mandatory' => true),
-					'name' => array('definition' => 'core_account/b2c/property/name', 'mandatory' => true),
-					'n_fn' => array('definition' => 'core_account/generic/property/n_fn', 'mandatory' => true),
-					'photo_link_id' => array('definition' => 'core_account/generic/property/photo_link_id'),
-					'place_id' => array('definition' => 'core_account/generic/property/place_id'),
-					'contact_1_id' => array('definition' => 'core_account/generic/property/contact_id'),
-					'n_title' => array('definition' => 'core_account/generic/property/n_title', 'mandatory' => true),
-					'n_first' => array('definition' => 'core_account/generic/property/n_first', 'mandatory' => true),
-					'n_last' => array('definition' => 'core_account/generic/property/n_last', 'mandatory' => true),
-					'email' => array('definition' => 'core_account/generic/property/email', 'mandatory' => true),
-					'tel_work' => array('definition' => 'core_account/generic/property/tel_work'),
-					'tel_cell' => array('definition' => 'core_account/generic/property/tel_cell'),
-					'adr_street' => array('definition' => 'core_account/generic/property/adr_street'),
-					'adr_zip' => array('definition' => 'core_account/generic/property/adr_zip'),
-					'adr_city' => array('definition' => 'core_account/generic/property/adr_city'),
-					'adr_state' => array('definition' => 'core_account/generic/property/adr_state'),
-					'adr_country' => array('definition' => 'core_account/generic/property/adr_country'),
-					'birth_date' => array('definition' => 'core_account/generic/property/birth_date'),
-					'callback_date' => array('definition' => 'core_account/generic/property/callback_date'),
-					'invoice_n_title' => array('definition' => 'core_account/generic/property/invoice_n_title', 'mandatory' => true),
-					'invoice_n_first' => array('definition' => 'core_account/generic/property/invoice_n_first', 'mandatory' => true),
-					'invoice_n_last' => array('definition' => 'core_account/generic/property/invoice_n_last', 'mandatory' => true),
-					'invoice_email' => array('definition' => 'core_account/generic/property/invoice_email', 'mandatory' => true),
-					'invoice_tel_work' => array('definition' => 'core_account/generic/property/invoice_tel_work'),
-					'invoice_tel_cell' => array('definition' => 'core_account/generic/property/invoice_tel_cell'),
-					'invoice_adr_street' => array('definition' => 'core_account/generic/property/invoice_adr_street'),
-					'invoice_adr_zip' => array('definition' => 'core_account/generic/property/invoice_adr_zip'),
-					'invoice_adr_city' => array('definition' => 'core_account/generic/property/invoice_adr_city'),
-					'invoice_adr_state' => array('definition' => 'core_account/generic/property/invoice_adr_state'),
-					'invoice_adr_country' => array('definition' => 'core_account/generic/property/invoice_adr_country'),
-					'property_1' => array('definition' => 'core_account/b2c/property/property_1'),
-					'property_2' => array('definition' => 'core_account/b2c/property/property_2'),
-					'property_3' => array('definition' => 'core_account/b2c/property/property_3'),
-					'contact_history' => array('definition' => 'core_account/generic/property/contact_history'),
-			),
-			'order' => 'n_fn',
+		'statuses' => array(),
+		'properties' => array(
+			'title_1', 'title_2', 'status', 'identifier', 'name', 'n_fn', 'photo_link_id', 'place_id',
+			'contact_1_id', 'n_title', 'n_first', 'n_last', 'email', 'tel_work', 'tel_cell',
+			'adr_street', 'adr_zip', 'adr_city', 'adr_state', 'adr_country', 'birth_date', 'callback_date',
+			'invoice_n_title', 'invoice_n_first', 'invoice_n_last', 'invoice_email', 'invoice_tel_work', 'invoice_tel_cell',
+			'invoice_adr_street', 'invoice_adr_zip', 'invoice_adr_city', 'invoice_adr_state', 'invoice_adr_country',
+			'property_1', 'property_2', 'property_3', 'contact_history',
+		),
+		'order' => 'n_fn',
 	),
 
 	'core_account/index/b2c' => array(
 			'title' => array('en_US' => 'P-PIT Commitments', 'fr_FR' => 'P-PIT Engagements'),
 	),
+	
 	'core_account/search/b2c' => array(
 			'title' => array('en_US' => 'Accounts', 'fr_FR' => 'Comptes'),
 			'todoTitle' => array('en_US' => 'todo list', 'fr_FR' => 'todo list'),
@@ -1807,6 +1812,7 @@ table.note-report td {
 					'property_3' => [],
 			),
 	),
+	
 	'core_account/list/b2c' => array(
 			'properties' => array(
 					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
@@ -1820,6 +1826,7 @@ table.note-report td {
 					'place_id' => [],
 			),
 	),
+	
 	'core_account/detail/b2c' => array(
 			'title' => array('en_US' => 'Account detail', 'fr_FR' => 'Détail du compte'),
 			'displayAudit' => true,
@@ -1834,6 +1841,7 @@ table.note-report td {
 					'contact_3' => array('definition' => 'core_account/b2c/contact/contact_3'),
 			),
 	),
+	
 	'core_account/update/b2c' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
@@ -1852,6 +1860,7 @@ table.note-report td {
 			'property_3' => array('mandatory' => false),
 			'contact_history' => array('mandatory' => false),
 	),
+	
 	'core_account/updateContact/b2c' => array(
 			'n_title' => array('mandatory' => false),
 			'n_first' => array('mandatory' => false),
@@ -1865,17 +1874,20 @@ table.note-report td {
 			'adr_state' => array('mandatory' => false),
 			'adr_country' => array('mandatory' => false),
 	),
+	
 	'core_account/groupUpdate/b2c' => array(
 			'status' => [],
 			'callback_date' => [],
 			'property_1' => [],
 			'property_2' => [],
 	),
+	
 	'core_account/requestTypes/b2c' => array(
 			'contact' => array('en_US' => 'Contact', 'fr_FR' => 'Contact'),
 			'newsletter' => array('en_US' => 'Newsletter', 'fr_FR' => 'Newsletter'),
 			'general_information' => array('en_US' => 'General information', 'fr_FR' => 'Information générale'),
 	),
+	
 	'core_account/export/b2c' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => [],
