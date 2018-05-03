@@ -636,6 +636,8 @@ class CommitmentController extends AbstractActionController
 	    				$commitment->id = null;
 	    				$commitment->identifier = 0;
 	    				$commitment->status = 'new';
+	    				$commitment->invoice_message_id = null;
+	    				$commitment->invoice_identifier = null;
 	    				$rc = $commitment->add();
 	    				if ($rc != 'OK') {
 	    					$connection->rollback();
@@ -872,6 +874,8 @@ class CommitmentController extends AbstractActionController
 	    $invoice['still_due'] = $commitment->tax_inclusive - $settledAmount;
     	
     	if (array_key_exists('commitment/invoice_tax_mention', $commitment->place_config)) $invoice['tax_mention'] = $commitment->place_config['commitment/invoice_tax_mention'];
+    	elseif ($context->getConfig('commitment/invoice_tax_mention')) $invoice['tax_mention'] = $context->getConfig('commitment/invoice_tax_mention');
+
     	if ($commitment->status != 'settled') {
 	    	if ($commitment->account->place->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $commitment->account->place->getConfig('commitment/invoice_bank_details');
     		elseif ($context->getConfig('commitment/invoice_bank_details')) $invoiceBankDetails = $context->getConfig('commitment/invoice_bank_details');
@@ -930,7 +934,7 @@ class CommitmentController extends AbstractActionController
 					$commitmentMessage->status = 'new';
 					$commitmentMessage->authentication_token = md5(uniqid(rand(), true));
 					$commitmentMessage->account_id = $account->id;
-					$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$invoice['identifier'];
+					$commitmentMessage->identifier = $context->getInstance()->fqdn.'_'.$commitment->invoice_identifier;
 					$commitmentMessage->direction = 'O';
 					$commitmentMessage->format = 'application/json';
 				}

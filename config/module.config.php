@@ -3140,7 +3140,7 @@ table.note-report td {
 					'account_property_12' => array('definition' => 'core_account/generic/property/property_12'),
 					'account_property_13' => array('definition' => 'core_account/generic/property/property_13'),
 					'account_property_14' => array('definition' => 'core_account/generic/property/property_14'),
-					'account_property_15' => array('definition' => 'core_account/generic/property/property_15'),
+					'account_property_15' => array('definition' => 'core_account/p-pit-studies/property/property_15'),
 					'account_property_16' => array('definition' => 'core_account/generic/property/property_16'),
 			),
 	),
