@@ -1,6 +1,7 @@
 <table class="table table-striped ppit_index">
 	<tr>
 		<th>&nbsp;</th>
+		<th>&nbsp;</th>
 	
 <?php $first = true; foreach ($listPage['properties'] as $propertyId => $options) : ?>
 	<?php $property = $termProperties[$propertyId] ?>
@@ -25,19 +26,34 @@
 
 		<th>&nbsp;</th>
 	<tr>
+		<td>
+			<input type="checkbox" class="term-checkbox" id="term-checkbox" title="<?php echo $this->translate('Check all', 'ppit-core', $context->getLocale()) ?>"></input>
+		</td>
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn term-group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="term-group-anchor" disabled="disabled">
+				<span class="glyphicon glyphicon-list-alt" id="group-glyphicon"></span>
+			</button>
+		</td>
 		<td style="text-align: center">&nbsp;</td>
 	<?php $total=0; foreach($terms as $term) $total += $term->amount; ?>
-		<td colspan="<?php echo count($termProperties) ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
+		<td colspan="<?php echo count($termProperties) - 1 ?>" style="text-align: right; font-weight: bold; <?php if ($mode == 'todo' && $total > 0) echo  'color: red;' ?>">
 			<?php echo $this->translate('Total', 'ppit-core', $context->getLocale()) ?>: 
 			<?php echo $context->formatFloat($total, 2) ?>
 		</td>		
 		<td>&nbsp;</td>
 	</tr>
+		
+	<tr class="term-detail-row" id="term-detail-row_0" rowspan="2"><td colspan="99"><div class="col-md-6 ppit-panel" id="term-detail-div_0"></div></td></tr>
+	<tr class="invisible"><td colspan="99"></td></tr>
+	<input type="hidden" id="term-number" value="<?php echo count($terms) ?>" />
 
 <?php $i = 0; foreach ($terms as $term) : ?>
-	
+		
+	<input type="hidden"  id="term_<?php echo $i ?>" value="<?php echo $term->id ?>" />
 	<tr class="term">
-	
+		<td>
+			<input type="checkbox" class="term-checkbox" id="term-checkbox_<?php echo $i ?>"></input>
+		</td>
 		<td style="text-align: center">
 			<button type="button" class="btn btn-default index-btn term-detail-anchor" title="<?php echo $this->translate('Detail', 'ppit-core', $context->getLocale())?>" id="term-detail-anchor_<?php echo $term->id ?>">
 				<span class="glyphicon glyphicon-zoom-in" id="<?php echo $term->id ?>-glyphicon"></span>
@@ -84,6 +100,23 @@
 		</td>
 	</tr>
 	
+	<tr class="term-detail-row" id="term-detail-row_<?php echo $term->id ?>" rowspan="2"><td colspan="99"><div class="col-md-8 col-md-offset-2 ppit-panel" id="term-detail-div_<?php echo $term->id ?>"></div></td></tr>
+	<tr class="invisible"><td colspan="99"></td></tr>
+	
 <?php $i++; endforeach; ?>
+
+	<tr>
+		<td>
+			<input type="checkbox" class="term-checkbox" id="down-term-checkbox" title="<?php echo $this->translate('Check all', 'ppit-core', $context->getLocale()) ?>"></input>
+		</td>
+		<td style="text-align: center">
+			<button type="button" class="btn btn-default index-btn term-group-anchor" title="<?php echo $this->translate('Grouped actions', 'ppit-core', $context->getLocale())?>" id="down-term-group-anchor" disabled="disabled">
+				<span class="glyphicon glyphicon-list-alt" id="group-glyphicon"></span>
+			</button>
+		</td>
+		<td style="text-align: center">&nbsp;</td>
+		<td colspan="<?php echo count($termProperties) - 1 ?>">&nbsp;</td>		
+		<td>&nbsp;</td>
+	</tr>
 
 </table>

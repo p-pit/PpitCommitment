@@ -7,11 +7,13 @@ use PpitCommitment\Model\CommitmentMessage;
 use PpitCommitment\Model\CommitmentYear;
 use PpitCommitment\Model\Term;
 use PpitCommitment\ViewHelper\SsmlTermViewHelper;
+use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Account;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
+use PpitCore\Model\Interaction;
 use PpitCore\Model\Place;
-use PpitCore\Form\CsrfForm;
+use PpitCore\ViewHelper\ArrayToXmlViewHelper;
 use Zend\Http\Client;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -55,6 +57,7 @@ class TermController extends AbstractActionController
 				'listPage' => $context->getConfig('commitmentTerm/list'),
 				'detailPage' => $context->getConfig('commitmentTerm/detail'),
 				'termUpdatePage' => $context->getConfig('commitmentTerm/update'),
+    			'termGroupPage' => $context->getConfig('commitmentTerm/group'),
     	));
     }
 
@@ -340,6 +343,191 @@ class TermController extends AbstractActionController
     	));
     	$view->setTerminal(true);
     	return $view;
+    }
+
+    public function groupAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    
+    	// Retrieve the type
+    	$type = $this->params()->fromRoute('type');
+    	$configProperties = $this->getConfigProperties($type);
+    
+    	$request = $this->getRequest();
+    	if (!$request->isPost()) return $this->redirect()->toRoute('home');
+    	$nbTerm = $request->getPost('nb-term');
+    
+    	$terms = array();
+    	for ($i = 0; $i < $nbTerm; $i++) {
+    		$term = Term::get($request->getPost('term_'.$i));
+    		$terms[] = $term;
+    	}
+    	$input = $term;
+    	$input->status = '';
+    
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	$request = $this->getRequest();
+    	if ($request->getPost('action') == 'update') {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		if ($csrfForm->isValid()) { // CSRF check
+    			$data = array();
+    			foreach ($context->getConfig('commitmentTerm/group/'.$type) as $propertyId => $options) {
+    				if ($request->getPost($propertyId.'_check')) $data[$propertyId] = $request->getPost($propertyId);
+    			}
+    			foreach ($terms as $term) {
+    				// Atomically save
+    				$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
+    				$connection->beginTransaction();
+    				try {
+    					if ($term->loadData($data) != 'OK') throw new \Exception('View error');
+    					$rc = $term->update(null);
+    					if ($rc != 'OK') {
+    						$connection->rollback();
+    						$error = $rc;
+    					}
+    				}
+    				catch (\Exception $e) {
+    					$connection->rollback();
+    					throw $e;
+    				}
+    			}
+    		}
+    	}
+    	$view = new ViewModel(array(
+    		'context' => $context,
+    		'configProperties' => $configProperties,
+    		'type' => $type,
+    		'terms' => $terms,
+    		'input' => $input,
+    		'places' => Place::getList(array()),
+    		'termGroupPage' => $context->getConfig('commitmentTerm/group'),
+    		'csrfForm' => $csrfForm,
+    		'message' => $message,
+    		'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+
+    public function debitAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$error = null;
+    	$message = null;
+    	 
+    	$view = new ViewModel(array(
+    		'context' => $context,
+    		'csrfForm' => $csrfForm,
+    		'message' => $message,
+    		'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
+
+    public function debitXmlAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	// Instanciate an interaction row for storing the XML content in database
+    	$interaction = Interaction::instanciate();
+    	$interaction->status = 'new';
+    	$interaction->type = 'application';
+    	$interaction->category = 'debit';
+    	$interaction->direction = 'O';
+    	$interaction->format = 'text/xml';
+    	$interaction->route = 'interaction/download';
+    	$interaction->reference = $context->getFormatedName().'_'.date('Y-m-d_H:i:s');
+    	$interaction->add();
+    	 
+    	$termIds = explode(',', $this->params()->fromQuery('terms'));
+    	$terms = array();
+    	$sum = 0;
+    	foreach ($termIds as $term_id) {
+    		$term = Term::get($term_id);
+    		$terms[$term->id] = $term;
+    		$sum += $term->amount;
+    	}
+		$content = array();
+		$content['GrpHdr'] = array();
+		$content['GrpHdr']['MsgId'] = $interaction->id;
+    	$content['GrpHdr']['CreDtTm'] = date('Y-m-d').'T'.date('h:i:s');
+		$content['GrpHdr']['NbOfTxs'] = count($terms);
+		$content['GrpHdr']['CtrlSum'] = $sum;
+		$content['GrpHdr']['InitgPty'] = array();
+		$content['GrpHdr']['InitgPty']['Nm'] = $context->getConfig('commitmentTerm/debit')['InitgPty/Nm'];
+		$content['PmtInf'] = array();
+		$content['PmtInf']['PmtInfId'] = $context->getInstance()->caption.' '.$interaction->id;
+		$content['PmtInf']['PmtMtd'] = 'DD';
+		$content['PmtInf']['NbOfTxs'] = count($terms);
+		$content['PmtInf']['CtrlSum'] = $sum;
+		$content['PmtInf']['PmtTpInf'] = array();
+		$content['PmtInf']['PmtTpInf']['SvcLvl'] = array();
+		$content['PmtInf']['PmtTpInf']['SvcLvl']['Cd'] = 'SEPA';
+		$content['PmtInf']['PmtTpInf']['LclInstrm'] = array();
+		$content['PmtInf']['PmtTpInf']['LclInstrm']['Cd'] = 'CORE';
+		$content['PmtInf']['PmtTpInf']['SeqTp'] = 'OOFF';
+		$content['PmtInf']['ReqdColltnDt'] = ($term->collection_date) ? $term->collection_date : date('Y-m-d');
+		$content['PmtInf']['Cdtr'] = array();
+		$content['PmtInf']['Cdtr']['Nm'] = $context->getConfig('commitmentTerm/debit')['Cdtr/Nm'];
+		$content['PmtInf']['CdtrAcct'] = array();
+		$content['PmtInf']['CdtrAcct']['Id'] = array();
+		$content['PmtInf']['CdtrAcct']['Id']['IBAN'] = $context->getConfig('commitmentTerm/debit')['CdtrAcct/Id/IBAN'];
+		$content['PmtInf']['CdtrAgt'] = array();
+		$content['PmtInf']['CdtrAgt']['FinInstnId'] = array();
+		$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr'] = array();
+		$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
+		$content['PmtInf']['CdtrSchmeId'] = array();
+		$content['PmtInf']['CdtrSchmeId']['Id'] = array();
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId'] = array();
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr'] = array();
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['Id'] = $context->getConfig('commitmentTerm/debit')['CdtrSchmeId/Id/PrvtId/Othr/Id'];
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm'] = array();
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm']['Prtry'] = 'SEPA';
+		
+		$content['PmtInf']['DrctDbtTxInf'] = array();
+		foreach ($terms as $term) {
+			$row = array();
+			$row['PmtId'] = array();
+			$row['PmtId']['EndToEndId'] = substr(($term->reference) ? $term->reference : $term->commitment_caption, 0, 35);
+			$row['InstdAmt'] = $term->amount;
+			$row['DrctDbtTxt'] = array();
+			$row['DrctDbtTxt']['MndtRltdInf'] = array();
+			$row['DrctDbtTxt']['MndtRltdInf']['MndtId'] = $term->transfer_order_id;
+			$row['DrctDbtTxt']['MndtRltdInf']['DtOfSgntr'] = $term->transfer_order_date;
+			$row['DbtrAgt'] = array();
+			$row['DbtrAgt']['FinInstnId'] = array();
+			$row['DbtrAgt']['FinInstnId']['Othr'] = array();
+			$row['DbtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
+			$row['Dbtr'] = array();
+			$row['Dbtr']['Nm'] = ($term->name) ? $term->name : $term->n_fn;
+			$row['DbtrAcct'] = array();
+			$row['DbtrAcct']['Id'] = array();
+			$row['DbtrAcct']['Id']['IBAN'] = $term->bank_identifier;
+			$row['RgltryRptg'] = array();
+			$row['RgltryRptg']['Dtls'] = array();
+			$row['RgltryRptg']['Dtls']['Cd'] = $context->getConfig('commitmentTerm/debit')['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];
+			$content['PmtInf']['DrctDbtTxInf'][] = $row;
+		}
+		header('Content-Type: application/xml; charset=utf-8');
+		header("Content-disposition: filename=debit-".date('Y-m-d').".xml");
+		$xmlContent = ArrayToXmlViewHelper::convert($content);
+    	$interaction->content = $xmlContent;
+		$interaction->update(null);
+    	echo $xmlContent;
+		return $this->response;
     }
     
 	public function deleteAction()

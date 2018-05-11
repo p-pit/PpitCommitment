@@ -117,6 +117,7 @@ class CommitmentController extends AbstractActionController
     			'groupPage' => $context->getConfig('commitment/group/'.$type),
     			'termSearchPage' => $context->getConfig('commitmentTerm/search'),
 				'termUpdatePage' => $context->getConfig('commitmentTerm/update'),
+				'termGroupPage' => $context->getConfig('commitmentTerm/group'),
     	));
     }
 	

@@ -39,7 +39,10 @@ class Term implements InputFilterAwareInterface
     public $place_id;
     public $place_caption;
     public $place_identifier;
-
+    public $transfer_order_id;
+    public $transfer_order_date;
+    public $bank_identifier;
+    
     public $commitment_property_1;
     public $commitment_property_2;
     public $commitment_property_3;
@@ -127,7 +130,10 @@ class Term implements InputFilterAwareInterface
         $this->place_id = (isset($data['place_id'])) ? $data['place_id'] : null;
         $this->place_caption = (isset($data['place_caption'])) ? $data['place_caption'] : null;
         $this->place_identifier = (isset($data['place_identifier'])) ? $data['place_identifier'] : null;
-
+        $this->transfer_order_id = (isset($data['transfer_order_id'])) ? $data['transfer_order_id'] : null;
+        $this->transfer_order_date = (isset($data['transfer_order_date'])) ? $data['transfer_order_date'] : null;
+        $this->bank_identifier = (isset($data['bank_identifier'])) ? $data['bank_identifier'] : null;
+        
         $this->commitment_property_1 = (isset($data['commitment_property_1'])) ? $data['commitment_property_1'] : null;
         $this->commitment_property_2 = (isset($data['commitment_property_2'])) ? $data['commitment_property_2'] : null;
         $this->commitment_property_3 = (isset($data['commitment_property_3'])) ? $data['commitment_property_3'] : null;
@@ -321,7 +327,7 @@ class Term implements InputFilterAwareInterface
 
     	$select = Term::getTable()->getSelect()
     		->join('commitment', 'commitment.id = commitment_term.commitment_id', array('commitment_caption' => 'caption', 'commitment_property_1' => 'property_1', 'commitment_property_2' => 'property_2', 'commitment_property_3' => 'property_3', 'commitment_property_4' => 'property_4', 'commitment_property_5' => 'property_5', 'commitment_property_6' => 'property_6', 'commitment_property_7' => 'property_7', 'commitment_property_8' => 'property_8', 'commitment_property_9' => 'property_9', 'commitment_property_10' => 'property_10', 'commitment_property_11' => 'property_11', 'commitment_property_12' => 'property_12', 'commitment_property_13' => 'property_13', 'commitment_property_14' => 'property_14', 'commitment_property_15' => 'property_15', 'commitment_property_16' => 'property_16', 'commitment_property_17' => 'property_17', 'commitment_property_18' => 'property_18', 'commitment_property_19' => 'property_19', 'commitment_property_20' => 'property_20', 'commitment_property_21' => 'property_21', 'commitment_property_22' => 'property_22', 'commitment_property_23' => 'property_23', 'commitment_property_24' => 'property_24', 'commitment_property_25' => 'property_25', 'commitment_property_26' => 'property_26', 'commitment_property_27' => 'property_27', 'commitment_property_28' => 'property_28', 'commitment_property_29' => 'property_29', 'commitment_property_30' => 'property_30'), 'left')
-    		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
+    		->join('core_account', 'core_account.id = commitment.account_id', array('place_id', 'name', 'transfer_order_id', 'transfer_order_date', 'bank_identifier', 'account_property_1' => 'property_1', 'account_property_2' => 'property_2', 'account_property_3' => 'property_3', 'account_property_4' => 'property_4', 'account_property_5' => 'property_5', 'account_property_6' => 'property_6', 'account_property_7' => 'property_7', 'account_property_8' => 'property_8', 'account_property_9' => 'property_9', 'account_property_10' => 'property_10', 'account_property_11' => 'property_11', 'account_property_12' => 'property_12', 'account_property_13' => 'property_13', 'account_property_14' => 'property_14', 'account_property_15' => 'property_15', 'account_property_16' => 'property_16'), 'left')
 			->join('core_place', 'core_account.place_id = core_place.id', array('place_caption' => 'caption', 'place_identifier' => 'identifier'), 'left')
     		->order(array($major.' '.$dir, 'due_date', 'amount DESC'));
 		$where = new Where;
@@ -415,6 +421,9 @@ class Term implements InputFilterAwareInterface
 				$term->commitment_property_29 = $commitment->property_29;
 				$term->commitment_property_30 = $commitment->property_30;
 				
+				$term->transfer_order_id = $account->transfer_order_id;
+				$term->transfer_order_date = $account->transfer_order_date;
+				$term->bank_identifier = $account->bank_identifier;
 				$term->account_property_1 = $account->property_1;
 		    	$term->account_property_2 = $account->property_2;
 		    	$term->account_property_3 = $account->property_3;

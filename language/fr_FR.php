@@ -104,6 +104,8 @@
 			'Schedule' => 'Echéancier',
 			'Selected accounts' => 'Comptes sélectionnés',
 			'Selected commitments' => 'Engagements sélectionnés',
+			'Selected terms' => 'Echéances sélectionnées',
+			'Send a debit order' => 'Envoyer un avis de prélèvement',
 			'Send the invoice by email' => 'Envoyer la facture par email',
 			'Settle' => 'Régler',
 			'Settlement' => 'Règlement',

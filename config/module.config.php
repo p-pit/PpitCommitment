@@ -772,7 +772,7 @@ return array(
 		        								),
 		        						),
 		        				),
-		        				'invoice' => array(
+	       						'invoice' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/invoice[/:id]',
@@ -784,17 +784,44 @@ return array(
 		        								),
 		        						),
 		        				),
-	       				'delete' => array(
-	                    'type' => 'segment',
-	                    'options' => array(
-	                        'route' => '/delete[/:id]',
-		                    'constraints' => array(
-		                    	'id' => '[0-9]*',
-		                    ),
-	                    	'defaults' => array(
-	                            'action' => 'delete',
-	                        ),
-	                    ),
+								'group' => array(
+										'type' => 'segment',
+										'options' => array(
+												'route' => '/group',
+												'defaults' => array(
+														'action' => 'group',
+												),
+										),
+		        				),
+		        				'debit' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/debit',
+		        								'defaults' => array(
+		        										'action' => 'debit',
+		        								),
+		        						),
+		        				),
+		        				'debitXml' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/debit-xml',
+		        								'defaults' => array(
+		        										'action' => 'debitXml',
+		        								),
+		        						),
+		        				),
+	       						'delete' => array(
+				                    'type' => 'segment',
+				                    'options' => array(
+				                        'route' => '/delete[/:id]',
+					                    'constraints' => array(
+					                    	'id' => '[0-9]*',
+					                    ),
+				                    	'defaults' => array(
+				                            'action' => 'delete',
+				                        ),
+			                    ),
 	                ),
 	       		),
 			),
@@ -895,6 +922,9 @@ return array(
             	array('route' => 'commitmentTerm/list', 'roles' => array('sales_manager')),
 				array('route' => 'commitmentTerm/generate', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/group', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/debit', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/debitXml', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/invoice', 'roles' => array('sales_manager', 'accountant')),
             )
         )
@@ -3184,6 +3214,19 @@ table.note-report td {
 			'comment' => ['mandatory' => false],
 			'document' => ['mandatory' => false],
 	),
+	'commitmentTerm/group' => array(
+		'status' => [],
+		'caption' => [],
+	),
+	
+	'commitmentTerm/debit' => array(
+		'InitgPty/Nm' => '** 1.8 - Nom de l\'émetteur **',
+		'Cdtr/Nm' => '** 2.19 - Nom du créancier **',
+		'CdtrAcct/Id/IBAN' => '** 2.20 - IBAN du compte du créancier **',
+		'CdtrSchmeId/Id/PrvtId/Othr/Id' => '** 2.66 - Identifiant créancier SEPA **',
+		'DrctDbtTxInf/RgltryRptg/Dtls/Cd' => '** 2.79 - Code économique déclaration balance de paiements **',
+	),
+	
 	'commitmentMessage' => array(
 			'importMaxRows' => 100,
 			'importTypes' => array('csv' => array('en_US' => 'CSV file', 'fr_FR' => 'Fichier CSV')),
@@ -3245,7 +3288,18 @@ table.note-report td {
 //						'wishes_2018' => array('definition' => 'customization/flux/send-message/wishes_2018'),
 						'probonocorpo' => array('definition' => 'customization/pbc/send-message/survey_isc'),
 				),
-				'signature' => array('definition' => 'customisation/esi/send-message/signature'),
+				'signature' => array(
+					'definition' => 'inline',
+					'body' => array(
+						'en_US' => 'To be translated',
+						'fr_FR' => '
+<hr>
+<div><a href="https://www.p-pit.fr"><img src="http://img.p-pit.fr/P-Pit/p-pit-advert.png" width="400" alt="P-Pit logo" /></a></div>
+Le support P-Pit<br>
+support@p-pit.fr
+'
+					),
+				),
 		),
 
 		'core_account/sendMessage/generic' => array(
@@ -3256,19 +3310,98 @@ table.note-report td {
 				'cci' => 'contact@p-pit.fr',
 				'from_mail' => 'contact@p-pit.fr',
 				'from_name' => 'noreply@p-pit.fr',
-				'subject' => array('en_US' => 'Important message from P-Pit', 'fr_FR' => 'Message important de P-Pit'),
-				'body' => array(
-						'en_US' => '<p>Hello,</p>
+				'subject' => array('default' => 'Important message from P-Pit', 'fr_FR' => 'Message important de P-Pit'),
+				'text' => array(
+					'default' => '
+<p>Hello %s,</p>
 <p>We hope that our services are giving you satisfaction. Please send your requests or questions to the P-Pit support: support@p-pit.fr.</p>
 <p>Best regards,</p>
 <p>The P-Pit staff</p>
 ',
-						'fr_FR' => '<p>Bonjour,</p>
+					'fr_FR' => '
+<p>Bonjour %s,</p>
 <p>Nous espérons que nos services vous donnent entière satisfaction. Veuillez adresser toute requête ou question au support P-Pit : support@p-pit.fr.</p>
 <p>Bien cordialement,</p>
 <p>L\'équipe P-Pit</p>
 ',
 				),
+				'params' => array('n_first'),
+				'body' => '
+<style>
+        @font-face {
+        font-family: "League Gothic";
+        src: url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.eot");
+        src: url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.eot?#iefix") format("embedded-opentype"), url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.woff2") format("woff2"), url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.woff") format("woff"), url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.ttf") format("truetype"), url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.svg#league_gothicregular") format("svg");
+        font-weight: normal;
+        font-style: normal;
+    }
+    
+    @media only screen and (max-width: 480px) {
+        @font-face {
+            font-family: "League Gothic";
+            url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.woff2") format("woff2"),
+            url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.woff") format("woff"),
+            url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.ttf") format("truetype"),
+            url("https://s3-eu-west-1.amazonaws.com/lrqdo-ppr-news-images/design-templates/leaguegothic-regular-webfont.svg#league_gothicregular") format("svg");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+</style>
+<table border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+        <tr>
+            <td>
+                <table bgcolor="#eeeeee" border="0" cellpadding="0" cellspacing="0" style="font-family: arial, helvetica, sans-serif;" width="760">
+                    <tbody>
+                        <tr>
+                            <td width="40">&nbsp;</td>
+                            <td width="680">
+                                <table align="center" border="0" cellpadding="0" cellspacing="0" valign="top" width="680">
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" height="40">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="left" bgcolor="#ffffff" valign="top" width="40">&nbsp;</td>
+                                            <td bgcolor="#ffffff" valign="top" width="600">
+                                                <table bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" width="600">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="line-height:24px;text-align:justify;font-size:16px; font-family: Georgia, Times New Roman, Times, serif; color:rgb(45,40,70);">
+																%s
+																%s
+															</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                            <td align="right" bgcolor="#ffffff" valign="top" width="38">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" height="10">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="left" bgcolor="#eeeeee" colspan="3" height="15" width="682"><font style="color: rgb(51, 51, 51); font-family: arial, sans-serif; font-size: 10px; font-weight: normal;">P-Pit SAS - 25, rue du Faubourg du Temple - B&acirc;timent C - 75010 Paris<br /></font></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" height="10">&nbsp;</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td width="40">&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>&nbsp;</p>
+            </td>
+        </tr>
+    </tbody>
+</table>',
 		),
 
 		'core_account/notification' => array(
