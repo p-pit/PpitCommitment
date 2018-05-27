@@ -512,7 +512,7 @@ class TermController extends AbstractActionController
 			$row['DbtrAgt']['FinInstnId']['Othr'] = array();
 			$row['DbtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
 			$row['Dbtr'] = array();
-			$row['Dbtr']['Nm'] = ($term->name) ? $term->name : $term->n_fn;
+			$row['Dbtr']['Nm'] = $term->name;
 			$row['DbtrAcct'] = array();
 			$row['DbtrAcct']['Id'] = array();
 			$row['DbtrAcct']['Id']['IBAN'] = $term->bank_identifier;
@@ -522,7 +522,7 @@ class TermController extends AbstractActionController
 			$content['PmtInf']['DrctDbtTxInf'][] = $row;
 		}
 		header('Content-Type: application/xml; charset=utf-8');
-		header("Content-disposition: filename=debit-".date('Y-m-d').".xml");
+		header("Content-disposition: attachment; filename=debit-".date('Y-m-d').".xml");
 		$xmlContent = ArrayToXmlViewHelper::convert($content);
     	$interaction->content = $xmlContent;
 		$interaction->update(null);

@@ -3285,8 +3285,6 @@ table.note-report td {
 		'core_account/sendMessage' => array(
 				'templates' => array(
 						'generic' => array('definition' => 'core_account/sendMessage/generic'),
-//						'wishes_2018' => array('definition' => 'customization/flux/send-message/wishes_2018'),
-						'probonocorpo' => array('definition' => 'customization/pbc/send-message/survey_isc'),
 				),
 				'signature' => array(
 					'definition' => 'inline',
