@@ -24,8 +24,8 @@ use PpitCore\Model\Place;
 use PpitCore\Model\Vcard;
 use PpitCore\Model\Document;
 use PpitDocument\Model\DocumentPart;
-use PpitMasterData\Model\Product;
-use PpitMasterData\Model\ProductOption;
+use PpitCore\Model\Product;
+use PpitCore\Model\ProductOption;
 use PpitCore\Model\User;
 use PpitCore\Model\UserContact;
 use DOMPDFModule\View\Model\PdfModel;
@@ -254,14 +254,13 @@ class CommitmentController extends AbstractActionController
 		$id = (int) $this->params()->fromRoute('id', 0);
     	if ($id) $commitment = Commitment::get($id);
     	else $commitment = Commitment::instanciate($type);
-
     	$view = new ViewModel(array(
     		'context' => $context,
 			'config' => $context->getconfig(),
     		'type' => $type,
     		'id' => $commitment->id,
     		'commitment' => $commitment,
-    		'products' => Product::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
+    		'products' => Product::getList($commitment->type, array()),
     		'options' => ProductOption::getList(null, array('type' => $commitment->type, 'is_available' => true), null, null, 'search'),
     	));
 		$view->setTerminal(true);
@@ -549,7 +548,7 @@ class CommitmentController extends AbstractActionController
     			$data['quantity'] = $request->getPost('quantity');
     			$data['unit_price'] = $request->getPost('unit_price');
     			$data['amount'] = round($data['quantity'] * $data['unit_price'], 2);
-    			$product = Product::get($data['product_identifier'], 'reference');
+    			$product = Product::get($data['product_identifier'], 'identifier');
     			if ($product->tax_1_share) $data['taxable_1_amount'] = round($data['amount'] * $product->tax_1_share, 2);
     			if ($product->tax_2_share) $data['taxable_2_amount'] = round($data['amount'] * $product->tax_2_share, 2);
     			if ($product->tax_3_share) $data['taxable_3_amount'] = round($data['amount'] * $product->tax_3_share, 2);
@@ -763,7 +762,7 @@ class CommitmentController extends AbstractActionController
     	 
     	// Lines
     	
-    	$product = Product::get($commitment->product_identifier, 'reference');
+    	$product = Product::get($commitment->product_identifier, 'identifier');
     	$taxExemptAmount = $commitment->amount - $commitment->taxable_1_amount - $commitment->taxable_2_amount - $commitment->taxable_3_amount;
     	if ($commitment->product_caption) $caption = $commitment->product_caption;
     	else $caption = $commitment->description;
@@ -1121,7 +1120,7 @@ class CommitmentController extends AbstractActionController
     			 
     			$type = $commitment->type;
     			$commitment->status = 'settled';
-    			$commitment->credit_status = 'closed';
+    			if (!$context->getConfig('credit')['unlimitedCredits']) $commitment->credit_status = 'closed';
     			 
     			// Atomically save
     			$connection = Commitment::getTable()->getAdapter()->getDriver()->getConnection();
@@ -1384,7 +1383,7 @@ class CommitmentController extends AbstractActionController
     		}
     		// Retrieve the product
     		$data['product_identifier'] = $this->request->getPost('product_identifier');
-    		$product = Product::get($data['product_identifier'], 'reference');
+    		$product = Product::get($data['product_identifier'], 'identifier');
     	    if (!$product) {
     			$logger->info('commitment/serviceAdd;'.$instance_caption.';400;'.'product_identifier: '.$data['product_identifier'].';');
     			$this->getResponse()->setStatusCode('400');
@@ -1532,7 +1531,27 @@ class CommitmentController extends AbstractActionController
 		$emails = array();
     	foreach ($commitmentIds as $commitment_id) {
 	    	$commitment = Commitment::get($commitment_id);
-    		if ($commitment->email && $commitment->invoice_message_id) {
+	    	$account = $commitment->account;
+	    	
+	    	// Retrieve the invoicing contact's email
+	    	$invoicingContact = null;
+	    	if ($account->contact_1_status == 'invoice') $invoicingContact = $account->contact_1;
+	    	elseif ($account->contact_2_status == 'invoice') $invoicingContact = $account->contact_2;
+	    	elseif ($account->contact_3_status == 'invoice') $invoicingContact = $account->contact_3;
+	    	elseif ($account->contact_4_status == 'invoice') $invoicingContact = $account->contact_4;
+	    	elseif ($account->contact_5_status == 'invoice') $invoicingContact = $account->contact_5;
+	    	 
+	    	if (!$invoicingContact) {
+	    		if ($account->contact_1_status == 'main') $invoicingContact = $account->contact_1;
+	    		elseif ($account->contact_2_status == 'main') $invoicingContact = $account->contact_2;
+	    		elseif ($account->contact_3_status == 'main') $invoicingContact = $account->contact_3;
+	    		elseif ($account->contact_4_status == 'main') $invoicingContact = $account->contact_4;
+	    		elseif ($account->contact_5_status == 'main') $invoicingContact = $account->contact_5;
+	    	}
+	    	if (!$invoicingContact) $invoicingContact = $account->contact_1;
+	    	$email = ($invoicingContact->email) ? $invoicingContact->email : $account->email;
+	    	
+	    	if ($email && $commitment->invoice_message_id) {
     			if ($commitment->place_logo_src) {
     				$logo_src = $commitment->place_logo_src;
     			}
@@ -1551,7 +1570,7 @@ class CommitmentController extends AbstractActionController
     			$data['account_name'] = $commitment->account_name;
     			$data['caption'] = $commitment->caption;
     			$data['type'] = 'email';
-	    		$data['to'] = [$commitment->email => $commitment->email];
+	    		$data['to'] = [$email => $email];
 	    		if (array_key_exists('cci', $template)) $data['cci'] = $template['cci'];
 	    		$data['from_mail'] = ($commitment->place_support_email) ? $commitment->place_support_email : $template['from_mail'];
 	    		$data['from_name'] = ($commitment->place_support_email) ? $commitment->place_caption : $template['from_name'];
@@ -1565,9 +1584,9 @@ class CommitmentController extends AbstractActionController
 	    		$arguments = array();
 	    		foreach ($template['body']['params'] as $param) $arguments[] = $commitment->properties[$param];
 	    		$data['body'] = vsprintf($data['body'], $arguments);
-				$data['body'] .= '<br><br>';
-	    		if (array_key_exists('commitment/invoice_header', $commitment->place_config)) $data['body'] .= $commitment->place_config['commitment/invoice_header'];
-	    		else $data['body'] .= $context->getConfig('commitment/invoice_header');
+				$signature = $context->getConfig('core_account/sendMessage')['signature'];
+				if ($signature['definition'] != 'inline') $signature = $context->getConfig($signature['definition']);
+	    		$data['body'] .= $context->localize($signature['body']);
 
 	    		$emails[$commitment_id] = $data;
     		}

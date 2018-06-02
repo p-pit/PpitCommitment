@@ -973,13 +973,6 @@ return array(
     				'labels' => array('fr_FR' => 'P-Pit Engagements', 'en_US' => 'Commitments by 2Pit'),
 					'default' => 'account',
 					'roles' => array(
-							'sales_manager' => array(
-									'show' => true,
-									'labels' => array(
-											'en_US' => 'Sales manager',
-											'fr_FR' => 'Gestion commerciale',
-									),
-							),
 					),
 			),
 	),
@@ -2764,7 +2757,6 @@ table.note-report td {
 		'templates' => array(
 			'generic' => array('definition' => 'commitment/template/generic'),
 		),
-		'signature' => array('definition' => 'commitment/signature/generic'),
 	),
 
 	'commitment/template/generic' => array(
@@ -2783,20 +2775,14 @@ table.note-report td {
 			'text' => array(
 				'default' => '<p>Hello,</p>
 <p>We inform you that your online invoice is available: <a href="%s">Download your invoice</a>.</p>
-<p>We thank you for using our services et remain at your disposal.</p> 
-<p>Best regards,</p>
-<br>
-<img height="%s" src="%s" alt="%s logo" />				
+<p>Should you need any additional information, please do not hesitate to contact us.</p>
 ',
 				'fr_FR' => '<p>Bonjour,</p>
 <p>Nous vous informons que votre facture est disponible : <a href="%s">T&eacute;l&eacute;charger votre facture</a>.</p>
-<p>Nous vous remercions de votre confiance et restons &agrave; votre disposition.</p>
-<p>Bien cordialement,</p>
-<br>
-<img height="%s" src="%s" alt="%s logo" />				
+<p>Nous vous en souhaitons bonne r&eacute;ception.</p>
 ',
 			),
-			'params' => array('invoice_route', 'place_logo_height', 'logo_src', 'place_caption'),
+			'params' => array('invoice_route'),
 		),
 	),
 	

@@ -490,7 +490,7 @@ function getCommitmentUpdate(id, action) {
 function fillRowPrice() {
 <?php foreach ($products as $product) : ?>
 	<?php if (array_key_exists(0, $product->variants)) : ?>
-	if ($('#product_identifier').val() == "<?php echo $product->reference ?>") {
+	if ($('#product_identifier').val() == "<?php echo $product->identifier ?>") {
 		$('#input_unit_price').val('<?php echo $product->variants[0]['price'] ?>');
 		$('#product_brand').val("<?php echo $product->brand ?>");
 		$('#product_caption').val("<?php echo $product->caption ?>");
