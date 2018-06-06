@@ -2759,6 +2759,12 @@ table.note-report td {
 		),
 	),
 
+	'commitment/send-message/rental' => array(
+		'templates' => array(
+			'generic' => array('definition' => 'commitment/template/generic'),
+		),
+	),
+	
 	'commitment/template/generic' => array(
 		'labels' => array(
 			'en_US' => 'Generic',

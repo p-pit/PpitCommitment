@@ -1527,11 +1527,15 @@ class CommitmentController extends AbstractActionController
     	$template = $context->getConfig('commitment/send-message'.(($type) ? '/'.$type : ''))['templates'][$template_id];
     	if ($template['definition'] != 'inline') $template = $context->getConfig($template['definition']);
 
+    	$places = Place::getList([]);
+    	
     	$commitmentIds = explode(',', $this->params()->fromQuery('commitments'));
 		$emails = array();
     	foreach ($commitmentIds as $commitment_id) {
 	    	$commitment = Commitment::get($commitment_id);
 	    	$account = $commitment->account;
+	    	if (array_key_exists($account->place_id, $places)) $place = $places[$account->place_id];
+	    	else $place = null;
 	    	
 	    	// Retrieve the invoicing contact's email
 	    	$invoicingContact = null;
@@ -1584,8 +1588,12 @@ class CommitmentController extends AbstractActionController
 	    		$arguments = array();
 	    		foreach ($template['body']['params'] as $param) $arguments[] = $commitment->properties[$param];
 	    		$data['body'] = vsprintf($data['body'], $arguments);
-				$signature = $context->getConfig('core_account/sendMessage')['signature'];
-				if ($signature['definition'] != 'inline') $signature = $context->getConfig($signature['definition']);
+	    		
+	    		if ($place && array_key_exists('core_account/sendMessage', $place->config)) $signature = $place->config['core_account/sendMessage']['signature'];
+				else $signature = $context->getConfig('core_account/sendMessage')['signature'];
+				if ($signature['definition'] != 'inline') {
+					$signature = $context->getConfig($signature['definition']);
+				}
 	    		$data['body'] .= $context->localize($signature['body']);
 
 	    		$emails[$commitment_id] = $data;
