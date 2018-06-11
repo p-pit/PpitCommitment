@@ -540,6 +540,7 @@ class Commitment implements InputFilterAwareInterface
 				elseif ($propertyId == 'account_name') $where->like('core_account.name', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'n_fn') $where->like('core_vcard.n_fn', '%'.$params[$propertyId].'%');
 				elseif ($propertyId == 'product_identifier') $where->like('product_identifier', '%'.$params[$propertyId].'%');
+				elseif ($propertyId == 'account_property_15') $where->equalTo('core_account.property_15', $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'min_') $where->greaterThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 4) == 'max_') $where->lessThanOrEqualTo('commitment.'.substr($propertyId, 4), $params[$propertyId]);
 				elseif (substr($propertyId, 0, 8) == 'account_') {
