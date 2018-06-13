@@ -3212,7 +3212,7 @@ table.note-report td {
 	),
 	
 	'commitmentTerm/debit' => array(
-		'InitgPty/Nm' => '** 1.8 - Nom de l\'émetteur **',
+		'InitgPty/Nm' => 'SPORTS ETUDES ACADEMY',
 		'Cdtr/Nm' => '** 2.19 - Nom du créancier **',
 		'CdtrAcct/Id/IBAN' => '** 2.20 - IBAN du compte du créancier **',
 		'CdtrSchmeId/Id/PrvtId/Othr/Id' => '** 2.66 - Identifiant créancier SEPA **',

@@ -363,8 +363,8 @@ class TermController extends AbstractActionController
     		$term = Term::get($request->getPost('term_'.$i));
     		$terms[] = $term;
     	}
-    	$input = $term;
-    	$input->status = '';
+    	$input = $term->properties;
+    	$input['status'] = '';
     
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
@@ -377,7 +377,7 @@ class TermController extends AbstractActionController
     		$csrfForm->setData($request->getPost());
     		if ($csrfForm->isValid()) { // CSRF check
     			$data = array();
-    			foreach ($context->getConfig('commitmentTerm/group/'.$type) as $propertyId => $options) {
+    			foreach ($context->getConfig('commitmentTerm/group') as $propertyId => $options) {
     				if ($request->getPost($propertyId.'_check')) $data[$propertyId] = $request->getPost($propertyId);
     			}
     			foreach ($terms as $term) {
@@ -391,6 +391,8 @@ class TermController extends AbstractActionController
     						$connection->rollback();
     						$error = $rc;
     					}
+    					$message = 'OK';
+    					$connection->commit();
     				}
     				catch (\Exception $e) {
     					$connection->rollback();
@@ -440,6 +442,10 @@ class TermController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
+    	$place_id = $this->params()->fromRoute('place_id');
+    	$place = Place::get($place_id);
+    	if ($place && array_key_exists('commitmentTerm/debit', $place->config)) $config = $place->config['commitmentTerm/debit'];
+    	else $config = $context->getConfig('commitmentTerm/debit');
 
     	// Instanciate an interaction row for storing the XML content in database
     	$interaction = Interaction::instanciate();
@@ -467,7 +473,7 @@ class TermController extends AbstractActionController
 		$content['GrpHdr']['NbOfTxs'] = count($terms);
 		$content['GrpHdr']['CtrlSum'] = $sum;
 		$content['GrpHdr']['InitgPty'] = array();
-		$content['GrpHdr']['InitgPty']['Nm'] = $context->getConfig('commitmentTerm/debit')['InitgPty/Nm'];
+		$content['GrpHdr']['InitgPty']['Nm'] = $config['InitgPty/Nm'];
 		$content['PmtInf'] = array();
 		$content['PmtInf']['PmtInfId'] = $context->getInstance()->caption.' '.$interaction->id;
 		$content['PmtInf']['PmtMtd'] = 'DD';
@@ -481,10 +487,10 @@ class TermController extends AbstractActionController
 		$content['PmtInf']['PmtTpInf']['SeqTp'] = 'OOFF';
 		$content['PmtInf']['ReqdColltnDt'] = ($term->collection_date) ? $term->collection_date : date('Y-m-d');
 		$content['PmtInf']['Cdtr'] = array();
-		$content['PmtInf']['Cdtr']['Nm'] = $context->getConfig('commitmentTerm/debit')['Cdtr/Nm'];
+		$content['PmtInf']['Cdtr']['Nm'] = $config['Cdtr/Nm'];
 		$content['PmtInf']['CdtrAcct'] = array();
 		$content['PmtInf']['CdtrAcct']['Id'] = array();
-		$content['PmtInf']['CdtrAcct']['Id']['IBAN'] = $context->getConfig('commitmentTerm/debit')['CdtrAcct/Id/IBAN'];
+		$content['PmtInf']['CdtrAcct']['Id']['IBAN'] = $config['CdtrAcct/Id/IBAN'];
 		$content['PmtInf']['CdtrAgt'] = array();
 		$content['PmtInf']['CdtrAgt']['FinInstnId'] = array();
 		$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr'] = array();
@@ -493,7 +499,7 @@ class TermController extends AbstractActionController
 		$content['PmtInf']['CdtrSchmeId']['Id'] = array();
 		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId'] = array();
 		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['Id'] = $context->getConfig('commitmentTerm/debit')['CdtrSchmeId/Id/PrvtId/Othr/Id'];
+		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['Id'] = $config['CdtrSchmeId/Id/PrvtId/Othr/Id'];
 		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm'] = array();
 		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm']['Prtry'] = 'SEPA';
 		
@@ -503,10 +509,10 @@ class TermController extends AbstractActionController
 			$row['PmtId'] = array();
 			$row['PmtId']['EndToEndId'] = substr(($term->reference) ? $term->reference : $term->commitment_caption, 0, 35);
 			$row['InstdAmt'] = $term->amount;
-			$row['DrctDbtTxt'] = array();
-			$row['DrctDbtTxt']['MndtRltdInf'] = array();
-			$row['DrctDbtTxt']['MndtRltdInf']['MndtId'] = $term->transfer_order_id;
-			$row['DrctDbtTxt']['MndtRltdInf']['DtOfSgntr'] = $term->transfer_order_date;
+			$row['DrctDbtTx'] = array();
+			$row['DrctDbtTx']['MndtRltdInf'] = array();
+			$row['DrctDbtTx']['MndtRltdInf']['MndtId'] = $term->transfer_order_id;
+			$row['DrctDbtTx']['MndtRltdInf']['DtOfSgntr'] = $term->transfer_order_date;
 			$row['DbtrAgt'] = array();
 			$row['DbtrAgt']['FinInstnId'] = array();
 			$row['DbtrAgt']['FinInstnId']['Othr'] = array();
@@ -516,9 +522,9 @@ class TermController extends AbstractActionController
 			$row['DbtrAcct'] = array();
 			$row['DbtrAcct']['Id'] = array();
 			$row['DbtrAcct']['Id']['IBAN'] = $term->bank_identifier;
-			$row['RgltryRptg'] = array();
+/*			$row['RgltryRptg'] = array();
 			$row['RgltryRptg']['Dtls'] = array();
-			$row['RgltryRptg']['Dtls']['Cd'] = $context->getConfig('commitmentTerm/debit')['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];
+			$row['RgltryRptg']['Dtls']['Cd'] = $config['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];*/
 			$content['PmtInf']['DrctDbtTxInf'][] = $row;
 		}
 		header('Content-Type: application/xml; charset=utf-8');
