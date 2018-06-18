@@ -42,6 +42,8 @@
 			'Display start' => 'Début d\'affichage',
 			'Display end' => 'Fin d\'affichage',
 			'Download the invoice' => 'Télécharger la facture',
+			'Control file' => 'Fichier de contrôle',
+			'Bank file' => 'Fichier bancaire',
 			'Due date' => 'Echéance',
 			'End' => 'Fin',
 			'End of display' => 'Fin d\'affichage',

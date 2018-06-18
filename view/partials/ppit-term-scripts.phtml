@@ -459,8 +459,6 @@ echo $this->partial('/partials/check-update-properties', array('entity' => 'Grou
 
 function connectDebitForm()
 {
-	var xhttp = new XMLHttpRequest();
-
 	var termNumber = $('#term-number').val(), terms = '';
 	first = true;
 	for (i = 0, j = 0; i < termNumber; i++) {
@@ -472,11 +470,23 @@ function connectDebitForm()
 		}
 	}
 
-	window.open('<?php echo $this->url('commitmentTerm/debitXml') ?>' + '?terms=' + terms, '_blank');
+	window.open('<?php echo $this->url('commitmentTerm/debitXml') ?>' + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank');
 }
 
 function getDebitForm() {
-	$('#term-debit-button').removeClass('btn-default').addClass('btn-warning');
+	var termNumber = $('#term-number').val(), terms = '';
+	first = true;
+	for (i = 0, j = 0; i < termNumber; i++) {
+		if (document.getElementById('term-checkbox_' + i).checked) {
+			if (!first) terms += ',';
+			first = false;
+			terms += $('#term_' + i).val();
+			j++;
+		}
+	}
+
+	$('#term-debit-button').show();
+	location.href = '<?php echo $this->url('commitmentTerm/debitSsml') ?>' + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank';
 	$('#term-debit-alert').show();
 	$('#term-debit-button').click(function () { connectDebitForm(); });
 }
@@ -505,8 +515,9 @@ function getDebit() {
 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
 			document.getElementById('term-debit-panel').innerHTML = xhttp.responseText;
+			$('#term-debit-button').hide();
 			$('#term-debit-alert').hide();
-			$('#term-debit-button').click(function () { getDebitForm(); });
+			$('#term-control-button').click(function () { getDebitForm(); });
 		}
 	}
 	xhttp.send();

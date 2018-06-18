@@ -802,7 +802,16 @@ return array(
 		        								),
 		        						),
 		        				),
-		        				'debitXml' => array(
+		        				'debitSsml' => array(
+		        						'type' => 'segment',
+		        						'options' => array(
+		        								'route' => '/debit-ssml',
+		        								'defaults' => array(
+		        										'action' => 'debitSsml',
+		        								),
+		        						),
+		        				),
+	       						'debitXml' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
 		        								'route' => '/debit-xml',
@@ -924,6 +933,7 @@ return array(
             	array('route' => 'commitmentTerm/update', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/group', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/debit', 'roles' => array('sales_manager')),
+            	array('route' => 'commitmentTerm/debitSsml', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/debitXml', 'roles' => array('sales_manager')),
             	array('route' => 'commitmentTerm/invoice', 'roles' => array('sales_manager', 'accountant')),
             )

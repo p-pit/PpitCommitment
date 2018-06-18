@@ -5,6 +5,7 @@ use PpitCommitment\Model\Commitment;
 use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Context;
+use PpitCore\Model\Encryption;
 use PpitCore\Model\Generic;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;
@@ -183,7 +184,7 @@ class Term implements InputFilterAwareInterface
         $this->account_property_16 = (isset($data['account_property_16'])) ? $data['account_property_16'] : null;
     }
     
-    public function getProperties()
+    public function getProperties($passphrase = null)
     {
     	$data = array();
     	$data['id'] = (int) $this->id;
@@ -207,6 +208,13 @@ class Term implements InputFilterAwareInterface
     	$data['place_caption'] = $this->place_caption;
     	$data['place_identifier'] = $this->place_identifier;
     	$data['place_id'] = $this->place_id;
+    	$data['transfer_order_id'] = $this->transfer_order_id;
+    	$data['transfer_order_date'] = $this->transfer_order_date;
+    	$data['transfer_order_id'] = $this->transfer_order_id;
+    	if ($passphrase) {
+    		$value = Encryption::decrypt($this->bank_identifier, $passphrase);
+    		if ($value) $data['bank_identifier'] = $value;
+    	}
 
     	$data['commitment_property_1'] = $this->commitment_property_1;
     	$data['commitment_property_2'] = $this->commitment_property_2;
@@ -379,7 +387,7 @@ class Term implements InputFilterAwareInterface
 		return $terms;
     }
 
-    public static function get($id, $column = 'id')
+    public static function get($id, $column = 'id', $passphrase = null)
     {
     	$term = Term::getTable()->get($id, $column);
     	if (!$term) return null;
@@ -442,7 +450,7 @@ class Term implements InputFilterAwareInterface
 		    	$term->account_property_16 = $account->property_16;
 			}
     	}
-    	$term->properties = $term->getProperties();
+    	$term->properties = $term->getProperties($passphrase);
     	return $term;
     }
 

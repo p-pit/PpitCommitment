@@ -29,9 +29,21 @@ if ($message == 'OK') $isDisabled = true; else $isDisabled = false;
 
 <?php if ($message != 'OK') : ?>
     <div class="form-group">
+		<div class="col-sm-5"><?php echo $this->translate('Password', 'ppit-core', $context->getLocale()) ?></div>
+		<div class="col-sm-7">
+			<input type="password" class="form-control" id="term-passphrase">
+		</div>
+	</div>
+    <div class="form-group">
 		<div class="col-sm-5">&nbsp;</div>
 		<div class="col-sm-7">
-			<input id="term-debit-button" class="btn btn-default" value="<?php echo $this->translate('Send', 'ppit-core', $context->getLocale()) ?>">
+			<input id="term-control-button" class="btn btn-warning" value="<?php echo $this->translate('Control file', 'ppit-commitment', $context->getLocale()) ?>">
+		</div>
+	</div>
+    <div class="form-group">
+		<div class="col-sm-5">&nbsp;</div>
+		<div class="col-sm-7">
+			<input id="term-debit-button" class="btn btn-danger" value="<?php echo $this->translate('Bank file', 'ppit-commitment', $context->getLocale()) ?>">
 		</div>
 	</div>
 	<div class="form-group">

@@ -13,6 +13,7 @@ use PpitCore\Model\Csrf;
 use PpitCore\Model\Context;
 use PpitCore\Model\Interaction;
 use PpitCore\Model\Place;
+use PpitCore\ViewHelper\ArrayToSsmlViewHelper;
 use PpitCore\ViewHelper\ArrayToXmlViewHelper;
 use Zend\Http\Client;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -438,6 +439,75 @@ class TermController extends AbstractActionController
     	return $view;
     }
 
+    public function generateDebit($terms, $interaction_id, $sum, $collection_date, $config)
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+
+    	$content = array();
+    	$content['GrpHdr'] = array();
+    	$content['GrpHdr']['MsgId'] = $interaction_id;
+    	$content['GrpHdr']['CreDtTm'] = date('Y-m-d').'T'.date('h:i:s');
+    	$content['GrpHdr']['NbOfTxs'] = count($terms);
+    	$content['GrpHdr']['CtrlSum'] = $sum;
+    	$content['GrpHdr']['InitgPty'] = array();
+    	$content['GrpHdr']['InitgPty']['Nm'] = $config['InitgPty/Nm'];
+    	$content['PmtInf'] = array();
+    	$content['PmtInf']['PmtInfId'] = $context->getInstance()->caption.' '.$interaction_id;
+    	$content['PmtInf']['PmtMtd'] = 'DD';
+    	$content['PmtInf']['NbOfTxs'] = count($terms);
+    	$content['PmtInf']['CtrlSum'] = $sum;
+    	$content['PmtInf']['PmtTpInf'] = array();
+    	$content['PmtInf']['PmtTpInf']['SvcLvl'] = array();
+    	$content['PmtInf']['PmtTpInf']['SvcLvl']['Cd'] = 'SEPA';
+    	$content['PmtInf']['PmtTpInf']['LclInstrm'] = array();
+    	$content['PmtInf']['PmtTpInf']['LclInstrm']['Cd'] = 'CORE';
+    	$content['PmtInf']['PmtTpInf']['SeqTp'] = 'OOFF';
+    	$content['PmtInf']['ReqdColltnDt'] = ($collection_date) ? $collection_date : date('Y-m-d');
+    	$content['PmtInf']['Cdtr'] = array();
+    	$content['PmtInf']['Cdtr']['Nm'] = $config['Cdtr/Nm'];
+    	$content['PmtInf']['CdtrAcct'] = array();
+    	$content['PmtInf']['CdtrAcct']['Id'] = array();
+    	$content['PmtInf']['CdtrAcct']['Id']['IBAN'] = $config['CdtrAcct/Id/IBAN'];
+    	$content['PmtInf']['CdtrAgt'] = array();
+    	$content['PmtInf']['CdtrAgt']['FinInstnId'] = array();
+    	$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr'] = array();
+    	$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
+    	$content['PmtInf']['CdtrSchmeId'] = array();
+    	$content['PmtInf']['CdtrSchmeId']['Id'] = array();
+    	$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId'] = array();
+    	$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr'] = array();
+    	$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['Id'] = $config['CdtrSchmeId/Id/PrvtId/Othr/Id'];
+    	$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm'] = array();
+    	$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm']['Prtry'] = 'SEPA';
+    
+    	$content['PmtInf']['DrctDbtTxInf'] = array();
+    	foreach ($terms as $term) {
+    		$row = array();
+    		$row['PmtId'] = array();
+    		$row['PmtId']['EndToEndId'] = substr(($term['reference']) ? $term['reference'] : $term['commitment_caption'], 0, 35);
+    		$row['InstdAmt'] = $term['amount'];
+    		$row['DrctDbtTx'] = array();
+    		$row['DrctDbtTx']['MndtRltdInf'] = array();
+    		$row['DrctDbtTx']['MndtRltdInf']['MndtId'] = $term['transfer_order_id'];
+    		$row['DrctDbtTx']['MndtRltdInf']['DtOfSgntr'] = $term['transfer_order_date'];
+    		$row['DbtrAgt'] = array();
+    		$row['DbtrAgt']['FinInstnId'] = array();
+    		$row['DbtrAgt']['FinInstnId']['Othr'] = array();
+    		$row['DbtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
+    		$row['Dbtr'] = array();
+    		$row['Dbtr']['Nm'] = $term['name'];
+    		$row['DbtrAcct'] = array();
+    		$row['DbtrAcct']['Id'] = array();
+    		$row['DbtrAcct']['Id']['IBAN'] = $term['bank_identifier'];
+/*			$row['RgltryRptg'] = array();
+    		$row['RgltryRptg']['Dtls'] = array();
+    		$row['RgltryRptg']['Dtls']['Cd'] = $config['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];*/
+    		$content['PmtInf']['DrctDbtTxInf'][] = $row;
+    	}
+    	return $content;
+    }
+    
     public function debitXmlAction()
     {
     	// Retrieve the context
@@ -446,6 +516,16 @@ class TermController extends AbstractActionController
     	$place = Place::get($place_id);
     	if ($place && array_key_exists('commitmentTerm/debit', $place->config)) $config = $place->config['commitmentTerm/debit'];
     	else $config = $context->getConfig('commitmentTerm/debit');
+    	$passphrase = $this->params()->fromQuery('passphrase');
+
+    	$termIds = explode(',', $this->params()->fromQuery('terms'));
+    	$terms = array();
+    	$sum = 0;
+    	foreach ($termIds as $term_id) {
+    		$term = Term::get($term_id, 'id', $passphrase)->properties;
+    		$terms[$term['id']] = $term;
+    		$sum += $term['amount'];
+    	}
 
     	// Instanciate an interaction row for storing the XML content in database
     	$interaction = Interaction::instanciate();
@@ -457,83 +537,43 @@ class TermController extends AbstractActionController
     	$interaction->route = 'interaction/download';
     	$interaction->reference = $context->getFormatedName().'_'.date('Y-m-d_H:i:s');
     	$interaction->add();
-    	 
-    	$termIds = explode(',', $this->params()->fromQuery('terms'));
-    	$terms = array();
-    	$sum = 0;
-    	foreach ($termIds as $term_id) {
-    		$term = Term::get($term_id);
-    		$terms[$term->id] = $term;
-    		$sum += $term->amount;
-    	}
-		$content = array();
-		$content['GrpHdr'] = array();
-		$content['GrpHdr']['MsgId'] = $interaction->id;
-    	$content['GrpHdr']['CreDtTm'] = date('Y-m-d').'T'.date('h:i:s');
-		$content['GrpHdr']['NbOfTxs'] = count($terms);
-		$content['GrpHdr']['CtrlSum'] = $sum;
-		$content['GrpHdr']['InitgPty'] = array();
-		$content['GrpHdr']['InitgPty']['Nm'] = $config['InitgPty/Nm'];
-		$content['PmtInf'] = array();
-		$content['PmtInf']['PmtInfId'] = $context->getInstance()->caption.' '.$interaction->id;
-		$content['PmtInf']['PmtMtd'] = 'DD';
-		$content['PmtInf']['NbOfTxs'] = count($terms);
-		$content['PmtInf']['CtrlSum'] = $sum;
-		$content['PmtInf']['PmtTpInf'] = array();
-		$content['PmtInf']['PmtTpInf']['SvcLvl'] = array();
-		$content['PmtInf']['PmtTpInf']['SvcLvl']['Cd'] = 'SEPA';
-		$content['PmtInf']['PmtTpInf']['LclInstrm'] = array();
-		$content['PmtInf']['PmtTpInf']['LclInstrm']['Cd'] = 'CORE';
-		$content['PmtInf']['PmtTpInf']['SeqTp'] = 'OOFF';
-		$content['PmtInf']['ReqdColltnDt'] = ($term->collection_date) ? $term->collection_date : date('Y-m-d');
-		$content['PmtInf']['Cdtr'] = array();
-		$content['PmtInf']['Cdtr']['Nm'] = $config['Cdtr/Nm'];
-		$content['PmtInf']['CdtrAcct'] = array();
-		$content['PmtInf']['CdtrAcct']['Id'] = array();
-		$content['PmtInf']['CdtrAcct']['Id']['IBAN'] = $config['CdtrAcct/Id/IBAN'];
-		$content['PmtInf']['CdtrAgt'] = array();
-		$content['PmtInf']['CdtrAgt']['FinInstnId'] = array();
-		$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr'] = array();
-		$content['PmtInf']['CdtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
-		$content['PmtInf']['CdtrSchmeId'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['Id'] = $config['CdtrSchmeId/Id/PrvtId/Othr/Id'];
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm'] = array();
-		$content['PmtInf']['CdtrSchmeId']['Id']['PrvtId']['Othr']['SchmeNm']['Prtry'] = 'SEPA';
-		
-		$content['PmtInf']['DrctDbtTxInf'] = array();
-		foreach ($terms as $term) {
-			$row = array();
-			$row['PmtId'] = array();
-			$row['PmtId']['EndToEndId'] = substr(($term->reference) ? $term->reference : $term->commitment_caption, 0, 35);
-			$row['InstdAmt'] = $term->amount;
-			$row['DrctDbtTx'] = array();
-			$row['DrctDbtTx']['MndtRltdInf'] = array();
-			$row['DrctDbtTx']['MndtRltdInf']['MndtId'] = $term->transfer_order_id;
-			$row['DrctDbtTx']['MndtRltdInf']['DtOfSgntr'] = $term->transfer_order_date;
-			$row['DbtrAgt'] = array();
-			$row['DbtrAgt']['FinInstnId'] = array();
-			$row['DbtrAgt']['FinInstnId']['Othr'] = array();
-			$row['DbtrAgt']['FinInstnId']['Othr']['Id'] = 'NOTPROVIDED';
-			$row['Dbtr'] = array();
-			$row['Dbtr']['Nm'] = $term->name;
-			$row['DbtrAcct'] = array();
-			$row['DbtrAcct']['Id'] = array();
-			$row['DbtrAcct']['Id']['IBAN'] = $term->bank_identifier;
-/*			$row['RgltryRptg'] = array();
-			$row['RgltryRptg']['Dtls'] = array();
-			$row['RgltryRptg']['Dtls']['Cd'] = $config['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];*/
-			$content['PmtInf']['DrctDbtTxInf'][] = $row;
-		}
-		header('Content-Type: application/xml; charset=utf-8');
+
+    	$content = $this->generateDebit($terms, $interaction->id, $sum, $term['collection_date'], $config);
+
+    	header('Content-Type: application/xml; charset=utf-8');
 		header("Content-disposition: attachment; filename=debit-".date('Y-m-d').".xml");
 		$xmlContent = ArrayToXmlViewHelper::convert($content);
     	$interaction->content = $xmlContent;
 		$interaction->update(null);
     	echo $xmlContent;
 		return $this->response;
+    }
+
+    public function debitSsmlAction()
+    {
+    	// Retrieve the context
+    	$context = Context::getCurrent();
+    	$place_id = $this->params()->fromRoute('place_id');
+    	$place = Place::get($place_id);
+    	if ($place && array_key_exists('commitmentTerm/debit', $place->config)) $config = $place->config['commitmentTerm/debit'];
+    	else $config = $context->getConfig('commitmentTerm/debit');
+    	$passphrase = $this->params()->fromQuery('passphrase');
+    
+    	$termIds = explode(',', $this->params()->fromQuery('terms'));
+    	$terms = array();
+    	$sum = 0;
+    	foreach ($termIds as $term_id) {
+    		$term = Term::get($term_id, 'id', $passphrase)->properties;
+    		$terms[$term['id']] = $term;
+    		$sum += $term['amount'];
+    	}
+    
+    	$content = $this->generateDebit($terms, 0, $sum, $term['collection_date'], $config);
+		ArrayToSsmlViewHelper::convert($content);
+    	
+    	$view = new ViewModel(array());
+		$view->setTerminal(true);
+		return $view;
     }
     
 	public function deleteAction()
