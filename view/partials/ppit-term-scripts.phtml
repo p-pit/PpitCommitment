@@ -347,7 +347,7 @@ function connectTermUpdateForm(commitment_id, id, action, target)
 			xhttp.onload = function () {
 				if (xhttp.readyState == 4 <?php if (!$context->getConfig()['isTraceActive']) echo '&& xhttp.status == 200' ?>) {
 					document.getElementById(target).innerHTML = xhttp.responseText;
-					filterTermList();
+//					filterTermList();
 					connectTermUpdateForm(id, action, target);
 					$('.action-btn').removeClass('btn-primary').addClass('btn-default');
 				}
@@ -470,7 +470,7 @@ function connectDebitForm()
 		}
 	}
 
-	window.open('<?php echo $this->url('commitmentTerm/debitXml') ?>' + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank');
+	window.open('<?php echo $this->url('commitmentTerm/debitXml') ?>/' + $('#place_id').val() + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank');
 }
 
 function getDebitForm() {
@@ -486,7 +486,7 @@ function getDebitForm() {
 	}
 
 	$('#term-debit-button').show();
-	location.href = '<?php echo $this->url('commitmentTerm/debitSsml') ?>' + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank';
+	location.href = '<?php echo $this->url('commitmentTerm/debitSsml') ?>/' + $('#place_id').val() + '?terms=' + terms + '&passphrase=' + $('#term-passphrase').val(), '_blank';
 	$('#term-debit-alert').show();
 	$('#term-debit-button').click(function () { connectDebitForm(); });
 }

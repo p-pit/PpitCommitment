@@ -5,7 +5,6 @@ namespace PpitCommitment\Controller;
 use PpitContact\Model\ContactMessage;
 use PpitCommitment\ViewHelper\PdfIndexCardViewHelper;
 use PpitCommitment\ViewHelper\PpitPDF;
-use PpitCommitment\ViewHelper\SsmlAccountViewHelper;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Account;
 use PpitCore\Model\Community;

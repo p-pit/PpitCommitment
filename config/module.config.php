@@ -805,7 +805,7 @@ return array(
 		        				'debitSsml' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
-		        								'route' => '/debit-ssml',
+		        								'route' => '/debit-ssml[/:place_id]',
 		        								'defaults' => array(
 		        										'action' => 'debitSsml',
 		        								),
@@ -814,7 +814,7 @@ return array(
 	       						'debitXml' => array(
 		        						'type' => 'segment',
 		        						'options' => array(
-		        								'route' => '/debit-xml',
+		        								'route' => '/debit-xml[/:place_id]',
 		        								'defaults' => array(
 		        										'action' => 'debitXml',
 		        								),
@@ -983,6 +983,13 @@ return array(
     				'labels' => array('fr_FR' => 'P-Pit Engagements', 'en_US' => 'Commitments by 2Pit'),
 					'default' => 'account',
 					'roles' => array(
+							'accountant' => array(
+									'show' => true,
+									'labels' => array(
+											'en_US' => 'Accountant',
+											'fr_FR' => 'Comptable',
+									),
+							),
 					),
 			),
 	),
@@ -1489,10 +1496,11 @@ return array(
 			'n_first', 'n_last', 'email', 'tel_work', 'tel_cell', 
 			'adr_street', 'adr_extended', 'adr_post_office_box', 'adr_zip', 'adr_city', 'adr_state', 'adr_country', 
 			'n_title_2', 'n_first_2', 'n_last_2', 'email_2', 'tel_work_2', 'tel_cell_2', 'address_2', 
-			'place_id', 'place_caption', 'opening_date', 'closing_date', 'callback_date', 'origine', 'contact_history',
+			'place_id'/*, 'place_caption'*/, 'opening_date', 'closing_date', 'callback_date', 'origine', 'contact_history',
 			'property_1', 'property_2', 'property_3', 'property_4', 'property_5', 'property_13',
 			'comment_1', 'comment_2'),
 		'order' => 'name',
+		'options' => ['internal_identifier' => true],
 	),
 	
 	'core_account/index/business' => array(
@@ -1518,7 +1526,7 @@ return array(
 	'core_account/list/business' => array(
 			'properties' => array(
 					'status' => ['color' => ['new' => 'LightGreen', 'interested' => 'LightSalmon', 'candidate' => 'LightBlue', 'answer' => 'LightSalmon', 'gone' => 'LightGrey']],
-					'place_caption' => [],
+					'place_id' => [],
 					'name' => [],
 					'basket' => [],
 					'property_1' => [],
@@ -1550,7 +1558,7 @@ return array(
 	'core_account/update/business' => array(
 			'place_id' => array('mandatory' => true),
 			'status' => array('mandatory' => true),
-			'identifier' => array('mandatory' => false),
+			'identifier' => [],
 			'name' => array('mandatory' => false),
 			'basket' => array('mandatory' => false),
 			'opening_date' => array('mandatory' => false),
@@ -1769,9 +1777,9 @@ table.note-report td {
 	'core_account/b2c/property/invoice_adr_city' => array('definition' => 'core_account/generic/property/invoice_adr_city'),
 	'core_account/b2c/property/invoice_adr_state' => array('definition' => 'core_account/generic/property/invoice_adr_state'),
 	'core_account/b2c/property/invoice_adr_country' => array('definition' => 'core_account/generic/property/invoice_adr_country'),
-	'core_account/b2c/property/property_1' => array('definition' => 'core_account/b2c/property/property_1'),
-	'core_account/b2c/property/property_2' => array('definition' => 'core_account/b2c/property/property_2'),
-	'core_account/b2c/property/property_3' => array('definition' => 'core_account/b2c/property/property_3'),
+	'core_account/b2c/property/transfer_order_id' => array('definition' => 'core_account/generic/property/transfer_order_id'),
+	'core_account/b2c/property/transfer_order_date' => array('definition' => 'core_account/generic/property/transfer_order_date'),
+	'core_account/b2c/property/bank_identifier' => array('definition' => 'core_account/generic/property/bank_identifier'),
 	
 	'core_account/b2c/property/property_1' => array(
 		'definition' => 'inline',
@@ -1822,6 +1830,7 @@ table.note-report td {
 			'adr_street', 'adr_zip', 'adr_city', 'adr_state', 'adr_country', 'birth_date', 'callback_date',
 			'invoice_n_title', 'invoice_n_first', 'invoice_n_last', 'invoice_email', 'invoice_tel_work', 'invoice_tel_cell',
 			'invoice_adr_street', 'invoice_adr_zip', 'invoice_adr_city', 'invoice_adr_state', 'invoice_adr_country',
+			'transfer_order_id', 'transfer_order_date', 'bank_identifier',
 			'property_1', 'property_2', 'property_3', 'contact_history',
 		),
 		'order' => 'n_fn',
@@ -1876,22 +1885,25 @@ table.note-report td {
 	),
 	
 	'core_account/update/b2c' => array(
-			'place_id' => array('mandatory' => true),
-			'status' => array('mandatory' => true),
-			'name' => array('mandatory' => true),
-			'identifier' => array('mandatory' => true),
-			'n_first' => array('mandatory' => false),
-			'n_last' => array('mandatory' => true),
-			'callback_date' => array('mandatory' => false),
-			'photo_link_id' => array('mandatory' => false),
-			'email' => array('mandatory' => false),
-			'tel_work' => array('mandatory' => false),
-			'tel_cell' => array('mandatory' => false),
-			'birth_date' => array('mandatory' => false),
-			'property_1' => array('mandatory' => false),
-			'property_2' => array('mandatory' => false),
-			'property_3' => array('mandatory' => false),
-			'contact_history' => array('mandatory' => false),
+		'place_id' => array('mandatory' => true),
+		'status' => array('mandatory' => true),
+		'name' => array('mandatory' => true),
+		'identifier' => array('mandatory' => true),
+		'n_first' => array('mandatory' => false),
+		'n_last' => array('mandatory' => true),
+		'callback_date' => array('mandatory' => false),
+		'photo_link_id' => array('mandatory' => false),
+		'email' => array('mandatory' => false),
+		'tel_work' => array('mandatory' => false),
+		'tel_cell' => array('mandatory' => false),
+		'birth_date' => array('mandatory' => false),
+		'property_1' => array('mandatory' => false),
+		'property_2' => array('mandatory' => false),
+		'property_3' => array('mandatory' => false),
+		'transfer_order_id' => array('mandatory' => false), 
+		'transfer_order_date' => array('mandatory' => false), 
+		'bank_identifier' => array('mandatory' => false),
+		'contact_history' => array('mandatory' => false),
 	),
 	
 	'core_account/updateContact/b2c' => array(
@@ -3222,7 +3234,7 @@ table.note-report td {
 	),
 	
 	'commitmentTerm/debit' => array(
-		'InitgPty/Nm' => 'SPORTS ETUDES ACADEMY',
+		'InitgPty/Nm' => '** 2.19 - Nom de l\'émetteur **',
 		'Cdtr/Nm' => '** 2.19 - Nom du créancier **',
 		'CdtrAcct/Id/IBAN' => '** 2.20 - IBAN du compte du créancier **',
 		'CdtrSchmeId/Id/PrvtId/Othr/Id' => '** 2.66 - Identifiant créancier SEPA **',

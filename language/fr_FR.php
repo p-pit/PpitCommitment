@@ -82,6 +82,7 @@
 			'Object' => 'Objet',
 			'Order form' => 'Bon de commande',
 			'Orders in progress' => 'Commandes en cours',
+			'Place to credit' => "Etablissement à créditer",
 			'Please accept the conditions' => "Veuillez accepter les conditions",
 			'Positioning' => 'Positionnement',
 			'Print the index card' => 'Imprimer la fiche',

@@ -277,8 +277,10 @@ class TermController extends AbstractActionController
 	    	$client->getRequest()->getHeaders()->addHeaders(array('Authorization' => 'Bearer '.$dropbox['credential']));
 	    	$client->setRawBody(json_encode(array('path' => $dropbox['folders']['settlements'])));
 	    	$response = $client->send();
-	    	foreach (json_decode($response->getBody(), true)['entries'] as $entry) {
-	    		$documentList[] = $entry['name'];
+	    	if (array_key_exists('entries', json_decode($response->getBody(), true))) {
+		    	foreach (json_decode($response->getBody(), true)['entries'] as $entry) {
+		    		$documentList[] = $entry['name'];
+		    	}
 	    	}
     	}
     	else $dropbox = null;
@@ -422,7 +424,10 @@ class TermController extends AbstractActionController
     {
     	// Retrieve the context
     	$context = Context::getCurrent();
-
+		$cursor = Place::getList([]);
+		$places = array();
+		foreach ($cursor as $place_id => $place) $places[$place_id] = ['caption' => $place->caption];
+    	
     	// Instanciate the csrf form
     	$csrfForm = new CsrfForm();
     	$csrfForm->addCsrfElement('csrf');
@@ -431,6 +436,7 @@ class TermController extends AbstractActionController
     	 
     	$view = new ViewModel(array(
     		'context' => $context,
+    		'places' => $places,
     		'csrfForm' => $csrfForm,
     		'message' => $message,
     		'error' => $error,
@@ -499,7 +505,7 @@ class TermController extends AbstractActionController
     		$row['Dbtr']['Nm'] = $term['name'];
     		$row['DbtrAcct'] = array();
     		$row['DbtrAcct']['Id'] = array();
-    		$row['DbtrAcct']['Id']['IBAN'] = $term['bank_identifier'];
+    		$row['DbtrAcct']['Id']['IBAN'] = (array_key_exists('bank_identifier', $term)) ? $term['bank_identifier'] : '';
 /*			$row['RgltryRptg'] = array();
     		$row['RgltryRptg']['Dtls'] = array();
     		$row['RgltryRptg']['Dtls']['Cd'] = $config['DrctDbtTxInf/RgltryRptg/Dtls/Cd'];*/

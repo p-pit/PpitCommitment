@@ -278,7 +278,10 @@ class Term implements InputFilterAwareInterface
     	unset($data['place_caption']);
     	unset($data['place_identifier']);
     	unset($data['place_id']);
-
+    	unset($data['transfer_order_id']);
+    	unset($data['transfer_order_date']);
+    	unset($data['bank_identifier']);
+    	 
     	unset($data['commitment_property_1']);
     	unset($data['commitment_property_2']);
     	unset($data['commitment_property_3']);
