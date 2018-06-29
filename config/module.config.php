@@ -3198,6 +3198,7 @@ table.note-report td {
 				'place_id' => ['multiple' => true],
 				'name' => [],
 				'status' => ['multiple' => true],
+				'due_date' => [],
 				'collection_date' => [],
 				'amount' => [],
 				'reference' => [],
@@ -3208,6 +3209,7 @@ table.note-report td {
 			'properties' => array(
 				'name' => [],
 				'status' => [],
+				'due_date' => [],
 				'collection_date' => [],
 				'amount' => [],
 			),

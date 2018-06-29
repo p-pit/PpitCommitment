@@ -31,7 +31,7 @@ class PdfInvoiceViewHelper
     	$pdf->SetTitle('Invoice');
     	$pdf->SetSubject('Invoice');
     	$pdf->SetKeywords('P-Pit, PDF, Invoice');
-    	
+
     	// set default header data
 		if ($place && $place->banner_src) $pdf->SetHeaderData($place->banner_src, ($place->banner_width) ? $place->banner_width : $context->getConfig('corePlace')['properties']['banner_width']['maxValue']);
 		else $pdf->SetHeaderData('logos/'.$context->getInstance()->caption.'/'.$context->getConfig('headerParams')['advert'], $context->getConfig('headerParams')['advert-width']);
@@ -104,8 +104,9 @@ class PdfInvoiceViewHelper
     	// Title
     	$text = '<div style="text-align: center"><strong>';
     	if ($proforma) $text .= 'Facture proforma';
+    	elseif ($invoice['excluding_tax'] < 0) $text .= 'Avoir n° '.$invoice['identifier'];
     	else $text .= 'Facture n° '.$invoice['identifier'];
-    	$text .= ' au '.$context->decodeDate($invoice['date']);
+    	$text .= ' du '.$context->decodeDate($invoice['date']);
     	$text .= '</strong></div>';
     	$pdf->writeHTML($text, true, 0, true, 0);
     	$pdf->Ln(5);
@@ -189,7 +190,7 @@ class PdfInvoiceViewHelper
     	// Terms
     	if (array_key_exists('terms', $invoice)) {
 		    $pdf->Ln();
-		    $text = '<strong>Echéancier</strong>';
+		    $text = '<strong>Echéancier de règlement</strong>';
 		    $pdf->writeHTML($text, true, 0, true, 0);
 	    	$pdf->Ln();
 	    	$pdf->SetDrawColor(0, 0, 0);
