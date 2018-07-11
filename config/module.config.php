@@ -2093,6 +2093,13 @@ table.note-report td {
 					'fr_FR' => 'Etablissement',
 			),
 	),
+	'commitment/property/place_caption' => array(
+			'type' => 'input',
+			'labels' => array(
+					'en_US' => 'Place',
+					'fr_FR' => 'Centre',
+			),
+	),
 	'commitment/property/account_id' => array(
 			'type' => 'input',
 			'labels' => array(
@@ -2225,6 +2232,7 @@ table.note-report td {
 							),
 					),
 					'place_id' => array('definition' => 'commitment/property/place_id'),
+					'place_caption' => array('definition' => 'commitment/property/place_caption'),
 					'account_id' => array('definition' => 'commitment/property/account_id'),
 					'account_name' => array('definition' => 'commitment/property/account_id'),
 					'account_identifier' => array('definition' => 'commitment/property/account_identifier'),

@@ -241,7 +241,7 @@ class PdfInvoiceViewHelper
     	if (array_key_exists('tax_mention', $invoice)) {
 	    	$pdf->SetFont('', 'B', 10);
 	    	$pdf->Ln();
-	    	$pdf->writeHTML($invoice['tax_mention'], true, 0, true, 0);
+	    	$pdf->writeHTML('<div style="text-align: center">'.$invoice['tax_mention'].'</div>', true, 0, true, 0);
     	}
 
     	if (array_key_exists('bank_details', $invoice)) {

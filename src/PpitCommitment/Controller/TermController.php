@@ -492,7 +492,7 @@ class TermController extends AbstractActionController
     		$row = array();
     		$row['PmtId'] = array();
     		$row['PmtId']['EndToEndId'] = substr(($term['reference']) ? $term['reference'] : $term['commitment_caption'], 0, 35);
-    		$row['InstdAmt'] = $term['amount'];
+    		$row['InstdAmt'] = round($term['amount'], 2);
     		$row['DrctDbtTx'] = array();
     		$row['DrctDbtTx']['MndtRltdInf'] = array();
     		$row['DrctDbtTx']['MndtRltdInf']['MndtId'] = $term['transfer_order_id'];
