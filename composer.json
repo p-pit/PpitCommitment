@@ -1,0 +1,13 @@
+{
+    "name": "2pit-io/2pit-commitment",
+    "description": "2pit project's Commitment module",
+    "license": "GPL-3.0-or-later",
+    "keywords": [
+        "2pit",
+        "commitment module"
+    ],
+    "homepage": "https://github.com/2pit-io/2pit.io",
+    "require": {
+        "php": "^5.3.3 || ^7.0"
+    }
+}

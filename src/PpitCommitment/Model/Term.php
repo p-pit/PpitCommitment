@@ -5,7 +5,7 @@ use PpitCommitment\Model\Commitment;
 use PpitCore\Model\Account;
 use PpitCore\Model\Community;
 use PpitCore\Model\Context;
-use PpitCore\Model\Encryption;
+use PpitCore\Model\DataPrivacy;
 use PpitCore\Model\Generic;
 use Zend\Db\Sql\Where;
 use Zend\InputFilter\Factory as InputFactory;
@@ -212,7 +212,7 @@ class Term implements InputFilterAwareInterface
     	$data['transfer_order_date'] = $this->transfer_order_date;
     	$data['transfer_order_id'] = $this->transfer_order_id;
     	if ($passphrase) {
-    		$value = Encryption::decrypt($this->bank_identifier, $passphrase);
+    		$value = DataPrivacy::decrypt($this->bank_identifier, $passphrase);
     		if ($value) $data['bank_identifier'] = $value;
     	}
 

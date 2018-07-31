@@ -1079,6 +1079,7 @@ return array(
 	'currentApplication' => 'ppitCommitment',
 
 	'ppitCoreDependencies' => array(
+		'commitment' => new \PpitCommitment\Model\Commitment,
 	),
 		
 	'ppitCommitmentDependencies' => array(

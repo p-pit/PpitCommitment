@@ -1601,6 +1601,10 @@ class Commitment implements InputFilterAwareInterface
     
     public function isUsed($object)
     {
+        // Allow or not deleting an account
+    	if (get_class($object) == 'PpitCore\Model\Account') {
+    		if (Generic::getTable()->cardinality('commitment', array('account_id' => $object->id)) > 0) return true;
+    	}
     	return false;
     }
     
